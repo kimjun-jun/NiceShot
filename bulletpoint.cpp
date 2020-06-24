@@ -99,7 +99,7 @@ void UpdateBulletPoint(void)
 	for (int nCntPlayer = 0; nCntPlayer < PLAYER_MAX; nCntPlayer++)
 	{
 		PLAYER_HONTAI *p = GetPlayerHoudai();
-		if (p[nCntPlayer].OneParameter.use)
+		if (p[nCntPlayer].use)
 		{
 			if (g_aBulletPoint[nCntPlayer].bUse)
 			{
@@ -114,7 +114,7 @@ void UpdateBulletPoint(void)
 void DrawBulletPoint(int type)
 {
 	PLAYER_HONTAI *p = GetPlayerHoudai();
-	if (p[type].OneParameter.use)
+	if (p[type].use)
 	{
 		LPDIRECT3DDEVICE9 pDevice = GetDevice();
 		D3DXMATRIX  mtxScale, mtxTranslate;

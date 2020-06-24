@@ -83,7 +83,7 @@ void UpdateStatus(void)
 	for (int CntPlayer = 0; CntPlayer < PLAYER_MAX; CntPlayer++)
 	{
 		//スピード
-		if (p[CntPlayer].OneParameter.speedbuffsignal == true)
+		if (p[CntPlayer].speedbuffsignal == true)
 		{
 			status[CntPlayer][STATUSTYPE_SPEED].vertexWk[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
 			status[CntPlayer][STATUSTYPE_SPEED].vertexWk[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);

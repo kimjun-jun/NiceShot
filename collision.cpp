@@ -110,7 +110,7 @@ void CheakHit(int scene)
 	//プレイヤーに対する当たり判定
 	for (int CntPlayer = 0; CntPlayer < PLAYER_MAX; CntPlayer++)
 	{
-		if (p[CntPlayer].OneParameter.use == true)
+		if (p[CntPlayer].use == true)
 		{
 			//プレイヤー対壁
 			for (int CntWall = 0; CntWall < 4; CntWall++)
@@ -118,16 +118,16 @@ void CheakHit(int scene)
 				switch (CntWall)
 				{
 				case 0:
-					if (p[CntPlayer].AllParameter.pos.z + PLAYER_MODEL_SIZE >= Wall[CntWall].pos.z) p[CntPlayer].AllParameter.pos.z = p[CntPlayer].AllParameter.oldpos.z;
+					if (p[CntPlayer].pos.z + PLAYER_MODEL_SIZE >= Wall[CntWall].pos.z) p[CntPlayer].pos.z = p[CntPlayer].oldpos.z;
 					break;
 				case 1:
-					if (p[CntPlayer].AllParameter.pos.x - PLAYER_MODEL_SIZE <= Wall[CntWall].pos.x) p[CntPlayer].AllParameter.pos.x = p[CntPlayer].AllParameter.oldpos.x;
+					if (p[CntPlayer].pos.x - PLAYER_MODEL_SIZE <= Wall[CntWall].pos.x) p[CntPlayer].pos.x = p[CntPlayer].oldpos.x;
 					break;
 				case 2:
-					if (p[CntPlayer].AllParameter.pos.x + PLAYER_MODEL_SIZE >= Wall[CntWall].pos.x) p[CntPlayer].AllParameter.pos.x = p[CntPlayer].AllParameter.oldpos.x;
+					if (p[CntPlayer].pos.x + PLAYER_MODEL_SIZE >= Wall[CntWall].pos.x) p[CntPlayer].pos.x = p[CntPlayer].oldpos.x;
 					break;
 				case 3:
-					if (p[CntPlayer].AllParameter.pos.z - PLAYER_MODEL_SIZE <= Wall[CntWall].pos.z) p[CntPlayer].AllParameter.pos.z = p[CntPlayer].AllParameter.oldpos.z;
+					if (p[CntPlayer].pos.z - PLAYER_MODEL_SIZE <= Wall[CntWall].pos.z) p[CntPlayer].pos.z = p[CntPlayer].oldpos.z;
 					break;
 				default:
 					break;
@@ -142,7 +142,7 @@ void CheakHit(int scene)
 						//対プレイヤー
 						if (b[CntPlayerBullet].UsePlayerType != CntPlayer)
 						{
-							if (CollisionBC(p[CntPlayer].AllParameter.pos, PLAYER_MODEL_SIZE, b[CntPlayerBullet].pos, BULLET_MODEL_SIZE))
+							if (CollisionBC(p[CntPlayer].pos, PLAYER_MODEL_SIZE, b[CntPlayerBullet].pos, BULLET_MODEL_SIZE))
 							{
 								// エフェクト爆発の生成
 								SetEffect(b[CntPlayerBullet].pos, D3DXVECTOR3(0.0f, 200.0f, 0.0f),
@@ -225,7 +225,7 @@ void CheakHit(int scene)
 			for (int CntItem = 0; CntItem < MAX_ITEM; CntItem++)
 			{
 				if (i[CntItem].bUse == false) continue;
-				if (CollisionBC(p[CntPlayer].AllParameter.pos, PLAYER_MODEL_SIZE, i[CntItem].pos, ITEM_MODEL_SIZE))
+				if (CollisionBC(p[CntPlayer].pos, PLAYER_MODEL_SIZE, i[CntItem].pos, ITEM_MODEL_SIZE))
 				{
 					switch (i[CntItem].nType)
 					{
@@ -240,23 +240,23 @@ void CheakHit(int scene)
 					case ITEMTYPE_SENSYA:
 						if (p[CntPlayer].ModelType == PLAYER_MODEL_NORMAL)
 						{
-							p[CntPlayer].OneParameter.Morphing = true;
+							p[CntPlayer].Morphing = true;
 							p[CntPlayer].ModelType = PLAYER_MODEL_ATTACK;
-							ps[CntPlayer].Model.MorphingSignal = NowMorphing;
-							ps[CntPlayer].Model.time = 0.0f;
-							p[CntPlayer].OneParameter.MorphingTime = MORPHING_TIME;
+							ps[CntPlayer].MorphingSignal = NowMorphing;
+							ps[CntPlayer].time = 0.0f;
+							p[CntPlayer].MorphingTime = MORPHING_TIME;
 						}
-						else if (p[CntPlayer].OneParameter.Morphing == false && p[CntPlayer].OneParameter.MorphingTime <= 0.0f)
+						else if (p[CntPlayer].Morphing == false && p[CntPlayer].MorphingTime <= 0.0f)
 						{
-							p[CntPlayer].OneParameter.Morphing = true;
+							p[CntPlayer].Morphing = true;
 							p[CntPlayer].ModelType = PLAYER_MODEL_ATTACK;
-							ps[CntPlayer].Model.MorphingSignal = NowMorphing;
-							ps[CntPlayer].Model.time = 0.0f;
-							p[CntPlayer].OneParameter.MorphingTime = MORPHING_TIME;
+							ps[CntPlayer].MorphingSignal = NowMorphing;
+							ps[CntPlayer].time = 0.0f;
+							p[CntPlayer].MorphingTime = MORPHING_TIME;
 						}
 						else
 						{
-							p[CntPlayer].OneParameter.MorphingTime = MORPHING_TIME;
+							p[CntPlayer].MorphingTime = MORPHING_TIME;
 						}
 						PlaySound(SOUND_LABEL_SE_rap1);
 						break;
@@ -267,9 +267,9 @@ void CheakHit(int scene)
 						PlaySound(SOUND_LABEL_SE_enter03);
 						break;
 					case ITEMTYPE_SPEEDUP:
-						p[CntPlayer].OneParameter.speedbuff = MAX_SPEEDBUFF;
-						p[CntPlayer].OneParameter.speedbufftime = MAX_SPEEDBUFFTIME;
-						p[CntPlayer].OneParameter.speedbuffsignal = true;
+						p[CntPlayer].speedbuff = MAX_SPEEDBUFF;
+						p[CntPlayer].speedbufftime = MAX_SPEEDBUFFTIME;
+						p[CntPlayer].speedbuffsignal = true;
 						PlaySound(SOUND_LABEL_SE_speed);
 						break;
 					case ITEMTYPE_CAMERA:

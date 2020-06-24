@@ -1,9 +1,9 @@
-//=============================================================================
-//
-// メイン処理 [main.cpp]
-// Author : 木村純(キムラジュン)
-//
-//=============================================================================
+/**
+* @file main.cpp
+* @brief NiceShot(3D)戦車ゲーム
+* @author キムラジュン
+* @date 2020/01/15
+*/
 #include "main.h"
 #include "debugproc.h"
 #include "input.h"
@@ -35,8 +35,8 @@
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define CLASS_NAME		"AppClass"			// ウインドウのクラス名
-#define WINDOW_NAME		_T("ナイスショット！")	// ウインドウのキャプション名
+#define CLASS_NAME		"AppClass"				//!< ウインドウのクラス名
+#define WINDOW_NAME		_T("ナイスショット！")	//!< ウインドウのキャプション名
 
 //*****************************************************************************
 // プロトタイプ宣言
@@ -54,18 +54,18 @@ void DrawFPS(void);
 //*****************************************************************************
 // グローバル変数:
 //*****************************************************************************
-LPDIRECT3D9			g_pD3D = NULL;			// Direct3D オブジェクト
-LPDIRECT3DDEVICE9	g_pD3DDevice = NULL;	// Deviceオブジェクト(描画に必要)
-#ifdef _DEBUG
-static LPD3DXFONT				g_pD3DXFont = NULL;			// フォントへのポインタ
-int					g_nCountFPS;			// FPSカウンタ
-#endif
-char g_text[256] = { 0 };										//表示させるテキスト
-int						g_nScene = SCENE_TITLE;		// ステージ番号
-float g_random;										// エネミーの初期座標をランダムで決める
-DWORD dwFrameCount;// 時間計測用
+LPDIRECT3D9			g_pD3D = NULL;				//!< Direct3D オブジェクト
+LPDIRECT3DDEVICE9	g_pD3DDevice = NULL;		//!< Deviceオブジェクト(描画に必要)
+int					g_nScene = SCENE_TITLE;		//!< ステージ番号
+int					stop = 0;					//!< デバッグ時の一時停止用変数
 
-int stop = 0;
+#ifdef _DEBUG
+static LPD3DXFONT	g_pD3DXFont = NULL;			//!< フォントへのポインタ
+int					g_nCountFPS;				//!< FPSカウンタ
+char				g_text[256] = { 0 };		//!< 表示させるテキスト
+DWORD				dwFrameCount;				//!< 時間計測用
+#endif
+
 
 //=============================================================================
 // メイン関数
@@ -149,14 +149,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 	// 入力処理の初期化
 	InitInput(hInstance, hWnd);
-
-
-
-
-
-
-
-
 
 	//フレームカウント初期化
 	timeBeginPeriod(1);				// 分解能を設定
@@ -279,36 +271,27 @@ HRESULT Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 
 	// デバイスのプレゼンテーションパラメータの設定
 	ZeroMemory(&d3dpp, sizeof(d3dpp));							// ワークをゼロクリア
-	d3dpp.BackBufferCount = 1;						// バックバッファの数
-	d3dpp.BackBufferWidth = SCREEN_W;				// ゲーム画面サイズ(幅)
-	d3dpp.BackBufferHeight = SCREEN_H;			// ゲーム画面サイズ(高さ)
-	d3dpp.BackBufferFormat = d3ddm.Format;				// バックバッファフォーマットはディスプレイモードに合わせて使う
-	d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;	// 映像信号に同期してフリップする
-	d3dpp.Windowed = bWindow;					// ウィンドウモード
+	d3dpp.BackBufferCount = 1;									// バックバッファの数
+	d3dpp.BackBufferWidth = SCREEN_W;							// ゲーム画面サイズ(幅)
+	d3dpp.BackBufferHeight = SCREEN_H;							// ゲーム画面サイズ(高さ)
+	d3dpp.BackBufferFormat = d3ddm.Format;						// バックバッファフォーマットはディスプレイモードに合わせて使う
+	d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;					// 映像信号に同期してフリップする
+	d3dpp.Windowed = bWindow;									// ウィンドウモード
 	d3dpp.EnableAutoDepthStencil = TRUE;						// デプスバッファ（Ｚバッファ）とステンシルバッファを作成
-	d3dpp.AutoDepthStencilFormat = D3DFMT_D16;				// デプスバッファとして16bitを使う
+	d3dpp.AutoDepthStencilFormat = D3DFMT_D16;					// デプスバッファとして16bitを使う
 
 	if (bWindow)
 	{// ウィンドウモード
-		d3dpp.BackBufferFormat = D3DFMT_UNKNOWN;					// バックバッファ
+		d3dpp.BackBufferFormat = D3DFMT_UNKNOWN;							// バックバッファ
 		d3dpp.FullScreen_RefreshRateInHz = 0;								// リフレッシュレート
-		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;	// インターバル
+		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;			// インターバル
 	}
 	else
 	{// フルスクリーンモード
-		//d3dpp.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;			// リフレッシュレート
-		//d3dpp.PresentationInterval       = D3DPRESENT_INTERVAL_DEFAULT;		// インターバル
 
-		//d3dpp.BackBufferFormat = D3DFMT_R5G6B5;					// バックバッファ2Dの時の画面設定
-
-		d3dpp.BackBufferFormat = D3DFMT_A8R8G8B8;					// バックバッファ
+		d3dpp.BackBufferFormat = D3DFMT_A8R8G8B8;							// バックバッファ
 		d3dpp.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;			// リフレッシュレート
-		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;		// インターバル
-
-		//d3dpp.BackBufferFormat = D3DFMT_A8R8G8B8;					// バックバッファ
-		//d3dpp.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;			// リフレッシュレート
-		//d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;		// インターバル
-
+		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;			// インターバル
 
 	}
 
@@ -369,48 +352,30 @@ HRESULT Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	// FOGの設定
 	FLOAT StartPos = 50;  //開始位置
 	FLOAT EndPos = 300; //終了位置
-	g_pD3DDevice->SetRenderState(D3DRS_FOGENABLE, TRUE); //フォグ：ON
-	g_pD3DDevice->SetRenderState(D3DRS_FOGENABLE, FALSE); //フォグ：OFF
-	g_pD3DDevice->SetRenderState(D3DRS_FOGCOLOR, D3DXCOLOR(0.0f, 0.0f, 0.0f, 1.0f)); 
-	g_pD3DDevice->SetRenderState(D3DRS_FOGVERTEXMODE, D3DFOG_NONE);      //頂点モード
-	g_pD3DDevice->SetRenderState(D3DRS_FOGTABLEMODE, D3DFOG_LINEAR);     //テーブルモード
-	g_pD3DDevice->SetRenderState(D3DRS_FOGSTART, *(DWORD*)(&StartPos)); //開始位置
-	g_pD3DDevice->SetRenderState(D3DRS_FOGEND, *(DWORD*)(&EndPos));     //終了位置	
+	g_pD3DDevice->SetRenderState(D3DRS_FOGENABLE, FALSE);								//フォグ：OFF
+	g_pD3DDevice->SetRenderState(D3DRS_FOGCOLOR, D3DXCOLOR(0.0f, 0.0f, 0.0f, 1.0f));	//カラー
+	g_pD3DDevice->SetRenderState(D3DRS_FOGVERTEXMODE, D3DFOG_NONE);						//頂点モード
+	g_pD3DDevice->SetRenderState(D3DRS_FOGTABLEMODE, D3DFOG_LINEAR);					//テーブルモード
+	g_pD3DDevice->SetRenderState(D3DRS_FOGSTART, *(DWORD*)(&StartPos));					//開始位置
+	g_pD3DDevice->SetRenderState(D3DRS_FOGEND, *(DWORD*)(&EndPos));						//終了位置	
 
 	//初期化処理
 	InitSound(hWnd);
-
 	InitDebugProc();
-
 	InitFade();
-
 	InitTitle();
-
 	InitTutorial(0);
-
 	InitTime(0);
-
 	InitCountdown(0);
-
 	InitResult(0);
-
 	InitBullet(0);
-
 	InitEffect(0);
-
 	InitExplosion(0);
-
 	InitLifeTex(0);
-
 	InitBulletTex(0);
-
 	InitDamege(0);
-
 	InitStatus(0);
-
 	InitRank(0);
-
-	// 入力処理の初期化
 	InitInput(hInstance, hWnd);
 
 	// フィールドの初期化
@@ -440,19 +405,10 @@ HRESULT Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 			*/
 
 	}
-	// カメラの初期化処理
 	InitCamera();
-
-	// ライトの初期化処理
 	InitLight();
-
-	// 影の初期化処理
 	InitShadow(0);
-
-	//落下地点アイコンの初期化
 	//InitBulletPoint();
-
-	// プレイヤーの初期化
 	InitPlayer();
 	InitItem();
 
@@ -476,7 +432,6 @@ void Uninit(void)
 		g_pD3D = NULL;
 	}
 
-	// ポリゴンとサウンドの終了処理
 	UninitPlayer();
 	UninitInput();
 	UninitTime();
@@ -532,8 +487,6 @@ void Update(void)
 		case SCENE_TITLE:
 			UpdateTitle();
 			break;
-		case SCENE_SELECT:
-			break;
 		case SCENE_TUTORIAL:
 			UpdateTutorial();
 			UpdateMeshField();
@@ -572,12 +525,17 @@ void Update(void)
 
 			//UpdateHeadIcon();
 			//UpdateBulletPoint();
+
 			// 当たり判定
 			CheakHit(1);
+			
+			//2Dの更新処理
 			UpdateBulletTex();
 			UpdateDamege();
 			UpdateStatus();
 			UpdateLifeTex();
+
+			//時間制限用
 			//AddTime(-1);
 			break;
 		case SCENE_RESULT:
@@ -594,18 +552,18 @@ void Update(void)
 //=============================================================================
 void Draw(void)
 {
+	//四人分の画面分割設定
 	D3DVIEWPORT9 vp[]
 	{
-		{DWORD(0),DWORD(0),DWORD(SCREEN_W/2-2.5f),DWORD(SCREEN_H/2-2.5f),0.0f,1.0f},
-		{DWORD(SCREEN_W / 2+2.5f),DWORD(0),DWORD(SCREEN_W/2-2.5f),DWORD(SCREEN_H/2-2.5f),0.0f,1.0f},
-		{DWORD(0),DWORD(SCREEN_H / 2+2.5f),DWORD(SCREEN_W/2-2.5f),DWORD(SCREEN_H / 2 - 2.5f),0.0f,1.0f},
-		{DWORD(SCREEN_W / 2 + 2.5f),DWORD(SCREEN_H / 2+2.5f),DWORD(SCREEN_W/2-2.5f),DWORD(SCREEN_H / 2 - 2.5f),0.0f,1.0f},
+		{DWORD(0),DWORD(0),DWORD(SCREEN_W/2- SCREEN_SEPARATE_BUFF),DWORD(SCREEN_H/2- SCREEN_SEPARATE_BUFF),0.0f,1.0f},
+		{DWORD(SCREEN_W / 2+ SCREEN_SEPARATE_BUFF),DWORD(0),DWORD(SCREEN_W/2- SCREEN_SEPARATE_BUFF),DWORD(SCREEN_H/2- SCREEN_SEPARATE_BUFF),0.0f,1.0f},
+		{DWORD(0),DWORD(SCREEN_H / 2+ SCREEN_SEPARATE_BUFF),DWORD(SCREEN_W/2- SCREEN_SEPARATE_BUFF),DWORD(SCREEN_H / 2 - SCREEN_SEPARATE_BUFF),0.0f,1.0f},
+		{DWORD(SCREEN_W / 2 + SCREEN_SEPARATE_BUFF),DWORD(SCREEN_H / 2+ SCREEN_SEPARATE_BUFF),DWORD(SCREEN_W/2- SCREEN_SEPARATE_BUFF),DWORD(SCREEN_H / 2 - SCREEN_SEPARATE_BUFF),0.0f,1.0f},
 	};
 	D3DVIEWPORT9 VpMaster{ 0,0,SCREEN_W,SCREEN_H,0.0f,1.0f };
 
 	// バックバッファ＆Ｚバッファのクリア
 		g_pD3DDevice->Clear(0, NULL, (D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER), D3DCOLOR_RGBA(0, 0, 0, 0), 1.0f, 0);
-		//g_pD3DDevice->SetViewport(&VpMaster);
 		// Direct3Dによる描画の開始
 		if (SUCCEEDED(g_pD3DDevice->BeginScene()))
 		{
@@ -615,17 +573,13 @@ void Draw(void)
 			case SCENE_TITLE:
 				DrawTitle();
 				break;
-			case SCENE_SELECT:
-				break;
 			case SCENE_TUTORIAL:
 				for (int i = 0, vpCnt = sizeof(vp) / sizeof(vp[0]); i < vpCnt; i++)
 				{
 					g_pD3DDevice->SetViewport(&vp[i]);
 					g_pD3DDevice->Clear(0, NULL, (D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER), D3DCOLOR_RGBA(0, 0, 0, 0), 1.0f, 0);
 					PLAYER_HONTAI *p = GetPlayerHoudai();
-
-					if (p[i].OneParameter.use == false) continue;
-
+					if (p[i].use == false) continue;
 					if (p[i].KiriSignal == true) g_pD3DDevice->SetRenderState(D3DRS_FOGENABLE, TRUE); //フォグ：ON
 					else g_pD3DDevice->SetRenderState(D3DRS_FOGENABLE, FALSE); //フォグ：OFF
 
@@ -664,7 +618,7 @@ void Draw(void)
 					g_pD3DDevice->SetViewport(&vp[i]);
 					g_pD3DDevice->Clear(0, NULL, (D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER), D3DCOLOR_RGBA(0, 0, 0, 0), 1.0f, 0);
 					PLAYER_HONTAI *p = GetPlayerHoudai();
-					if (p[i].OneParameter.use == true)
+					if (p[i].use == true)
 					{
 						// カメラの設定
 						SetCamera(i);
@@ -702,7 +656,7 @@ void Draw(void)
 					g_pD3DDevice->Clear(0, NULL, (D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER), D3DCOLOR_RGBA(0, 0, 0, 0), 1.0f, 0);
 					PLAYER_HONTAI *p = GetPlayerHoudai();
 
-					if (p[i].OneParameter.use == true)
+					if (p[i].use == true)
 					{
 
 						if (p[i].KiriSignal == true) g_pD3DDevice->SetRenderState(D3DRS_FOGENABLE, TRUE); //フォグ：ON
@@ -799,6 +753,13 @@ LPDIRECT3DDEVICE9 GetDevice(void)
 }
 
 #ifdef _DEBUG
+//=============================================================================
+// デバッグ時に表示させる文字列をg_textに書き込む
+//=============================================================================
+void SetText(char *moji)
+{
+	strcpy(g_text, moji);
+}
 
 //=============================================================================
 // デバッグ時にどの制御になったかゲーム画面で判断する文字描画関数
@@ -886,78 +847,6 @@ void InitGame(void)
 }
 
 //=============================================================================
-// 攻後の
-// 戻り値：座標(float)
-//=============================================================================
-float Random(int type)
-{
-	float n = 0.0;
-	switch (type)
-	{
-	case X:
-	{
-		switch ((rand() % 6))
-		{
-		case 0:
-			n = 300.0;
-			break;
-		case 1:
-			n = 400.0;
-			break;
-		case 2:
-			n = 500.0;
-			break;
-		case 3:
-			n = 700.0;
-			break;
-		case 4:
-			n = 200.0;
-			break;
-		default:
-			n = 220.0;
-			break;
-		}
-		break;
-	}
-	case Y:
-	{
-		switch ((rand() % 6))
-		{
-		case 0:
-			n = 200.0;
-			break;
-		case 1:
-			n = 300.0;
-			break;
-		case 2:
-			n = 300.0;
-			break;
-		case 3:
-			n = 320.0;
-			break;
-		case 4:
-			n = 250.0;
-			break;
-		default:
-			n = 200.0;
-			break;
-		}
-		break;
-	}
-	}
-	return n;
-}
-
-//=============================================================================
-// FPSの値
-// 戻り値：FPSの値
-//=============================================================================
-DWORD GetFPS(void)
-{
-	return dwFrameCount;
-}
-
-//=============================================================================
 // D3DXVECTOR3からfloatに変換。移動距離の値を計算する関数
 // 戻り値：移動距離の値
 //=============================================================================
@@ -966,7 +855,7 @@ float SpdCal(D3DXVECTOR3 move)
 	float spd;
 	float crossvec;
 	crossvec = float(sqrt((move.x*move.x) + (move.z*move.z)));
-	return spd= float(sqrt((move.y*move.y) + (crossvec*crossvec)));
+	return spd = float(sqrt((move.y*move.y) + (crossvec*crossvec)));
 }
 
 //=============================================================================

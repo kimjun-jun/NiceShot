@@ -1,9 +1,9 @@
-//=============================================================================
-//
-// フェード処理 [fade.cpp]
-// Author : 木村純(キムラジュン)
-//
-//=============================================================================
+/**
+* @file fade.cpp
+* @brief HitBallTarget(2D)的当てゲーム
+* @author キムラジュン
+* @date 2019/09/01
+*/
 #include "main.h"
 #include "fade.h"
 #include "sound.h"
@@ -11,24 +11,33 @@
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define	FADE_RATE		(0.02f)		// フェード係数
+#define	FADE_RATE		(0.02f)									//!< フェード係数
 
 //*****************************************************************************
 // プロトタイプ宣言
 //*****************************************************************************
+
+/**
+* @brief 頂点生成関数 MakeVertexFade
+* @return HRESULT
+*/
 HRESULT MakeVertexFade(void);
+
+/**
+* @brief フェードカラー設定関数 SetColor
+* @param[in] D3DCOLOR col カラー値
+*/
 void SetColor(D3DCOLOR col);
 
 //*****************************************************************************
 // グローバル変数
 //*****************************************************************************
-static LPDIRECT3DTEXTURE9		g_p3DTextureFade = NULL;		// テクスチャへのポインタ
-static VERTEX_2D				g_vertexWkFade[POLYGON_2D_VERTEX];		// 頂点情報格納ワーク
-
-static D3DXCOLOR				g_color;
-static FADE						g_eFade = FADE_IN;
-static int						g_eScene = SCENE_TITLE;			// 次に飛ぶ予定のScene
-static int						g_sno = -1;
+static LPDIRECT3DTEXTURE9		g_p3DTextureFade = NULL;				//!< テクスチャへのポインタ
+static VERTEX_2D				g_vertexWkFade[POLYGON_2D_VERTEX];		//!< 頂点情報格納ワーク
+static D3DXCOLOR				g_color;								//!< カラー情報
+static FADE						g_eFade = FADE_IN;						//!< フェード番号
+static int						g_eScene = SCENE_TITLE;					//!< 次に飛ぶ予定のScene
+static int						g_sno = -1;								//!< サウンドナンバー
 
 //=============================================================================
 // 初期化処理

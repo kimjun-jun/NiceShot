@@ -489,9 +489,9 @@ void UpdateMeshField(void)
 	PLAYER_HONTAI *player = GetPlayerHoudai();
 	for (int CntPlayer = 0; CntPlayer < PLAYER_MAX; CntPlayer++)
 	{
-		FieldHit(D3DXVECTOR3(player[CntPlayer].AllParameter.pos.x, player[CntPlayer].AllParameter.pos.y + 1000.0f, player[CntPlayer].AllParameter.pos.z),
-			D3DXVECTOR3(player[CntPlayer].AllParameter.pos.x, player[CntPlayer].AllParameter.pos.y - 1000.0f, player[CntPlayer].AllParameter.pos.z),
-			&player[CntPlayer].OneParameter.RotVecAxis, &player[CntPlayer].AllParameter.pos.y);
+		FieldHit(D3DXVECTOR3(player[CntPlayer].pos.x, player[CntPlayer].pos.y + 1000.0f, player[CntPlayer].pos.z),
+			D3DXVECTOR3(player[CntPlayer].pos.x, player[CntPlayer].pos.y - 1000.0f, player[CntPlayer].pos.z),
+			&player[CntPlayer].RotVecAxis, &player[CntPlayer].pos.y);
 	}
 
 	ITEM *item = GetItem();

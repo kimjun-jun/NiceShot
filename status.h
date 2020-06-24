@@ -14,7 +14,7 @@
 #define	STATUS_POS_X			(SCREEN_CENTER_X)				// ステータスの表示位置
 #define	STATUS_POS_Y			(SCREEN_CENTER_Y)				// ステータスの表示位置
 #define	STATUS_POS_X_OFFSET		(180.0f)						// ステータスの表示位置オフセット
-#define	STATUS_POS_Y_OFFSET		(120.0f)							// ステータスの表示位置オフセット
+#define	STATUS_POS_Y_OFFSET		(120.0f)						// ステータスの表示位置オフセット
 
 #define STATUS_MAX			(4)
 

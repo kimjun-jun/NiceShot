@@ -101,11 +101,11 @@ void UpdateLifeTex(void)
 	PLAYER_HONTAI *p = GetPlayerHoudai();
 	for (int CntPlayer = 0; CntPlayer < PLAYER_MAX; CntPlayer++)
 	{
-		if (p[CntPlayer].OneParameter.use == true)
+		if (p[CntPlayer].use == true)
 		{
 			if (g_nLifeTex[CntPlayer] <= 0)
 			{
-				p[CntPlayer].OneParameter.use = false;
+				p[CntPlayer].use = false;
 				SetRank(CntPlayer);
 			}
 		}

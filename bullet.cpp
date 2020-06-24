@@ -120,9 +120,9 @@ void UpdateBullet(void)
 			for (int CntPlayer = 0; CntPlayer < PLAYER_MAX; CntPlayer++)
 			{
 				if (g_aBullet[nCntBullet].UsePlayerType == CntPlayer) continue;
-				if (p[CntPlayer].OneParameter.use == false) continue;
+				if (p[CntPlayer].use == false) continue;
 
-				if (CollisionBC(p[CntPlayer].AllParameter.pos, PLAYER_MODEL_SIZE*10.0f, g_aBullet[nCntBullet].pos, BULLET_MODEL_SIZE))
+				if (CollisionBC(p[CntPlayer].pos, PLAYER_MODEL_SIZE*10.0f, g_aBullet[nCntBullet].pos, BULLET_MODEL_SIZE))
 				{
 					if (g_aBullet[nCntBullet].HormingSignal == false)
 					{
@@ -138,7 +138,7 @@ void UpdateBullet(void)
 			}
 			if (g_aBullet[nCntBullet].HormingSignal == true)
 			{
-				g_aBullet[nCntBullet].Hormingmove = p[g_aBullet[nCntBullet].HormingPlayerType].AllParameter.pos - g_aBullet[nCntBullet].pos;
+				g_aBullet[nCntBullet].Hormingmove = p[g_aBullet[nCntBullet].HormingPlayerType].pos - g_aBullet[nCntBullet].pos;
 			}
 
 			g_aBullet[nCntBullet].pos.x += g_aBullet[nCntBullet].move.x + (g_aBullet[nCntBullet].Hormingmove.x / 30.0f);

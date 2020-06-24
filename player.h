@@ -11,12 +11,10 @@
 //*****************************************************************************
 
 
-struct PLAYER_HONTAI
+class PLAYER_HONTAI : public ALLCHARACTER , public ONECHARACTER, public GPUMODEL
 {
-	ALLCHARACTER				AllParameter;				// 標準パラメータ
-	ONECHARACTER				OneParameter;				// 可変パラメータ
+public:
 	PLAYER_HONTAI				*Parent;					// 親子判定
-	GPUMODEL					Model;						// モデル構造体
 	bool						BackCameraItemSignal;		// バックカメラアイテムを使用しているかどうか
 	bool						KiriSignal;					// 霧アイテムを使用しているかどうか
 	float						BackCameraItemTime;			// バックカメラアイテムの効果時間
@@ -26,12 +24,11 @@ struct PLAYER_HONTAI
 	int							ModelType;					// どのモデル状態か判定
 };
 
-struct PLAYER_PRATS
+class PLAYER_PRATS : public ALLCHARACTER, public GPUMODEL
 {
-	ALLCHARACTER				AllParameter;		// 標準パラメータ
+public:
 	PLAYER_HONTAI				*ParentHontai;		// 親子判定
 	PLAYER_PRATS				*ParentParts;		// 親子判定
-	GPUMODEL					Model;				// モデル構造体
 	bool						CameraKey;			// カメラ制御を判定,trueプレイヤーに自動追尾させるか判定,falseカメラの回転はプレイヤーが行う
 	float						AmmoBornCnt;		// 残弾回復カウント。時間で回復
 	int							AmmoNum;			// 残弾数。最大5個
