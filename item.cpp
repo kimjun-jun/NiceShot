@@ -1,9 +1,9 @@
-//=============================================================================
-//
-// アイテム処理 [item.cpp]
-// Author : 木村純
-//
-//=============================================================================
+/**
+* @file item.cpp
+* @brief NiceShot(3D)戦車ゲーム
+* @author キムラジュン
+* @date 2020/01/15
+*/
 #include "main.h"
 #include "item.h"
 #include "field.h"
@@ -93,6 +93,7 @@ HRESULT InitItem(void)
 	for(int nCntItem = 0; nCntItem < MAX_ITEM; nCntItem++)
 	{
 		g_aItem[nCntItem].pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		g_aItem[nCntItem].scl = D3DXVECTOR3(1.0f, 1.0f, 1.0f);
 		g_aItem[nCntItem].rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 		g_aItem[nCntItem].Upvec = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
 		g_aItem[nCntItem].rotVecAxis = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
@@ -103,6 +104,8 @@ HRESULT InitItem(void)
 		g_aItem[nCntItem].nIdxShadow = -1;
 		g_aItem[nCntItem].nType = -1;
 		g_aItem[nCntItem].bUse = false;
+		g_aItem[nCntItem].GettingSignal = false;
+		g_aItem[nCntItem].GettingSignalEnd = false;
 		g_aItem[nCntItem].fCollisionEnd = false;
 	}
 	for (int nCntItem = 0; nCntItem < DROP_ITEM_MAX; nCntItem++)
@@ -129,8 +132,8 @@ HRESULT InitItem(void)
 		int ItemNum = rand() % ITEMTYPE_MAX;
 		//ライフ、カメラ、霧アイテムの時はもう一度抽選
 		if (ItemNum == ITEMTYPE_LIFE && ItemNum == ITEMTYPE_CAMERA && ItemNum == ITEMTYPE_KIRI) ItemNum = rand() % ITEMTYPE_MAX;
-		SetItem(pos, D3DXVECTOR3(0.0f, 0.0f, 0.0f), ItemNum);
-		//SetItem(pos, D3DXVECTOR3(0.0f, 0.0f, 0.0f), ITEMTYPE_TIKEI);
+		SetItem(pos, D3DXVECTOR3(1.0f, 1.0f, 1.0f),D3DXVECTOR3(0.0f, 0.0f, 0.0f), ItemNum);
+		//SetItem(pos, D3DXVECTOR3(1.0f, 1.0f, 1.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ITEMTYPE_TIKEI);
 
 	}
 
@@ -174,6 +177,7 @@ void UpdateItem(void)
 	{
 		if (g_aItem[nCntItem].bUse == true)
 		{
+			//フィールドに落ちてるときはくるくる回転させる
 			g_aItem[nCntItem].rot.y += VALUE_ROTATE_ITEM;
 			if (g_aItem[nCntItem].rot.y > D3DX_PI)
 			{
@@ -183,6 +187,7 @@ void UpdateItem(void)
 			// 影の位置設定
 			SetPositionShadow(g_aItem[nCntItem].nIdxShadow, D3DXVECTOR3(g_aItem[nCntItem].pos.x, 0.1f, g_aItem[nCntItem].pos.z), D3DXVECTOR3(g_aItem[nCntItem].fRadius * 2.0f, g_aItem[nCntItem].fRadius * 2.0f, g_aItem[nCntItem].fRadius * 2.0f));
 
+			//影のサイズを調整
 			float fSizeX = 20.0f + (g_aItem[nCntItem].pos.y - 10.0f) * 0.05f;
 			if (fSizeX < 20.0f)
 			{
@@ -196,6 +201,7 @@ void UpdateItem(void)
 
 			SetVertexShadow(g_aItem[nCntItem].nIdxShadow, fSizeX, fSizeY);
 
+			//影の色を調整
 			float colA = (200.0f - (g_aItem[nCntItem].pos.y - 10.0f)) / 400.0f;
 			if (colA < 0.0f)
 			{
@@ -216,6 +222,8 @@ void UpdateItem(void)
 			}
 			else g_aItem[nCntItem].Qrot = 0.0f;
 		}
+
+		//アイテムを復活させる制御。
 		for (int nCntItem = 0; nCntItem < MAX_ITEM; nCntItem++)
 		{
 			if (g_aItem[0].GoukeiDrop > DROP_ITEM_MAX) break;
@@ -232,8 +240,8 @@ void UpdateItem(void)
 					int ItemNum = rand() % ITEMTYPE_MAX;
 					//ライフ、カメラ、霧アイテムの時はもう一度抽選
 					if (ItemNum == ITEMTYPE_LIFE && ItemNum == ITEMTYPE_CAMERA && ItemNum == ITEMTYPE_KIRI) ItemNum = rand() % ITEMTYPE_MAX;
-					SetItem(pos, D3DXVECTOR3(0.0f, 0.0f, 0.0f), ItemNum);
-					//SetItem(pos, D3DXVECTOR3(0.0f, 0.0f, 0.0f), ITEMTYPE_TIKEI);
+					SetItem(pos, D3DXVECTOR3(1.0f, 1.0f, 1.0f),D3DXVECTOR3(0.0f, 0.0f, 0.0f), ItemNum);
+					//SetItem(pos, D3DXVECTOR3(1.0f, 1.0f, 1.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ITEMTYPE_TIKEI);
 					g_aItem[nCntItem].fCollisionEnd = false;
 					g_aItem[nCntItem].Droptime = 0.0f;
 					g_aItem[0].GoukeiDrop++;
@@ -241,6 +249,11 @@ void UpdateItem(void)
 				}
 				break;
 			}
+		}
+
+		if (g_aItem[nCntItem].GettingSignal == true)
+		{
+			GettingItem(nCntItem);
 		}
 	}
 }
@@ -258,7 +271,7 @@ void DrawItem(void)
 	{
 		if (g_aItem[nCntItem].bUse==true)
 		{
-			D3DXMATRIX mtxRot, mtxTranslate;
+			D3DXMATRIX mtxScl, mtxRot, mtxTranslate;
 			D3DXMATERIAL *pD3DXMat;
 			D3DMATERIAL9 matDef;
 
@@ -271,6 +284,10 @@ void DrawItem(void)
 
 			// ワールドマトリックスの初期化
 			D3DXMatrixIdentity(&g_mtxWorldItem);
+
+			// スケールを反映
+			D3DXMatrixScaling(&mtxScl, g_aItem[nCntItem].scl.x, g_aItem[nCntItem].scl.y, g_aItem[nCntItem].scl.z);
+			D3DXMatrixMultiply(&g_mtxWorldItem, &g_mtxWorldItem, &mtxScl);
 
 			// 回転を反映
 			D3DXMatrixRotationYawPitchRoll(&mtxRot, g_aItem[nCntItem].rot.y, g_aItem[nCntItem].rot.x, g_aItem[nCntItem].rot.z);
@@ -315,13 +332,14 @@ void DrawItem(void)
 //=============================================================================
 // アイテムの設定
 //=============================================================================
-void SetItem(D3DXVECTOR3 pos, D3DXVECTOR3 rot, int nType)
+void SetItem(D3DXVECTOR3 pos, D3DXVECTOR3 scl, D3DXVECTOR3 rot, int nType)
 {
 	for(int nCntItem = 0; nCntItem < MAX_ITEM; nCntItem++)
 	{
 		if(!g_aItem[nCntItem].bUse)
 		{
 			g_aItem[nCntItem].pos = pos;
+			g_aItem[nCntItem].scl = scl;
 			g_aItem[nCntItem].rot = rot;
 			g_aItem[nCntItem].fRadius = ITEM_RADIUS;
 			g_aItem[nCntItem].nType = nType;
@@ -356,3 +374,29 @@ ITEM *GetItem(void)
 	return &g_aItem[0];
 }
 
+//=============================================================================
+// アイテムを取得したプレイヤーへ近づける関数
+//=============================================================================
+void GettingItem(int nIdxItem)
+{
+	if (g_aItem[nIdxItem].GettingSignalEnd == false)
+	{
+		PLAYER_HONTAI *p = GetPlayerHoudai();
+		D3DXVECTOR3 distance = p->pos - g_aItem[nIdxItem].pos;
+		distance /= 5.0f;
+		g_aItem[nIdxItem].pos += distance;
+		g_aItem[nIdxItem].scl -= D3DXVECTOR3(ITEM_SMALL_SCL, ITEM_SMALL_SCL, ITEM_SMALL_SCL);
+		if (g_aItem[nIdxItem].scl.x <= ITEM_DELETE_SCL)
+		{
+			g_aItem[nIdxItem].GettingSignalEnd = true;
+		}
+	}
+
+	else
+	{
+		DeleteItem(nIdxItem);
+		g_aItem[nIdxItem].GettingSignal = false;
+		g_aItem[nIdxItem].GettingSignalEnd = false;
+		g_aItem[0].GoukeiDrop--;
+	}
+}

@@ -1,9 +1,9 @@
-//=============================================================================
-//
-// ‰eˆ— [shadow.cpp]
-// Author : –Ø‘ºƒ(ƒLƒ€ƒ‰ƒWƒ…ƒ“)
-//
-//=============================================================================
+/**
+* @file shadow.cpp
+* @brief NiceShot(3D)íŽÔƒQ[ƒ€
+* @author ƒLƒ€ƒ‰ƒWƒ…ƒ“
+* @date 2020/01/15
+*/
 #include "main.h"
 #include "shadow.h"
 #include "input.h"
@@ -97,6 +97,8 @@ void DrawShadow(void)
 	pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
 	pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
 
+	// Z”äŠr‚È‚µ
+	pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS);
 
 	for(int nCntShadow = 0; nCntShadow < MAX_SHADOW; nCntShadow++)
 	{
@@ -138,6 +140,9 @@ void DrawShadow(void)
 	pDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);			// Œ‹‰Ê = “]‘—Œ³(SRC) + “]‘—æ(DEST)
 	pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
 	pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+
+	// Z”äŠr‚ ‚è
+	pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
 
 }
 

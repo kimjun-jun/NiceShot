@@ -1,8 +1,8 @@
 /**
 * @file fade.cpp
-* @brief HitBallTarget(2D)的当てゲーム
+* @brief NiceShot(3D)戦車ゲーム
 * @author キムラジュン
-* @date 2019/09/01
+* @date 2020/01/15
 */
 #include "main.h"
 #include "fade.h"
@@ -25,7 +25,7 @@ HRESULT MakeVertexFade(void);
 
 /**
 * @brief フェードカラー設定関数 SetColor
-* @param[in] D3DCOLOR col カラー値
+* @param[in] D3DCOLOR col カラー値　画面がフェードする色を設定
 */
 void SetColor(D3DCOLOR col);
 

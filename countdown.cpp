@@ -1,34 +1,39 @@
-//=============================================================================
-//
-// カウントダウン処理 [countdown.cpp]
-// Author : 木村純(キムラジュン)
-//
-//=============================================================================
+/**
+* @file countdown.cpp
+* @brief NiceShot(3D)戦車ゲーム
+* @author キムラジュン
+* @date 2020/01/15
+*/
 #include "main.h"
 #include "fade.h"
 #include "sound.h"
 #include "countdown.h"
 
-//*****************************************************************************
-// マクロ定義
-//*****************************************************************************
-
 
 //*****************************************************************************
 // プロトタイプ宣言
 //*****************************************************************************
+/**
+* @brief 頂点生成関数 MakeVertexCountdown
+* @return HRESULT
+*/
 HRESULT MakeVertexCountdown(void);
-void SetTextureCountdown(void);	// 
-void SetVertexCountdown(void);					// 
+/**
+* @brief テクスチャ設定関数 SetTextureCountdown
+*/
+void SetTextureCountdown(void);
+/**
+* @brief 頂点設定関数 SetVertexCountdown
+*/
+void SetVertexCountdown(void);
 
 //*****************************************************************************
 // グローバル変数
 //*****************************************************************************
-COUNTDOWN g_countdown[COUNTDOWN_GOUKEI];
+COUNTDOWN g_countdown[COUNTDOWN_GOUKEI];					//!< 0カウントダウン値,1スタートLOGO	構造体変数
+static int g_countdown_maneger;								//!< カウントダウン数値	→毎フレーム減算される
+static int g_fps_maneger;									//!< カウントダウン減算値	→[3,2,1]GO
 
-
-static int g_countdown_maneger;
-static int g_fps_maneger;
 //=============================================================================
 // 初期化処理
 //=============================================================================
@@ -187,9 +192,6 @@ void SetTextureCountdown(void)
 		g_countdown[0].use = false;
 		g_countdown[1].use = true;
 	}
-	//else if (val == 120 || val == 60) g_countdown[0].changeval = 0;
-	//else if (val == FPS_TIME_COUNTDOWN*(2/3) || val == FPS_TIME_COUNTDOWN * (1 / 3)) 
-	
 	else g_countdown[1].use = false;
 	if (val % (FPS_TIME_COUNTDOWN/3) == 0)
 	{

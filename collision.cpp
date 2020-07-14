@@ -1,9 +1,9 @@
-//=============================================================================
-//
-// 当たり判定処理 [collision.cpp]
-// Author : 木村純(キムラジュン)
-//
-//=============================================================================
+/**
+* @file collision.cpp
+* @brief NiceShot(3D)戦車ゲーム
+* @author キムラジュン
+* @date 2020/01/15
+*/
 #include "main.h"
 #include "player.h"
 #include "bullet.h"
@@ -146,7 +146,7 @@ void CheakHit(int scene)
 							{
 								// エフェクト爆発の生成
 								SetEffect(b[CntPlayerBullet].pos, D3DXVECTOR3(0.0f, 200.0f, 0.0f),
-									PLAYER_COLOR[b[CntPlayerBullet].UsePlayerType], 24.0f, 240.0f, 30);
+									PLAYER_COLOR[b[CntPlayerBullet].UsePlayerType], 150.0f, 150.0f, 30);
 								if (scene == 1)
 								{
 									ChangeLife(-1, CntPlayer);
@@ -160,7 +160,7 @@ void CheakHit(int scene)
 								ReleaseBullet(CntPlayerBullet);
 
 								// SE再生
-								PlaySound(SOUND_LABEL_SE_damage);
+								PlaySound(SOUND_LABEL_SE_attack02);
 								break;
 							}
 						}
@@ -224,14 +224,16 @@ void CheakHit(int scene)
 			//プレイヤー対アイテム
 			for (int CntItem = 0; CntItem < MAX_ITEM; CntItem++)
 			{
-				if (i[CntItem].bUse == false) continue;
+				if (i[CntItem].bUse == false || i[CntItem].GettingSignal == true || i[CntItem].GettingSignalEnd == true) continue;
 				if (CollisionBC(p[CntPlayer].pos, PLAYER_MODEL_SIZE, i[CntItem].pos, ITEM_MODEL_SIZE))
 				{
 					switch (i[CntItem].nType)
 					{
 					case ITEMTYPE_TIKEI:
-						SetFieldInterPolationFieldType(rand() % 2);
+						//SetFieldInterPolationFieldType(rand() % 2);
+						SetFieldInterPolationFieldType(0);
 						PlaySound(SOUND_LABEL_SE_enter03);
+						PlaySound(SOUND_LABEL_SE_quake);
 						break;
 					case ITEMTYPE_LIFE:
 						ChangeLife(1, CntPlayer);
@@ -284,8 +286,7 @@ void CheakHit(int scene)
 
 						break;
 					}
-					DeleteItem(CntItem);
-					i[0].GoukeiDrop--;
+					i[CntItem].GettingSignal = true;
 				}
 			}
 		}

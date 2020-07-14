@@ -1,9 +1,9 @@
-//=============================================================================
-//
-// ƒTƒEƒ“ƒhˆ— [sound.h]
-// Author : –Ø‘ºƒ(ƒLƒ€ƒ‰ƒWƒ…ƒ“)
-//
-//=============================================================================
+/**
+* @file sound.h
+* @brief NiceShot(3D)íŽÔƒQ[ƒ€
+* @author ƒLƒ€ƒ‰ƒWƒ…ƒ“
+* @date 2020/01/15
+*/
 #pragma once
 
 #include <windows.h>
@@ -12,7 +12,7 @@
 //*****************************************************************************
 // ƒTƒEƒ“ƒhƒtƒ@ƒCƒ‹
 //*****************************************************************************
-enum //‚±‚±‚Ì‡”Ô‚Æ.CPP‚ÌSOUNDPARAM g_aParam[SOUND_LABEL_MAX] =‡”Ô‚ðˆê’v‚³‚¹‚é‚±‚ÆB‚±‚±‚Ì–¼‘O‚ðŽg‚Á‚Ä‰¹‚ð–Â‚ç‚·
+enum SOUND_TRACK//‚±‚±‚Ì‡”Ô‚Æ.CPP‚ÌSOUNDPARAM g_aParam[SOUND_LABEL_MAX] =‡”Ô‚ðˆê’v‚³‚¹‚é‚±‚ÆB‚±‚±‚Ì–¼‘O‚ðŽg‚Á‚Ä‰¹‚ð–Â‚ç‚·
 {
 	SOUND_LABEL_BGM_title01,			// ƒ^ƒCƒgƒ‹BGM
 	SOUND_LABEL_BGM_tutorial01,			// ƒ`ƒ…[ƒgƒŠƒAƒ‹BGM
@@ -35,6 +35,7 @@ enum //‚±‚±‚Ì‡”Ô‚Æ.CPP‚ÌSOUNDPARAM g_aParam[SOUND_LABEL_MAX] =‡”Ô‚ðˆê’v‚³‚¹‚é‚
 	SOUND_LABEL_SE_rap2,				// ƒ‰ƒbƒp2
 	SOUND_LABEL_SE_speed,				// ƒXƒs[ƒhƒAƒbƒv
 	SOUND_LABEL_SE_kiri,				// –¶
+	SOUND_LABEL_SE_quake,				// ’nk
 	SOUND_LABEL_MAX,
 };
 

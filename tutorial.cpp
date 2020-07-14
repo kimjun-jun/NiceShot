@@ -1,9 +1,9 @@
-//=============================================================================
-//
-// チュートリアル処理 [tutorial.cpp]
-// Author : 木村純(キムラジュン)
-//
-//=============================================================================
+/**
+* @file tutorial.cpp
+* @brief NiceShot(3D)戦車ゲーム
+* @author キムラジュン
+* @date 2020/01/15
+*/
 #include "main.h"
 #include "tutorial.h"
 #include "input.h"
@@ -13,12 +13,16 @@
 //*****************************************************************************
 // プロトタイプ宣言
 //*****************************************************************************
+/**
+* @brief 頂点生成関数 MakeVertexTutorial
+* @return HRESULT
+*/
 HRESULT MakeVertexTutorial(void);
 
 //*****************************************************************************
 // グローバル変数
 //*****************************************************************************
-TUTO tuto[TUTORIAL_GOUKEI];
+TUTO tuto[TUTORIAL_GOUKEI];			//!< 0～3でplayer画面1～4まで対応	構造体変数
 
 //=============================================================================
 // 初期化処理
@@ -37,6 +41,7 @@ HRESULT InitTutorial(int type)
 		}
 		tuto[CntPlayer].cnt = 0;
 	}
+	//描画位置設定
 	tuto[0].pos = D3DXVECTOR3(TUTORIAL_POS_X - TUTORIAL_SIZE_X, TUTORIAL_POS_Y - TUTORIAL_SIZE_Y, 0.0f);
 	tuto[1].pos = D3DXVECTOR3(TUTORIAL_POS_X + TUTORIAL_SIZE_X, TUTORIAL_POS_Y - TUTORIAL_SIZE_Y, 0.0f);
 	tuto[2].pos = D3DXVECTOR3(TUTORIAL_POS_X - TUTORIAL_SIZE_X, TUTORIAL_POS_Y + TUTORIAL_SIZE_Y, 0.0f);

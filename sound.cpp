@@ -1,9 +1,9 @@
-//=============================================================================
-//
-// サウンド処理 [sound.cpp]
-// Author : 木村純(キムラジュン)
-//
-//=============================================================================
+/**
+* @file sound.cpp
+* @brief NiceShot(3D)戦車ゲーム
+* @author キムラジュン
+* @date 2020/01/15
+*/
 #include "main.h"
 #include "sound.h"
 
@@ -55,6 +55,8 @@ SOUNDPARAM g_aParam[SOUND_LABEL_MAX] =
 	{ "data/SE/trumpet2.wav", 0 },
 	{ "data/SE/speed.wav", 0 },
 	{ "data/SE/_sound_anime_smoke1.wav", 0 },
+	{ "data/SE/avalanche1.wav", 0 },
+	
 };
 
 //=============================================================================
@@ -205,6 +207,7 @@ bool InitSound(HWND hWnd)
 	SourceVolumeChange(5, SOUND_LABEL_SE_nyu);
 	SourceVolumeChange(5, SOUND_LABEL_SE_rap1);
 	SourceVolumeChange(5, SOUND_LABEL_SE_speed);
+	SourceVolumeChange(10, SOUND_LABEL_SE_quake);
 	return true;
 }
 

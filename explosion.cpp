@@ -1,9 +1,9 @@
-//=============================================================================
-//
-// 爆発処理 [explosion.cpp]
-// Author : 木村純
-//
-//=============================================================================
+/**
+* @file explosion.cpp
+* @brief NiceShot(3D)戦車ゲーム
+* @author キムラジュン
+* @date 2020/01/15
+*/
 #include "main.h"
 #include "explosion.h"
 #include "input.h"
@@ -159,6 +159,9 @@ void DrawExplosion(int CntPlayer)
 	pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);			// αデスティネーションカラーの指定
 	pDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
 
+	// Z比較なし
+	pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS);
+
 	for(int nCntExplosion = 0; nCntExplosion < MAX_EXPLOSION; nCntExplosion++)
 	{
 		if(g_aExplosion[nCntExplosion].bUse)
@@ -211,6 +214,10 @@ void DrawExplosion(int CntPlayer)
 	pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);		// αソースカラーの指定
 	pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);	// αデスティネーションカラーの指定
 	pDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
+
+	// Z比較あり
+	pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
+
 }
 
 //=============================================================================

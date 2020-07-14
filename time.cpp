@@ -1,9 +1,9 @@
-//=============================================================================
-//
-// タイムの処理 [time.cpp]
-// Author : 木村純(キムラジュン)
-//
-//=============================================================================
+/**
+* @file time.cpp
+* @brief NiceShot(3D)戦車ゲーム
+* @author キムラジュン
+* @date 2020/01/15
+*/
 #include "main.h"
 #include "time.h"
 #include "fade.h"
@@ -17,19 +17,30 @@
 //*****************************************************************************
 // プロトタイプ宣言
 //*****************************************************************************
+/**
+* @brief 頂点生成関数 MakeVertexTime
+* @return HRESULT
+*/
 HRESULT MakeVertexTime(void);
-void SetTextureTime(void);	// 
-void SetVertexTime(void);					// 
+
+/**
+* @brief テクスチャ設定関数 SetTextureTime
+*/
+void SetTextureTime(void);
+
+/**
+* @brief 頂点設定関数 SetVertexTime
+*/
+void SetVertexTime(void);
+
 
 //*****************************************************************************
 // グローバル変数
 //*****************************************************************************
-static TIME  g_time[TIME_DIGIT];
-static DOT g_dot;
-static TIMELOGO g_timelogo;
-
-
-static int g_time_maneger;//残り時間
+static TIME  g_time[TIME_DIGIT];		//!< タイムのカウント構造体変数
+static DOT g_dot;						//!< 小数点構造体変数
+static TIMELOGO g_timelogo;				//!< タイムロゴ構造体変数
+static int g_time_maneger;				//!< 残り時間
 
 //=============================================================================
 // 初期化処理
@@ -56,8 +67,6 @@ HRESULT InitTime(int type)
 
 	g_dot.pos = D3DXVECTOR3(g_time[0].pos.x - TEXTURE_TIME_SIZE_X / 2, TEXTURE_TIMELOGO_POS_Y+ (TEXTURE_TIME_SIZE_Y/2)+ TEXTURE_DOT_SIZE_Y, 0.0f);
 	g_timelogo.pos = D3DXVECTOR3(TEXTURE_TIMELOGO_POS_X, TEXTURE_TIMELOGO_POS_Y, 0.0f);
-	g_dot.nCountAnim = 0;
-	g_dot.nPatternAnim = 0;
 	// テクスチャの読み込み  
 	if (type == 0)	// 初回のみ読み込む
 	{
@@ -88,8 +97,6 @@ void ReInitTime(void)
 		time->use = true;
 	}
 
-	g_dot.nCountAnim = 0;
-	g_dot.nPatternAnim = 0;
 	g_time_maneger = FPS_TIME_COUNT;
 	MakeVertexTime();
 	UpdateTime();

@@ -42,12 +42,38 @@
 // プロトタイプ宣言
 //*****************************************************************************
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+/**
+* @brief 初期化関数
+* @param[in]　HWND hWnd, BOOL bWindow
+* @return HRESULT
+* @details 起動時の初期化
+*/
 HRESULT Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow);
+
+/**
+* @brief メモリ開放関数
+* @details ゲーム終了時にメモリ開放する
+*/
 void Uninit(void);
+
+/**
+* @brief アップデート関数
+* @details オブジェクトを更新する
+*/
 void Update(void);
+
+/**
+* @brief 描画関数
+* @details オブジェクトを描画する
+*/
 void Draw(void);
 
 #ifdef _DEBUG
+/**
+* @brief FPS表示関数
+* @details デバッグ実行時FPSを表示する
+*/
 void DrawFPS(void);
 #endif
 
@@ -523,7 +549,6 @@ void Update(void)
 			// 影の更新処理
 			UpdateShadow();
 
-			//UpdateHeadIcon();
 			//UpdateBulletPoint();
 
 			// 当たり判定
@@ -769,23 +794,23 @@ void DrawTextType(void)
 	TCHAR str[256];
 	RECT rect = { 10, 90, SCREEN_W, SCREEN_H };
 	wsprintf(str, _T("%s\n"), g_text);
-	g_pD3DXFont->DrawText(NULL, str, -1, &rect, DT_LEFT, D3DCOLOR_ARGB(0xff, 0x00, 0x00, 0x00));
+	g_pD3DXFont->DrawText(NULL, str, -1, &rect, DT_LEFT, D3DCOLOR_ARGB(0xff, 0xff, 0x00, 0x00));
 }
 
 //=============================================================================
 // FPS表示処理
 //=============================================================================
-int GetPadData(int no);
-
 void DrawFPS(void)
 {
 	TCHAR str[256];
+	int GetPadData(int no);
+
 	//ここのセットを加えることでデバッグ時の表示項目を増やせる
 	{
 		RECT rect = { 0, 0, SCREEN_W, SCREEN_H };
 		wsprintf(str, _T("FPS:%d\n"), g_nCountFPS);
 		// テキスト描画
-		g_pD3DXFont->DrawText(NULL, str, -1, &rect, DT_LEFT, D3DCOLOR_ARGB(0xff, 0x00, 0xff, 0xff));//ARGBで色変えれる
+		g_pD3DXFont->DrawText(NULL, str, -1, &rect, DT_LEFT, D3DCOLOR_ARGB(0xff, 0xff, 0xff, 0xff));//ARGBで色変えれる
 	}
 
 	{

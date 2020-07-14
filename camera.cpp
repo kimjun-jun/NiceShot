@@ -1,9 +1,9 @@
-//=============================================================================
-//
-// カメラ処理 [camera.cpp]
-// Author : 木村純(キムラジュン)
-//
-//=============================================================================
+/**
+* @file camera.cpp
+* @brief NiceShot(3D)戦車ゲーム
+* @author キムラジュン
+* @date 2020/01/15
+*/
 #include "main.h"
 #include "debugproc.h"
 #include "input.h"
@@ -14,7 +14,7 @@
 // マクロ定義
 //*****************************************************************************
 #define	VIEW_ANGLE		(D3DXToRadian(45.0f))							// ビュー平面の視野角
-#define	VIEW_ASPECT		((float)SCREEN_W / (float)SCREEN_H)	// ビュー平面のアスペクト比	
+#define	VIEW_ASPECT		((float)SCREEN_W / (float)SCREEN_H)				// ビュー平面のアスペクト比	
 #define	VIEW_NEAR_Z		(10.0f)											// ビュー平面のNearZ値
 #define	VIEW_FAR_Z		(10000.0f)										// ビュー平面のFarZ値
 

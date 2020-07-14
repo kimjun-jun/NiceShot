@@ -65,47 +65,53 @@
 #define	MODEL_HOUSINMO				"data/MODEL/PlayerSensyaHousinMo.x"											//!< 読み込むモデル名
 
 //キャラクターなどの合計
-#define PLAYER_MAX					(4)																			//!< プレイヤー最大人数
-#define BULLETPOINT_MAX				(PLAYER_MAX)																//!< 着地点の最大数
+#define PLAYER_MAX							(4)																			//!< プレイヤー最大人数
+#define BULLETPOINT_MAX						(PLAYER_MAX)																//!< 着地点の最大数
 
 //移動量マクロ
-#define VALUE_MOVE_BULLET			(6.0f)																		//!< バレットの速度
-#define	VALUE_MOVE					(0.1f)																		//!< 移動加速度
-#define	VALUE_MOVE_MAX				(4.0f)																		//!< 移動加速度の最大値
-#define	VALUE_ROTATE				(D3DX_PI * 0.02f)															//!< 標準的な回転量
-#define	VALUE_ROTATE_PLAYER			(0.03f)																		//!< プレイヤー回転量
-#define MAX_SPEEDBUFF				(2.0f)																		//!< スピードバフ移動量最大値(積)
-#define MAX_SPEEDBUFFTIME			(120.0f*3)																	//!< スピードバフ有効時間
-																												
+#define VALUE_MOVE_BULLET					(6.0f)																		//!< バレットの速度
+#define	VALUE_MOVE							(0.1f)																		//!< 移動加速度
+#define	VALUE_MOVE_MAX						(4.0f)																		//!< 移動加速度の最大値
+#define	VALUE_ROTATE_PLAYER_HOUTOU			(0.03f)																		//!< プレイヤー砲塔回転量
+#define	VALUE_ROTATE_PLAYER_HOUTOU_MAX		(1.57f)																		//!< プレイヤー砲塔回転量最大値
+#define	VALUE_ROTATE_PLAYER_HOUSIN			(0.01f)																		//!< プレイヤー砲身回転量
+#define	VALUE_ROTATE_PLAYER_HOUSIN_MAX		(0.2f)																		//!< プレイヤー砲塔回転量最大値
+#define MAX_SPEEDBUFF						(1.5f)																		//!< スピードバフ移動量最大値(積)
+#define MAX_SPEEDBUFFTIME					(120.0f*3)																	//!< スピードバフ有効時間
+#define	FRONT_VEC							(1)																			//!< 前ベクトル
+#define	BACK_VEC							(-1)																		//!< 後ろベクトル
+#define	MOVE_INERTIA_MOMENT					(0.8f)																		//!< 移動量の慣性モーメント、減速係数として使用
+#define	VALUE_SPEEDBUFF_SUB					(1.0f)																		//!< スピートアップ時間のデクリメントする値
+
 //2Dテクスチャのサイズポジションなど																			
-#define	LIFETEX_SIZE_X				(30.0f)																		//!< ライフの数字の幅
-#define	LIFETEX_SIZE_Y				(40.0f)																		//!< ライフの数字の高さ
-#define	LIFETEX_POS_X				(SCREEN_CENTER_X-200.0f)													//!< ライフの表示基準位置Ｘ座標
-#define	LIFETEX_POS_Y				(SCREEN_CENTER_Y-100.0f)													//!< ライフの表示基準位置Ｙ座標
-#define	BULLETTEX_SIZE_X			(LIFETEX_SIZE_X)															//!< ライフの数字の幅
-#define	BULLETTEX_SIZE_Y			(LIFETEX_SIZE_Y)															//!< ライフの数字の高さ
-#define	BULLETTEX_POS_X				(LIFETEX_POS_X)																//!< ライフの表示基準位置Ｘ座標
-#define	BULLETTEX_POS_Y				(LIFETEX_POS_Y+LIFETEX_SIZE_Y)												//!< ライフの表示基準位置Ｙ座標
-																												
-#define MAX_AMMO					(5)																			//!< 所持弾薬の最大値
-#define MAX_LIFE					(6)																			//!< 体力最大値
-#define BORN_AMMO_ADDTIME			(1.0f)																		//!< 弾薬復活させるための加算タイム
-#define BORN_AMMO_MAXTIME			(120.0f)																	//!< 1弾薬復活するのに必要なタイム
-#define MORPHING_TIME				(300.0f)																	//!< モーフィングアイテム有効時間
-#define BACKCAMERA_TIME				(300.0f)																	//!< バックカメラアイテム有効時間
-#define KIRI_TIME					(300.0f)																	//!< フォグ霧アイテムの有効時間
-#define SCREENDAMEGE_TIME			(30.0f)																		//!< 被ダメージ時の画面フェード時間
-#define	MAX_SHADOW					(256)																		//!< 影最大数
-#define	BULLETKAKUSAN_MAX			(3)																			//!< バレット拡散数
-#define	BULLET_MAX					((MAX_AMMO*BULLETKAKUSAN_MAX*PLAYER_MAX)*2)									//!< 合計のバレットワーク数
-#define HEADICON_MAX				(PLAYER_MAX*(PLAYER_MAX-1))													//!< 敵の頭上アイコン最大数
-#define PLAYER_MODEL_SIZE			(15.0f)																		//!< モデルサイズ
-#define BULLET_MODEL_SIZE			(15.0f)																		//!< モデルサイズ
-#define ITEM_MODEL_SIZE				(15.0f)																		//!< モデルサイズ
-#define DROP_ITEM_MAX				(10)																		//!< フィールドに落ちてるアイテムの数
-#define DROP_ITEM_CHARGE_ADDTIME	(0.1f)																		//!< アイテムをリスポーンさせる時の加算タイム
-#define DROP_ITEM_CHARGE_CNT		(300.0f)																	//!< アイテムをリスポーンさせる時の所要タイム
-#define	MAX_ITEM					(20)																		//!< アイテムワーク最大数
+#define	LIFETEX_SIZE_X						(30.0f)																		//!< ライフの数字の幅
+#define	LIFETEX_SIZE_Y						(40.0f)																		//!< ライフの数字の高さ
+#define	LIFETEX_POS_X						(SCREEN_CENTER_X-200.0f)													//!< ライフの表示基準位置Ｘ座標
+#define	LIFETEX_POS_Y						(SCREEN_CENTER_Y-100.0f)													//!< ライフの表示基準位置Ｙ座標
+#define	BULLETTEX_SIZE_X					(LIFETEX_SIZE_X)															//!< ライフの数字の幅
+#define	BULLETTEX_SIZE_Y					(LIFETEX_SIZE_Y)															//!< ライフの数字の高さ
+#define	BULLETTEX_POS_X						(LIFETEX_POS_X)																//!< ライフの表示基準位置Ｘ座標
+#define	BULLETTEX_POS_Y						(LIFETEX_POS_Y+LIFETEX_SIZE_Y)												//!< ライフの表示基準位置Ｙ座標
+																														
+#define MAX_AMMO							(5)																			//!< 所持弾薬の最大値
+#define MAX_LIFE							(6)																			//!< 体力最大値
+#define BORN_AMMO_ADDTIME					(1.0f)																		//!< 弾薬復活させるための加算タイム
+#define BORN_AMMO_MAXTIME					(120.0f)																	//!< 1弾薬復活するのに必要なタイム
+#define MORPHING_TIME						(300.0f)																	//!< モーフィングアイテム有効時間
+#define BACKCAMERA_TIME						(300.0f)																	//!< バックカメラアイテム有効時間
+#define KIRI_TIME							(300.0f)																	//!< フォグ霧アイテムの有効時間
+#define SCREENDAMEGE_TIME					(30.0f)																		//!< 被ダメージ時の画面フェード時間
+#define	MAX_SHADOW							(256)																		//!< 影最大数
+#define	BULLETKAKUSAN_MAX					(3)																			//!< バレット拡散数
+#define	BULLET_MAX							((MAX_AMMO*BULLETKAKUSAN_MAX*PLAYER_MAX)*2)									//!< 合計のバレットワーク数
+#define HEADICON_MAX						(PLAYER_MAX*(PLAYER_MAX-1))													//!< 敵の頭上アイコン最大数
+#define PLAYER_MODEL_SIZE					(15.0f)																		//!< モデルサイズ
+#define BULLET_MODEL_SIZE					(15.0f)																		//!< モデルサイズ
+#define ITEM_MODEL_SIZE						(15.0f)																		//!< モデルサイズ
+#define DROP_ITEM_MAX						(10)																		//!< フィールドに落ちてるアイテムの数
+#define DROP_ITEM_CHARGE_ADDTIME			(0.1f)																		//!< アイテムをリスポーンさせる時の加算タイム
+#define DROP_ITEM_CHARGE_CNT				(300.0f)																	//!< アイテムをリスポーンさせる時の所要タイム
+#define	MAX_ITEM							(20)																		//!< アイテムワーク最大数
 
 /**
  * @enum E_STAGE
@@ -221,7 +227,7 @@ enum STATUSTYPE
 };
 
 /**
- * @struct VERTEX_2D
+ * @class VERTEX_2D
  * ポリゴン頂点フォーマットに合わせたCLASSを定義
  */
 class VERTEX_2D
@@ -234,7 +240,7 @@ public:
 };
 
 /**
- * @struct VERTEX_3D
+ * @class VERTEX_3D
  * ３Ｄポリゴン頂点フォーマットに合わせたCLASSを定義
  */
 
@@ -248,7 +254,7 @@ public:
 };
 
 /**
- * @struct INTERPOLATION_DATA
+ * @class INTERPOLATION_DATA
  * 補間用のデータCLASSを定義
  */
 class INTERPOLATION_DATA
@@ -261,7 +267,7 @@ public:
 };
 
 /**
- * @struct ALLCHARACTER
+ * @class ALLCHARACTER
  * キャラクターの標準的な変数をまとめたCLASS
  */
 class ALLCHARACTER
@@ -337,13 +343,13 @@ LPDIRECT3DDEVICE9 GetDevice(void);
 /**
 * @brief 文字セットする関数 SelectText
 * @param[in] moji 表示したい文字を入力
-* @details 打球方向判定用 Debugのみで使用
+* @details 未使用 Debugのみで使用可能
 */
 void SetText(char *moji);
 
 /**
 * @brief 文字を表示する関数 DrawTextType
-* @details 打球方向判定用 Debugのみで使用
+* @details 未使用 Debugのみで使用可能
 */
 void DrawTextType(void);
 
@@ -377,10 +383,14 @@ float SpdCal(D3DXVECTOR3 move);
 
 /**
 * @brief レイキャスト関数 RayCast
-* @param[in] D3DXVECTOR3 rayS, D3DXVECTOR3 rayG, D3DXVECTOR3 vtx0, D3DXVECTOR3 vtx1, D3DXVECTOR3 vtx2
-* @param[out] D3DXVECTOR3 *ReturnVtx
-* @return bool 当たっているかの信号
-* @details 任意のレイ始終点を決め当たり判定をした任意の3頂点を用いて計算する。リターンがfalseならReturnVtxは更新されない。tureなら頂点とレイが交わっている交点をReturnVtxに入れる
+* @param[in] D3DXVECTOR3 rayS　レイ始点座標
+* @param[in] D3DXVECTOR3 rayG　レイ終点座標
+* @param[in] D3DXVECTOR3 vtx0　判定する三角ポリゴンの頂点1座標
+* @param[in] D3DXVECTOR3 vtx1　判定する三角ポリゴンの頂点2座標
+* @param[in] D3DXVECTOR3 vtx2　判定する三角ポリゴンの頂点3座標
+* @param[out] D3DXVECTOR3 *ReturnVtx　判定結果を格納
+* @return bool ture:当たっている false:当たっていない
+* @details 任意のレイ始終点を決め当たり判定をしたい任意の3頂点を用いて計算する。リターンがfalseならReturnVtxは更新されない。tureなら三角ポリゴンとレイが交わっている交点をReturnVtxに格納
 */
 bool RayCast(D3DXVECTOR3 rayS, D3DXVECTOR3 rayG, D3DXVECTOR3 vtx0, D3DXVECTOR3 vtx1, D3DXVECTOR3 vtx2, D3DXVECTOR3 *ReturnVtx);
 

@@ -1,9 +1,9 @@
-//=============================================================================
-//
-// プレイヤー処理 [player.cpp]
-// Author : 木村純(キムラジュン)
-//
-//=============================================================================
+/**
+* @file player.cpp
+* @brief NiceShot(3D)戦車ゲーム
+* @author キムラジュン
+* @date 2020/01/15
+*/
 #include "main.h"
 #include "input.h"
 #include "player.h"
@@ -20,8 +20,6 @@
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define	PLAYER_RADIUS		(10.0f)						// 半径
-#define	RATE_MOVE_PLAYER	(0.025f)					// 移動慣性係数
 
 //*****************************************************************************
 // プロトタイプ宣言
@@ -442,7 +440,7 @@ void UninitPlayer(void)
 //=============================================================================
 void UpdatePlayer(void)
 {
-	CAMERA *cam = GetCamera();
+	//何人死んだか計算。三人死んだらゲーム終了。次のシーンへ
 	int deadcnt = 0;
 	for (int CntPlayer = 0; CntPlayer < PLAYER_MAX; CntPlayer++)
 	{
@@ -453,270 +451,13 @@ void UpdatePlayer(void)
 	{
 		if (g_PlayerHoudai[CntPlayer].use)
 		{
-			g_PlayerHoudai[CntPlayer].oldpos = g_PlayerHoudai[CntPlayer].pos;
-
-			//移動処理
-			if (GetKeyboardPress(DIK_UP) || IsButtonPressed(CntPlayer, BUTTON_A))
-			{	
-				g_PlayerHoudai[CntPlayer].dir = 1;
-				g_PlayerHoudai[CntPlayer].speed += VALUE_MOVE;
-			}
-			else if (GetKeyboardPress(DIK_DOWN) || IsButtonPressed(CntPlayer, BUTTON_B))
-			{
-				g_PlayerHoudai[CntPlayer].dir = -1;
-				g_PlayerHoudai[CntPlayer].speed -= VALUE_MOVE;
-			}
-			// 無移動時は移動量に慣性をかける
-			else
-			{
-				g_PlayerHoudai[CntPlayer].speed *= 0.8f;
-			}
-
-			//視点変化のアナログ値を旋回に代入してアナログ操作で旋回
-			DIJOYSTATE2 *Button = GetIsButton();
-			float LAnalogX = float(Button->lX/30000.0f);
-
-			//旋回
-			if (!IsButtonPressed(CntPlayer, BUTTON_ANALOG_L_RIGHT) && !IsButtonPressed(CntPlayer, BUTTON_ANALOG_L_LEFT))
-			{
-				g_PlayerHoudai[CntPlayer].dir = 1;
-			}
-			else if (GetKeyboardPress(DIK_RIGHT) || IsButtonPressed(CntPlayer, BUTTON_ANALOG_L_RIGHT))
-			{
-				g_PlayerHoudai[CntPlayer].rot.y += LAnalogX * g_PlayerHoudai[CntPlayer].dir;
-			}
-			else if (GetKeyboardPress(DIK_LEFT) || IsButtonPressed(CntPlayer, BUTTON_ANALOG_L_LEFT))
-			{
-				g_PlayerHoudai[CntPlayer].rot.y += LAnalogX * g_PlayerHoudai[CntPlayer].dir;
-			}
-
-			//角度の制限値
-			if (g_PlayerHoudai[CntPlayer].rot.y >= 6.28f) g_PlayerHoudai[CntPlayer].rot.y = 0.0f;
-			else if (g_PlayerHoudai[CntPlayer].rot.y <= -6.28f) g_PlayerHoudai[CntPlayer].rot.y = 0.0f;
-
-			// 移動速度の制限
-			if (g_PlayerHoudai[CntPlayer].speed >= VALUE_MOVE_MAX) g_PlayerHoudai[CntPlayer].speed = VALUE_MOVE_MAX;
-			else if (g_PlayerHoudai[CntPlayer].speed <= -VALUE_MOVE_MAX) g_PlayerHoudai[CntPlayer].speed = -VALUE_MOVE_MAX;
-
-			// プレイヤーの座標を更新
-			g_PlayerHoudai[CntPlayer].pos.x -= sinf(g_PlayerHoudai[CntPlayer].rot.y) * (g_PlayerHoudai[CntPlayer].speed * g_PlayerHoudai[CntPlayer].speedbuff);
-			g_PlayerHoudai[CntPlayer].pos.z -= cosf(g_PlayerHoudai[CntPlayer].rot.y) * (g_PlayerHoudai[CntPlayer].speed * g_PlayerHoudai[CntPlayer].speedbuff);
-
-			//スピードバフ時間減少
-			if (g_PlayerHoudai[CntPlayer].speedbuffsignal == true)
-			{
-				g_PlayerHoudai[CntPlayer].speedbufftime -= 1.0f;
-				if (g_PlayerHoudai[CntPlayer].speedbufftime <= 0.0f)
-				{
-					g_PlayerHoudai[CntPlayer].speedbuffsignal = false;
-					g_PlayerHoudai[CntPlayer].speedbuff = 1.0f;
-				}
-			}
-
-			//砲塔操作　バレット着弾点(左右エイム)
-			if (GetKeyboardPress(DIK_D) || IsButtonPressed(CntPlayer, BUTTON_R1))
-			{
-				g_PlayerHoutou[CntPlayer].rot.y += VALUE_ROTATE_PLAYER;
-				if (g_PlayerHoutou[CntPlayer].rot.y >= 1.57f) g_PlayerHoutou[CntPlayer].rot.y = 1.57f;
-			}
-			else if (GetKeyboardPress(DIK_A) || IsButtonPressed(CntPlayer, BUTTON_L1))
-			{
-				g_PlayerHoutou[CntPlayer].rot.y -= VALUE_ROTATE_PLAYER;
-				if (g_PlayerHoutou[CntPlayer].rot.y <= -1.57f) g_PlayerHoutou[CntPlayer].rot.y = -1.57f;
-			}
-
-			//砲身操作　バレット着弾点(前後エイム)
-			if (GetKeyboardPress(DIK_W) || IsButtonPressed(CntPlayer, BUTTON_R2))
-			{
-				g_PlayerHousin[CntPlayer].rot.x += 0.01f;
-				if (g_PlayerHousin[CntPlayer].rot.x >= 0.2f) g_PlayerHousin[CntPlayer].rot.x = 0.2f;
-			}
-			else if (GetKeyboardPress(DIK_S) || IsButtonPressed(CntPlayer, BUTTON_L2))
-			{
-				g_PlayerHousin[CntPlayer].rot.x -= 0.01f;
-				if (g_PlayerHousin[CntPlayer].rot.x <= -0.2) g_PlayerHousin[CntPlayer].rot.x = -0.2f;
-			}
-
-			//地形の角度とプレイヤーの角度を計算。drawでクオータニオンで使う
-			D3DXVec3Cross(&g_PlayerHoudai[CntPlayer].UpRotTOaxis, &g_PlayerHoudai[CntPlayer].RotVecAxis, &g_PlayerHoudai[CntPlayer].Upvec);
-			float Ukakezan = D3DXVec3Dot(&g_PlayerHoudai[CntPlayer].RotVecAxis, &g_PlayerHoudai[CntPlayer].Upvec);
-			if (Ukakezan != 0)
-			{
-				float cossita = Ukakezan /
-					sqrtf(g_PlayerHoudai[CntPlayer].RotVecAxis.x*g_PlayerHoudai[CntPlayer].RotVecAxis.x +
-						g_PlayerHoudai[CntPlayer].RotVecAxis.y *g_PlayerHoudai[CntPlayer].RotVecAxis.y +
-						g_PlayerHoudai[CntPlayer].RotVecAxis.z * g_PlayerHoudai[CntPlayer].RotVecAxis.z);
-				g_PlayerHoudai[CntPlayer].Qrot = acosf(cossita);
-			}
-			else g_PlayerHoudai[CntPlayer].Qrot = 0.0f;
-
-			g_PlayerHoudai[CntPlayer].Frontvec.x = sinf(g_PlayerHoudai[CntPlayer].rot.y);
-			g_PlayerHoudai[CntPlayer].Frontvec.y = 0.0f;
-			g_PlayerHoudai[CntPlayer].Frontvec.z = cosf(g_PlayerHoudai[CntPlayer].rot.y);
-
-			//地形の角度とプレイヤーの角度を計算。バレット発射方向で使う
-			D3DXVec3Cross(&g_PlayerHoudai[CntPlayer].FrontRotTOaxis, &g_PlayerHoudai[CntPlayer].RotVecAxis, &g_PlayerHoudai[CntPlayer].Frontvec);
-			float Bkakezan = D3DXVec3Dot(&g_PlayerHoudai[CntPlayer].RotVecAxis, &g_PlayerHoudai[CntPlayer].Frontvec);
-			if (Bkakezan != 0)
-			{
-				float cossita = Bkakezan /
-					sqrtf(g_PlayerHoudai[CntPlayer].RotVecAxis.x*g_PlayerHoudai[CntPlayer].RotVecAxis.x +
-						g_PlayerHoudai[CntPlayer].RotVecAxis.y *g_PlayerHoudai[CntPlayer].RotVecAxis.y +
-						g_PlayerHoudai[CntPlayer].RotVecAxis.z * g_PlayerHoudai[CntPlayer].RotVecAxis.z)
-					*
-					sqrtf(g_PlayerHoudai[CntPlayer].Frontvec.x*g_PlayerHoudai[CntPlayer].Frontvec.x +
-						g_PlayerHoudai[CntPlayer].Frontvec.y *g_PlayerHoudai[CntPlayer].Frontvec.y +
-						g_PlayerHoudai[CntPlayer].Frontvec.z * g_PlayerHoudai[CntPlayer].Frontvec.z);
-				g_PlayerHoudai[CntPlayer].Brot = acosf(cossita);
-			}
-			else
-			{
-				g_PlayerHoudai[CntPlayer].Brot = 1.57f;		//下方向ベクトルrot=0.0f、上方向ベクトルrot=3.14、に対しての前方向ベクトルはrot=1.57f。
-			}
-			g_PlayerHoudai[CntPlayer].Brot -= 1.57f;
-
-			//バックカメラ処理
-			//バックカメラオン　カメラ視点、注視点
-			if (GetKeyboardPress(DIK_B) || IsButtonPressed(CntPlayer, BUTTON_Y))
-			{
-				cam[CntPlayer].at.x = g_PlayerHoudai[CntPlayer].pos.x + (AT_W_CAM * sinf(g_PlayerHoudai[CntPlayer].rot.y + g_PlayerHoutou[CntPlayer].rot.y));
-				cam[CntPlayer].at.y = g_PlayerHoudai[CntPlayer].pos.y + (g_PlayerHousin[CntPlayer].rot.x*100.0f);
-				cam[CntPlayer].at.z = g_PlayerHoudai[CntPlayer].pos.z + (AT_W_CAM * cosf(g_PlayerHoudai[CntPlayer].rot.y + g_PlayerHoutou[CntPlayer].rot.y));
-
-				cam[CntPlayer].pos.x = g_PlayerHoudai[CntPlayer].pos.x - sinf(g_PlayerHoudai[CntPlayer].rot.y + g_PlayerHoutou[CntPlayer].rot.y) * cam[CntPlayer].len;
-				cam[CntPlayer].pos.y = g_PlayerHoudai[CntPlayer].pos.y + POS_H_CAM;
-				cam[CntPlayer].pos.z = g_PlayerHoudai[CntPlayer].pos.z - cosf(g_PlayerHoudai[CntPlayer].rot.y + g_PlayerHoutou[CntPlayer].rot.y) * cam[CntPlayer].len;
-			}
-			//バックカメラオフ　カメラ視点、注視点
-			else
-			{
-				cam[CntPlayer].at.x = g_PlayerHoudai[CntPlayer].pos.x - (AT_W_CAM * sinf(g_PlayerHoudai[CntPlayer].rot.y + g_PlayerHoutou[CntPlayer].rot.y));
-				cam[CntPlayer].at.y = g_PlayerHoudai[CntPlayer].pos.y + (g_PlayerHousin[CntPlayer].rot.x*100.0f);
-				cam[CntPlayer].at.z = g_PlayerHoudai[CntPlayer].pos.z - (AT_W_CAM * cosf(g_PlayerHoudai[CntPlayer].rot.y + g_PlayerHoutou[CntPlayer].rot.y));
-
-				cam[CntPlayer].pos.x = g_PlayerHoudai[CntPlayer].pos.x + sinf(g_PlayerHoudai[CntPlayer].rot.y + g_PlayerHoutou[CntPlayer].rot.y) * cam[CntPlayer].len;
-				cam[CntPlayer].pos.y = g_PlayerHoudai[CntPlayer].pos.y + POS_H_CAM;
-				//cam[CntPlayer].pos.y = 100.0f;
-				cam[CntPlayer].pos.z = g_PlayerHoudai[CntPlayer].pos.z + cosf(g_PlayerHoudai[CntPlayer].rot.y + g_PlayerHoutou[CntPlayer].rot.y) * cam[CntPlayer].len;
-			}
-			if (g_PlayerHoudai[CntPlayer].BackCameraItemSignal == true)
-			{
-				cam[CntPlayer].at.x = g_PlayerHoudai[CntPlayer].pos.x + (AT_W_CAM * sinf(g_PlayerHoudai[CntPlayer].rot.y + g_PlayerHoutou[CntPlayer].rot.y));
-				cam[CntPlayer].at.y = g_PlayerHoudai[CntPlayer].pos.y + (g_PlayerHousin[CntPlayer].rot.x*100.0f);
-				cam[CntPlayer].at.z = g_PlayerHoudai[CntPlayer].pos.z + (AT_W_CAM * cosf(g_PlayerHoudai[CntPlayer].rot.y + g_PlayerHoutou[CntPlayer].rot.y));
-
-				cam[CntPlayer].pos.x = g_PlayerHoudai[CntPlayer].pos.x - sinf(g_PlayerHoudai[CntPlayer].rot.y + g_PlayerHoutou[CntPlayer].rot.y) * cam[CntPlayer].len;
-				cam[CntPlayer].pos.y = g_PlayerHoudai[CntPlayer].pos.y + POS_H_CAM;
-				cam[CntPlayer].pos.z = g_PlayerHoudai[CntPlayer].pos.z - cosf(g_PlayerHoudai[CntPlayer].rot.y + g_PlayerHoutou[CntPlayer].rot.y) * cam[CntPlayer].len;
-				g_PlayerHoudai[CntPlayer].BackCameraItemTime += 1.0f;
-				if (g_PlayerHoudai[CntPlayer].BackCameraItemTime >= BACKCAMERA_TIME)
-				{
-					g_PlayerHoudai[CntPlayer].BackCameraItemTime = 0.0f;
-					g_PlayerHoudai[CntPlayer].BackCameraItemSignal = false;
-				}
-			}
-
-			if (g_PlayerHoudai[CntPlayer].KiriSignal == true)
-			{
-				g_PlayerHoudai[CntPlayer].KiriItemTime += 1.0f;
-				if (g_PlayerHoudai[CntPlayer].KiriItemTime >= KIRI_TIME)
-				{
-					g_PlayerHoudai[CntPlayer].KiriItemTime = 0.0f;
-					g_PlayerHoudai[CntPlayer].KiriSignal = false;
-				}
-			}
-
-			// 弾発射
-			if (g_PlayerHoudai[CntPlayer].AmmoNum > 0)
-			{
-				if (GetKeyboardTrigger(DIK_SPACE) || IsButtonTriggered(CntPlayer, BUTTON_X))
-				{
-					D3DXVECTOR3 BposStart;
-					D3DXVECTOR3 move;
-
-					//プレイヤーposから発射方向に少しずらした値
-					//地面の傾きに沿って発射するときは問題ない。その傾きから左右に回転してる時だけposがおかしい
-					BposStart.x = g_PlayerHoudai[CntPlayer].pos.x - sinf(g_PlayerHoutou[CntPlayer].rot.y + g_PlayerHoudai[CntPlayer].rot.y) * VALUE_MOVE_BULLET;
-					BposStart.y = g_PlayerHoudai[CntPlayer].pos.y + (-sinf(-g_PlayerHousin[CntPlayer].rot.x +
-						g_PlayerHoudai[CntPlayer].Brot + g_PlayerHoudai[CntPlayer].Qrot) * VALUE_MOVE_BULLET) + 20;
-					BposStart.z = g_PlayerHoudai[CntPlayer].pos.z - cosf(g_PlayerHoutou[CntPlayer].rot.y + g_PlayerHoudai[CntPlayer].rot.y) * VALUE_MOVE_BULLET;
-
-					D3DXVECTOR3 BmoveRot;
-					BmoveRot.x = -sinf(g_PlayerHoutou[CntPlayer].rot.y + g_PlayerHoudai[CntPlayer].rot.y);
-					BmoveRot.y = sinf(g_PlayerHoudai[CntPlayer].Brot -g_PlayerHousin[CntPlayer].rot.x);
-					BmoveRot.z = -cosf(g_PlayerHoutou[CntPlayer].rot.y + g_PlayerHoudai[CntPlayer].rot.y);
-
-					move.x = (BmoveRot.x) *VALUE_MOVE_BULLET;
-					move.y = (BmoveRot.y) *VALUE_MOVE_BULLET;
-					move.z = (BmoveRot.z) *VALUE_MOVE_BULLET;
-					//move.y *= -1;
-
-
-					SetBullet(BposStart, move, 4.0f, 4.0f, 60 * 4, CntPlayer);
-
-					//拡散弾処理
-					if (g_PlayerHoudai[CntPlayer].ModelType == PLAYER_MODEL_ATTACK)
-					{
-						D3DXVECTOR3 leftB, rightB;
-						leftB = D3DXVECTOR3(-sinf(g_PlayerHoutou[CntPlayer].rot.y + g_PlayerHoudai[CntPlayer].rot.y + 0.3f)*VALUE_MOVE_BULLET,
-							move.y,
-							-cosf(g_PlayerHoutou[CntPlayer].rot.y + g_PlayerHoudai[CntPlayer].rot.y + 0.3f) *VALUE_MOVE_BULLET);
-						rightB = D3DXVECTOR3(-sinf(g_PlayerHoutou[CntPlayer].rot.y + g_PlayerHoudai[CntPlayer].rot.y - 0.3f)*VALUE_MOVE_BULLET,
-							move.y,
-							-cosf(g_PlayerHoutou[CntPlayer].rot.y + g_PlayerHoudai[CntPlayer].rot.y - 0.3f) *VALUE_MOVE_BULLET);
-						SetBullet(BposStart, leftB, 4.0f, 4.0f, 60 * 4, CntPlayer);
-						SetBullet(BposStart, rightB, 4.0f, 4.0f, 60 * 4, CntPlayer);
-					}
-					g_PlayerHoudai[CntPlayer].AmmoNum -= 1;
-					ChangeBulletTex(-1, CntPlayer);
-					// SE再生
-					PlaySound(SOUND_LABEL_SE_attack03);
-				}
-			}
-
-			// モーフィングtrue
-			if (g_PlayerHoudai[CntPlayer].Morphing == true)
-			{
-				///////////////////////////////////////////////////////////////////////バレット3つ時間開始
-				// モーフィング時間減算開始
-				g_PlayerHoudai[CntPlayer].MorphingTime -= 1.0f;
-
-				// モーフィング攻撃タイプに変更開始
-				if (g_PlayerHousin[CntPlayer].MorphingSignal == NowMorphing)
-				{
-					g_PlayerHoudai[CntPlayer].ModelType = PLAYER_MODEL_ATTACK;
-					DoMorphing(&g_PlayerHousin[CntPlayer], &g_PlayerHousinAtack[CntPlayer]);
-				}
-				///////////////////////////////////////////////////////////////////////バレット3つ時間終了
-
-				// 時間経過でモデルを元に戻す
-				else if (g_PlayerHoudai[CntPlayer].MorphingTime <= 0.0f)
-				{
-					g_PlayerHoudai[CntPlayer].ModelType = PLAYER_MODEL_NORMAL;
-					g_PlayerHousin[CntPlayer].MorphingSignal = NowMorphing;
-					g_PlayerHoudai[CntPlayer].Morphing = false;
-				}
-			}
-
-			// モーフィングオリジナルタイプに変更開始
-			if (g_PlayerHoudai[CntPlayer].Morphing == false && g_PlayerHoudai[CntPlayer].MorphingTime <= 0.0f)
-			{
-				DoMorphing(&g_PlayerHousin[CntPlayer], &g_PlayerHousinOriginal[CntPlayer]);
-				if (g_PlayerHousin[CntPlayer].MorphingSignal == EndMorphing)
-				{
-					g_PlayerHoudai[CntPlayer].MorphingTime = MORPHING_TIME;
-					g_PlayerHousin[CntPlayer].time = 0.0f;
-				}
-			}
-
-			//残弾復活 一定時間経過で1個づつ自動回復
-			if (g_PlayerHoudai[CntPlayer].AmmoNum < MAX_AMMO) g_PlayerHoudai[CntPlayer].AmmoBornCnt += BORN_AMMO_ADDTIME;
-			if (g_PlayerHoudai[CntPlayer].AmmoBornCnt >= BORN_AMMO_MAXTIME)
-			{
-				g_PlayerHoudai[CntPlayer].AmmoNum++;
-				ChangeBulletTex(1, CntPlayer);
-				g_PlayerHoudai[CntPlayer].AmmoBornCnt = 0.0f;
-			}
+			g_PlayerHoudai[CntPlayer].SetMoveABL(CntPlayer);
+			//g_PlayerHoudai[CntPlayer].SetMoveLR(CntPlayer);
+			g_PlayerHoudai[CntPlayer].SetQ(CntPlayer);
+			g_PlayerHoudai[CntPlayer].SetCamera(CntPlayer);
+			g_PlayerHoudai[CntPlayer].SetBulletALL(CntPlayer);
+			g_PlayerHoudai[CntPlayer].SetKiri(CntPlayer);
+			g_PlayerHoudai[CntPlayer].SetMorphing(CntPlayer);
 		}
 	}
 }
@@ -1018,4 +759,316 @@ void SetPlayerMeshColor(GPUMODEL *model, int type)
 	// 頂点データをアンロックする
 	model->pD3DVtxBuff->Unlock();
 	model->pD3DIdxBuff->Unlock();
+}
+
+//=============================================================================
+// 移動制御(ABボタンLスティックで制御)
+//=============================================================================
+void PLAYER_HONTAI::SetMoveABL(int CntPlayer)
+{
+	g_PlayerHoudai[CntPlayer].oldpos = g_PlayerHoudai[CntPlayer].pos;
+
+	//移動処理
+	if (IsButtonPressed(CntPlayer, BUTTON_A))
+	{
+		g_PlayerHoudai[CntPlayer].dir = FRONT_VEC;
+		g_PlayerHoudai[CntPlayer].speed += VALUE_MOVE;
+	}
+	else if (IsButtonPressed(CntPlayer, BUTTON_B))
+	{
+		g_PlayerHoudai[CntPlayer].dir = BACK_VEC;
+		g_PlayerHoudai[CntPlayer].speed -= VALUE_MOVE;
+	}
+	// 無移動時は移動量に慣性をかける
+	else
+	{
+		g_PlayerHoudai[CntPlayer].speed *= MOVE_INERTIA_MOMENT;
+	}
+
+	//視点変化のアナログ値を旋回に代入してアナログ操作で旋回
+	DIJOYSTATE2 *Button = GetIsButton();
+	float LAnalogX = float(Button->lX / 30000.0f);
+
+	//旋回
+	if (!IsButtonPressed(CntPlayer, BUTTON_ANALOG_L_RIGHT) && !IsButtonPressed(CntPlayer, BUTTON_ANALOG_L_LEFT))
+	{
+		g_PlayerHoudai[CntPlayer].dir = 1;
+	}
+	else if (GetKeyboardPress(DIK_RIGHT) || IsButtonPressed(CntPlayer, BUTTON_ANALOG_L_RIGHT))
+	{
+		g_PlayerHoudai[CntPlayer].rot.y += LAnalogX * g_PlayerHoudai[CntPlayer].dir*g_PlayerHoudai[CntPlayer].speedbuff;
+	}
+	else if (GetKeyboardPress(DIK_LEFT) || IsButtonPressed(CntPlayer, BUTTON_ANALOG_L_LEFT))
+	{
+		g_PlayerHoudai[CntPlayer].rot.y += LAnalogX * g_PlayerHoudai[CntPlayer].dir*g_PlayerHoudai[CntPlayer].speedbuff;
+	}
+
+	//角度の制限値
+	if (g_PlayerHoudai[CntPlayer].rot.y >= D3DX_PI*2) g_PlayerHoudai[CntPlayer].rot.y = 0.0f;
+	else if (g_PlayerHoudai[CntPlayer].rot.y <= -D3DX_PI * 2) g_PlayerHoudai[CntPlayer].rot.y = 0.0f;
+
+	// 移動速度の制限
+	if (g_PlayerHoudai[CntPlayer].speed >= VALUE_MOVE_MAX) g_PlayerHoudai[CntPlayer].speed = VALUE_MOVE_MAX;
+	else if (g_PlayerHoudai[CntPlayer].speed <= -VALUE_MOVE_MAX) g_PlayerHoudai[CntPlayer].speed = -VALUE_MOVE_MAX;
+
+	// プレイヤーの座標を更新
+	g_PlayerHoudai[CntPlayer].pos.x -= sinf(g_PlayerHoudai[CntPlayer].rot.y) * (g_PlayerHoudai[CntPlayer].speed * g_PlayerHoudai[CntPlayer].speedbuff);
+	g_PlayerHoudai[CntPlayer].pos.z -= cosf(g_PlayerHoudai[CntPlayer].rot.y) * (g_PlayerHoudai[CntPlayer].speed * g_PlayerHoudai[CntPlayer].speedbuff);
+
+	//スピードバフ時間減少
+	if (g_PlayerHoudai[CntPlayer].speedbuffsignal == true)
+	{
+		g_PlayerHoudai[CntPlayer].speedbufftime -= VALUE_SPEEDBUFF_SUB;
+		if (g_PlayerHoudai[CntPlayer].speedbufftime <= 0.0f)
+		{
+			g_PlayerHoudai[CntPlayer].speedbuffsignal = false;
+			g_PlayerHoudai[CntPlayer].speedbuff = VALUE_SPEEDBUFF_SUB;
+		}
+	}
+
+	//砲塔操作　バレット着弾点(左右エイム)
+	if (GetKeyboardPress(DIK_D) || IsButtonPressed(CntPlayer, BUTTON_R1))
+	{
+		g_PlayerHoutou[CntPlayer].rot.y += VALUE_ROTATE_PLAYER_HOUTOU;
+		if (g_PlayerHoutou[CntPlayer].rot.y >= VALUE_ROTATE_PLAYER_HOUTOU_MAX) g_PlayerHoutou[CntPlayer].rot.y = VALUE_ROTATE_PLAYER_HOUTOU_MAX;
+	}
+	else if (GetKeyboardPress(DIK_A) || IsButtonPressed(CntPlayer, BUTTON_L1))
+	{
+		g_PlayerHoutou[CntPlayer].rot.y -= VALUE_ROTATE_PLAYER_HOUTOU;
+		if (g_PlayerHoutou[CntPlayer].rot.y <= -VALUE_ROTATE_PLAYER_HOUTOU_MAX) g_PlayerHoutou[CntPlayer].rot.y = -VALUE_ROTATE_PLAYER_HOUTOU_MAX;
+	}
+
+	//砲身操作　バレット着弾点(前後エイム)
+	if (GetKeyboardPress(DIK_W) || IsButtonPressed(CntPlayer, BUTTON_R2))
+	{
+		g_PlayerHousin[CntPlayer].rot.x += VALUE_ROTATE_PLAYER_HOUSIN;
+		if (g_PlayerHousin[CntPlayer].rot.x >= VALUE_ROTATE_PLAYER_HOUSIN_MAX) g_PlayerHousin[CntPlayer].rot.x = VALUE_ROTATE_PLAYER_HOUSIN_MAX;
+	}
+	else if (GetKeyboardPress(DIK_S) || IsButtonPressed(CntPlayer, BUTTON_L2))
+	{
+		g_PlayerHousin[CntPlayer].rot.x -= VALUE_ROTATE_PLAYER_HOUSIN;
+		if (g_PlayerHousin[CntPlayer].rot.x <= -VALUE_ROTATE_PLAYER_HOUSIN_MAX) g_PlayerHousin[CntPlayer].rot.x = -VALUE_ROTATE_PLAYER_HOUSIN_MAX;
+	}
+}
+
+//=============================================================================
+// 移動制御(LRスティックで制御)
+//=============================================================================
+void PLAYER_HONTAI::SetMoveLR(int CntPlayer)
+{
+
+}
+
+//=============================================================================
+// クォータニオン制御
+//=============================================================================
+void PLAYER_HONTAI::SetQ(int CntPlayer)
+{
+	//地形の角度とプレイヤーの角度を計算。drawでクオータニオンで使う
+	D3DXVec3Cross(&g_PlayerHoudai[CntPlayer].UpRotTOaxis, &g_PlayerHoudai[CntPlayer].RotVecAxis, &g_PlayerHoudai[CntPlayer].Upvec);
+	float Ukakezan = D3DXVec3Dot(&g_PlayerHoudai[CntPlayer].RotVecAxis, &g_PlayerHoudai[CntPlayer].Upvec);
+	if (Ukakezan != 0)
+	{
+		float cossita = Ukakezan /
+			sqrtf(g_PlayerHoudai[CntPlayer].RotVecAxis.x*g_PlayerHoudai[CntPlayer].RotVecAxis.x +
+				g_PlayerHoudai[CntPlayer].RotVecAxis.y *g_PlayerHoudai[CntPlayer].RotVecAxis.y +
+				g_PlayerHoudai[CntPlayer].RotVecAxis.z * g_PlayerHoudai[CntPlayer].RotVecAxis.z);
+		g_PlayerHoudai[CntPlayer].Qrot = acosf(cossita);
+	}
+	else g_PlayerHoudai[CntPlayer].Qrot = 0.0f;
+}
+
+//=============================================================================
+// カメラ制御
+//=============================================================================
+void PLAYER_HONTAI::SetCamera(int CntPlayer)
+{
+	CAMERA *cam = GetCamera();
+	//バックカメラ処理
+	//バックカメラオン　カメラ視点、注視点
+	if (GetKeyboardPress(DIK_B) || IsButtonPressed(CntPlayer, BUTTON_Y))
+	{
+		cam[CntPlayer].at.x = g_PlayerHoudai[CntPlayer].pos.x + (AT_W_CAM * sinf(g_PlayerHoudai[CntPlayer].rot.y + g_PlayerHoutou[CntPlayer].rot.y));
+		cam[CntPlayer].at.y = g_PlayerHoudai[CntPlayer].pos.y + (g_PlayerHousin[CntPlayer].rot.x*100.0f);
+		cam[CntPlayer].at.z = g_PlayerHoudai[CntPlayer].pos.z + (AT_W_CAM * cosf(g_PlayerHoudai[CntPlayer].rot.y + g_PlayerHoutou[CntPlayer].rot.y));
+
+		cam[CntPlayer].pos.x = g_PlayerHoudai[CntPlayer].pos.x - sinf(g_PlayerHoudai[CntPlayer].rot.y + g_PlayerHoutou[CntPlayer].rot.y) * cam[CntPlayer].len;
+		cam[CntPlayer].pos.y = g_PlayerHoudai[CntPlayer].pos.y + POS_H_CAM;
+		cam[CntPlayer].pos.z = g_PlayerHoudai[CntPlayer].pos.z - cosf(g_PlayerHoudai[CntPlayer].rot.y + g_PlayerHoutou[CntPlayer].rot.y) * cam[CntPlayer].len;
+	}
+	//バックカメラオフ　カメラ視点、注視点
+	else
+	{
+		cam[CntPlayer].at.x = g_PlayerHoudai[CntPlayer].pos.x - (AT_W_CAM * sinf(g_PlayerHoudai[CntPlayer].rot.y + g_PlayerHoutou[CntPlayer].rot.y));
+		cam[CntPlayer].at.y = g_PlayerHoudai[CntPlayer].pos.y + (g_PlayerHousin[CntPlayer].rot.x*100.0f);
+		cam[CntPlayer].at.z = g_PlayerHoudai[CntPlayer].pos.z - (AT_W_CAM * cosf(g_PlayerHoudai[CntPlayer].rot.y + g_PlayerHoutou[CntPlayer].rot.y));
+
+		cam[CntPlayer].pos.x = g_PlayerHoudai[CntPlayer].pos.x + sinf(g_PlayerHoudai[CntPlayer].rot.y + g_PlayerHoutou[CntPlayer].rot.y) * cam[CntPlayer].len;
+		cam[CntPlayer].pos.y = g_PlayerHoudai[CntPlayer].pos.y + POS_H_CAM;
+		//cam[CntPlayer].pos.y = 100.0f;
+		cam[CntPlayer].pos.z = g_PlayerHoudai[CntPlayer].pos.z + cosf(g_PlayerHoudai[CntPlayer].rot.y + g_PlayerHoutou[CntPlayer].rot.y) * cam[CntPlayer].len;
+	}
+	if (g_PlayerHoudai[CntPlayer].BackCameraItemSignal == true)
+	{
+		cam[CntPlayer].at.x = g_PlayerHoudai[CntPlayer].pos.x + (AT_W_CAM * sinf(g_PlayerHoudai[CntPlayer].rot.y + g_PlayerHoutou[CntPlayer].rot.y));
+		cam[CntPlayer].at.y = g_PlayerHoudai[CntPlayer].pos.y + (g_PlayerHousin[CntPlayer].rot.x*100.0f);
+		cam[CntPlayer].at.z = g_PlayerHoudai[CntPlayer].pos.z + (AT_W_CAM * cosf(g_PlayerHoudai[CntPlayer].rot.y + g_PlayerHoutou[CntPlayer].rot.y));
+
+		cam[CntPlayer].pos.x = g_PlayerHoudai[CntPlayer].pos.x - sinf(g_PlayerHoudai[CntPlayer].rot.y + g_PlayerHoutou[CntPlayer].rot.y) * cam[CntPlayer].len;
+		cam[CntPlayer].pos.y = g_PlayerHoudai[CntPlayer].pos.y + POS_H_CAM;
+		cam[CntPlayer].pos.z = g_PlayerHoudai[CntPlayer].pos.z - cosf(g_PlayerHoudai[CntPlayer].rot.y + g_PlayerHoutou[CntPlayer].rot.y) * cam[CntPlayer].len;
+		g_PlayerHoudai[CntPlayer].BackCameraItemTime += 1.0f;
+		if (g_PlayerHoudai[CntPlayer].BackCameraItemTime >= BACKCAMERA_TIME)
+		{
+			g_PlayerHoudai[CntPlayer].BackCameraItemTime = 0.0f;
+			g_PlayerHoudai[CntPlayer].BackCameraItemSignal = false;
+		}
+	}
+}
+
+//=============================================================================
+// バレット関連制御
+//=============================================================================
+void PLAYER_HONTAI::SetBulletALL(int CntPlayer)
+{
+	g_PlayerHoudai[CntPlayer].Frontvec.x = sinf(g_PlayerHoudai[CntPlayer].rot.y);
+	g_PlayerHoudai[CntPlayer].Frontvec.y = 0.0f;
+	g_PlayerHoudai[CntPlayer].Frontvec.z = cosf(g_PlayerHoudai[CntPlayer].rot.y);
+
+	//地形の角度とプレイヤーの角度を計算。バレット発射方向で使う
+	D3DXVec3Cross(&g_PlayerHoudai[CntPlayer].FrontRotTOaxis, &g_PlayerHoudai[CntPlayer].RotVecAxis, &g_PlayerHoudai[CntPlayer].Frontvec);
+	float Bkakezan = D3DXVec3Dot(&g_PlayerHoudai[CntPlayer].RotVecAxis, &g_PlayerHoudai[CntPlayer].Frontvec);
+	if (Bkakezan != 0)
+	{
+		float cossita = Bkakezan /
+			sqrtf(g_PlayerHoudai[CntPlayer].RotVecAxis.x*g_PlayerHoudai[CntPlayer].RotVecAxis.x +
+				g_PlayerHoudai[CntPlayer].RotVecAxis.y *g_PlayerHoudai[CntPlayer].RotVecAxis.y +
+				g_PlayerHoudai[CntPlayer].RotVecAxis.z * g_PlayerHoudai[CntPlayer].RotVecAxis.z)
+			*
+			sqrtf(g_PlayerHoudai[CntPlayer].Frontvec.x*g_PlayerHoudai[CntPlayer].Frontvec.x +
+				g_PlayerHoudai[CntPlayer].Frontvec.y *g_PlayerHoudai[CntPlayer].Frontvec.y +
+				g_PlayerHoudai[CntPlayer].Frontvec.z * g_PlayerHoudai[CntPlayer].Frontvec.z);
+		g_PlayerHoudai[CntPlayer].Brot = acosf(cossita);
+	}
+	else
+	{
+		g_PlayerHoudai[CntPlayer].Brot = 1.57f;		//下方向ベクトルrot=0.0f、上方向ベクトルrot=3.14、に対しての前方向ベクトルはrot=1.57f。
+	}
+	g_PlayerHoudai[CntPlayer].Brot -= 1.57f;
+
+	// 弾発射
+	if (g_PlayerHoudai[CntPlayer].AmmoNum > 0)
+	{
+		if (GetKeyboardTrigger(DIK_SPACE) || IsButtonTriggered(CntPlayer, BUTTON_X))
+		{
+			D3DXVECTOR3 BposStart;
+			D3DXVECTOR3 move;
+
+			//プレイヤーposから発射方向に少しずらした値
+			//地面の傾きに沿って発射するときは問題ない。その傾きから左右に回転してる時だけposがおかしい
+			BposStart.x = g_PlayerHoudai[CntPlayer].pos.x - sinf(g_PlayerHoutou[CntPlayer].rot.y + g_PlayerHoudai[CntPlayer].rot.y) * VALUE_MOVE_BULLET;
+			BposStart.y = g_PlayerHoudai[CntPlayer].pos.y + (-sinf(-g_PlayerHousin[CntPlayer].rot.x +
+				g_PlayerHoudai[CntPlayer].Brot + g_PlayerHoudai[CntPlayer].Qrot) * VALUE_MOVE_BULLET) + 20;
+			BposStart.z = g_PlayerHoudai[CntPlayer].pos.z - cosf(g_PlayerHoutou[CntPlayer].rot.y + g_PlayerHoudai[CntPlayer].rot.y) * VALUE_MOVE_BULLET;
+
+			D3DXVECTOR3 BmoveRot;
+			BmoveRot.x = -sinf(g_PlayerHoutou[CntPlayer].rot.y + g_PlayerHoudai[CntPlayer].rot.y);
+			BmoveRot.y = sinf(g_PlayerHoudai[CntPlayer].Brot - g_PlayerHousin[CntPlayer].rot.x);
+			BmoveRot.z = -cosf(g_PlayerHoutou[CntPlayer].rot.y + g_PlayerHoudai[CntPlayer].rot.y);
+
+			move.x = (BmoveRot.x) *VALUE_MOVE_BULLET;
+			move.y = (BmoveRot.y) *VALUE_MOVE_BULLET;
+			move.z = (BmoveRot.z) *VALUE_MOVE_BULLET;
+			//move.y *= -1;
+
+
+			SetBullet(BposStart, move, 4.0f, 4.0f, 60 * 4, CntPlayer);
+
+			//拡散弾処理
+			if (g_PlayerHoudai[CntPlayer].ModelType == PLAYER_MODEL_ATTACK)
+			{
+				D3DXVECTOR3 leftB, rightB;
+				leftB = D3DXVECTOR3(-sinf(g_PlayerHoutou[CntPlayer].rot.y + g_PlayerHoudai[CntPlayer].rot.y + 0.3f)*VALUE_MOVE_BULLET,
+					move.y,
+					-cosf(g_PlayerHoutou[CntPlayer].rot.y + g_PlayerHoudai[CntPlayer].rot.y + 0.3f) *VALUE_MOVE_BULLET);
+				rightB = D3DXVECTOR3(-sinf(g_PlayerHoutou[CntPlayer].rot.y + g_PlayerHoudai[CntPlayer].rot.y - 0.3f)*VALUE_MOVE_BULLET,
+					move.y,
+					-cosf(g_PlayerHoutou[CntPlayer].rot.y + g_PlayerHoudai[CntPlayer].rot.y - 0.3f) *VALUE_MOVE_BULLET);
+				SetBullet(BposStart, leftB, 4.0f, 4.0f, 60 * 4, CntPlayer);
+				SetBullet(BposStart, rightB, 4.0f, 4.0f, 60 * 4, CntPlayer);
+			}
+			g_PlayerHoudai[CntPlayer].AmmoNum -= 1;
+			ChangeBulletTex(-1, CntPlayer);
+			// SE再生
+			PlaySound(SOUND_LABEL_SE_attack03);
+		}
+	}
+
+
+	//残弾復活 一定時間経過で1個づつ自動回復
+	if (g_PlayerHoudai[CntPlayer].AmmoNum < MAX_AMMO) g_PlayerHoudai[CntPlayer].AmmoBornCnt += BORN_AMMO_ADDTIME;
+	if (g_PlayerHoudai[CntPlayer].AmmoBornCnt >= BORN_AMMO_MAXTIME)
+	{
+		g_PlayerHoudai[CntPlayer].AmmoNum++;
+		ChangeBulletTex(1, CntPlayer);
+		g_PlayerHoudai[CntPlayer].AmmoBornCnt = 0.0f;
+	}
+
+}
+
+//=============================================================================
+// フォグ制御
+//=============================================================================
+void PLAYER_HONTAI::SetKiri(int CntPlayer)
+{
+	if (g_PlayerHoudai[CntPlayer].KiriSignal == true)
+	{
+		g_PlayerHoudai[CntPlayer].KiriItemTime += 1.0f;
+		if (g_PlayerHoudai[CntPlayer].KiriItemTime >= KIRI_TIME)
+		{
+			g_PlayerHoudai[CntPlayer].KiriItemTime = 0.0f;
+			g_PlayerHoudai[CntPlayer].KiriSignal = false;
+		}
+	}
+}
+
+//=============================================================================
+// モーフィング制御
+//=============================================================================
+void PLAYER_HONTAI::SetMorphing(int CntPlayer)
+{
+	// モーフィングtrue
+	if (g_PlayerHoudai[CntPlayer].Morphing == true)
+	{
+		///////////////////////////////////////////////////////////////////////バレット3つ時間開始
+		// モーフィング時間減算開始
+		g_PlayerHoudai[CntPlayer].MorphingTime -= 1.0f;
+
+		// モーフィング攻撃タイプに変更開始
+		if (g_PlayerHousin[CntPlayer].MorphingSignal == NowMorphing)
+		{
+			g_PlayerHoudai[CntPlayer].ModelType = PLAYER_MODEL_ATTACK;
+			DoMorphing(&g_PlayerHousin[CntPlayer], &g_PlayerHousinAtack[CntPlayer]);
+		}
+		///////////////////////////////////////////////////////////////////////バレット3つ時間終了
+
+		// 時間経過でモデルを元に戻す
+		else if (g_PlayerHoudai[CntPlayer].MorphingTime <= 0.0f)
+		{
+			g_PlayerHoudai[CntPlayer].ModelType = PLAYER_MODEL_NORMAL;
+			g_PlayerHousin[CntPlayer].MorphingSignal = NowMorphing;
+			g_PlayerHoudai[CntPlayer].Morphing = false;
+		}
+	}
+
+	// モーフィングオリジナルタイプに変更開始
+	if (g_PlayerHoudai[CntPlayer].Morphing == false && g_PlayerHoudai[CntPlayer].MorphingTime <= 0.0f)
+	{
+		DoMorphing(&g_PlayerHousin[CntPlayer], &g_PlayerHousinOriginal[CntPlayer]);
+		if (g_PlayerHousin[CntPlayer].MorphingSignal == EndMorphing)
+		{
+			g_PlayerHoudai[CntPlayer].MorphingTime = MORPHING_TIME;
+			g_PlayerHousin[CntPlayer].time = 0.0f;
+		}
+	}
 }

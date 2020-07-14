@@ -1,9 +1,9 @@
-//=============================================================================
-//
-// タイトル画面処理 [title.cpp]
-// Author : 木村純(キムラジュン)
-//
-//=============================================================================
+/**
+* @file title.cpp
+* @brief NiceShot(3D)戦車ゲーム
+* @author キムラジュン
+* @date 2020/01/15
+*/
 #include "main.h"
 #include "title.h"
 #include "input.h"
@@ -36,23 +36,31 @@
 //*****************************************************************************
 // プロトタイプ宣言
 //*****************************************************************************
+/**
+* @brief 頂点生成関数 MakeVertexTitle
+* @return HRESULT
+*/
 HRESULT MakeVertexTitle(LPDIRECT3DDEVICE9 pDevice);
+
+/**
+* @brief 頂点カラー設定関数 SetColorTitleLogo
+*/
 void SetColorTitleLogo(void);
 
 //*****************************************************************************
 // グローバル変数
 //*****************************************************************************
-LPDIRECT3DTEXTURE9		g_pD3DTextureTitle = NULL;		// テクスチャへのポインタ
-LPDIRECT3DVERTEXBUFFER9 g_pD3DVtxBuffTitle = NULL;		// 頂点バッファインターフェースへのポインタ
-LPDIRECT3DTEXTURE9		g_pD3DTextureTitleLogo = NULL;	// テクスチャへのポインタ
-LPDIRECT3DVERTEXBUFFER9 g_pD3DVtxBuffTitleLogo = NULL;	// 頂点バッファインターフェースへのポインタ
-LPDIRECT3DTEXTURE9		g_pD3DTextureStart = NULL;		// テクスチャへのポインタ
-LPDIRECT3DVERTEXBUFFER9 g_pD3DVtxBuffStart = NULL;		// 頂点バッファインターフェースへのポインタ
-int						g_nCountAppearStart = 0;		//
-float					g_fAlphaLogo = 0.0f;			//
-int						g_nCountDisp = 0;				//
-bool					g_bDispStart = false;			//
-int						g_nConutDemo = 0;				//
+LPDIRECT3DTEXTURE9		g_pD3DTextureTitle = NULL;		//!< テクスチャへのポインタ
+LPDIRECT3DVERTEXBUFFER9 g_pD3DVtxBuffTitle = NULL;		//!< 頂点バッファインターフェースへのポインタ
+LPDIRECT3DTEXTURE9		g_pD3DTextureTitleLogo = NULL;	//!< テクスチャへのポインタ
+LPDIRECT3DVERTEXBUFFER9 g_pD3DVtxBuffTitleLogo = NULL;	//!< 頂点バッファインターフェースへのポインタ
+LPDIRECT3DTEXTURE9		g_pD3DTextureStart = NULL;		//!< テクスチャへのポインタ
+LPDIRECT3DVERTEXBUFFER9 g_pD3DVtxBuffStart = NULL;		//!< 頂点バッファインターフェースへのポインタ
+int						g_nCountAppearStart = 0;		//!< スタートロゴ点滅用カウントアッパー
+float					g_fAlphaLogo = 0.0f;			//!< スタートロゴのアルファ値
+int						g_nCountDisp = 0;				//!< スタートロゴ点滅させる時間
+bool					g_bDispStart = false;			//!< スタートロゴ描画判定
+int						g_nConutDemo = 0;				//!< タイトル時一定時間無操作だとデモリール再生。今回は未使用
 
 //=============================================================================
 // 初期化処理
@@ -381,7 +389,7 @@ HRESULT MakeVertexTitle(LPDIRECT3DDEVICE9 pDevice)
 }
 
 //=============================================================================
-// 頂点の作成
+// 頂点カラーの設定
 //=============================================================================
 void SetColorTitleLogo(void)
 {

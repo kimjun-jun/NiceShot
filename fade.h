@@ -1,8 +1,8 @@
 /**
 * @file fade.h
-* @brief HitBallTarget(2D)的当てゲーム
+* @brief NiceShot(3D)戦車ゲーム
 * @author キムラジュン
-* @date 2019/09/01
+* @date 2020/01/15
 */
 #pragma once
 
@@ -48,7 +48,9 @@ void DrawFade(void);
 
 /**
 * @brief フェード設定関数 SetFade
-* @param[in] FADE fade フェードの種類, E_STAGE next 次のゲームシーン, int sno 流したい音楽
+* @param[in] FADE fade フェードの種類 enum FADE参照
+* @param[in] E_STAGE next 次のゲームシーン　enum E_STAGE参照
+* @param[in] int sno 流したい音楽 enum SOUND_TRACK参照
 */
 void SetFade(FADE fade, E_STAGE next, int sno);
 
