@@ -23,8 +23,9 @@ public:
 	int							AmmoNum;								//!< 残弾数。最大5個
 	int							ModelType;								//!< どのモデル状態か判定
 	void						SetMoveABL(int CntPlayer);				//!< 移動制御(ABボタンLスティックで制御)
+	void						SetCameraABL(int CntPlayer);			//!< カメラ制御(ABボタンLスティックで制御)
 	void						SetMoveLR(int CntPlayer);				//!< 移動制御(LRスティックで制御)
-	void						SetCamera(int CntPlayer);				//!< カメラ制御
+	void						SetCameraLR(int CntPlayer);				//!< カメラ制御(LRスティックで制御)
 	void						SetQ(int CntPlayer);					//!< クォータニオン制御
 	void						SetBulletALL(int CntPlayer);			//!< バレット関連制御
 	void						SetKiri(int CntPlayer);					//!< フォグ制御

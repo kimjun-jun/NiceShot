@@ -118,6 +118,7 @@
   <ItemGroup>
     <ClInclude Include="bullet.h" />
     <ClInclude Include="bulletpoint.h" />
+    <ClInclude Include="bulletprediction.h" />
     <ClInclude Include="bullettex.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="collision.h" />
@@ -149,6 +150,7 @@
   <ItemGroup>
     <ClCompile Include="bullet.cpp" />
     <ClCompile Include="bulletpoint.cpp" />
+    <ClCompile Include="bulletprediction.cpp" />
     <ClCompile Include="bullettex.cpp" />
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="collision.cpp" />

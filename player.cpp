@@ -453,8 +453,9 @@ void UpdatePlayer(void)
 		{
 			g_PlayerHoudai[CntPlayer].SetMoveABL(CntPlayer);
 			//g_PlayerHoudai[CntPlayer].SetMoveLR(CntPlayer);
+			g_PlayerHoudai[CntPlayer].SetCameraABL(CntPlayer);
+			//g_PlayerHoudai[CntPlayer].SetCameraLR(CntPlayer);
 			g_PlayerHoudai[CntPlayer].SetQ(CntPlayer);
-			g_PlayerHoudai[CntPlayer].SetCamera(CntPlayer);
 			g_PlayerHoudai[CntPlayer].SetBulletALL(CntPlayer);
 			g_PlayerHoudai[CntPlayer].SetKiri(CntPlayer);
 			g_PlayerHoudai[CntPlayer].SetMorphing(CntPlayer);
@@ -852,36 +853,9 @@ void PLAYER_HONTAI::SetMoveABL(int CntPlayer)
 }
 
 //=============================================================================
-// 移動制御(LRスティックで制御)
+// カメラ制御(ABボタンLスティックで制御)
 //=============================================================================
-void PLAYER_HONTAI::SetMoveLR(int CntPlayer)
-{
-
-}
-
-//=============================================================================
-// クォータニオン制御
-//=============================================================================
-void PLAYER_HONTAI::SetQ(int CntPlayer)
-{
-	//地形の角度とプレイヤーの角度を計算。drawでクオータニオンで使う
-	D3DXVec3Cross(&g_PlayerHoudai[CntPlayer].UpRotTOaxis, &g_PlayerHoudai[CntPlayer].RotVecAxis, &g_PlayerHoudai[CntPlayer].Upvec);
-	float Ukakezan = D3DXVec3Dot(&g_PlayerHoudai[CntPlayer].RotVecAxis, &g_PlayerHoudai[CntPlayer].Upvec);
-	if (Ukakezan != 0)
-	{
-		float cossita = Ukakezan /
-			sqrtf(g_PlayerHoudai[CntPlayer].RotVecAxis.x*g_PlayerHoudai[CntPlayer].RotVecAxis.x +
-				g_PlayerHoudai[CntPlayer].RotVecAxis.y *g_PlayerHoudai[CntPlayer].RotVecAxis.y +
-				g_PlayerHoudai[CntPlayer].RotVecAxis.z * g_PlayerHoudai[CntPlayer].RotVecAxis.z);
-		g_PlayerHoudai[CntPlayer].Qrot = acosf(cossita);
-	}
-	else g_PlayerHoudai[CntPlayer].Qrot = 0.0f;
-}
-
-//=============================================================================
-// カメラ制御
-//=============================================================================
-void PLAYER_HONTAI::SetCamera(int CntPlayer)
+void PLAYER_HONTAI::SetCameraABL(int CntPlayer)
 {
 	CAMERA *cam = GetCamera();
 	//バックカメラ処理
@@ -927,6 +901,41 @@ void PLAYER_HONTAI::SetCamera(int CntPlayer)
 }
 
 //=============================================================================
+// 移動制御(LRスティックで制御)
+//=============================================================================
+void PLAYER_HONTAI::SetMoveLR(int CntPlayer)
+{
+
+}
+
+//=============================================================================
+// カメラ制御(LRスティックで制御)
+//=============================================================================
+void PLAYER_HONTAI::SetCameraLR(int CntPlayer)
+{
+
+}
+
+//=============================================================================
+// クォータニオン制御
+//=============================================================================
+void PLAYER_HONTAI::SetQ(int CntPlayer)
+{
+	//地形の角度とプレイヤーの角度を計算。drawでクオータニオンで使う
+	D3DXVec3Cross(&g_PlayerHoudai[CntPlayer].UpRotTOaxis, &g_PlayerHoudai[CntPlayer].RotVecAxis, &g_PlayerHoudai[CntPlayer].Upvec);
+	float Upkakezan = D3DXVec3Dot(&g_PlayerHoudai[CntPlayer].RotVecAxis, &g_PlayerHoudai[CntPlayer].Upvec);
+	if (Upkakezan != 0)
+	{
+		float cossita = Upkakezan /
+			sqrtf(g_PlayerHoudai[CntPlayer].RotVecAxis.x*g_PlayerHoudai[CntPlayer].RotVecAxis.x +
+				g_PlayerHoudai[CntPlayer].RotVecAxis.y *g_PlayerHoudai[CntPlayer].RotVecAxis.y +
+				g_PlayerHoudai[CntPlayer].RotVecAxis.z * g_PlayerHoudai[CntPlayer].RotVecAxis.z);
+		g_PlayerHoudai[CntPlayer].Qrot = acosf(cossita);
+	}
+	else g_PlayerHoudai[CntPlayer].Qrot = 0.0f;
+}
+
+//=============================================================================
 // バレット関連制御
 //=============================================================================
 void PLAYER_HONTAI::SetBulletALL(int CntPlayer)
@@ -966,10 +975,12 @@ void PLAYER_HONTAI::SetBulletALL(int CntPlayer)
 
 			//プレイヤーposから発射方向に少しずらした値
 			//地面の傾きに沿って発射するときは問題ない。その傾きから左右に回転してる時だけposがおかしい
-			BposStart.x = g_PlayerHoudai[CntPlayer].pos.x - sinf(g_PlayerHoutou[CntPlayer].rot.y + g_PlayerHoudai[CntPlayer].rot.y) * VALUE_MOVE_BULLET;
+			BposStart.x = g_PlayerHoudai[CntPlayer].pos.x - sinf(g_PlayerHoutou[CntPlayer].rot.y + g_PlayerHoudai[CntPlayer].rot.y +
+				g_PlayerHoudai[CntPlayer].Brot + g_PlayerHoudai[CntPlayer].Qrot) * VALUE_POS_BULLET;
 			BposStart.y = g_PlayerHoudai[CntPlayer].pos.y + (-sinf(-g_PlayerHousin[CntPlayer].rot.x +
-				g_PlayerHoudai[CntPlayer].Brot + g_PlayerHoudai[CntPlayer].Qrot) * VALUE_MOVE_BULLET) + 20;
-			BposStart.z = g_PlayerHoudai[CntPlayer].pos.z - cosf(g_PlayerHoutou[CntPlayer].rot.y + g_PlayerHoudai[CntPlayer].rot.y) * VALUE_MOVE_BULLET;
+				g_PlayerHoudai[CntPlayer].Brot + g_PlayerHoudai[CntPlayer].Qrot) * VALUE_POS_BULLET) + 20;
+			BposStart.z = g_PlayerHoudai[CntPlayer].pos.z - cosf(g_PlayerHoutou[CntPlayer].rot.y + g_PlayerHoudai[CntPlayer].rot.y +
+				g_PlayerHoudai[CntPlayer].Brot + g_PlayerHoudai[CntPlayer].Qrot) * VALUE_POS_BULLET;
 
 			D3DXVECTOR3 BmoveRot;
 			BmoveRot.x = -sinf(g_PlayerHoutou[CntPlayer].rot.y + g_PlayerHoudai[CntPlayer].rot.y);

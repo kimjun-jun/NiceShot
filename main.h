@@ -70,6 +70,7 @@
 
 //移動量マクロ
 #define VALUE_MOVE_BULLET					(6.0f)																		//!< バレットの速度
+#define VALUE_POS_BULLET					(10.0f)																		//!< プレイヤー中心としたバレットの発射位置
 #define	VALUE_MOVE							(0.1f)																		//!< 移動加速度
 #define	VALUE_MOVE_MAX						(4.0f)																		//!< 移動加速度の最大値
 #define	VALUE_ROTATE_PLAYER_HOUTOU			(0.03f)																		//!< プレイヤー砲塔回転量
@@ -104,6 +105,7 @@
 #define	MAX_SHADOW							(256)																		//!< 影最大数
 #define	BULLETKAKUSAN_MAX					(3)																			//!< バレット拡散数
 #define	BULLET_MAX							((MAX_AMMO*BULLETKAKUSAN_MAX*PLAYER_MAX)*2)									//!< 合計のバレットワーク数
+#define	BULLET_PREDICTION_MAX				(4)																			//!< バレット予測線の数
 #define HEADICON_MAX						(PLAYER_MAX*(PLAYER_MAX-1))													//!< 敵の頭上アイコン最大数
 #define PLAYER_MODEL_SIZE					(15.0f)																		//!< モデルサイズ
 #define BULLET_MODEL_SIZE					(15.0f)																		//!< モデルサイズ
