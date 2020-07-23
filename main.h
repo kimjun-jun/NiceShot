@@ -50,19 +50,20 @@
 //画像の参照名																									
 #define TEXTURE_GAME_SCORE			"data/TEXTURE/BG/0-9.png"													//!< 読み込むテクスチャファイル名
 #define	TEXTURE_MEISAI				"data/MODEL/28513607_p4_master1200.jpg"										//!< 読み込むテクスチャファイル名
-#define	TEXTURE_TIKEI_ITEM			"data/MODEL/landmark_aogashima.png"											//!< 地形変形アイテム
-#define	TEXTURE_LIFE_ITEM			"data/MODEL/life000.png"													//!< ライフ回復
-#define	TEXTURE_SENSYA_ITEM			"data/MODEL/war_sensya_noman.png"											//!< 戦車変形アイテム
-#define	TEXTURE_BULLET_ITEM			"data/MODEL/bullettex.png"													//!< バレットアイテム
-#define	TEXTURE_SPEED_ITEM			"data/MODEL/1213810.png"													//!< スピードアップアイテム
-#define	TEXTURE_CAMERA_ITEM			"data/MODEL/mark_camera_satsuei_ok.png"										//!< 強制バックカメラアイテム
-#define	TEXTURE_KIRI_ITEM			"data/MODEL/yama_kiri.png"													//!< 霧アイテム
+#define	TEXTURE_STATUS_TIKEI_ITEM	"data/MODEL/landmark_aogashima.png"											//!< 地形変形アイテム
+#define	TEXTURE_STATUS_LIFE_ITEM	"data/MODEL/life000.png"													//!< ライフ回復
+#define	TEXTURE_STATUS_SENSYA_ITEM	"data/MODEL/war_sensya_noman.png"											//!< 戦車変形アイテム
+#define	TEXTURE_STATUS_BULLET_ITEM	"data/MODEL/bullettex.png"													//!< バレットアイテム
+#define	TEXTURE_STATUS_SPEED_ITEM	"data/MODEL/1213810.png"													//!< スピードアップアイテム
+#define	TEXTURE_STATUS_CAMERA_ITEM	"data/MODEL/mark_camera_satsuei_ok.png"										//!< 強制バックカメラアイテム
+#define	TEXTURE_STATUS_KIRI_ITEM	"data/MODEL/yama_kiri.png"													//!< 霧アイテム
 																												
 //モデルの参照																									
 #define	MODEL_HOUDAI				"data/MODEL/PlayerSensyaHoudai.x"											//!< 読み込むモデル名
 #define	MODEL_HOUTOU				"data/MODEL/PlayerSensyaHoutou.x"											//!< 読み込むモデル名
 #define	MODEL_HOUSIN				"data/MODEL/PlayerSensyaHousin.x"											//!< 読み込むモデル名
 #define	MODEL_HOUSINMO				"data/MODEL/PlayerSensyaHousinMo.x"											//!< 読み込むモデル名
+#define	MODEL_BULLETPOS				"data/MODEL/PlayerSensyaBulletPos.x"										//!< 読み込むモデル名
 
 //キャラクターなどの合計
 #define PLAYER_MAX							(4)																			//!< プレイヤー最大人数
@@ -70,7 +71,8 @@
 
 //移動量マクロ
 #define VALUE_MOVE_BULLET					(6.0f)																		//!< バレットの速度
-#define VALUE_POS_BULLET					(10.0f)																		//!< プレイヤー中心としたバレットの発射位置
+#define VALUE_LEN_BULLET					(10.0f)																		//!< プレイヤー中心としたバレットの発射位置までの距離
+#define VALUE_LENTIMES_BULLET				(2.5f)																			//!< プレイヤー中心としたバレットの発射位置にたいする倍率
 #define	VALUE_MOVE							(0.1f)																		//!< 移動加速度
 #define	VALUE_MOVE_MAX						(4.0f)																		//!< 移動加速度の最大値
 #define	VALUE_ROTATE_PLAYER_HOUTOU			(0.03f)																		//!< プレイヤー砲塔回転量
@@ -93,7 +95,8 @@
 #define	BULLETTEX_SIZE_Y					(LIFETEX_SIZE_Y)															//!< ライフの数字の高さ
 #define	BULLETTEX_POS_X						(LIFETEX_POS_X)																//!< ライフの表示基準位置Ｘ座標
 #define	BULLETTEX_POS_Y						(LIFETEX_POS_Y+LIFETEX_SIZE_Y)												//!< ライフの表示基準位置Ｙ座標
-																														
+#define	EXPLOSION_COLLISIONPOS_BUFFSIZE		(5.0f)																		//!< 2D爆破を壁に当たった時の描画する座標を調整
+
 #define MAX_AMMO							(5)																			//!< 所持弾薬の最大値
 #define MAX_LIFE							(6)																			//!< 体力最大値
 #define BORN_AMMO_ADDTIME					(1.0f)																		//!< 弾薬復活させるための加算タイム
@@ -114,6 +117,17 @@
 #define DROP_ITEM_CHARGE_ADDTIME			(0.1f)																		//!< アイテムをリスポーンさせる時の加算タイム
 #define DROP_ITEM_CHARGE_CNT				(300.0f)																	//!< アイテムをリスポーンさせる時の所要タイム
 #define	MAX_ITEM							(20)																		//!< アイテムワーク最大数
+
+
+//エフェクト関連定数
+#define	EFFECT_NORMALSET_SIZE_X				(16.0f)																		//!< エフェクト標準の幅
+#define	EFFECT_NORMALSET_SIZE_Y				(16.0f)																		//!< エフェクト標準の高さ
+#define	EFFECT_BULLET_SIZE_X				(16.0f)																		//!< エフェクトバレットの幅
+#define	EFFECT_BULLET_SIZE_Y				(16.0f)																		//!< エフェクトバレットの高さ
+#define	EFFECT_BULLET_TIME					(10)																		//!< エフェクトバレットの生存時間
+#define	EFFECT_SPEEDUP_SIZE_X				(25.0f)																		//!< エフェクトスピードアップの幅
+#define	EFFECT_SPEEDUP_SIZE_Y				(10.0f)																		//!< エフェクトスピードアップの高さ
+#define	EFFECT_SPEEDUP_TIME					(10)																			//!< エフェクトスピードアップの生存時間
 
 /**
  * @enum E_STAGE
@@ -298,7 +312,6 @@ public:
 	D3DXVECTOR3					FrontRotTOaxis;		//!< 地形法線とプレイヤーFrontベクトルの外積値
 	D3DXQUATERNION				q;					//!< プレイヤー用クオータニオン
 	D3DXQUATERNION				BrotQ;				//!< バレッド用クオータニオン
-	D3DXQUATERNION				kyouyakuQ;			//!< 共役くお
 	float						speed;				//!< 移動スピード
 	float						speedbuff;			//!< 移動スピードアイテムバフ
 	float						speedbufftime;		//!< 移動スピードアイテム効果時間
@@ -315,7 +328,7 @@ public:
 
 /**
  * @class GPUMODEL
- * モデルのCLASS
+ * モデルの頂点データを使用　モーフィング実行時に元データと変化データの頂点情報を保存
  */
 class GPUMODEL
 {

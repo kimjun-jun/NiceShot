@@ -12,8 +12,6 @@
 // マクロ定義
 //*****************************************************************************
 #define	TEXTURE_EFFECT			"data/TEXTURE/effect000.jpg"	// 読み込むテクスチャファイル名
-#define	EFFECT_SIZE_X			(50.0f)							// ビルボードの幅
-#define	EFFECT_SIZE_Y			(50.0f)							// ビルボードの高さ
 
 #define	MAX_EFFECT				(4096)							// エフェクト最大数
 
@@ -75,8 +73,8 @@ HRESULT InitEffect(int type)
 		g_aEffect[nCntEffect].move = D3DXVECTOR3(1.0f, 1.0f, 1.0f);
 		g_aEffect[nCntEffect].col = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
 		g_aEffect[nCntEffect].nDecAlpha = 0.0f;
-		g_aEffect[nCntEffect].fSizeX = EFFECT_SIZE_X;
-		g_aEffect[nCntEffect].fSizeY = EFFECT_SIZE_Y;
+		g_aEffect[nCntEffect].fSizeX = EFFECT_NORMALSET_SIZE_X;
+		g_aEffect[nCntEffect].fSizeY = EFFECT_NORMALSET_SIZE_Y;
 		g_aEffect[nCntEffect].nTimer = 0;
 		g_aEffect[nCntEffect].bUse = false;
 	}
@@ -114,14 +112,14 @@ void UpdateEffect(void)
 			g_aEffect[nCntEffect].pos.x += g_aEffect[nCntEffect].move.x;
 			g_aEffect[nCntEffect].pos.z += g_aEffect[nCntEffect].move.z;
 
-			//g_aEffect[nCntEffect].col.a -= g_aEffect[nCntEffect].nDecAlpha;
-			//if (g_aEffect[nCntEffect].col.a <= 0.0f)
-			//{
-			//	g_aEffect[nCntEffect].col.a = 0.0f;
-			//}
-			SetColorEffect(nCntEffect,
-				D3DXCOLOR(g_aEffect[nCntEffect].col.r, g_aEffect[nCntEffect].col.b,
-					g_aEffect[nCntEffect].col.b, g_aEffect[nCntEffect].col.a));
+			g_aEffect[nCntEffect].col.a -= g_aEffect[nCntEffect].nDecAlpha;
+			if (g_aEffect[nCntEffect].col.a <= 0.0f)
+			{
+				g_aEffect[nCntEffect].col.a = 0.0f;
+			}
+
+			//カラーセット
+			SetColorEffect(nCntEffect, D3DXCOLOR(g_aEffect[nCntEffect].col.r, g_aEffect[nCntEffect].col.b, g_aEffect[nCntEffect].col.b, g_aEffect[nCntEffect].col.a));
 
 			g_aEffect[nCntEffect].nTimer--;
 			if (g_aEffect[nCntEffect].nTimer <= 0)
@@ -145,7 +143,7 @@ void DrawEffect(int CntPlayer)
 	pDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
 
 	// Z比較なし
-	pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS);
+	//pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS);
 
 	for (int nCntEffect = 0; nCntEffect < MAX_EFFECT; nCntEffect++)
 	{
@@ -200,7 +198,7 @@ void DrawEffect(int CntPlayer)
 	pDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
 
 	// Z比較あり
-	pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
+	//pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
 
 }
 
@@ -229,10 +227,10 @@ HRESULT MakeVertexEffect(LPDIRECT3DDEVICE9 pDevice)
 		for (int nCntEffect = 0; nCntEffect < MAX_EFFECT; nCntEffect++, pVtx += 4)
 		{
 			// 頂点座標の設定
-			pVtx[0].vtx = D3DXVECTOR3(-EFFECT_SIZE_X / 2, -EFFECT_SIZE_Y / 2, 0.0f);
-			pVtx[1].vtx = D3DXVECTOR3(EFFECT_SIZE_X / 2, -EFFECT_SIZE_Y / 2, 0.0f);
-			pVtx[2].vtx = D3DXVECTOR3(-EFFECT_SIZE_X / 2, EFFECT_SIZE_Y / 2, 0.0f);
-			pVtx[3].vtx = D3DXVECTOR3(EFFECT_SIZE_X / 2, EFFECT_SIZE_Y / 2, 0.0f);
+			pVtx[0].vtx = D3DXVECTOR3(-EFFECT_NORMALSET_SIZE_X / 2, -EFFECT_NORMALSET_SIZE_Y / 2, 0.0f);
+			pVtx[1].vtx = D3DXVECTOR3(EFFECT_NORMALSET_SIZE_X / 2, -EFFECT_NORMALSET_SIZE_Y / 2, 0.0f);
+			pVtx[2].vtx = D3DXVECTOR3(-EFFECT_NORMALSET_SIZE_X / 2, EFFECT_NORMALSET_SIZE_Y / 2, 0.0f);
+			pVtx[3].vtx = D3DXVECTOR3(EFFECT_NORMALSET_SIZE_X / 2, EFFECT_NORMALSET_SIZE_Y / 2, 0.0f);
 
 			// 法線の設定
 			pVtx[0].nor = D3DXVECTOR3(0.0f, 1.0f,0.0f);

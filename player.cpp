@@ -16,6 +16,7 @@
 #include "morphing.h"
 #include "field.h"
 #include "sound.h"
+#include "effect.h"
 
 //*****************************************************************************
 // マクロ定義
@@ -29,11 +30,12 @@
 //*****************************************************************************
 // グローバル変数
 //*****************************************************************************
-static PLAYER_HONTAI		g_PlayerHoudai[PLAYER_MAX];
-static PLAYER_PRATS			g_PlayerHoutou[PLAYER_MAX];
-static PLAYER_PRATS			g_PlayerHousin[PLAYER_MAX];
-static GPUMODEL				g_PlayerHousinOriginal[PLAYER_MAX];
-static GPUMODEL				g_PlayerHousinAtack[PLAYER_MAX];
+static PLAYER_HONTAI		g_PlayerHoudai[PLAYER_MAX];								 //!< 砲台データクラス(モデルの本体)　描画有
+static PLAYER_PRATS			g_PlayerHoutou[PLAYER_MAX];								 //!< 砲塔データクラス(モデルのパーツ)　描画有
+static PLAYER_PRATS			g_PlayerHousin[PLAYER_MAX];								 //!< 砲身データクラス(モデルのパーツ)　描画有
+static PLAYER_PRATS			g_PlayerBulletStartPos[PLAYER_MAX];						 //!< バレット発射データクラス(モデルのパーツ)　描画無
+static GPUMODEL				g_PlayerHousinOriginal[PLAYER_MAX];						 //!< 砲身データクラス(頂点データのみ保持)　非モーフィング時に頂点データ使用
+static GPUMODEL				g_PlayerHousinAtack[PLAYER_MAX];						 //!< 砲身データクラス(頂点データのみ保持)　モーフィング時に頂点データ使用
 
 static D3DXCOLOR PLAYER_COLOR[] = {
 	D3DXCOLOR(1.0f, 1.0f, 0.1f, 1.0f),//p1カラー
@@ -41,8 +43,6 @@ static D3DXCOLOR PLAYER_COLOR[] = {
 	D3DXCOLOR(1.0f, 0.2f, 0.2f, 1.0f),//p3カラー
 	D3DXCOLOR(0.2f, 1.0f, 0.2f, 1.0f),//p4カラー
 };
-
-D3DXMATRIX mtxQmove;
 
 //=============================================================================
 // 初期化処理
@@ -54,7 +54,7 @@ HRESULT InitPlayer(void)
 	//PLAYER 初期化
 	for (int CntPlayer = 0; CntPlayer < PLAYER_MAX; CntPlayer++)
 	{
-		//砲台
+		////////////////////////////////////////////////////////////////////////////////////////////////砲台
 		// 位置・回転・スケールの初期設定
 		g_PlayerHoudai[CntPlayer].pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 		g_PlayerHoudai[CntPlayer].oldpos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
@@ -64,7 +64,6 @@ HRESULT InitPlayer(void)
 									  
 		g_PlayerHoudai[CntPlayer].q = D3DXQUATERNION(0,0,0,1);
 		g_PlayerHoudai[CntPlayer].BrotQ = D3DXQUATERNION(0, 0, 0, 1);
-		g_PlayerHoudai[CntPlayer].kyouyakuQ = D3DXQUATERNION(0, 0, 0, 1);
 		g_PlayerHoudai[CntPlayer].RotVecAxis = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 		g_PlayerHoudai[CntPlayer].Upvec = D3DXVECTOR3(0, 1, 0);
 		g_PlayerHoudai[CntPlayer].Frontvec = D3DXVECTOR3(0, 0, 1);
@@ -120,7 +119,7 @@ HRESULT InitPlayer(void)
 			&g_PlayerHoudai[CntPlayer].pD3DTexture);	// 読み込むメモリー
 
 
-		//砲塔
+		/////////////////////////////////////////////////////////////////////////////////////////砲塔
 		// 位置・回転・スケールの初期設定
 		g_PlayerHoutou[CntPlayer].pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 		g_PlayerHoutou[CntPlayer].rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
@@ -147,7 +146,7 @@ HRESULT InitPlayer(void)
 			return E_FAIL;
 		}
 
-		//頂点カラーをプレイヤー色(緑)に変更
+		//頂点カラーをプレイヤー色に変更
 		SetPlayerMeshColor(&g_PlayerHoutou[CntPlayer], CntPlayer);
 
 		// テクスチャの読み込み
@@ -155,7 +154,7 @@ HRESULT InitPlayer(void)
 			TEXTURE_MEISAI,									// ファイルの名前
 			&g_PlayerHoutou[CntPlayer].pD3DTexture);	// 読み込むメモリー
 
-		//砲身
+		///////////////////////////////////////////////////////////////////////////////////////////////砲身
 		// 位置・回転・スケールの初期設定
 		g_PlayerHousin[CntPlayer].pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 		g_PlayerHousin[CntPlayer].rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
@@ -191,7 +190,36 @@ HRESULT InitPlayer(void)
 			TEXTURE_MEISAI,									// ファイルの名前
 			&g_PlayerHousin[CntPlayer].pD3DTexture);	// 読み込むメモリー
 
-		//砲身攻撃データ
+
+		///////////////////////////////////////////////////////////////////////////////////////////////バレット発射座標
+		// 位置・回転・スケールの初期設定
+		g_PlayerBulletStartPos[CntPlayer].pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		g_PlayerBulletStartPos[CntPlayer].rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		g_PlayerBulletStartPos[CntPlayer].scl = D3DXVECTOR3(1.0f, 1.0f, 1.0f);
+		g_PlayerBulletStartPos[CntPlayer].move = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		g_PlayerBulletStartPos[CntPlayer].pD3DTexture = NULL;
+		g_PlayerBulletStartPos[CntPlayer].pD3DXMesh = NULL;
+		g_PlayerBulletStartPos[CntPlayer].pD3DXBuffMat = NULL;
+		g_PlayerBulletStartPos[CntPlayer].nNumMat = 0;
+		g_PlayerBulletStartPos[CntPlayer].pD3DVtxBuff = NULL;
+		g_PlayerBulletStartPos[CntPlayer].pD3DIdxBuff = NULL;
+		g_PlayerBulletStartPos[CntPlayer].nNumVertex = 0;
+		g_PlayerBulletStartPos[CntPlayer].nNumPolygon = 0;
+		g_PlayerBulletStartPos[CntPlayer].nNumVertexIndex = 0;
+		g_PlayerBulletStartPos[CntPlayer].MorphingSignal = NoMorphing;
+		g_PlayerBulletStartPos[CntPlayer].ParentParts = &g_PlayerHousin[CntPlayer];
+
+		// Xファイルの読み込み
+		if (LoadMesh(MODEL_BULLETPOS, &g_PlayerBulletStartPos[CntPlayer].pD3DXBuffMat,
+			&g_PlayerBulletStartPos[CntPlayer].nNumMat, &g_PlayerBulletStartPos[CntPlayer].pD3DXMesh,
+			&g_PlayerBulletStartPos[CntPlayer].pD3DVtxBuff, &g_PlayerBulletStartPos[CntPlayer].pD3DIdxBuff,
+			&g_PlayerBulletStartPos[CntPlayer].nNumVertex, &g_PlayerBulletStartPos[CntPlayer].nNumPolygon,
+			&g_PlayerBulletStartPos[CntPlayer].nNumVertexIndex, &g_PlayerBulletStartPos[CntPlayer].pD3DTexture))
+		{
+			return E_FAIL;
+		}
+
+		///////////////////////////////////////////////////////////////////////////////////////////////////////砲身攻撃データ
 		// 位置・回転・スケールの初期設定
 		g_PlayerHousinAtack[CntPlayer].pD3DTexture = NULL;
 		g_PlayerHousinAtack[CntPlayer].pD3DXMesh = NULL;
@@ -222,7 +250,7 @@ HRESULT InitPlayer(void)
 			&g_PlayerHousinAtack[CntPlayer].pD3DTexture);	// 読み込むメモリー
 
 
-		//砲身通常データ
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////砲身通常データ
 		// 位置・回転・スケールの初期設定
 		g_PlayerHousinOriginal[CntPlayer].pD3DTexture = NULL;
 		g_PlayerHousinOriginal[CntPlayer].pD3DXMesh = NULL;
@@ -255,6 +283,8 @@ HRESULT InitPlayer(void)
 	}
 
 
+
+	//初期化段階で座標と角度をランダムで設定
 	g_PlayerHoudai[0].pos = D3DXVECTOR3(699.0f + rand() % 10 , 300.0f, 699.0f + rand() % 10);
 	g_PlayerHoudai[1].pos = D3DXVECTOR3(-699.0f + rand() % 10, 300.0f, 699.0f + rand() % 10);
 	g_PlayerHoudai[2].pos = D3DXVECTOR3(699.0f + rand() % 10, 300.0f, -699.0f + rand() % 10);
@@ -332,6 +362,13 @@ HRESULT ReInitPlayer(void)
 		g_PlayerHousin[CntPlayer].move = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 		g_PlayerHousin[CntPlayer].MorphingSignal = NoMorphing;
 
+		//バレット発射座標
+		// 位置・回転・スケールの初期設定
+		g_PlayerBulletStartPos[CntPlayer].pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		g_PlayerBulletStartPos[CntPlayer].rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		g_PlayerBulletStartPos[CntPlayer].scl = D3DXVECTOR3(1.0f, 1.0f, 1.0f);
+		g_PlayerBulletStartPos[CntPlayer].move = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+
 		ResetMorphing(&g_PlayerHousin[CntPlayer], &g_PlayerHousinOriginal[CntPlayer]);
 	}
 
@@ -376,10 +413,8 @@ void UninitPlayer(void)
 			g_PlayerHoudai[CntPlayer].pD3DXBuffMat->Release();
 			g_PlayerHoudai[CntPlayer].pD3DXBuffMat = NULL;
 		}
-	}
 
-	for (int CntPlayer = 0; CntPlayer < PLAYER_MAX; CntPlayer++)
-	{
+
 		if (g_PlayerHoutou[CntPlayer].pD3DTexture != NULL)
 		{// テクスチャの開放
 			g_PlayerHoutou[CntPlayer].pD3DTexture->Release();
@@ -390,10 +425,8 @@ void UninitPlayer(void)
 			g_PlayerHoutou[CntPlayer].pD3DXBuffMat->Release();
 			g_PlayerHoutou[CntPlayer].pD3DXBuffMat = NULL;
 		}
-	}
 
-	for (int CntPlayer = 0; CntPlayer < PLAYER_MAX; CntPlayer++)
-	{
+
 		if (g_PlayerHousin[CntPlayer].pD3DTexture != NULL)
 		{// テクスチャの開放
 			g_PlayerHousin[CntPlayer].pD3DTexture->Release();
@@ -404,10 +437,20 @@ void UninitPlayer(void)
 			g_PlayerHousin[CntPlayer].pD3DXBuffMat->Release();
 			g_PlayerHousin[CntPlayer].pD3DXBuffMat = NULL;
 		}
-	}
 
-	for (int CntPlayer = 0; CntPlayer < PLAYER_MAX; CntPlayer++)
-	{
+
+		if (g_PlayerBulletStartPos[CntPlayer].pD3DTexture != NULL)
+		{// テクスチャの開放
+			g_PlayerBulletStartPos[CntPlayer].pD3DTexture->Release();
+			g_PlayerBulletStartPos[CntPlayer].pD3DTexture = NULL;
+		}
+		if (g_PlayerBulletStartPos[CntPlayer].pD3DXBuffMat != NULL)
+		{// マテリアルの開放
+			g_PlayerBulletStartPos[CntPlayer].pD3DXBuffMat->Release();
+			g_PlayerBulletStartPos[CntPlayer].pD3DXBuffMat = NULL;
+		}
+
+
 		if (g_PlayerHousinOriginal[CntPlayer].pD3DTexture != NULL)
 		{// テクスチャの開放
 			g_PlayerHousinOriginal[CntPlayer].pD3DTexture->Release();
@@ -418,10 +461,8 @@ void UninitPlayer(void)
 			g_PlayerHousinOriginal[CntPlayer].pD3DXBuffMat->Release();
 			g_PlayerHousinOriginal[CntPlayer].pD3DXBuffMat = NULL;
 		}
-	}
 
-	for (int CntPlayer = 0; CntPlayer < PLAYER_MAX; CntPlayer++)
-	{
+
 		if (g_PlayerHousinAtack[CntPlayer].pD3DTexture != NULL)
 		{// テクスチャの開放
 			g_PlayerHousinAtack[CntPlayer].pD3DTexture->Release();
@@ -453,9 +494,9 @@ void UpdatePlayer(void)
 		{
 			g_PlayerHoudai[CntPlayer].SetMoveABL(CntPlayer);
 			//g_PlayerHoudai[CntPlayer].SetMoveLR(CntPlayer);
+			g_PlayerHoudai[CntPlayer].SetQ(CntPlayer);
 			g_PlayerHoudai[CntPlayer].SetCameraABL(CntPlayer);
 			//g_PlayerHoudai[CntPlayer].SetCameraLR(CntPlayer);
-			g_PlayerHoudai[CntPlayer].SetQ(CntPlayer);
 			g_PlayerHoudai[CntPlayer].SetBulletALL(CntPlayer);
 			g_PlayerHoudai[CntPlayer].SetKiri(CntPlayer);
 			g_PlayerHoudai[CntPlayer].SetMorphing(CntPlayer);
@@ -534,7 +575,6 @@ void DrawPlayer(void)
 			g_PlayerHoudai[CntPlayer].BrotQ = D3DXQUATERNION(0, 0, 0, 1);
 			D3DXMATRIX mtxQ;
 			D3DXMatrixIdentity(&mtxQ);
-			D3DXMatrixIdentity(&mtxQmove);
 			
 			//q=(rotVecAxis法線)*(g_Player.rot回転)
 			D3DXQuaternionRotationAxis(&g_PlayerHoudai[CntPlayer].q, &g_PlayerHoudai[CntPlayer].UpRotTOaxis, -g_PlayerHoudai[CntPlayer].Qrot);
@@ -542,7 +582,6 @@ void DrawPlayer(void)
 
 			// ワールドマトリックスの初期化
 			D3DXMatrixIdentity(&g_PlayerHoudai[CntPlayer].mtxWorld);
-			D3DXMatrixIdentity(&g_PlayerHoudai[CntPlayer].mtxWorldRotBuff);
 
 			// スケールを反映
 			D3DXMatrixScaling(&mtxScl, g_PlayerHoudai[CntPlayer].scl.x, g_PlayerHoudai[CntPlayer].scl.y, g_PlayerHoudai[CntPlayer].scl.z);
@@ -551,7 +590,6 @@ void DrawPlayer(void)
 			// 回転を反映
 			D3DXMatrixRotationYawPitchRoll(&mtxRot, g_PlayerHoudai[CntPlayer].rot.y, g_PlayerHoudai[CntPlayer].rot.x, g_PlayerHoudai[CntPlayer].rot.z);
 
-			D3DXMatrixMultiply(&g_PlayerHoudai[CntPlayer].mtxWorldRotBuff, &g_PlayerHoudai[CntPlayer].mtxWorldRotBuff, &mtxQ);
 			D3DXMatrixMultiply(&g_PlayerHoudai[CntPlayer].mtxWorld, &g_PlayerHoudai[CntPlayer].mtxWorld, &mtxRot);
 			D3DXMatrixMultiply(&g_PlayerHoudai[CntPlayer].mtxWorld, &g_PlayerHoudai[CntPlayer].mtxWorld, &mtxQ);
 
@@ -683,6 +721,13 @@ void DrawPlayer(void)
 			// ワールドマトリックスの設定
 			pDevice->SetTransform(D3DTS_WORLD, &g_PlayerHousin[CntPlayer].mtxWorld);
 
+			if (g_PlayerBulletStartPos[CntPlayer].ParentParts != NULL)
+			{
+				g_PlayerBulletStartPos[CntPlayer].pos.x = g_PlayerBulletStartPos[CntPlayer].ParentParts->mtxWorld._41;
+				g_PlayerBulletStartPos[CntPlayer].pos.y = g_PlayerBulletStartPos[CntPlayer].ParentParts->mtxWorld._42;
+				g_PlayerBulletStartPos[CntPlayer].pos.z = g_PlayerBulletStartPos[CntPlayer].ParentParts->mtxWorld._43;
+			}
+
 			// 現在のマテリアルを取得
 			pDevice->GetMaterial(&matDef);
 
@@ -740,6 +785,14 @@ PLAYER_PRATS *GetPlayerHousin(void)
 }
 
 //=============================================================================
+// プレイヤーバレット発射座標情報を取得
+//=============================================================================
+D3DXVECTOR3 GetPlayerBulletStartPos(int PlayerType)
+{
+	return g_PlayerBulletStartPos[PlayerType].pos;
+}
+
+//=============================================================================
 // メッシュカラーをセット
 //=============================================================================
 void SetPlayerMeshColor(GPUMODEL *model, int type)
@@ -763,7 +816,7 @@ void SetPlayerMeshColor(GPUMODEL *model, int type)
 }
 
 //=============================================================================
-// 移動制御(ABボタンLスティックで制御)
+// 移動制御(ABボタンLスティックで移動制御)
 //=============================================================================
 void PLAYER_HONTAI::SetMoveABL(int CntPlayer)
 {
@@ -820,6 +873,11 @@ void PLAYER_HONTAI::SetMoveABL(int CntPlayer)
 	if (g_PlayerHoudai[CntPlayer].speedbuffsignal == true)
 	{
 		g_PlayerHoudai[CntPlayer].speedbufftime -= VALUE_SPEEDBUFF_SUB;
+
+		// エフェクトスピードアップの生成
+		D3DXVECTOR3 EffctSpeedupPos = D3DXVECTOR3(g_PlayerHoudai[CntPlayer].pos.x, g_PlayerHoudai[CntPlayer].pos.y, g_PlayerHoudai[CntPlayer].pos.z);
+		SetEffect(EffctSpeedupPos, D3DXVECTOR3(0.0f, 0.0f, 0.0f), PLAYER_COLOR[CntPlayer], EFFECT_SPEEDUP_SIZE_X, EFFECT_SPEEDUP_SIZE_Y, EFFECT_SPEEDUP_TIME);
+
 		if (g_PlayerHoudai[CntPlayer].speedbufftime <= 0.0f)
 		{
 			g_PlayerHoudai[CntPlayer].speedbuffsignal = false;
@@ -853,7 +911,7 @@ void PLAYER_HONTAI::SetMoveABL(int CntPlayer)
 }
 
 //=============================================================================
-// カメラ制御(ABボタンLスティックで制御)
+// カメラ制御(ABボタンLスティックで移動制御)
 //=============================================================================
 void PLAYER_HONTAI::SetCameraABL(int CntPlayer)
 {
@@ -898,10 +956,12 @@ void PLAYER_HONTAI::SetCameraABL(int CntPlayer)
 			g_PlayerHoudai[CntPlayer].BackCameraItemSignal = false;
 		}
 	}
+
+	cam[CntPlayer].up = g_PlayerHoudai[CntPlayer].Upvec;
 }
 
 //=============================================================================
-// 移動制御(LRスティックで制御)
+// 移動制御(LRスティックで移動制御)
 //=============================================================================
 void PLAYER_HONTAI::SetMoveLR(int CntPlayer)
 {
@@ -909,7 +969,7 @@ void PLAYER_HONTAI::SetMoveLR(int CntPlayer)
 }
 
 //=============================================================================
-// カメラ制御(LRスティックで制御)
+// カメラ制御(LRスティックで移動制御)
 //=============================================================================
 void PLAYER_HONTAI::SetCameraLR(int CntPlayer)
 {
@@ -975,12 +1035,12 @@ void PLAYER_HONTAI::SetBulletALL(int CntPlayer)
 
 			//プレイヤーposから発射方向に少しずらした値
 			//地面の傾きに沿って発射するときは問題ない。その傾きから左右に回転してる時だけposがおかしい
-			BposStart.x = g_PlayerHoudai[CntPlayer].pos.x - sinf(g_PlayerHoutou[CntPlayer].rot.y + g_PlayerHoudai[CntPlayer].rot.y +
-				g_PlayerHoudai[CntPlayer].Brot + g_PlayerHoudai[CntPlayer].Qrot) * VALUE_POS_BULLET;
-			BposStart.y = g_PlayerHoudai[CntPlayer].pos.y + (-sinf(-g_PlayerHousin[CntPlayer].rot.x +
-				g_PlayerHoudai[CntPlayer].Brot + g_PlayerHoudai[CntPlayer].Qrot) * VALUE_POS_BULLET) + 20;
-			BposStart.z = g_PlayerHoudai[CntPlayer].pos.z - cosf(g_PlayerHoutou[CntPlayer].rot.y + g_PlayerHoudai[CntPlayer].rot.y +
-				g_PlayerHoudai[CntPlayer].Brot + g_PlayerHoudai[CntPlayer].Qrot) * VALUE_POS_BULLET;
+			BposStart.x = g_PlayerBulletStartPos[CntPlayer].pos.x - (sinf(g_PlayerHoutou[CntPlayer].rot.y + g_PlayerHoudai[CntPlayer].rot.y +
+				g_PlayerHoudai[CntPlayer].Brot + g_PlayerHoudai[CntPlayer].Qrot) * VALUE_LEN_BULLET);
+			BposStart.y = g_PlayerBulletStartPos[CntPlayer].pos.y + (-sinf(-g_PlayerHousin[CntPlayer].rot.x +
+				g_PlayerHoudai[CntPlayer].Brot + g_PlayerHoudai[CntPlayer].Qrot) + (VALUE_LEN_BULLET*VALUE_LENTIMES_BULLET));
+			BposStart.z = g_PlayerBulletStartPos[CntPlayer].pos.z - (cosf(g_PlayerHoutou[CntPlayer].rot.y + g_PlayerHoudai[CntPlayer].rot.y +
+				g_PlayerHoudai[CntPlayer].Brot + g_PlayerHoudai[CntPlayer].Qrot) * VALUE_LEN_BULLET);
 
 			D3DXVECTOR3 BmoveRot;
 			BmoveRot.x = -sinf(g_PlayerHoutou[CntPlayer].rot.y + g_PlayerHoudai[CntPlayer].rot.y);
@@ -994,6 +1054,7 @@ void PLAYER_HONTAI::SetBulletALL(int CntPlayer)
 
 
 			SetBullet(BposStart, move, 4.0f, 4.0f, 60 * 4, CntPlayer);
+			//SetBullet(g_PlayerBulletStartPos[CntPlayer].pos, move, 4.0f, 4.0f, 60 * 4, CntPlayer);
 
 			//拡散弾処理
 			if (g_PlayerHoudai[CntPlayer].ModelType == PLAYER_MODEL_ATTACK)
@@ -1005,8 +1066,11 @@ void PLAYER_HONTAI::SetBulletALL(int CntPlayer)
 				rightB = D3DXVECTOR3(-sinf(g_PlayerHoutou[CntPlayer].rot.y + g_PlayerHoudai[CntPlayer].rot.y - 0.3f)*VALUE_MOVE_BULLET,
 					move.y,
 					-cosf(g_PlayerHoutou[CntPlayer].rot.y + g_PlayerHoudai[CntPlayer].rot.y - 0.3f) *VALUE_MOVE_BULLET);
-				SetBullet(BposStart, leftB, 4.0f, 4.0f, 60 * 4, CntPlayer);
-				SetBullet(BposStart, rightB, 4.0f, 4.0f, 60 * 4, CntPlayer);
+				//SetBullet(BposStart, leftB, 4.0f, 4.0f, 60 * 4, CntPlayer);
+				//SetBullet(BposStart, rightB, 4.0f, 4.0f, 60 * 4, CntPlayer);
+				SetBullet(g_PlayerBulletStartPos[CntPlayer].pos, leftB, 4.0f, 4.0f, 60 * 4, CntPlayer);
+				SetBullet(g_PlayerBulletStartPos[CntPlayer].pos, rightB, 4.0f, 4.0f, 60 * 4, CntPlayer);
+
 			}
 			g_PlayerHoudai[CntPlayer].AmmoNum -= 1;
 			ChangeBulletTex(-1, CntPlayer);

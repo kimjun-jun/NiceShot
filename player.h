@@ -22,10 +22,10 @@ public:
 	float						AmmoBornCnt;							//!< 残弾回復カウント。時間で回復
 	int							AmmoNum;								//!< 残弾数。最大5個
 	int							ModelType;								//!< どのモデル状態か判定
-	void						SetMoveABL(int CntPlayer);				//!< 移動制御(ABボタンLスティックで制御)
-	void						SetCameraABL(int CntPlayer);			//!< カメラ制御(ABボタンLスティックで制御)
-	void						SetMoveLR(int CntPlayer);				//!< 移動制御(LRスティックで制御)
-	void						SetCameraLR(int CntPlayer);				//!< カメラ制御(LRスティックで制御)
+	void						SetMoveABL(int CntPlayer);				//!< 移動制御(ABボタンLスティックで移動制御)
+	void						SetCameraABL(int CntPlayer);			//!< カメラ制御(ABボタンLスティックで移動制御)
+	void						SetMoveLR(int CntPlayer);				//!< 移動制御(LRスティックで移動制御)
+	void						SetCameraLR(int CntPlayer);				//!< カメラ制御(LRスティックで移動制御)
 	void						SetQ(int CntPlayer);					//!< クォータニオン制御
 	void						SetBulletALL(int CntPlayer);			//!< バレット関連制御
 	void						SetKiri(int CntPlayer);					//!< フォグ制御
@@ -37,10 +37,6 @@ class PLAYER_PRATS : public ALLCHARACTER, public GPUMODEL
 public:
 	PLAYER_HONTAI				*ParentHontai;		// 親子判定
 	PLAYER_PRATS				*ParentParts;		// 親子判定
-	bool						CameraKey;			// カメラ制御を判定,trueプレイヤーに自動追尾させるか判定,falseカメラの回転はプレイヤーが行う
-	float						AmmoBornCnt;		// 残弾回復カウント。時間で回復
-	int							AmmoNum;			// 残弾数。最大5個
-	int							ModelType;			// どのモデル状態か判定
 };
 
 //*****************************************************************************
@@ -55,5 +51,6 @@ void DrawPlayer(void);
 PLAYER_HONTAI *GetPlayerHoudai(void);
 PLAYER_PRATS *GetPlayerHoutou(void);
 PLAYER_PRATS *GetPlayerHousin(void);
+D3DXVECTOR3 GetPlayerBulletStartPos(int PlayerType);
 void SetPlayerMeshColor(GPUMODEL *model, int type);
 

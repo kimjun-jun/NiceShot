@@ -179,35 +179,31 @@ void UpdateItem(void)
 		{
 			//フィールドに落ちてるときはくるくる回転させる
 			g_aItem[nCntItem].rot.y += VALUE_ROTATE_ITEM;
-			if (g_aItem[nCntItem].rot.y > D3DX_PI)
-			{
-				g_aItem[nCntItem].rot.y -= D3DX_PI * 2.0f;
-			}
 
-			// 影の位置設定
-			SetPositionShadow(g_aItem[nCntItem].nIdxShadow, D3DXVECTOR3(g_aItem[nCntItem].pos.x, 0.1f, g_aItem[nCntItem].pos.z), D3DXVECTOR3(g_aItem[nCntItem].fRadius * 2.0f, g_aItem[nCntItem].fRadius * 2.0f, g_aItem[nCntItem].fRadius * 2.0f));
+			//// 影の位置設定
+			//SetPositionShadow(g_aItem[nCntItem].nIdxShadow, D3DXVECTOR3(g_aItem[nCntItem].pos.x, 0.1f, g_aItem[nCntItem].pos.z), D3DXVECTOR3(g_aItem[nCntItem].fRadius * 2.0f, g_aItem[nCntItem].fRadius * 2.0f, g_aItem[nCntItem].fRadius * 2.0f));
 
-			//影のサイズを調整
-			float fSizeX = 20.0f + (g_aItem[nCntItem].pos.y - 10.0f) * 0.05f;
-			if (fSizeX < 20.0f)
-			{
-				fSizeX = 20.0f;
-			}
-			float fSizeY = 20.0f + (g_aItem[nCntItem].pos.y - 10.0f) * 0.05f;
-			if (fSizeY < 20.0f)
-			{
-				fSizeY = 20.0f;
-			}
+			////影のサイズを調整
+			//float fSizeX = 20.0f + (g_aItem[nCntItem].pos.y - 10.0f) * 0.05f;
+			//if (fSizeX < 20.0f)
+			//{
+			//	fSizeX = 20.0f;
+			//}
+			//float fSizeY = 20.0f + (g_aItem[nCntItem].pos.y - 10.0f) * 0.05f;
+			//if (fSizeY < 20.0f)
+			//{
+			//	fSizeY = 20.0f;
+			//}
 
-			SetVertexShadow(g_aItem[nCntItem].nIdxShadow, fSizeX, fSizeY);
+			//SetVertexShadow(g_aItem[nCntItem].nIdxShadow, fSizeX, fSizeY);
 
-			//影の色を調整
-			float colA = (200.0f - (g_aItem[nCntItem].pos.y - 10.0f)) / 400.0f;
-			if (colA < 0.0f)
-			{
-				colA = 0.0f;
-			}
-			SetColorShadow(g_aItem[nCntItem].nIdxShadow, D3DXCOLOR(1.0f, 1.0f, 1.0f, colA));
+			////影の色を調整
+			//float colA = (200.0f - (g_aItem[nCntItem].pos.y - 10.0f)) / 400.0f;
+			//if (colA < 0.0f)
+			//{
+			//	colA = 0.0f;
+			//}
+			//SetColorShadow(g_aItem[nCntItem].nIdxShadow, D3DXCOLOR(1.0f, 1.0f, 1.0f, colA));
 
 			//地形の角度とプレイヤーの角度を計算。drawでクオータニオンで使う
 			D3DXVec3Cross(&g_aItem[nCntItem].rotTOaxis, &g_aItem[nCntItem].rotVecAxis, &g_aItem[nCntItem].Upvec);
@@ -346,7 +342,7 @@ void SetItem(D3DXVECTOR3 pos, D3DXVECTOR3 scl, D3DXVECTOR3 rot, int nType)
 			g_aItem[nCntItem].bUse = true;
 
 			// 影の設定
-			g_aItem[nCntItem].nIdxShadow = CreateShadow(g_aItem[nCntItem].pos, D3DXVECTOR3(g_aItem[nCntItem].fRadius * 2.0f, g_aItem[nCntItem].fRadius * 2.0f, g_aItem[nCntItem].fRadius * 2.0f));
+			//g_aItem[nCntItem].nIdxShadow = CreateShadow(g_aItem[nCntItem].pos, D3DXVECTOR3(g_aItem[nCntItem].fRadius * 2.0f, g_aItem[nCntItem].fRadius * 2.0f, g_aItem[nCntItem].fRadius * 2.0f));
 
 			break;
 		}
@@ -381,6 +377,10 @@ void GettingItem(int nIdxItem)
 {
 	if (g_aItem[nIdxItem].GettingSignalEnd == false)
 	{
+		//くるくる回転を加速
+		g_aItem[nIdxItem].rot.y += VALUE_ROTATE_ITEM*10;
+		
+		//プレイヤーとアイテムの距離を計算し/5分づつ近づける
 		PLAYER_HONTAI *p = GetPlayerHoudai();
 		D3DXVECTOR3 distance = p->pos - g_aItem[nIdxItem].pos;
 		distance /= 5.0f;

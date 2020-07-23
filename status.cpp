@@ -28,16 +28,16 @@ HRESULT InitStatus(int type)
 	if (type == 0)
 	{
 		D3DXCreateTextureFromFile(pDevice,
-			TEXTURE_SPEED_ITEM,
+			TEXTURE_STATUS_SPEED_ITEM,
 			&status[0][STATUSTYPE_SPEED].pD3DTexture);
 		D3DXCreateTextureFromFile(pDevice,
-			TEXTURE_SENSYA_ITEM,
+			TEXTURE_STATUS_SENSYA_ITEM,
 			&status[0][STATUSTYPE_SENSYA].pD3DTexture);
 		D3DXCreateTextureFromFile(pDevice,
-			TEXTURE_CAMERA_ITEM,
+			TEXTURE_STATUS_CAMERA_ITEM,
 			&status[0][STATUSTYPE_CAMERA].pD3DTexture);
 		D3DXCreateTextureFromFile(pDevice,
-			TEXTURE_KIRI_ITEM,
+			TEXTURE_STATUS_KIRI_ITEM,
 			&status[0][STATUSTYPE_KIRI].pD3DTexture);
 	}
 

@@ -36,6 +36,7 @@ enum SOUND_TRACK//ここの順番と.CPPのSOUNDPARAM g_aParam[SOUND_LABEL_MAX] =順番を
 	SOUND_LABEL_SE_speed,				// スピードアップ
 	SOUND_LABEL_SE_kiri,				// 霧
 	SOUND_LABEL_SE_quake,				// 地震
+	SOUND_LABEL_SE_kurukuru,			// くるくる
 	SOUND_LABEL_MAX,
 };
 

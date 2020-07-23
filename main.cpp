@@ -411,13 +411,13 @@ HRESULT Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 
 		// ï«ÇÃèâä˙âª
 		InitMeshWall(D3DXVECTOR3(0.0f, 0.0f, 960.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f),
-			D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f), 1, 1, 1920.0f, 1920.0f);
+			D3DXCOLOR(0.2f, 0.2f, 0.2f, 1.0f), 1, 1, 1920.0f, 1920.0f);
 		InitMeshWall(D3DXVECTOR3(-960.0f, 0.0f, 0.0f), D3DXVECTOR3(0.0f, -D3DX_PI * 0.50f, 0.0f),
-			D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f), 1, 1, 1920.0f, 1920.0f);
+			D3DXCOLOR(0.2f, 0.2f, 0.2f, 1.0f), 1, 1, 1920.0f, 1920.0f);
 		InitMeshWall(D3DXVECTOR3(960.0f, 0.0f, 0.0f), D3DXVECTOR3(0.0f, D3DX_PI * 0.50f, 0.0f),
-			D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f), 1, 1, 1920.0f, 1920.0f);
+			D3DXCOLOR(0.2f, 0.2f, 0.2f, 1.0f), 1, 1, 1920.0f, 1920.0f);
 		InitMeshWall(D3DXVECTOR3(0.0f, 0.0f, -960.0f), D3DXVECTOR3(0.0f, D3DX_PI, 0.0f),
-			D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f), 1, 1, 1920.0f, 1920.0f);
+			D3DXCOLOR(0.2f, 0.2f, 0.2f, 1.0f), 1, 1, 1920.0f, 1920.0f);
 		/*
 		// ï«(ó†ë§ópÇÃîºìßñæ)
 		InitMeshWall(D3DXVECTOR3(0.0f, 0.0f, 875.0f), D3DXVECTOR3(0.0f, D3DX_PI, 0.0f),

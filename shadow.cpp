@@ -98,7 +98,7 @@ void DrawShadow(void)
 	pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
 
 	// Z”äŠr‚È‚µ
-	pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS);
+	//pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS);
 
 	for(int nCntShadow = 0; nCntShadow < MAX_SHADOW; nCntShadow++)
 	{
@@ -142,7 +142,7 @@ void DrawShadow(void)
 	pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 
 	// Z”äŠr‚ ‚è
-	pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
+	//pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
 
 }
 

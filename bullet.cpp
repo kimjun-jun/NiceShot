@@ -77,7 +77,7 @@ HRESULT InitBullet(int type)
 		g_aBullet[nCntBullet].use = false;
 		g_aBullet[nCntBullet].HormingSignal = false;
 		g_aBullet[nCntBullet].fRadius = 10.0f;
-		g_aBullet[nCntBullet].GravityAdd = 1.1f;
+		g_aBullet[nCntBullet].GravityAdd = 0.05f;
 		g_aBullet[nCntBullet].Gravity = 0.01f;
 		g_aBullet[nCntBullet].FieldPosY = 0.1f;
 		g_aBullet[nCntBullet].move = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
@@ -122,13 +122,12 @@ void UpdateBullet(void)
 				if (g_aBullet[nCntBullet].UsePlayerType == CntPlayer) continue;
 				if (p[CntPlayer].use == false) continue;
 
-				if (CollisionBC(p[CntPlayer].pos, PLAYER_MODEL_SIZE*10.0f, g_aBullet[nCntBullet].pos, BULLET_MODEL_SIZE))
+				if (CollisionBC(p[CntPlayer].pos, PLAYER_MODEL_SIZE*5.0f, g_aBullet[nCntBullet].pos, BULLET_MODEL_SIZE))
 				{
 					if (g_aBullet[nCntBullet].HormingSignal == false)
 					{
 						g_aBullet[nCntBullet].HormingSignal = true;
 						g_aBullet[nCntBullet].HormingPlayerType = CntPlayer;
-						break;
 					}
 				}
 				else
@@ -142,10 +141,10 @@ void UpdateBullet(void)
 			}
 
 			g_aBullet[nCntBullet].pos.x += g_aBullet[nCntBullet].move.x + (g_aBullet[nCntBullet].Hormingmove.x / 30.0f);
-			g_aBullet[nCntBullet].pos.y -= g_aBullet[nCntBullet].Gravity + g_aBullet[nCntBullet].move.y - (g_aBullet[nCntBullet].Hormingmove.y / 30.0f);
+			g_aBullet[nCntBullet].pos.y -= g_aBullet[nCntBullet].Gravity + g_aBullet[nCntBullet].move.y - (g_aBullet[nCntBullet].Hormingmove.y / 10.0f);
 			g_aBullet[nCntBullet].pos.z += g_aBullet[nCntBullet].move.z + (g_aBullet[nCntBullet].Hormingmove.z / 30.0f);
-			g_aBullet[nCntBullet].Gravity *= g_aBullet[nCntBullet].GravityAdd;
-			if (g_aBullet[nCntBullet].Gravity > 5.0f) g_aBullet[nCntBullet].Gravity = 5.0f;
+			g_aBullet[nCntBullet].Gravity += g_aBullet[nCntBullet].GravityAdd;
+			if (g_aBullet[nCntBullet].Gravity > 10.0f) g_aBullet[nCntBullet].Gravity = 10.0f;
 
 			g_aBullet[nCntBullet].nTimer--;
 			if (g_aBullet[nCntBullet].nTimer <= 0)
@@ -159,7 +158,7 @@ void UpdateBullet(void)
 				SetPositionShadow(g_aBullet[nCntBullet].nIdxShadow, D3DXVECTOR3(g_aBullet[nCntBullet].pos.x, g_aBullet[nCntBullet].FieldPosY, g_aBullet[nCntBullet].pos.z), g_aBullet[nCntBullet].scale);
 				// エフェクトの設定
 				SetEffect(g_aBullet[nCntBullet].pos, D3DXVECTOR3(0.0f, 0.0f, 0.0f),
-					PLAYER_COLOR[g_aBullet[nCntBullet].UsePlayerType], 16.0f, 16.0f, 10);
+					PLAYER_COLOR[g_aBullet[nCntBullet].UsePlayerType], EFFECT_BULLET_SIZE_X, EFFECT_BULLET_SIZE_Y, EFFECT_BULLET_TIME);
 			}
 
 

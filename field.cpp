@@ -534,10 +534,11 @@ void UpdateMeshField(void)
 			FieldHit(D3DXVECTOR3(bullet[Cntbullet].pos.x, bullet[Cntbullet].pos.y + 1000.0f, bullet[Cntbullet].pos.z),
 				D3DXVECTOR3(bullet[Cntbullet].pos.x, bullet[Cntbullet].pos.y - 1000.0f, bullet[Cntbullet].pos.z),
 				&kari, &bullet[Cntbullet].FieldPosY);
-			if (bullet[Cntbullet].FieldPosY - 3.0f > bullet[Cntbullet].pos.y)//地形との当たり判定を緩く(調整)するためのbullet[Cntbullet].FieldPosY-.0f
+			if (bullet[Cntbullet].FieldPosY - 3.0f > bullet[Cntbullet].pos.y)//地形との当たり判定を緩く(調整)するためのbullet[Cntbullet].FieldPosY-3.0f
 			{
 				// 爆発の生成
-				SetExplosion(bullet[Cntbullet].pos, 40.0f, 40.0f, EXPLOSIONTYPE_BULLET_PLAYER, PLAYER_COLOR[bullet[Cntbullet].UsePlayerType]);
+				D3DXVECTOR3 ExploPos = D3DXVECTOR3(bullet[Cntbullet].pos.x, bullet[Cntbullet].FieldPosY, bullet[Cntbullet].pos.z);
+				SetExplosion(ExploPos, 40.0f, 40.0f, EXPLOSIONTYPE_BULLET_PLAYER, PLAYER_COLOR[bullet[Cntbullet].UsePlayerType]);
 				// バレット破棄
 				ReleaseBullet(Cntbullet);
 				// SE再生
@@ -633,7 +634,7 @@ void SetFieldInterPolationFieldType(int type)
 {
 	InterPolationFieldType = type;
 	ITEM *item = GetItem();
-	for (int CntItem = 0; CntItem < DROP_ITEM_MAX; CntItem++)
+	for (int CntItem = 0; CntItem < MAX_ITEM; CntItem++)
 	{
 		item[CntItem].fCollisionEnd = false;
 	}

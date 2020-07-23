@@ -2,13 +2,13 @@ Metasequoia Document
 Format Text Ver 1.0
 
 Scene {
-	pos -56.7250 -78.7097 2400.0005
+	pos -91.2833 -59.2625 1500.0002
 	lookat 0.0000 0.0000 0.0000
-	head -28.4038
-	pich 0.6692
+	head -26.6037
+	pich 0.5892
 	bank 0.0200
 	ortho 0
-	zoom2 3.1250
+	zoom2 5.0000
 	amb 0.250 0.250 0.250
 	dirlights 1 {
 		light {
@@ -289,7 +289,7 @@ Object "housin" {
 	}
 }
 Object "housinsin" {
-	visible 15
+	visible 0
 	locking 1
 	shading 1
 	facet 59.5
@@ -397,7 +397,7 @@ Object "housinsin" {
 	}
 }
 Object "housinsinsin" {
-	visible 15
+	visible 0
 	locking 1
 	shading 1
 	facet 59.5

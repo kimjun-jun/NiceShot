@@ -56,7 +56,8 @@ SOUNDPARAM g_aParam[SOUND_LABEL_MAX] =
 	{ "data/SE/speed.wav", 0 },
 	{ "data/SE/_sound_anime_smoke1.wav", 0 },
 	{ "data/SE/avalanche1.wav", 0 },
-	
+	{ "data/SE/whip-gesture2.wav", 0 },
+
 };
 
 //=============================================================================
@@ -208,6 +209,7 @@ bool InitSound(HWND hWnd)
 	SourceVolumeChange(5, SOUND_LABEL_SE_rap1);
 	SourceVolumeChange(5, SOUND_LABEL_SE_speed);
 	SourceVolumeChange(10, SOUND_LABEL_SE_quake);
+	SourceVolumeChange(5, SOUND_LABEL_SE_kurukuru);
 	return true;
 }
 

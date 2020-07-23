@@ -160,7 +160,7 @@ void DrawExplosion(int CntPlayer)
 	pDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
 
 	// Z”äŠr‚È‚µ
-	pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS);
+	//pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS);
 
 	for(int nCntExplosion = 0; nCntExplosion < MAX_EXPLOSION; nCntExplosion++)
 	{
@@ -216,7 +216,7 @@ void DrawExplosion(int CntPlayer)
 	pDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
 
 	// Z”äŠr‚ ‚è
-	pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
+	//pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
 
 }
 
