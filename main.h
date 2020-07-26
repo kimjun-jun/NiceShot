@@ -295,6 +295,7 @@ public:
 	D3DXVECTOR3					rot;				//!< モデルの向き(回転)
 	D3DXVECTOR3					scl;				//!< モデルの大きさ(スケール)
 	D3DXVECTOR3					move;				//!< モデルの移動量
+	D3DXVECTOR3					bulletmove;				//!< モデルの移動量
 };
 
 /**

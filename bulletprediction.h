@@ -13,7 +13,7 @@
 HRESULT InitBulletprediction(int type);
 void UninitBulletprediction(void);
 void UpdateBulletprediction(void);
-void DrawBulletprediction(int CntPlayer);
+void DrawBulletprediction(void);
 
-int SetBulletprediction(D3DXVECTOR3 pos, D3DXVECTOR3 move, D3DXCOLOR col, float fSizeX, float fSizeY, int nTimer);
+int SetBulletprediction(D3DXVECTOR3 pos, D3DXCOLOR col, float fSizeX, float fSizeY);
 

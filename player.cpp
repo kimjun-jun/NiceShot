@@ -61,7 +61,8 @@ HRESULT InitPlayer(void)
 		g_PlayerHoudai[CntPlayer].rot = D3DXVECTOR3(0.0f, 3.14f, 0.0f);
 		g_PlayerHoudai[CntPlayer].scl = D3DXVECTOR3(1.0f, 1.0f, 1.0f);
 		g_PlayerHoudai[CntPlayer].move = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-									  
+		g_PlayerHoudai[CntPlayer].bulletmove = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+
 		g_PlayerHoudai[CntPlayer].q = D3DXQUATERNION(0,0,0,1);
 		g_PlayerHoudai[CntPlayer].BrotQ = D3DXQUATERNION(0, 0, 0, 1);
 		g_PlayerHoudai[CntPlayer].RotVecAxis = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
@@ -321,7 +322,7 @@ HRESULT ReInitPlayer(void)
 		g_PlayerHoudai[CntPlayer].rot = D3DXVECTOR3(0.0f, 3.14f, 0.0f);
 		g_PlayerHoudai[CntPlayer].scl = D3DXVECTOR3(1.0f, 1.0f, 1.0f);
 		g_PlayerHoudai[CntPlayer].move = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-
+		g_PlayerHoudai[CntPlayer].bulletmove = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 		g_PlayerHoudai[CntPlayer].q = D3DXQUATERNION(0, 0, 0, 1);
 		g_PlayerHoudai[CntPlayer].RotVecAxis = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 		g_PlayerHoudai[CntPlayer].Upvec = D3DXVECTOR3(0, 1, 0);
@@ -886,15 +887,15 @@ void PLAYER_HONTAI::SetMoveABL(int CntPlayer)
 	}
 
 	//砲塔操作　バレット着弾点(左右エイム)
-	if (GetKeyboardPress(DIK_D) || IsButtonPressed(CntPlayer, BUTTON_R1))
+	if (IsButtonPressed(CntPlayer, BUTTON_R1))
 	{
 		g_PlayerHoutou[CntPlayer].rot.y += VALUE_ROTATE_PLAYER_HOUTOU;
-		if (g_PlayerHoutou[CntPlayer].rot.y >= VALUE_ROTATE_PLAYER_HOUTOU_MAX) g_PlayerHoutou[CntPlayer].rot.y = VALUE_ROTATE_PLAYER_HOUTOU_MAX;
+		//if (g_PlayerHoutou[CntPlayer].rot.y >= VALUE_ROTATE_PLAYER_HOUTOU_MAX) g_PlayerHoutou[CntPlayer].rot.y = VALUE_ROTATE_PLAYER_HOUTOU_MAX;
 	}
-	else if (GetKeyboardPress(DIK_A) || IsButtonPressed(CntPlayer, BUTTON_L1))
+	else if (IsButtonPressed(CntPlayer, BUTTON_L1))
 	{
 		g_PlayerHoutou[CntPlayer].rot.y -= VALUE_ROTATE_PLAYER_HOUTOU;
-		if (g_PlayerHoutou[CntPlayer].rot.y <= -VALUE_ROTATE_PLAYER_HOUTOU_MAX) g_PlayerHoutou[CntPlayer].rot.y = -VALUE_ROTATE_PLAYER_HOUTOU_MAX;
+		//if (g_PlayerHoutou[CntPlayer].rot.y <= -VALUE_ROTATE_PLAYER_HOUTOU_MAX) g_PlayerHoutou[CntPlayer].rot.y = -VALUE_ROTATE_PLAYER_HOUTOU_MAX;
 	}
 
 	//砲身操作　バレット着弾点(前後エイム)
@@ -1000,9 +1001,9 @@ void PLAYER_HONTAI::SetQ(int CntPlayer)
 //=============================================================================
 void PLAYER_HONTAI::SetBulletALL(int CntPlayer)
 {
-	g_PlayerHoudai[CntPlayer].Frontvec.x = sinf(g_PlayerHoudai[CntPlayer].rot.y);
+	g_PlayerHoudai[CntPlayer].Frontvec.x = sinf(g_PlayerHoudai[CntPlayer].rot.y+ g_PlayerHoutou[CntPlayer].rot.y);
 	g_PlayerHoudai[CntPlayer].Frontvec.y = 0.0f;
-	g_PlayerHoudai[CntPlayer].Frontvec.z = cosf(g_PlayerHoudai[CntPlayer].rot.y);
+	g_PlayerHoudai[CntPlayer].Frontvec.z = cosf(g_PlayerHoudai[CntPlayer].rot.y+ g_PlayerHoutou[CntPlayer].rot.y);
 
 	//地形の角度とプレイヤーの角度を計算。バレット発射方向で使う
 	D3DXVec3Cross(&g_PlayerHoudai[CntPlayer].FrontRotTOaxis, &g_PlayerHoudai[CntPlayer].RotVecAxis, &g_PlayerHoudai[CntPlayer].Frontvec);
@@ -1031,7 +1032,6 @@ void PLAYER_HONTAI::SetBulletALL(int CntPlayer)
 		if (GetKeyboardTrigger(DIK_SPACE) || IsButtonTriggered(CntPlayer, BUTTON_X))
 		{
 			D3DXVECTOR3 BposStart;
-			D3DXVECTOR3 move;
 
 			//プレイヤーposから発射方向に少しずらした値
 			//地面の傾きに沿って発射するときは問題ない。その傾きから左右に回転してる時だけposがおかしい
@@ -1042,18 +1042,27 @@ void PLAYER_HONTAI::SetBulletALL(int CntPlayer)
 			BposStart.z = g_PlayerBulletStartPos[CntPlayer].pos.z - (cosf(g_PlayerHoutou[CntPlayer].rot.y + g_PlayerHoudai[CntPlayer].rot.y +
 				g_PlayerHoudai[CntPlayer].Brot + g_PlayerHoudai[CntPlayer].Qrot) * VALUE_LEN_BULLET);
 
-			D3DXVECTOR3 BmoveRot;
+			D3DXVECTOR3 BmoveRot;					//弾が進行する角度
+			D3DXVECTOR3 BmoveFieldUpVECNor;			//upベクトル法線
+			D3DXVECTOR3 BmoveFieldHousinRot;		//
+
+			D3DXVec3Normalize(&BmoveFieldUpVECNor,&g_PlayerHoudai[CntPlayer].RotVecAxis);
+
+
+			BmoveFieldHousinRot.x = -sinf(BmoveFieldUpVECNor.x - g_PlayerHoutou[CntPlayer].rot.y);
+			BmoveFieldHousinRot.y = sinf(BmoveFieldUpVECNor.y - g_PlayerHoutou[CntPlayer].rot.y);
+			BmoveFieldHousinRot.z = -cosf(BmoveFieldUpVECNor.z - g_PlayerHoutou[CntPlayer].rot.y);
+
 			BmoveRot.x = -sinf(g_PlayerHoutou[CntPlayer].rot.y + g_PlayerHoudai[CntPlayer].rot.y);
-			BmoveRot.y = sinf(g_PlayerHoudai[CntPlayer].Brot - g_PlayerHousin[CntPlayer].rot.x);
+			BmoveRot.y = sinf(g_PlayerHoudai[CntPlayer].Brot + g_PlayerHousin[CntPlayer].rot.x);
 			BmoveRot.z = -cosf(g_PlayerHoutou[CntPlayer].rot.y + g_PlayerHoudai[CntPlayer].rot.y);
 
-			move.x = (BmoveRot.x) *VALUE_MOVE_BULLET;
-			move.y = (BmoveRot.y) *VALUE_MOVE_BULLET;
-			move.z = (BmoveRot.z) *VALUE_MOVE_BULLET;
-			//move.y *= -1;
+			g_PlayerHoudai[CntPlayer].bulletmove.x = (BmoveRot.x) *VALUE_MOVE_BULLET;
+			g_PlayerHoudai[CntPlayer].bulletmove.y = (BmoveRot.y) *VALUE_MOVE_BULLET;
+			g_PlayerHoudai[CntPlayer].bulletmove.z = (BmoveRot.z) *VALUE_MOVE_BULLET;
 
 
-			SetBullet(BposStart, move, 4.0f, 4.0f, 60 * 4, CntPlayer);
+			SetBullet(BposStart, g_PlayerHoudai[CntPlayer].bulletmove, 4.0f, 4.0f, 60 * 4, CntPlayer);
 			//SetBullet(g_PlayerBulletStartPos[CntPlayer].pos, move, 4.0f, 4.0f, 60 * 4, CntPlayer);
 
 			//拡散弾処理

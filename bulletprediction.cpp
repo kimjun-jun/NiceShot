@@ -6,6 +6,7 @@
 */
 #include "main.h"
 #include "input.h"
+#include "player.h"
 #include "camera.h"
 #include "bulletprediction.h"
 
@@ -23,16 +24,14 @@
 //*****************************************************************************
 typedef struct
 {
-	D3DXVECTOR3 pos;		// 位置
-	D3DXVECTOR3 rot;		// 回転
-	D3DXVECTOR3 scale;		// スケール
-	D3DXVECTOR3 move;		// 移動量
-	D3DXCOLOR col;			// 色
-	float fSizeX;			// 幅
-	float fSizeY;			// 高さ
-	int nTimer;				// タイマー
-	float nDecAlpha;		// 減衰値
-	bool bUse;				// 使用しているかどうか
+	D3DXVECTOR3 pos;			//!< 位置
+	D3DXVECTOR3 rot;			//!< 回転
+	D3DXVECTOR3 scale;			//!< スケール
+	D3DXCOLOR	col;			//!< 色
+	float		fSizeX;			//!< 幅
+	float		fSizeY;			//!< 高さ
+	int			PlayerType;		//!< プレイヤーの種類
+	bool		bUse;			//!< 使用しているかどうか
 } BULLETPREDICTION;
 
 static D3DXCOLOR PLAYER_COLOR[] = {
@@ -54,10 +53,9 @@ void SetColorBulletprediction(int nIdxBulletprediction, D3DXCOLOR col);
 //*****************************************************************************
 LPDIRECT3DTEXTURE9		g_pD3DTextureBulletprediction = NULL;		// テクスチャへのポインタ
 LPDIRECT3DVERTEXBUFFER9 g_pD3DVtxBuffBulletprediction = NULL;		// 頂点バッファインターフェースへのポインタ
+D3DXMATRIX				g_mtxWorldBulletprediction;					// ワールドマトリックス
 
-D3DXMATRIX				g_mtxWorldBulletprediction;				// ワールドマトリックス
-
-BULLETPREDICTION		g_aBulletprediction[MAX_BULLETPREDICTION];			// 弾ワーク
+BULLETPREDICTION		g_aBulletprediction[MAX_BULLETPREDICTION];	// 弾ワーク
 
 //=============================================================================
 // 初期化処理
@@ -80,14 +78,15 @@ HRESULT InitBulletprediction(int type)
 		g_aBulletprediction[nCntBulletprediction].pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 		g_aBulletprediction[nCntBulletprediction].rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 		g_aBulletprediction[nCntBulletprediction].scale = D3DXVECTOR3(1.0f, 1.0f, 1.0f);
-		g_aBulletprediction[nCntBulletprediction].move = D3DXVECTOR3(1.0f, 1.0f, 1.0f);
 		g_aBulletprediction[nCntBulletprediction].col = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
-		g_aBulletprediction[nCntBulletprediction].nDecAlpha = 0.0f;
 		g_aBulletprediction[nCntBulletprediction].fSizeX = BULLETPREDICTION_SIZE_X;
 		g_aBulletprediction[nCntBulletprediction].fSizeY = BULLETPREDICTION_SIZE_Y;
-		g_aBulletprediction[nCntBulletprediction].nTimer = 0;
 		g_aBulletprediction[nCntBulletprediction].bUse = false;
 	}
+	g_aBulletprediction[0].PlayerType = PLAYER01;
+	g_aBulletprediction[1].PlayerType = PLAYER02;
+	g_aBulletprediction[2].PlayerType = PLAYER03;
+	g_aBulletprediction[3].PlayerType = PLAYER04;
 
 	return S_OK;
 }
@@ -115,27 +114,21 @@ void UninitBulletprediction(void)
 //=============================================================================
 void UpdateBulletprediction(void)
 {
+	PLAYER_HONTAI *player = GetPlayerHoudai();
+
 	for (int nCntBulletprediction = 0; nCntBulletprediction < MAX_BULLETPREDICTION; nCntBulletprediction++)
 	{
+		//g_aBullet[nCntBullet].pos.x += g_aBullet[nCntBullet].move.x + (g_aBullet[nCntBullet].Hormingmove.x / 30.0f);
+		//g_aBullet[nCntBullet].pos.y -= g_aBullet[nCntBullet].Gravity + g_aBullet[nCntBullet].move.y - (g_aBullet[nCntBullet].Hormingmove.y / 10.0f);
+		//g_aBullet[nCntBullet].pos.z += g_aBullet[nCntBullet].move.z + (g_aBullet[nCntBullet].Hormingmove.z / 30.0f);
+		//g_aBullet[nCntBullet].Gravity += g_aBullet[nCntBullet].GravityAdd;
+		//if (g_aBullet[nCntBullet].Gravity > 10.0f) g_aBullet[nCntBullet].Gravity = 10.0f;
+
+
 		if (g_aBulletprediction[nCntBulletprediction].bUse)
 		{
-			g_aBulletprediction[nCntBulletprediction].pos.x += g_aBulletprediction[nCntBulletprediction].move.x;
-			g_aBulletprediction[nCntBulletprediction].pos.z += g_aBulletprediction[nCntBulletprediction].move.z;
+			//int SetBulletprediction(D3DXVECTOR3 pos, D3DXCOLOR col, float fSizeX, float fSizeY)
 
-			//g_aBulletprediction[nCntBulletprediction].col.a -= g_aBulletprediction[nCntBulletprediction].nDecAlpha;
-			//if (g_aBulletprediction[nCntBulletprediction].col.a <= 0.0f)
-			//{
-			//	g_aBulletprediction[nCntBulletprediction].col.a = 0.0f;
-			//}
-			SetColorBulletprediction(nCntBulletprediction,
-				D3DXCOLOR(g_aBulletprediction[nCntBulletprediction].col.r, g_aBulletprediction[nCntBulletprediction].col.b,
-					g_aBulletprediction[nCntBulletprediction].col.b, g_aBulletprediction[nCntBulletprediction].col.a));
-
-			g_aBulletprediction[nCntBulletprediction].nTimer--;
-			if (g_aBulletprediction[nCntBulletprediction].nTimer <= 0)
-			{
-				g_aBulletprediction[nCntBulletprediction].bUse = false;
-			}
 		}
 	}
 }
@@ -143,7 +136,7 @@ void UpdateBulletprediction(void)
 //=============================================================================
 // 描画処理
 //=============================================================================
-void DrawBulletprediction(int CntPlayer)
+void DrawBulletprediction(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 	D3DXMATRIX mtxView, mtxScale, mtxTranslate;
@@ -153,7 +146,7 @@ void DrawBulletprediction(int CntPlayer)
 	pDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
 
 	// Z比較なし
-	pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS);
+	//pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS);
 
 	for (int nCntBulletprediction = 0; nCntBulletprediction < MAX_BULLETPREDICTION; nCntBulletprediction++)
 	{
@@ -165,15 +158,15 @@ void DrawBulletprediction(int CntPlayer)
 			// ビューマトリックスを取得
 			CAMERA *cam = GetCamera();
 
-			g_mtxWorldBulletprediction._11 = cam[CntPlayer].mtxView._11;
-			g_mtxWorldBulletprediction._12 = cam[CntPlayer].mtxView._21;
-			g_mtxWorldBulletprediction._13 = cam[CntPlayer].mtxView._31;
-			g_mtxWorldBulletprediction._21 = cam[CntPlayer].mtxView._12;
-			g_mtxWorldBulletprediction._22 = cam[CntPlayer].mtxView._22;
-			g_mtxWorldBulletprediction._23 = cam[CntPlayer].mtxView._32;
-			g_mtxWorldBulletprediction._31 = cam[CntPlayer].mtxView._13;
-			g_mtxWorldBulletprediction._32 = cam[CntPlayer].mtxView._23;
-			g_mtxWorldBulletprediction._33 = cam[CntPlayer].mtxView._33;
+			g_mtxWorldBulletprediction._11 = cam[g_aBulletprediction[nCntBulletprediction].PlayerType].mtxView._11;
+			g_mtxWorldBulletprediction._12 = cam[g_aBulletprediction[nCntBulletprediction].PlayerType].mtxView._21;
+			g_mtxWorldBulletprediction._13 = cam[g_aBulletprediction[nCntBulletprediction].PlayerType].mtxView._31;
+			g_mtxWorldBulletprediction._21 = cam[g_aBulletprediction[nCntBulletprediction].PlayerType].mtxView._12;
+			g_mtxWorldBulletprediction._22 = cam[g_aBulletprediction[nCntBulletprediction].PlayerType].mtxView._22;
+			g_mtxWorldBulletprediction._23 = cam[g_aBulletprediction[nCntBulletprediction].PlayerType].mtxView._32;
+			g_mtxWorldBulletprediction._31 = cam[g_aBulletprediction[nCntBulletprediction].PlayerType].mtxView._13;
+			g_mtxWorldBulletprediction._32 = cam[g_aBulletprediction[nCntBulletprediction].PlayerType].mtxView._23;
+			g_mtxWorldBulletprediction._33 = cam[g_aBulletprediction[nCntBulletprediction].PlayerType].mtxView._33;
 
 			// スケールを反映
 			D3DXMatrixScaling(&mtxScale, g_aBulletprediction[nCntBulletprediction].scale.x, g_aBulletprediction[nCntBulletprediction].scale.y, g_aBulletprediction[nCntBulletprediction].scale.z);
@@ -319,7 +312,7 @@ void SetColorBulletprediction(int nIdxBulletprediction, D3DXCOLOR col)
 //=============================================================================
 // エフェクトの設定
 //=============================================================================
-int SetBulletprediction(D3DXVECTOR3 pos, D3DXVECTOR3 move, D3DXCOLOR col, float fSizeX, float fSizeY, int nTimer)
+int SetBulletprediction(D3DXVECTOR3 pos, D3DXCOLOR col, float fSizeX, float fSizeY)
 {
 	int nIdxBulletprediction = -1;
 
@@ -330,12 +323,9 @@ int SetBulletprediction(D3DXVECTOR3 pos, D3DXVECTOR3 move, D3DXCOLOR col, float 
 			g_aBulletprediction[nCntBulletprediction].pos = pos;
 			g_aBulletprediction[nCntBulletprediction].rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 			g_aBulletprediction[nCntBulletprediction].scale = D3DXVECTOR3(1.0f, 1.0f, 1.0f);
-			g_aBulletprediction[nCntBulletprediction].move = move;
 			g_aBulletprediction[nCntBulletprediction].col = col;
 			g_aBulletprediction[nCntBulletprediction].fSizeX = fSizeX;
 			g_aBulletprediction[nCntBulletprediction].fSizeY = fSizeY;
-			g_aBulletprediction[nCntBulletprediction].nTimer = nTimer;
-			g_aBulletprediction[nCntBulletprediction].nDecAlpha = col.a / nTimer;
 			g_aBulletprediction[nCntBulletprediction].bUse = true;
 
 			// 頂点座標の設定

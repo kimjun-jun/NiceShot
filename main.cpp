@@ -31,6 +31,7 @@
 #include "damege.h"
 #include "status.h"
 #include "sound.h"
+#include "bulletprediction.h"
 
 //*****************************************************************************
 // マクロ定義
@@ -396,6 +397,7 @@ HRESULT Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	InitResult(0);
 	InitBullet(0);
 	InitEffect(0);
+	InitBulletprediction(0);
 	InitExplosion(0);
 	InitLifeTex(0);
 	InitBulletTex(0);
@@ -469,6 +471,7 @@ void Uninit(void)
 	UninitSound();
 	UninitBullet();
 	UninitEffect();
+	UninitBulletprediction();
 	UninitExplosion();
 	UninitItem();
 	UninitLifeTex();
@@ -518,6 +521,7 @@ void Update(void)
 			UpdateMeshField();
 			UpdatePlayer();
 			UpdateBullet();
+			UpdateBulletprediction();
 			UpdateEffect();
 			UpdateExplosion();
 			UpdateItem();
@@ -541,6 +545,7 @@ void Update(void)
 			// キャラ周りの更新処理
 			UpdatePlayer();
 			UpdateBullet();
+			UpdateBulletprediction();
 			UpdateEffect();
 			UpdateExplosion();
 			UpdateItem();
@@ -622,6 +627,7 @@ void Draw(void)
 					DrawPlayer();
 					DrawItem();
 
+					DrawBulletprediction();
 					DrawExplosion(i);
 					DrawEffect(i);
 
@@ -648,15 +654,18 @@ void Draw(void)
 						// カメラの設定
 						SetCamera(i);
 
-						// 3dモデルの描画処理
-						DrawPlayer();
-						DrawItem();
+						//DrawBullet();
 						//DrawBulletPoint(i);
 
 						//フィールド
 						DrawMeshField();
 						DrawMeshWall();
 
+						// 3dモデルの描画処理
+						DrawPlayer();
+						DrawItem();
+
+						DrawBulletprediction();
 						DrawExplosion(i);
 						DrawEffect(i);
 
@@ -690,19 +699,20 @@ void Draw(void)
 						// カメラの設定
 						SetCamera(i);
 
-						// 3dモデルの描画処理
 						//DrawBullet();
 						//DrawBulletPoint(i);
-
-						DrawPlayer();
-						DrawItem();
 
 						//フィールド
 						DrawMeshField();
 						DrawMeshWall();
 
-						DrawEffect(i);
+						// 3dモデルの描画処理
+						DrawPlayer();
+						DrawItem();
+
+						DrawBulletprediction();
 						DrawExplosion(i);
+						DrawEffect(i);
 						//影
 						DrawShadow();
 
