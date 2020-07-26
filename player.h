@@ -15,6 +15,9 @@ class PLAYER_HONTAI : public ALLCHARACTER , public ONECHARACTER, public GPUMODEL
 {
 public:
 	PLAYER_HONTAI				*Parent;								//!< 親子判定
+	D3DXVECTOR3					bulletmove;								//!< バレット進行方向
+	D3DXVECTOR3					BposStart;								//!< バレットの発射位置
+	D3DXVECTOR3					BmoveRot;								//!< 弾が進行する角度
 	bool						BackCameraItemSignal;					//!< バックカメラアイテムを使用しているかどうか
 	bool						KiriSignal;								//!< 霧アイテムを使用しているかどうか
 	float						BackCameraItemTime;						//!< バックカメラアイテムの効果時間

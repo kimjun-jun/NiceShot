@@ -208,7 +208,7 @@ bool InitSound(HWND hWnd)
 	SourceVolumeChange(5, SOUND_LABEL_SE_nyu);
 	SourceVolumeChange(5, SOUND_LABEL_SE_rap1);
 	SourceVolumeChange(5, SOUND_LABEL_SE_speed);
-	SourceVolumeChange(10, SOUND_LABEL_SE_quake);
+	SourceVolumeChange(30, SOUND_LABEL_SE_quake);
 	SourceVolumeChange(5, SOUND_LABEL_SE_kurukuru);
 	return true;
 }

@@ -627,7 +627,7 @@ void Draw(void)
 					DrawPlayer();
 					DrawItem();
 
-					DrawBulletprediction();
+					DrawBulletprediction(i);
 					DrawExplosion(i);
 					DrawEffect(i);
 
@@ -665,7 +665,7 @@ void Draw(void)
 						DrawPlayer();
 						DrawItem();
 
-						DrawBulletprediction();
+						DrawBulletprediction(i);
 						DrawExplosion(i);
 						DrawEffect(i);
 
@@ -710,7 +710,7 @@ void Draw(void)
 						DrawPlayer();
 						DrawItem();
 
-						DrawBulletprediction();
+						DrawBulletprediction(i);
 						DrawExplosion(i);
 						DrawEffect(i);
 						//‰e

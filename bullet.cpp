@@ -77,8 +77,8 @@ HRESULT InitBullet(int type)
 		g_aBullet[nCntBullet].use = false;
 		g_aBullet[nCntBullet].HormingSignal = false;
 		g_aBullet[nCntBullet].fRadius = 10.0f;
-		g_aBullet[nCntBullet].GravityAdd = 0.05f;
-		g_aBullet[nCntBullet].Gravity = 0.01f;
+		g_aBullet[nCntBullet].GravityAdd = VALUE_GRAVITYADD_BULLET;
+		g_aBullet[nCntBullet].Gravity = 0.0f;
 		g_aBullet[nCntBullet].FieldPosY = 0.1f;
 		g_aBullet[nCntBullet].move = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 
@@ -144,7 +144,7 @@ void UpdateBullet(void)
 			g_aBullet[nCntBullet].pos.y -= g_aBullet[nCntBullet].Gravity + g_aBullet[nCntBullet].move.y - (g_aBullet[nCntBullet].Hormingmove.y / 10.0f);
 			g_aBullet[nCntBullet].pos.z += g_aBullet[nCntBullet].move.z + (g_aBullet[nCntBullet].Hormingmove.z / 30.0f);
 			g_aBullet[nCntBullet].Gravity += g_aBullet[nCntBullet].GravityAdd;
-			if (g_aBullet[nCntBullet].Gravity > 10.0f) g_aBullet[nCntBullet].Gravity = 10.0f;
+			if (g_aBullet[nCntBullet].Gravity > VALUE_GRAVITYMAX_BULLET) g_aBullet[nCntBullet].Gravity = VALUE_GRAVITYMAX_BULLET;
 
 			g_aBullet[nCntBullet].nTimer--;
 			if (g_aBullet[nCntBullet].nTimer <= 0)
@@ -351,7 +351,7 @@ int SetBullet(D3DXVECTOR3 pos, D3DXVECTOR3 move,float fSizeX, float fSizeY, int 
 			g_aBullet[nCntBullet].pos = pos;
 			g_aBullet[nCntBullet].rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 			g_aBullet[nCntBullet].scale = D3DXVECTOR3(1.0f, 1.0f, 1.0f);
-			g_aBullet[nCntBullet].Gravity = 0.01f;
+			g_aBullet[nCntBullet].Gravity = 0.0f;
 			g_aBullet[nCntBullet].move = move;
 			g_aBullet[nCntBullet].Hormingmove = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 			g_aBullet[nCntBullet].fSizeX = fSizeX;

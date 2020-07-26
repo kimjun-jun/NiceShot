@@ -72,7 +72,9 @@
 //移動量マクロ
 #define VALUE_MOVE_BULLET					(6.0f)																		//!< バレットの速度
 #define VALUE_LEN_BULLET					(10.0f)																		//!< プレイヤー中心としたバレットの発射位置までの距離
-#define VALUE_LENTIMES_BULLET				(2.5f)																			//!< プレイヤー中心としたバレットの発射位置にたいする倍率
+#define VALUE_LENTIMES_BULLET				(2.5f)																		//!< プレイヤー中心としたバレットの発射位置にたいする倍率
+#define VALUE_GRAVITYMAX_BULLET				(10.0f)																		//!< バレットの重力最大値
+#define VALUE_GRAVITYADD_BULLET				(0.05f)																		//!< バレットの重力加速度
 #define	VALUE_MOVE							(0.1f)																		//!< 移動加速度
 #define	VALUE_MOVE_MAX						(4.0f)																		//!< 移動加速度の最大値
 #define	VALUE_ROTATE_PLAYER_HOUTOU			(0.03f)																		//!< プレイヤー砲塔回転量
@@ -295,7 +297,6 @@ public:
 	D3DXVECTOR3					rot;				//!< モデルの向き(回転)
 	D3DXVECTOR3					scl;				//!< モデルの大きさ(スケール)
 	D3DXVECTOR3					move;				//!< モデルの移動量
-	D3DXVECTOR3					bulletmove;				//!< モデルの移動量
 };
 
 /**

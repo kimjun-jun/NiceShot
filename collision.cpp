@@ -146,7 +146,7 @@ void CheakHit(int scene)
 							{
 								// エフェクト爆発の生成
 								SetEffect(b[CntPlayerBullet].pos, D3DXVECTOR3(0.0f, 0.0f, 0.0f),
-									PLAYER_COLOR[b[CntPlayerBullet].UsePlayerType], 150.0f, 150.0f, 30);
+									PLAYER_COLOR[b[CntPlayerBullet].UsePlayerType], 150.0f, 150.0f, 40);
 								if (scene == 1)
 								{
 									ChangeLife(-1, CntPlayer);
