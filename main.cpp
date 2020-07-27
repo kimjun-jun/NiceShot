@@ -813,7 +813,6 @@ void DrawTextType(void)
 void DrawFPS(void)
 {
 	TCHAR str[256];
-	int GetPadData(int no);
 
 	//ここのセットを加えることでデバッグ時の表示項目を増やせる
 	{
@@ -825,14 +824,16 @@ void DrawFPS(void)
 
 	{
 		RECT rect = { 0, 50, SCREEN_W, SCREEN_H };
-		wsprintf(str, _T("%d %d %d %d %d %d %d %d \n"), GetPadData(0), GetPadData(1), GetPadData(2), GetPadData(3), GetPadData(4), GetPadData(5), GetPadData(6), GetPadData(7));
+		wsprintf(str, _T("%d %d %d %d %d %d %d %d \n"), GetPadData(PLAYER01,0), GetPadData(PLAYER01, 1), GetPadData(PLAYER01, 2), GetPadData(PLAYER01, 3), 
+			GetPadData(PLAYER01, 4), GetPadData(PLAYER01, 5), GetPadData(PLAYER01, 6), GetPadData(PLAYER01, 7));
 		// テキスト描画
 		g_pD3DXFont->DrawText(NULL, str, -1, &rect, DT_LEFT, D3DCOLOR_ARGB(0xff, 0xff, 0x00, 0x00));
 	}
 
 	{
 		RECT rect = { 0, 70, SCREEN_W, SCREEN_H };
-		wsprintf(str, _T("%d %d %d %d %d %d %d %d \n"), GetPadData(8), GetPadData(9), GetPadData(10), GetPadData(11), GetPadData(12), GetPadData(13), GetPadData(14), GetPadData(15));
+		wsprintf(str, _T("%d %d %d %d %d %d %d %d \n"), GetPadData(PLAYER01, 8), GetPadData(PLAYER01, 9), GetPadData(PLAYER01, 10), GetPadData(PLAYER01, 11), 
+			GetPadData(PLAYER01, 12), GetPadData(PLAYER01, 13), GetPadData(PLAYER01, 14), GetPadData(PLAYER01, 15));
 		// テキスト描画
 		g_pD3DXFont->DrawText(NULL, str, -1, &rect, DT_LEFT, D3DCOLOR_ARGB(0xff, 0xff, 0x00, 0x00));
 	}

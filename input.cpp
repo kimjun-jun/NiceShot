@@ -466,7 +466,7 @@ void UninitPad(void)
 }
 
 //------------------------------------------ çXêV
-DIJOYSTATE2		dijs2;
+DIJOYSTATE2		dijs2[GAMEPADMAX];
 
 void UpdatePad(void)
 {
@@ -566,14 +566,14 @@ void UpdatePad(void)
 		padTrigger[i] = ((lastPadState ^ padState[i])	// ëOâÒÇ∆à·Ç¡ÇƒÇ¢Çƒ
 			& padState[i]);					// ÇµÇ©Ç‡ç°ONÇÃÇ‚Ç¬
 
-		dijs2 = dijs;
+		dijs2[i] = dijs;
 
 	}
 }
 
-int GetPadData(int no)
+int GetPadData(int PlayerType,int no)
 {
-	return dijs2.rgbButtons[no];
+	return dijs2[PlayerType].rgbButtons[no];
 }
 
 //----------------------------------------------- åüç∏
@@ -583,9 +583,9 @@ BOOL IsButtonPressed(int padNo, DWORD button)
 }
 
 
-DIJOYSTATE2 *GetIsButton(void)
+DIJOYSTATE2 *GetIsButton(int PlayerType)
 {
-	return &dijs2;
+	return &dijs2[PlayerType];
 }
 
 BOOL IsButtonTriggered(int padNo, DWORD button)

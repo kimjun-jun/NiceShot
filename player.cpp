@@ -841,7 +841,7 @@ void PLAYER_HONTAI::SetMoveABL(int CntPlayer)
 	}
 
 	//視点変化のアナログ値を旋回に代入してアナログ操作で旋回
-	DIJOYSTATE2 *Button = GetIsButton();
+	DIJOYSTATE2 *Button = GetIsButton(CntPlayer);
 	float LAnalogX = float(Button->lX / 30000.0f);
 
 	//旋回

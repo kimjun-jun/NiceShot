@@ -93,8 +93,9 @@ long GetMouseY(void);               // マウスがY方向に動いた相対値
 long GetMouseZ(void);               // マウスホイールが動いた相対値
 
 //---------------------------- game pad
+int GetPadData(int PlayerType, int no);
 BOOL IsButtonPressed(int padNo, DWORD button);
-DIJOYSTATE2 *GetIsButton(void);
+DIJOYSTATE2 *GetIsButton(int PlayerType);
 BOOL IsButtonTriggered(int padNo, DWORD button);
 
 
