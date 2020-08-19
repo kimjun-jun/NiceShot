@@ -34,6 +34,7 @@ typedef struct
 	int							nIdxShadow;			// 影ID
 	int							nType;				// 種類
 	int							GoukeiDrop;			// ドロップ合計
+	int							GetPlayerType;		// どのプレイヤーが取得したか
 	bool						bUse;				// 使用しているかどうか
 	bool						GettingSignal;		// プレイヤーがアイテムを取得したかどうか　真:取得中　偽:取得していない
 	bool						GettingSignalEnd;	// プレイヤーがアイテムを取得終了したかどうか　真:終了　偽:終了していない、もしくは取得していない

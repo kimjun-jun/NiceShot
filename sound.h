@@ -37,6 +37,7 @@ enum SOUND_TRACK//‚±‚±‚Ì‡”Ô‚Æ.CPP‚ÌSOUNDPARAM g_aParam[SOUND_LABEL_MAX] =‡”Ô‚ð
 	SOUND_LABEL_SE_kiri,				// –¶
 	SOUND_LABEL_SE_quake,				// ’nk
 	SOUND_LABEL_SE_kurukuru,			// ‚­‚é‚­‚é
+	SOUND_LABEL_SE_parin,				// ƒpƒŠ[ƒ“
 	SOUND_LABEL_MAX,
 };
 

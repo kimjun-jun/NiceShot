@@ -357,7 +357,7 @@ HRESULT InitMeshField(D3DXVECTOR3 pos, D3DXVECTOR3 rot,
 	}
 
 
-	//当たり判定高速化用
+	//当たり判定高速化用。一応親子関係も登録
 	//親判定
 	for (int CntPartition = 0; CntPartition < FIELD_PARTITION_FIRST_NUM; CntPartition++)
 	{
@@ -501,7 +501,7 @@ void UpdateMeshField(void)
 	{
 		FieldHit(D3DXVECTOR3(player[CntPlayer].pos.x, player[CntPlayer].pos.y + 1000.0f, player[CntPlayer].pos.z),
 			D3DXVECTOR3(player[CntPlayer].pos.x, player[CntPlayer].pos.y - 1000.0f, player[CntPlayer].pos.z),
-			&player[CntPlayer].RotVecAxis, &player[CntPlayer].pos.y);
+			&player[CntPlayer].RotVecAxis, &player[CntPlayer].pos.y, &player[CntPlayer].RidePolygonNum);
 	}
 
 	ITEM *item = GetItem();
@@ -905,8 +905,10 @@ void SetDegenerationPoly(void)
 	}
 }
 
+
+
 //=============================================================================
-// 地形との当たり判定 rayS,rayG,vtxHOUSEN,posy 返り値void
+// 地形との当たり判定 rayS,rayG,vtxHOUSEN,posy 返り値void プレイヤー以外の当たり判定で使用
 //=============================================================================
 void FieldHit(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVECTOR3 *vtxNor, float *posY)
 {
@@ -920,643 +922,14 @@ void FieldHit(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVECTOR3 *vtxNor, float
 	float HitPosRight;
 	HitPosUp = HitPosDown = HitPosLeft = HitPosRight = 0.0f;
 
+	//高速化処理。4分木で当たり判定をする範囲を絞る。
+	SpeedUpFieldHitPoly(InrayS, &HitPosUp, &HitPosDown, &HitPosLeft, &HitPosRight);
+
+
+
 	// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
 	g_pD3DVtxBuffFieldDraw->Lock(0, 0, (void**)&pVtx, 0);
 	g_pD3DIdxBuffFieldDraw->Lock(0, 0, (void**)&pIdx, 0);
-
-	//親判定　X,Zがプラスかマイナスか　基準はg_posFieldの中心(x0,z0)
-	if (InrayS.x >= 0.0f && InrayS.z >= 0.0f)			//親++第一象限
-	{
-		g_FirstField_Collision[1].Cheak = true;
-		//子判定　親の時と同じく、第一象限のなかでさらにプラスかマイナスか判定
-		if (InrayS.x >= g_fSideSizeXQuarter && InrayS.z >= g_fSideSizeZQuarter)			//子++第一象限
-		{
-			g_SecondField_Collision[5].Cheak = true;
-			//孫判定　同上
-			if (InrayS.x >= g_fSideSizeXQuarter + g_fSideSizeXEighth && InrayS.z >= g_fSideSizeZQuarter + g_fSideSizeZEighth)			//孫++第一象限
-			{
-				g_ThirdField_Collision[21].Cheak = true;
-				HitPosUp = g_fSideSizeZQuarter + g_fSideSizeZQuarter;
-				HitPosDown = g_fSideSizeZQuarter + g_fSideSizeZEighth;
-				HitPosLeft = g_fSideSizeXQuarter + g_fSideSizeXEighth;
-				HitPosRight = g_fSideSizeXQuarter + g_fSideSizeXQuarter;
-			}
-			else if (InrayS.x < g_fSideSizeXQuarter + g_fSideSizeXEighth && InrayS.z >= g_fSideSizeZQuarter + g_fSideSizeZEighth)			//孫-+第二象限
-			{
-				g_ThirdField_Collision[20].Cheak = true;
-				HitPosUp = g_fSideSizeZQuarter + g_fSideSizeZQuarter;
-				HitPosDown = g_fSideSizeZQuarter + g_fSideSizeZEighth;
-				HitPosLeft = g_fSideSizeXQuarter;
-				HitPosRight = g_fSideSizeXQuarter + g_fSideSizeXEighth;
-			}
-			else if (InrayS.x < g_fSideSizeXQuarter + g_fSideSizeXEighth && InrayS.z < g_fSideSizeZQuarter + g_fSideSizeZEighth)			//孫--第三象限
-			{
-				g_ThirdField_Collision[22].Cheak = true;
-				HitPosUp = g_fSideSizeZQuarter + g_fSideSizeZEighth;
-				HitPosDown = g_fSideSizeZQuarter;
-				HitPosLeft = g_fSideSizeXQuarter;
-				HitPosRight = g_fSideSizeXQuarter + g_fSideSizeXEighth;
-			}
-			else if (InrayS.x >= g_fSideSizeXQuarter + g_fSideSizeXEighth && InrayS.z < g_fSideSizeZQuarter + g_fSideSizeZEighth)			//孫+-第四象限
-			{
-				g_ThirdField_Collision[23].Cheak = true;
-				HitPosUp = g_fSideSizeZQuarter + g_fSideSizeZEighth;
-				HitPosDown = g_fSideSizeZQuarter;
-				HitPosLeft = g_fSideSizeXQuarter + g_fSideSizeXEighth;
-				HitPosRight = g_fSideSizeXQuarter + g_fSideSizeXQuarter;
-			}
-		}
-		else if (InrayS.x < g_fSideSizeXQuarter && InrayS.z >= g_fSideSizeZQuarter)			//子-+第二象限
-		{
-			g_SecondField_Collision[4].Cheak = true;
-			//孫判定　同上
-			if (InrayS.x >= g_fSideSizeXEighth && InrayS.z >= g_fSideSizeZQuarter + g_fSideSizeZEighth)			//孫++第一象限
-			{
-				g_ThirdField_Collision[17].Cheak = true;
-				HitPosUp = g_fSideSizeZQuarter + g_fSideSizeZQuarter;
-				HitPosDown = g_fSideSizeZQuarter + g_fSideSizeZEighth;
-				HitPosLeft = g_fSideSizeXEighth;
-				HitPosRight = g_fSideSizeXQuarter;
-			}
-			else if (InrayS.x < g_fSideSizeXEighth && InrayS.z >= g_fSideSizeZQuarter + g_fSideSizeZEighth)			//孫-+第二象限
-			{
-				g_ThirdField_Collision[16].Cheak = true;
-				HitPosUp = g_fSideSizeZQuarter + g_fSideSizeZQuarter;
-				HitPosDown = g_fSideSizeZQuarter + g_fSideSizeZEighth;
-				HitPosLeft = 0.0f;
-				HitPosRight = g_fSideSizeXEighth;
-			}
-			else if (InrayS.x < g_fSideSizeXEighth && InrayS.z < g_fSideSizeZQuarter + g_fSideSizeZEighth)			//孫--第三象限
-			{
-				g_ThirdField_Collision[18].Cheak = true;
-				HitPosUp = g_fSideSizeZQuarter + g_fSideSizeZEighth;
-				HitPosDown = g_fSideSizeZQuarter;
-				HitPosLeft = 0.0f;
-				HitPosRight = g_fSideSizeXEighth;
-			}
-			else if (InrayS.x >= g_fSideSizeXEighth && InrayS.z < g_fSideSizeZQuarter + g_fSideSizeZEighth)			//孫+-第四象限
-			{
-				g_ThirdField_Collision[19].Cheak = true;
-				HitPosUp = g_fSideSizeZQuarter + g_fSideSizeZEighth;
-				HitPosDown = g_fSideSizeZQuarter;
-				HitPosLeft = g_fSideSizeXEighth;
-				HitPosRight = g_fSideSizeXQuarter;
-			}
-		}
-		else if (InrayS.x < g_fSideSizeXQuarter && InrayS.z < g_fSideSizeZQuarter)			//子--第三象限
-		{
-			g_SecondField_Collision[6].Cheak = true;
-			//孫判定　同上
-			if (InrayS.x >= g_fSideSizeXEighth && InrayS.z >= g_fSideSizeZEighth)			//孫++第一象限
-			{
-				g_ThirdField_Collision[25].Cheak = true;
-				HitPosUp = g_fSideSizeZQuarter;
-				HitPosDown = g_fSideSizeZEighth;
-				HitPosLeft = g_fSideSizeXEighth;
-				HitPosRight = g_fSideSizeXQuarter;
-			}
-			else if (InrayS.x < g_fSideSizeXEighth && InrayS.z >= g_fSideSizeZEighth)			//孫-+第二象限
-			{
-				g_ThirdField_Collision[24].Cheak = true;
-				HitPosUp = g_fSideSizeZQuarter;
-				HitPosDown = g_fSideSizeZEighth;
-				HitPosLeft = 0.0f;
-				HitPosRight = g_fSideSizeXEighth;
-			}
-			else if (InrayS.x < g_fSideSizeXEighth && InrayS.z < g_fSideSizeZEighth)			//孫--第三象限
-			{
-				g_ThirdField_Collision[26].Cheak = true;
-				HitPosUp = g_fSideSizeZEighth;
-				HitPosDown = 0.0f;
-				HitPosLeft = 0.0f;
-				HitPosRight = g_fSideSizeXEighth;
-			}
-			else if (InrayS.x >=  g_fSideSizeXEighth && InrayS.z <  g_fSideSizeZEighth)			//孫+-第四象限
-			{
-				g_ThirdField_Collision[27].Cheak = true;
-				HitPosUp = g_fSideSizeZEighth;
-				HitPosDown = 0.0f;
-				HitPosLeft = g_fSideSizeXEighth;
-				HitPosRight = g_fSideSizeXQuarter;
-			}
-
-		}
-		else if (InrayS.x >= g_fSideSizeXQuarter && InrayS.z < g_fSideSizeZQuarter)			//子+-第四象限
-		{
-			g_SecondField_Collision[7].Cheak = true;
-			//孫判定　同上
-			if (InrayS.x >= g_fSideSizeXQuarter + g_fSideSizeXEighth && InrayS.z >= g_fSideSizeZEighth)			//孫++第一象限
-			{
-				g_ThirdField_Collision[29].Cheak = true;
-				HitPosUp = g_fSideSizeZQuarter;
-				HitPosDown = g_fSideSizeZEighth;
-				HitPosLeft = g_fSideSizeXQuarter + g_fSideSizeXEighth;
-				HitPosRight = g_fSideSizeXQuarter + g_fSideSizeXQuarter;
-			}
-			else if (InrayS.x < g_fSideSizeXQuarter + g_fSideSizeXEighth && InrayS.z >= g_fSideSizeZEighth)			//孫-+第二象限
-			{
-				g_ThirdField_Collision[28].Cheak = true;
-				HitPosUp = g_fSideSizeZQuarter;
-				HitPosDown = g_fSideSizeZEighth;
-				HitPosLeft = g_fSideSizeXQuarter;
-				HitPosRight = g_fSideSizeXQuarter + g_fSideSizeXEighth;
-			}
-			else if (InrayS.x < g_fSideSizeXQuarter + g_fSideSizeXEighth && InrayS.z < g_fSideSizeZEighth)			//孫--第三象限
-			{
-				g_ThirdField_Collision[30].Cheak = true;
-				HitPosUp = g_fSideSizeZEighth;
-				HitPosDown = 0.0f;
-				HitPosLeft = g_fSideSizeXQuarter;
-				HitPosRight = g_fSideSizeXQuarter + g_fSideSizeXEighth;
-			}
-			else if (InrayS.x >= g_fSideSizeXQuarter + g_fSideSizeXEighth && InrayS.z < g_fSideSizeZEighth)			//孫+-第四象限
-			{
-				g_ThirdField_Collision[31].Cheak = true;
-				HitPosUp = g_fSideSizeZEighth;
-				HitPosDown = 0.0f;
-				HitPosLeft = g_fSideSizeXQuarter + g_fSideSizeXEighth;
-				HitPosRight = g_fSideSizeXQuarter + g_fSideSizeXQuarter;
-			}
-		}
-	}
-	else if (InrayS.x < 0.0f && InrayS.z >= 0.0f)			//親-+第二象限
-	{
-		g_FirstField_Collision[0].Cheak = true;
-		//子判定　親の時と同じく、第一象限のなかでさらにプラスかマイナスか判定
-		if (InrayS.x >= -g_fSideSizeXQuarter && InrayS.z >= g_fSideSizeZQuarter)			//子++第一象限
-		{
-			g_SecondField_Collision[1].Cheak = true;
-			//孫判定　同上
-			if (InrayS.x >= -g_fSideSizeXEighth && InrayS.z >= g_fSideSizeZQuarter + g_fSideSizeZEighth)			//孫++第一象限
-			{
-				g_ThirdField_Collision[5].Cheak = true;
-				HitPosUp = g_fSideSizeZQuarter + g_fSideSizeZQuarter;
-				HitPosDown = g_fSideSizeZQuarter + g_fSideSizeZEighth;
-				HitPosLeft = -g_fSideSizeXEighth;
-				HitPosRight = 0.0f;
-			}
-			else if (InrayS.x < -g_fSideSizeXEighth && InrayS.z >= g_fSideSizeZQuarter + g_fSideSizeZEighth)			//孫-+第二象限
-			{
-				g_ThirdField_Collision[4].Cheak = true;
-				HitPosUp = g_fSideSizeZQuarter + g_fSideSizeZQuarter;
-				HitPosDown = g_fSideSizeZQuarter + g_fSideSizeZEighth;
-				HitPosLeft = -g_fSideSizeXQuarter;
-				HitPosRight = -g_fSideSizeXEighth;
-			}
-			else if (InrayS.x < -g_fSideSizeXEighth && InrayS.z < g_fSideSizeZQuarter + g_fSideSizeZEighth)			//孫--第三象限
-			{
-				g_ThirdField_Collision[6].Cheak = true;
-				HitPosUp = g_fSideSizeZQuarter + g_fSideSizeZEighth;
-				HitPosDown = g_fSideSizeZQuarter;
-				HitPosLeft = -g_fSideSizeXQuarter;
-				HitPosRight = -g_fSideSizeXEighth;
-			}
-			else if (InrayS.x >= -g_fSideSizeXEighth && InrayS.z < g_fSideSizeZQuarter + g_fSideSizeZEighth)			//孫+-第四象限
-			{
-				g_ThirdField_Collision[7].Cheak = true;
-				HitPosUp = g_fSideSizeZQuarter + g_fSideSizeZEighth;
-				HitPosDown = g_fSideSizeZQuarter;
-				HitPosLeft = -g_fSideSizeXEighth;
-				HitPosRight = 0.0f;
-			}
-		}
-		else if (InrayS.x < -g_fSideSizeXQuarter && InrayS.z >= g_fSideSizeZQuarter)			//子-+第二象限
-		{
-			g_SecondField_Collision[0].Cheak = true;
-			//孫判定　同上
-			if (InrayS.x >= -g_fSideSizeXQuarter - g_fSideSizeXEighth && InrayS.z >= g_fSideSizeZQuarter + g_fSideSizeZEighth)			//孫++第一象限
-			{
-				g_ThirdField_Collision[1].Cheak = true;
-				HitPosUp = g_fSideSizeZQuarter + g_fSideSizeZQuarter;
-				HitPosDown = g_fSideSizeZQuarter + g_fSideSizeZEighth;
-				HitPosLeft = -g_fSideSizeXQuarter - g_fSideSizeXEighth;
-				HitPosRight = -g_fSideSizeXQuarter;
-			}
-			else if (InrayS.x < -g_fSideSizeXQuarter - g_fSideSizeXEighth && InrayS.z >= g_fSideSizeZQuarter + g_fSideSizeZEighth)			//孫-+第二象限
-			{
-				g_ThirdField_Collision[0].Cheak = true;
-				HitPosUp = g_fSideSizeZQuarter + g_fSideSizeZQuarter;
-				HitPosDown = g_fSideSizeZQuarter + g_fSideSizeZEighth;
-				HitPosLeft = -g_fSideSizeXQuarter - g_fSideSizeXQuarter;
-				HitPosRight = -g_fSideSizeXQuarter - g_fSideSizeXEighth;
-			}
-			else if (InrayS.x < -g_fSideSizeXQuarter - g_fSideSizeXEighth && InrayS.z < g_fSideSizeZQuarter + g_fSideSizeZEighth)			//孫--第三象限
-			{
-				g_ThirdField_Collision[2].Cheak = true;
-				HitPosUp = g_fSideSizeZQuarter + g_fSideSizeZEighth;
-				HitPosDown = g_fSideSizeZQuarter;
-				HitPosLeft = -g_fSideSizeXQuarter - g_fSideSizeXQuarter;
-				HitPosRight = -g_fSideSizeXQuarter - g_fSideSizeXEighth;
-			}
-			else if (InrayS.x >= -g_fSideSizeXQuarter - g_fSideSizeXEighth && InrayS.z < g_fSideSizeZQuarter + g_fSideSizeZEighth)			//孫+-第四象限
-			{
-				g_ThirdField_Collision[3].Cheak = true;
-				HitPosUp = g_fSideSizeZQuarter + g_fSideSizeZEighth;
-				HitPosDown = g_fSideSizeZQuarter;
-				HitPosLeft = -g_fSideSizeXQuarter - g_fSideSizeXEighth;
-				HitPosRight = -g_fSideSizeXQuarter;
-			}
-		}
-		else if (InrayS.x < -g_fSideSizeXQuarter && InrayS.z < g_fSideSizeZQuarter)			//子--第三象限
-		{
-			g_SecondField_Collision[2].Cheak = true;
-			//孫判定　同上
-			if (InrayS.x >= -g_fSideSizeXQuarter - g_fSideSizeXEighth && InrayS.z >= g_fSideSizeZEighth)			//孫++第一象限
-			{
-				g_ThirdField_Collision[9].Cheak = true;
-				HitPosUp = g_fSideSizeZQuarter;
-				HitPosDown = g_fSideSizeZEighth;
-				HitPosLeft = -g_fSideSizeXQuarter - g_fSideSizeXEighth;
-				HitPosRight = -g_fSideSizeXQuarter;
-			}
-			else if (InrayS.x < -g_fSideSizeXQuarter - g_fSideSizeXEighth && InrayS.z >= g_fSideSizeZEighth)			//孫-+第二象限
-			{
-				g_ThirdField_Collision[8].Cheak = true;
-				HitPosUp = g_fSideSizeZQuarter;
-				HitPosDown = g_fSideSizeZEighth;
-				HitPosLeft = -g_fSideSizeXQuarter - g_fSideSizeXQuarter;
-				HitPosRight = -g_fSideSizeXQuarter - g_fSideSizeXEighth;
-			}
-			else if (InrayS.x < -g_fSideSizeXQuarter - g_fSideSizeXEighth && InrayS.z < g_fSideSizeZEighth)			//孫--第三象限
-			{
-				g_ThirdField_Collision[10].Cheak = true;
-				HitPosUp = g_fSideSizeZEighth;
-				HitPosDown = 0.0f;
-				HitPosLeft = -g_fSideSizeXQuarter - g_fSideSizeXQuarter;
-				HitPosRight = -g_fSideSizeXQuarter - g_fSideSizeXEighth;
-			}
-			else if (InrayS.x >= -g_fSideSizeXQuarter - g_fSideSizeXEighth && InrayS.z <  g_fSideSizeZEighth)			//孫+-第四象限
-			{
-				g_ThirdField_Collision[11].Cheak = true;
-				HitPosUp = g_fSideSizeZEighth;
-				HitPosDown = 0.0f;
-				HitPosLeft = -g_fSideSizeXQuarter - g_fSideSizeXEighth;
-				HitPosRight = -g_fSideSizeXQuarter;
-			}
-
-		}
-		else if (InrayS.x >= -g_fSideSizeXQuarter && InrayS.z < g_fSideSizeZQuarter)			//子+-第四象限
-		{
-			g_SecondField_Collision[3].Cheak = true;
-			//孫判定　同上
-			if (InrayS.x >= -g_fSideSizeXEighth && InrayS.z >= g_fSideSizeZEighth)			//孫++第一象限
-			{
-				g_ThirdField_Collision[13].Cheak = true;
-				HitPosUp = g_fSideSizeZQuarter;
-				HitPosDown = g_fSideSizeZEighth;
-				HitPosLeft = -g_fSideSizeXEighth;
-				HitPosRight = 0.0f;
-			}
-			else if (InrayS.x < -g_fSideSizeXEighth && InrayS.z >= g_fSideSizeZEighth)			//孫-+第二象限
-			{
-				g_ThirdField_Collision[12].Cheak = true;
-				HitPosUp = g_fSideSizeZQuarter;
-				HitPosDown = g_fSideSizeZEighth;
-				HitPosLeft = -g_fSideSizeXQuarter;
-				HitPosRight = -g_fSideSizeXEighth;
-			}
-			else if (InrayS.x < -g_fSideSizeXEighth && InrayS.z < g_fSideSizeZEighth)			//孫--第三象限
-			{
-				g_ThirdField_Collision[14].Cheak = true;
-				HitPosUp = g_fSideSizeZEighth;
-				HitPosDown = 0.0f;
-				HitPosLeft = -g_fSideSizeXQuarter;
-				HitPosRight = -g_fSideSizeXEighth;
-			}
-			else if (InrayS.x >= -g_fSideSizeXEighth && InrayS.z < g_fSideSizeZEighth)			//孫+-第四象限
-			{
-				g_ThirdField_Collision[15].Cheak = true;
-				HitPosUp = g_fSideSizeZEighth;
-				HitPosDown = 0.0f;
-				HitPosLeft = -g_fSideSizeXEighth;
-				HitPosRight = 0.0f;
-			}
-		}
-	}
-	else if (InrayS.x < 0.0f && InrayS.z < 0.0f)			//親--第三象限
-	{
-		g_FirstField_Collision[2].Cheak = true;
-		if (InrayS.x >= -g_fSideSizeXQuarter && InrayS.z >= -g_fSideSizeZQuarter)			//子++第一象限
-		{
-			g_SecondField_Collision[9].Cheak = true;
-			//孫判定　同上
-			if (InrayS.x >= -g_fSideSizeXEighth && InrayS.z >= -g_fSideSizeZEighth)			//孫++第一象限
-			{
-				g_ThirdField_Collision[37].Cheak = true;
-				HitPosUp = 0.0f;
-				HitPosDown = -g_fSideSizeZEighth;
-				HitPosLeft = -g_fSideSizeXEighth;
-				HitPosRight = 0.0f;
-			}
-			else if (InrayS.x < -g_fSideSizeXEighth && InrayS.z >= -g_fSideSizeZEighth)			//孫-+第二象限
-			{
-				g_ThirdField_Collision[36].Cheak = true;
-				HitPosUp = 0.0f;
-				HitPosDown = -g_fSideSizeZEighth;
-				HitPosLeft = -g_fSideSizeXQuarter;
-				HitPosRight = -g_fSideSizeXEighth;
-			}
-			else if (InrayS.x < -g_fSideSizeXEighth && InrayS.z < -g_fSideSizeZEighth)			//孫--第三象限
-			{
-				g_ThirdField_Collision[38].Cheak = true;
-				HitPosUp = -g_fSideSizeZEighth;
-				HitPosDown = -g_fSideSizeZQuarter;
-				HitPosLeft = -g_fSideSizeXQuarter;
-				HitPosRight = -g_fSideSizeXEighth;
-			}
-			else if (InrayS.x >= -g_fSideSizeXEighth && InrayS.z < -g_fSideSizeZEighth)			//孫+-第四象限
-			{
-				g_ThirdField_Collision[39].Cheak = true;
-				HitPosUp = -g_fSideSizeZEighth;
-				HitPosDown = -g_fSideSizeZQuarter;
-				HitPosLeft = -g_fSideSizeXEighth;
-				HitPosRight = 0.0f;
-			}
-		}
-		else if (InrayS.x < -g_fSideSizeXQuarter && InrayS.z >= -g_fSideSizeZQuarter)			//子-+第二象限
-		{
-			g_SecondField_Collision[8].Cheak = true;
-			//孫判定　同上
-			if (InrayS.x >= -g_fSideSizeXQuarter - g_fSideSizeXEighth && InrayS.z >= -g_fSideSizeZEighth)			//孫++第一象限
-			{
-				g_ThirdField_Collision[33].Cheak = true;
-				HitPosUp = 0.0f;
-				HitPosDown = -g_fSideSizeZEighth;
-				HitPosLeft = -g_fSideSizeXQuarter - g_fSideSizeXEighth;
-				HitPosRight = -g_fSideSizeXQuarter;
-			}
-			else if (InrayS.x < -g_fSideSizeXQuarter - g_fSideSizeXEighth && InrayS.z >= -g_fSideSizeZEighth)			//孫-+第二象限
-			{
-				g_ThirdField_Collision[32].Cheak = true;
-				HitPosUp = 0.0f;
-				HitPosDown = -g_fSideSizeZEighth;
-				HitPosLeft = -g_fSideSizeXQuarter - g_fSideSizeXQuarter;
-				HitPosRight = -g_fSideSizeXQuarter - g_fSideSizeXEighth;
-			}
-			else if (InrayS.x < -g_fSideSizeXQuarter - g_fSideSizeXEighth && InrayS.z < -g_fSideSizeZEighth)			//孫--第三象限
-			{
-				g_ThirdField_Collision[34].Cheak = true;
-				HitPosUp = -g_fSideSizeZEighth;
-				HitPosDown = -g_fSideSizeZQuarter;
-				HitPosLeft = -g_fSideSizeXQuarter - g_fSideSizeXQuarter;
-				HitPosRight = -g_fSideSizeXQuarter - g_fSideSizeXEighth;
-			}
-			else if (InrayS.x >= -g_fSideSizeXQuarter - g_fSideSizeXEighth && InrayS.z < -g_fSideSizeZEighth)			//孫+-第四象限
-			{
-				g_ThirdField_Collision[35].Cheak = true;
-				HitPosUp = -g_fSideSizeZEighth;
-				HitPosDown = -g_fSideSizeZQuarter;
-				HitPosLeft = -g_fSideSizeXQuarter - g_fSideSizeXEighth;
-				HitPosRight = -g_fSideSizeXQuarter;
-			}
-		}
-		else if (InrayS.x < -g_fSideSizeXQuarter && InrayS.z < -g_fSideSizeZQuarter)			//子--第三象限
-		{
-			g_SecondField_Collision[10].Cheak = true;
-			//孫判定　同上
-			if (InrayS.x >= -g_fSideSizeXQuarter - g_fSideSizeXEighth && InrayS.z >= -g_fSideSizeZQuarter - g_fSideSizeZEighth)			//孫++第一象限
-			{
-				g_ThirdField_Collision[41].Cheak = true;
-				HitPosUp = -g_fSideSizeZQuarter;
-				HitPosDown = -g_fSideSizeZQuarter - g_fSideSizeZEighth;
-				HitPosLeft = -g_fSideSizeXQuarter - g_fSideSizeXEighth;
-				HitPosRight = -g_fSideSizeXQuarter;
-			}
-			else if (InrayS.x < -g_fSideSizeXQuarter - g_fSideSizeXEighth && InrayS.z >= -g_fSideSizeZQuarter - g_fSideSizeZEighth)			//孫-+第二象限
-			{
-				g_ThirdField_Collision[40].Cheak = true;
-				HitPosUp = -g_fSideSizeZQuarter;
-				HitPosDown = -g_fSideSizeZQuarter - g_fSideSizeZEighth;
-				HitPosLeft = -g_fSideSizeXQuarter - g_fSideSizeXQuarter;
-				HitPosRight = -g_fSideSizeXQuarter - g_fSideSizeXEighth;
-			}
-			else if (InrayS.x < -g_fSideSizeXQuarter - g_fSideSizeXEighth && InrayS.z < -g_fSideSizeZQuarter - g_fSideSizeZEighth)			//孫--第三象限
-			{
-				g_ThirdField_Collision[42].Cheak = true;
-				HitPosUp = -g_fSideSizeZQuarter - g_fSideSizeZEighth;
-				HitPosDown = -g_fSideSizeZQuarter - g_fSideSizeZQuarter;
-				HitPosLeft = -g_fSideSizeXQuarter - g_fSideSizeXQuarter;
-				HitPosRight = -g_fSideSizeXQuarter - g_fSideSizeXEighth;
-			}
-			else if (InrayS.x >= -g_fSideSizeXQuarter - g_fSideSizeXEighth && InrayS.z < -g_fSideSizeZQuarter - g_fSideSizeZEighth)			//孫+-第四象限
-			{
-				g_ThirdField_Collision[43].Cheak = true;
-				HitPosUp = -g_fSideSizeZQuarter - g_fSideSizeZEighth;
-				HitPosDown = -g_fSideSizeZQuarter - g_fSideSizeZQuarter;
-				HitPosLeft = -g_fSideSizeXQuarter - g_fSideSizeXEighth;
-				HitPosRight = -g_fSideSizeXQuarter;
-			}
-
-		}
-		else if (InrayS.x >= -g_fSideSizeXQuarter && InrayS.z < -g_fSideSizeZQuarter)			//子+-第四象限
-		{
-			g_SecondField_Collision[11].Cheak = true;
-			//孫判定　同上
-			if (InrayS.x >= -g_fSideSizeXEighth && InrayS.z >= -g_fSideSizeZQuarter - g_fSideSizeZEighth)			//孫++第一象限
-			{
-				g_ThirdField_Collision[45].Cheak = true;
-				HitPosUp = -g_fSideSizeZQuarter;
-				HitPosDown = -g_fSideSizeZQuarter - g_fSideSizeZEighth;
-				HitPosLeft = -g_fSideSizeXEighth;
-				HitPosRight = 0.0f;
-			}
-			else if (InrayS.x < -g_fSideSizeXEighth && InrayS.z >= -g_fSideSizeZQuarter - g_fSideSizeZEighth)			//孫-+第二象限
-			{
-				g_ThirdField_Collision[44].Cheak = true;
-				HitPosUp = -g_fSideSizeZQuarter;
-				HitPosDown = -g_fSideSizeZQuarter - g_fSideSizeZEighth;
-				HitPosLeft = -g_fSideSizeXQuarter;
-				HitPosRight = -g_fSideSizeXEighth;
-			}
-			else if (InrayS.x < -g_fSideSizeXEighth && InrayS.z < -g_fSideSizeZQuarter - g_fSideSizeZEighth)			//孫--第三象限
-			{
-				g_ThirdField_Collision[46].Cheak = true;
-				HitPosUp = -g_fSideSizeZQuarter - g_fSideSizeZEighth;
-				HitPosDown = -g_fSideSizeZQuarter - g_fSideSizeZQuarter;
-				HitPosLeft = -g_fSideSizeXQuarter;
-				HitPosRight = -g_fSideSizeXEighth;
-			}
-			else if (InrayS.x >= -g_fSideSizeXEighth && InrayS.z < -g_fSideSizeZQuarter - g_fSideSizeZEighth)			//孫+-第四象限
-			{
-				g_ThirdField_Collision[47].Cheak = true;
-				HitPosUp = -g_fSideSizeZQuarter - g_fSideSizeZEighth;
-				HitPosDown = -g_fSideSizeZQuarter - g_fSideSizeZQuarter;
-				HitPosLeft = -g_fSideSizeXEighth;
-				HitPosRight = 0.0f;
-			}
-		}
-	}
-	else if (InrayS.x >= 0.0f && InrayS.z < 0.0f)			//親+-第四象限
-	{
-		g_FirstField_Collision[3].Cheak = true;
-		if (InrayS.x >= g_fSideSizeXQuarter && InrayS.z >= -g_fSideSizeZQuarter)			//子++第一象限
-		{
-			g_SecondField_Collision[13].Cheak = true;
-			//孫判定　同上
-			if (InrayS.x >= g_fSideSizeXQuarter + g_fSideSizeXEighth && InrayS.z >= -g_fSideSizeZEighth)			//孫++第一象限
-			{
-				g_ThirdField_Collision[53].Cheak = true;
-				HitPosUp = 0.0f;
-				HitPosDown = -g_fSideSizeZEighth;
-				HitPosLeft = g_fSideSizeXQuarter + g_fSideSizeXEighth;
-				HitPosRight = g_fSideSizeXQuarter + g_fSideSizeXQuarter;
-			}
-			else if (InrayS.x < g_fSideSizeXQuarter + g_fSideSizeXEighth && InrayS.z >= -g_fSideSizeZEighth)			//孫-+第二象限
-			{
-				g_ThirdField_Collision[52].Cheak = true;
-				HitPosUp = 0.0f;
-				HitPosDown = -g_fSideSizeZEighth;
-				HitPosLeft = g_fSideSizeXQuarter;
-				HitPosRight = g_fSideSizeXQuarter + g_fSideSizeXEighth;
-			}
-			else if (InrayS.x < g_fSideSizeXQuarter + g_fSideSizeXEighth && InrayS.z < -g_fSideSizeZEighth)			//孫--第三象限
-			{
-				g_ThirdField_Collision[54].Cheak = true;
-				HitPosUp = -g_fSideSizeZEighth;
-				HitPosDown = -g_fSideSizeZQuarter;
-				HitPosLeft = g_fSideSizeXQuarter;
-				HitPosRight = g_fSideSizeXQuarter + g_fSideSizeXEighth;
-			}
-			else if (InrayS.x >= g_fSideSizeXQuarter + g_fSideSizeXEighth && InrayS.z < -g_fSideSizeZEighth)			//孫+-第四象限
-			{
-				g_ThirdField_Collision[55].Cheak = true;
-				HitPosUp = -g_fSideSizeZEighth;
-				HitPosDown = -g_fSideSizeZQuarter;
-				HitPosLeft = g_fSideSizeXQuarter + g_fSideSizeXEighth;
-				HitPosRight = g_fSideSizeXQuarter + g_fSideSizeXQuarter;
-			}
-		}
-		else if (InrayS.x < g_fSideSizeXQuarter && InrayS.z >= -g_fSideSizeZQuarter)			//子-+第二象限
-		{
-			g_SecondField_Collision[12].Cheak = true;
-			//孫判定　同上
-			if (InrayS.x >= g_fSideSizeXEighth && InrayS.z >= -g_fSideSizeZEighth)			//孫++第一象限
-			{
-				g_ThirdField_Collision[49].Cheak = true;
-				HitPosUp = 0.0f;
-				HitPosDown = -g_fSideSizeZEighth;
-				HitPosLeft = g_fSideSizeXEighth;
-				HitPosRight = g_fSideSizeXQuarter;
-			}
-			else if (InrayS.x < g_fSideSizeXEighth && InrayS.z >= -g_fSideSizeZEighth)			//孫-+第二象限
-			{
-				g_ThirdField_Collision[48].Cheak = true;
-				HitPosUp = 0.0f;
-				HitPosDown = -g_fSideSizeZEighth;
-				HitPosLeft = 0.0f;
-				HitPosRight = g_fSideSizeXEighth;
-			}
-			else if (InrayS.x < g_fSideSizeXEighth && InrayS.z < -g_fSideSizeZEighth)			//孫--第三象限
-			{
-				g_ThirdField_Collision[50].Cheak = true;
-				HitPosUp = -g_fSideSizeZEighth;
-				HitPosDown = -g_fSideSizeZQuarter;
-				HitPosLeft = 0.0f;
-				HitPosRight = g_fSideSizeXEighth;
-			}
-			else if (InrayS.x >= g_fSideSizeXEighth && InrayS.z < -g_fSideSizeZEighth)			//孫+-第四象限
-			{
-				g_ThirdField_Collision[51].Cheak = true;
-				HitPosUp = -g_fSideSizeZEighth;
-				HitPosDown = -g_fSideSizeZQuarter;
-				HitPosLeft = g_fSideSizeXEighth;
-				HitPosRight = g_fSideSizeXQuarter;
-			}
-		}
-		else if (InrayS.x < g_fSideSizeXQuarter && InrayS.z < -g_fSideSizeZQuarter)			//子--第三象限
-		{
-			g_SecondField_Collision[14].Cheak = true;
-			//孫判定　同上
-			if (InrayS.x >= g_fSideSizeXEighth && InrayS.z >= -g_fSideSizeZQuarter - g_fSideSizeZEighth)			//孫++第一象限
-			{
-				g_ThirdField_Collision[57].Cheak = true;
-				HitPosUp = -g_fSideSizeZQuarter;
-				HitPosDown = -g_fSideSizeZQuarter - g_fSideSizeZEighth;
-				HitPosLeft = g_fSideSizeXEighth;
-				HitPosRight = g_fSideSizeXQuarter;
-			}
-			else if (InrayS.x < g_fSideSizeXEighth && InrayS.z >= -g_fSideSizeZQuarter - g_fSideSizeZEighth)			//孫-+第二象限
-			{
-				g_ThirdField_Collision[56].Cheak = true;
-				HitPosUp = -g_fSideSizeZQuarter;
-				HitPosDown = -g_fSideSizeZQuarter - g_fSideSizeZEighth;
-				HitPosLeft = 0.0f;
-				HitPosRight = g_fSideSizeXEighth;
-			}
-			else if (InrayS.x < g_fSideSizeXEighth && InrayS.z < -g_fSideSizeZQuarter - g_fSideSizeZEighth)			//孫--第三象限
-			{
-				g_ThirdField_Collision[58].Cheak = true;
-				HitPosUp = -g_fSideSizeZQuarter - g_fSideSizeZEighth;
-				HitPosDown = -g_fSideSizeZQuarter - g_fSideSizeZQuarter;
-				HitPosLeft = 0.0f;
-				HitPosRight = g_fSideSizeXEighth;
-			}
-			else if (InrayS.x >= g_fSideSizeXEighth && InrayS.z < -g_fSideSizeZQuarter - g_fSideSizeZEighth)			//孫+-第四象限
-			{
-				g_ThirdField_Collision[59].Cheak = true;
-				HitPosUp = -g_fSideSizeZQuarter - g_fSideSizeZEighth;
-				HitPosDown = -g_fSideSizeZQuarter - g_fSideSizeZQuarter;
-				HitPosLeft = g_fSideSizeXEighth;
-				HitPosRight = g_fSideSizeXQuarter;
-			}
-
-		}
-		else if (InrayS.x >= g_fSideSizeXQuarter && InrayS.z < -g_fSideSizeZQuarter)			//子+-第四象限
-		{
-			g_SecondField_Collision[15].Cheak = true;
-			//孫判定　同上
-			if (InrayS.x >= g_fSideSizeXQuarter + g_fSideSizeXEighth && InrayS.z >= -g_fSideSizeZQuarter - g_fSideSizeZEighth)			//孫++第一象限
-			{
-				g_ThirdField_Collision[61].Cheak = true;
-				HitPosUp = -g_fSideSizeZQuarter;
-				HitPosDown = -g_fSideSizeZQuarter - g_fSideSizeZEighth;
-				HitPosLeft = g_fSideSizeXQuarter + g_fSideSizeXEighth;
-				HitPosRight = g_fSideSizeXQuarter + g_fSideSizeXQuarter;
-			}
-			else if (InrayS.x < g_fSideSizeXQuarter + g_fSideSizeXEighth && InrayS.z >= -g_fSideSizeZQuarter - g_fSideSizeZEighth)			//孫-+第二象限
-			{
-				g_ThirdField_Collision[60].Cheak = true;
-				HitPosUp = -g_fSideSizeZQuarter;
-				HitPosDown = -g_fSideSizeZQuarter - g_fSideSizeZEighth;
-				HitPosLeft = g_fSideSizeXQuarter;
-				HitPosRight = g_fSideSizeXQuarter + g_fSideSizeXEighth;
-			}
-			else if (InrayS.x < g_fSideSizeXQuarter + g_fSideSizeXEighth && InrayS.z < -g_fSideSizeZQuarter - g_fSideSizeZEighth)			//孫--第三象限
-			{
-				g_ThirdField_Collision[62].Cheak = true;
-				HitPosUp = -g_fSideSizeZQuarter - g_fSideSizeZEighth;
-				HitPosDown = -g_fSideSizeZQuarter - g_fSideSizeZQuarter;
-				HitPosLeft = g_fSideSizeXQuarter;
-				HitPosRight = g_fSideSizeXQuarter + g_fSideSizeXEighth;
-			}
-			else if (InrayS.x >= g_fSideSizeXQuarter + g_fSideSizeXEighth && InrayS.z < -g_fSideSizeZQuarter - g_fSideSizeZEighth)			//孫+-第四象限
-			{
-				g_ThirdField_Collision[63].Cheak = true;
-				HitPosUp = -g_fSideSizeZQuarter - g_fSideSizeZEighth;
-				HitPosDown = -g_fSideSizeZQuarter - g_fSideSizeZQuarter;
-				HitPosLeft = g_fSideSizeXQuarter + g_fSideSizeXEighth;
-				HitPosRight = g_fSideSizeXQuarter + g_fSideSizeXQuarter;
-			}
-		}
-	}
-
-	//親判定
-	for (int CntPartition = 0; CntPartition < FIELD_PARTITION_FIRST_NUM; CntPartition++)
-	{
-		g_FirstField_Collision[CntPartition].Cheak = false;
-	}
-	//子判定
-	for (int CntPartition = 0; CntPartition < FIELD_PARTITION_SECOND_NUM; CntPartition++)
-	{
-		g_SecondField_Collision[CntPartition].Cheak = false;
-	}
-	//孫判定
-	for (int CntPartition = 0; CntPartition < FIELD_PARTITION_THIRD_NUM; CntPartition++)
-	{
-		g_ThirdField_Collision[CntPartition].Cheak = false;
-	}
-
-
 
 
 	for (int nCntVtx = 0; nCntVtx < g_nNumVertexIndexField; nCntVtx++)
@@ -1594,7 +967,7 @@ void FieldHit(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVECTOR3 *vtxNor, float
 					vtxHen[0] = vtx[1] - vtx[0];
 					vtxHen[1] = vtx[2] - vtx[0];
 
-					//プレイやの傾く軸
+					//プレイやの傾く軸(地形の法線)
 					D3DXVECTOR3 vtxHOUSEN;
 					D3DXVec3Cross(&vtxHOUSEN, &vtxHen[0], &vtxHen[1]);
 					if (vtxHOUSEN.y <= 0) vtxHOUSEN *= -1;
@@ -1612,4 +985,1371 @@ void FieldHit(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVECTOR3 *vtxNor, float
 	g_pD3DIdxBuffFieldDraw->Unlock();
 
 }
+
+void SpeedUpFieldHitPoly(D3DXVECTOR3 InrayS, float *HitPosUp, float *HitPosDown, float *HitPosLeft, float *HitPosRight)
+{
+	//判定用フラグを初期化　g_ThirdField_Collisionはプレイヤーの球面補間を計算時に現在乗っているポリゴン番号として使用
+	//親判定
+	for (int CntPartition = 0; CntPartition < FIELD_PARTITION_FIRST_NUM; CntPartition++)
+	{
+		g_FirstField_Collision[CntPartition].Cheak = false;
+	}
+	//子判定
+	for (int CntPartition = 0; CntPartition < FIELD_PARTITION_SECOND_NUM; CntPartition++)
+	{
+		g_SecondField_Collision[CntPartition].Cheak = false;
+	}
+	//孫判定
+	for (int CntPartition = 0; CntPartition < FIELD_PARTITION_THIRD_NUM; CntPartition++)
+	{
+		g_ThirdField_Collision[CntPartition].Cheak = false;
+	}
+
+	//判定　X,Zがプラスかマイナスか　基準はg_posFieldの中心(x0,z0)
+	if (InrayS.x >= 0.0f && InrayS.z >= 0.0f)			//親++第一象限
+	{
+		g_FirstField_Collision[1].Cheak = true;
+		//子判定　親の時と同じく、第一象限のなかでさらにプラスかマイナスか判定
+		if (InrayS.x >= g_fSideSizeXQuarter && InrayS.z >= g_fSideSizeZQuarter)			//子++第一象限
+		{
+			g_SecondField_Collision[5].Cheak = true;
+			//孫判定　同上
+			if (InrayS.x >= g_fSideSizeXQuarter + g_fSideSizeXEighth && InrayS.z >= g_fSideSizeZQuarter + g_fSideSizeZEighth)			//孫++第一象限
+			{
+				g_ThirdField_Collision[21].Cheak = true;
+				*HitPosUp = g_fSideSizeZQuarter + g_fSideSizeZQuarter;
+				*HitPosDown = g_fSideSizeZQuarter + g_fSideSizeZEighth;
+				*HitPosLeft = g_fSideSizeXQuarter + g_fSideSizeXEighth;
+				*HitPosRight = g_fSideSizeXQuarter + g_fSideSizeXQuarter;
+			}
+			else if (InrayS.x < g_fSideSizeXQuarter + g_fSideSizeXEighth && InrayS.z >= g_fSideSizeZQuarter + g_fSideSizeZEighth)			//孫-+第二象限
+			{
+				g_ThirdField_Collision[20].Cheak = true;
+				*HitPosUp = g_fSideSizeZQuarter + g_fSideSizeZQuarter;
+				*HitPosDown = g_fSideSizeZQuarter + g_fSideSizeZEighth;
+				*HitPosLeft = g_fSideSizeXQuarter;
+				*HitPosRight = g_fSideSizeXQuarter + g_fSideSizeXEighth;
+			}
+			else if (InrayS.x < g_fSideSizeXQuarter + g_fSideSizeXEighth && InrayS.z < g_fSideSizeZQuarter + g_fSideSizeZEighth)			//孫--第三象限
+			{
+				g_ThirdField_Collision[22].Cheak = true;
+				*HitPosUp = g_fSideSizeZQuarter + g_fSideSizeZEighth;
+				*HitPosDown = g_fSideSizeZQuarter;
+				*HitPosLeft = g_fSideSizeXQuarter;
+				*HitPosRight = g_fSideSizeXQuarter + g_fSideSizeXEighth;
+			}
+			else if (InrayS.x >= g_fSideSizeXQuarter + g_fSideSizeXEighth && InrayS.z < g_fSideSizeZQuarter + g_fSideSizeZEighth)			//孫+-第四象限
+			{
+				g_ThirdField_Collision[23].Cheak = true;
+				*HitPosUp = g_fSideSizeZQuarter + g_fSideSizeZEighth;
+				*HitPosDown = g_fSideSizeZQuarter;
+				*HitPosLeft = g_fSideSizeXQuarter + g_fSideSizeXEighth;
+				*HitPosRight = g_fSideSizeXQuarter + g_fSideSizeXQuarter;
+			}
+		}
+		else if (InrayS.x < g_fSideSizeXQuarter && InrayS.z >= g_fSideSizeZQuarter)			//子-+第二象限
+		{
+			g_SecondField_Collision[4].Cheak = true;
+			//孫判定　同上
+			if (InrayS.x >= g_fSideSizeXEighth && InrayS.z >= g_fSideSizeZQuarter + g_fSideSizeZEighth)			//孫++第一象限
+			{
+				g_ThirdField_Collision[17].Cheak = true;
+				*HitPosUp = g_fSideSizeZQuarter + g_fSideSizeZQuarter;
+				*HitPosDown = g_fSideSizeZQuarter + g_fSideSizeZEighth;
+				*HitPosLeft = g_fSideSizeXEighth;
+				*HitPosRight = g_fSideSizeXQuarter;
+			}
+			else if (InrayS.x < g_fSideSizeXEighth && InrayS.z >= g_fSideSizeZQuarter + g_fSideSizeZEighth)			//孫-+第二象限
+			{
+				g_ThirdField_Collision[16].Cheak = true;
+				*HitPosUp = g_fSideSizeZQuarter + g_fSideSizeZQuarter;
+				*HitPosDown = g_fSideSizeZQuarter + g_fSideSizeZEighth;
+				*HitPosLeft = 0.0f;
+				*HitPosRight = g_fSideSizeXEighth;
+			}
+			else if (InrayS.x < g_fSideSizeXEighth && InrayS.z < g_fSideSizeZQuarter + g_fSideSizeZEighth)			//孫--第三象限
+			{
+				g_ThirdField_Collision[18].Cheak = true;
+				*HitPosUp = g_fSideSizeZQuarter + g_fSideSizeZEighth;
+				*HitPosDown = g_fSideSizeZQuarter;
+				*HitPosLeft = 0.0f;
+				*HitPosRight = g_fSideSizeXEighth;
+			}
+			else if (InrayS.x >= g_fSideSizeXEighth && InrayS.z < g_fSideSizeZQuarter + g_fSideSizeZEighth)			//孫+-第四象限
+			{
+				g_ThirdField_Collision[19].Cheak = true;
+				*HitPosUp = g_fSideSizeZQuarter + g_fSideSizeZEighth;
+				*HitPosDown = g_fSideSizeZQuarter;
+				*HitPosLeft = g_fSideSizeXEighth;
+				*HitPosRight = g_fSideSizeXQuarter;
+			}
+		}
+		else if (InrayS.x < g_fSideSizeXQuarter && InrayS.z < g_fSideSizeZQuarter)			//子--第三象限
+		{
+			g_SecondField_Collision[6].Cheak = true;
+			//孫判定　同上
+			if (InrayS.x >= g_fSideSizeXEighth && InrayS.z >= g_fSideSizeZEighth)			//孫++第一象限
+			{
+				g_ThirdField_Collision[25].Cheak = true;
+				*HitPosUp = g_fSideSizeZQuarter;
+				*HitPosDown = g_fSideSizeZEighth;
+				*HitPosLeft = g_fSideSizeXEighth;
+				*HitPosRight = g_fSideSizeXQuarter;
+			}
+			else if (InrayS.x < g_fSideSizeXEighth && InrayS.z >= g_fSideSizeZEighth)			//孫-+第二象限
+			{
+				g_ThirdField_Collision[24].Cheak = true;
+				*HitPosUp = g_fSideSizeZQuarter;
+				*HitPosDown = g_fSideSizeZEighth;
+				*HitPosLeft = 0.0f;
+				*HitPosRight = g_fSideSizeXEighth;
+			}
+			else if (InrayS.x < g_fSideSizeXEighth && InrayS.z < g_fSideSizeZEighth)			//孫--第三象限
+			{
+				g_ThirdField_Collision[26].Cheak = true;
+				*HitPosUp = g_fSideSizeZEighth;
+				*HitPosDown = 0.0f;
+				*HitPosLeft = 0.0f;
+				*HitPosRight = g_fSideSizeXEighth;
+			}
+			else if (InrayS.x >= g_fSideSizeXEighth && InrayS.z < g_fSideSizeZEighth)			//孫+-第四象限
+			{
+				g_ThirdField_Collision[27].Cheak = true;
+				*HitPosUp = g_fSideSizeZEighth;
+				*HitPosDown = 0.0f;
+				*HitPosLeft = g_fSideSizeXEighth;
+				*HitPosRight = g_fSideSizeXQuarter;
+			}
+
+		}
+		else if (InrayS.x >= g_fSideSizeXQuarter && InrayS.z < g_fSideSizeZQuarter)			//子+-第四象限
+		{
+			g_SecondField_Collision[7].Cheak = true;
+			//孫判定　同上
+			if (InrayS.x >= g_fSideSizeXQuarter + g_fSideSizeXEighth && InrayS.z >= g_fSideSizeZEighth)			//孫++第一象限
+			{
+				g_ThirdField_Collision[29].Cheak = true;
+				*HitPosUp = g_fSideSizeZQuarter;
+				*HitPosDown = g_fSideSizeZEighth;
+				*HitPosLeft = g_fSideSizeXQuarter + g_fSideSizeXEighth;
+				*HitPosRight = g_fSideSizeXQuarter + g_fSideSizeXQuarter;
+			}
+			else if (InrayS.x < g_fSideSizeXQuarter + g_fSideSizeXEighth && InrayS.z >= g_fSideSizeZEighth)			//孫-+第二象限
+			{
+				g_ThirdField_Collision[28].Cheak = true;
+				*HitPosUp = g_fSideSizeZQuarter;
+				*HitPosDown = g_fSideSizeZEighth;
+				*HitPosLeft = g_fSideSizeXQuarter;
+				*HitPosRight = g_fSideSizeXQuarter + g_fSideSizeXEighth;
+			}
+			else if (InrayS.x < g_fSideSizeXQuarter + g_fSideSizeXEighth && InrayS.z < g_fSideSizeZEighth)			//孫--第三象限
+			{
+				g_ThirdField_Collision[30].Cheak = true;
+				*HitPosUp = g_fSideSizeZEighth;
+				*HitPosDown = 0.0f;
+				*HitPosLeft = g_fSideSizeXQuarter;
+				*HitPosRight = g_fSideSizeXQuarter + g_fSideSizeXEighth;
+			}
+			else if (InrayS.x >= g_fSideSizeXQuarter + g_fSideSizeXEighth && InrayS.z < g_fSideSizeZEighth)			//孫+-第四象限
+			{
+				g_ThirdField_Collision[31].Cheak = true;
+				*HitPosUp = g_fSideSizeZEighth;
+				*HitPosDown = 0.0f;
+				*HitPosLeft = g_fSideSizeXQuarter + g_fSideSizeXEighth;
+				*HitPosRight = g_fSideSizeXQuarter + g_fSideSizeXQuarter;
+			}
+		}
+	}
+	else if (InrayS.x < 0.0f && InrayS.z >= 0.0f)			//親-+第二象限
+	{
+		g_FirstField_Collision[0].Cheak = true;
+		//子判定　親の時と同じく、第一象限のなかでさらにプラスかマイナスか判定
+		if (InrayS.x >= -g_fSideSizeXQuarter && InrayS.z >= g_fSideSizeZQuarter)			//子++第一象限
+		{
+			g_SecondField_Collision[1].Cheak = true;
+			//孫判定　同上
+			if (InrayS.x >= -g_fSideSizeXEighth && InrayS.z >= g_fSideSizeZQuarter + g_fSideSizeZEighth)			//孫++第一象限
+			{
+				g_ThirdField_Collision[5].Cheak = true;
+				*HitPosUp = g_fSideSizeZQuarter + g_fSideSizeZQuarter;
+				*HitPosDown = g_fSideSizeZQuarter + g_fSideSizeZEighth;
+				*HitPosLeft = -g_fSideSizeXEighth;
+				*HitPosRight = 0.0f;
+			}
+			else if (InrayS.x < -g_fSideSizeXEighth && InrayS.z >= g_fSideSizeZQuarter + g_fSideSizeZEighth)			//孫-+第二象限
+			{
+				g_ThirdField_Collision[4].Cheak = true;
+				*HitPosUp = g_fSideSizeZQuarter + g_fSideSizeZQuarter;
+				*HitPosDown = g_fSideSizeZQuarter + g_fSideSizeZEighth;
+				*HitPosLeft = -g_fSideSizeXQuarter;
+				*HitPosRight = -g_fSideSizeXEighth;
+			}
+			else if (InrayS.x < -g_fSideSizeXEighth && InrayS.z < g_fSideSizeZQuarter + g_fSideSizeZEighth)			//孫--第三象限
+			{
+				g_ThirdField_Collision[6].Cheak = true;
+				*HitPosUp = g_fSideSizeZQuarter + g_fSideSizeZEighth;
+				*HitPosDown = g_fSideSizeZQuarter;
+				*HitPosLeft = -g_fSideSizeXQuarter;
+				*HitPosRight = -g_fSideSizeXEighth;
+			}
+			else if (InrayS.x >= -g_fSideSizeXEighth && InrayS.z < g_fSideSizeZQuarter + g_fSideSizeZEighth)			//孫+-第四象限
+			{
+				g_ThirdField_Collision[7].Cheak = true;
+				*HitPosUp = g_fSideSizeZQuarter + g_fSideSizeZEighth;
+				*HitPosDown = g_fSideSizeZQuarter;
+				*HitPosLeft = -g_fSideSizeXEighth;
+				*HitPosRight = 0.0f;
+			}
+		}
+		else if (InrayS.x < -g_fSideSizeXQuarter && InrayS.z >= g_fSideSizeZQuarter)			//子-+第二象限
+		{
+			g_SecondField_Collision[0].Cheak = true;
+			//孫判定　同上
+			if (InrayS.x >= -g_fSideSizeXQuarter - g_fSideSizeXEighth && InrayS.z >= g_fSideSizeZQuarter + g_fSideSizeZEighth)			//孫++第一象限
+			{
+				g_ThirdField_Collision[1].Cheak = true;
+				*HitPosUp = g_fSideSizeZQuarter + g_fSideSizeZQuarter;
+				*HitPosDown = g_fSideSizeZQuarter + g_fSideSizeZEighth;
+				*HitPosLeft = -g_fSideSizeXQuarter - g_fSideSizeXEighth;
+				*HitPosRight = -g_fSideSizeXQuarter;
+			}
+			else if (InrayS.x < -g_fSideSizeXQuarter - g_fSideSizeXEighth && InrayS.z >= g_fSideSizeZQuarter + g_fSideSizeZEighth)			//孫-+第二象限
+			{
+				g_ThirdField_Collision[0].Cheak = true;
+				*HitPosUp = g_fSideSizeZQuarter + g_fSideSizeZQuarter;
+				*HitPosDown = g_fSideSizeZQuarter + g_fSideSizeZEighth;
+				*HitPosLeft = -g_fSideSizeXQuarter - g_fSideSizeXQuarter;
+				*HitPosRight = -g_fSideSizeXQuarter - g_fSideSizeXEighth;
+			}
+			else if (InrayS.x < -g_fSideSizeXQuarter - g_fSideSizeXEighth && InrayS.z < g_fSideSizeZQuarter + g_fSideSizeZEighth)			//孫--第三象限
+			{
+				g_ThirdField_Collision[2].Cheak = true;
+				*HitPosUp = g_fSideSizeZQuarter + g_fSideSizeZEighth;
+				*HitPosDown = g_fSideSizeZQuarter;
+				*HitPosLeft = -g_fSideSizeXQuarter - g_fSideSizeXQuarter;
+				*HitPosRight = -g_fSideSizeXQuarter - g_fSideSizeXEighth;
+			}
+			else if (InrayS.x >= -g_fSideSizeXQuarter - g_fSideSizeXEighth && InrayS.z < g_fSideSizeZQuarter + g_fSideSizeZEighth)			//孫+-第四象限
+			{
+				g_ThirdField_Collision[3].Cheak = true;
+				*HitPosUp = g_fSideSizeZQuarter + g_fSideSizeZEighth;
+				*HitPosDown = g_fSideSizeZQuarter;
+				*HitPosLeft = -g_fSideSizeXQuarter - g_fSideSizeXEighth;
+				*HitPosRight = -g_fSideSizeXQuarter;
+			}
+		}
+		else if (InrayS.x < -g_fSideSizeXQuarter && InrayS.z < g_fSideSizeZQuarter)			//子--第三象限
+		{
+			g_SecondField_Collision[2].Cheak = true;
+			//孫判定　同上
+			if (InrayS.x >= -g_fSideSizeXQuarter - g_fSideSizeXEighth && InrayS.z >= g_fSideSizeZEighth)			//孫++第一象限
+			{
+				g_ThirdField_Collision[9].Cheak = true;
+				*HitPosUp = g_fSideSizeZQuarter;
+				*HitPosDown = g_fSideSizeZEighth;
+				*HitPosLeft = -g_fSideSizeXQuarter - g_fSideSizeXEighth;
+				*HitPosRight = -g_fSideSizeXQuarter;
+			}
+			else if (InrayS.x < -g_fSideSizeXQuarter - g_fSideSizeXEighth && InrayS.z >= g_fSideSizeZEighth)			//孫-+第二象限
+			{
+				g_ThirdField_Collision[8].Cheak = true;
+				*HitPosUp = g_fSideSizeZQuarter;
+				*HitPosDown = g_fSideSizeZEighth;
+				*HitPosLeft = -g_fSideSizeXQuarter - g_fSideSizeXQuarter;
+				*HitPosRight = -g_fSideSizeXQuarter - g_fSideSizeXEighth;
+			}
+			else if (InrayS.x < -g_fSideSizeXQuarter - g_fSideSizeXEighth && InrayS.z < g_fSideSizeZEighth)			//孫--第三象限
+			{
+				g_ThirdField_Collision[10].Cheak = true;
+				*HitPosUp = g_fSideSizeZEighth;
+				*HitPosDown = 0.0f;
+				*HitPosLeft = -g_fSideSizeXQuarter - g_fSideSizeXQuarter;
+				*HitPosRight = -g_fSideSizeXQuarter - g_fSideSizeXEighth;
+			}
+			else if (InrayS.x >= -g_fSideSizeXQuarter - g_fSideSizeXEighth && InrayS.z < g_fSideSizeZEighth)			//孫+-第四象限
+			{
+				g_ThirdField_Collision[11].Cheak = true;
+				*HitPosUp = g_fSideSizeZEighth;
+				*HitPosDown = 0.0f;
+				*HitPosLeft = -g_fSideSizeXQuarter - g_fSideSizeXEighth;
+				*HitPosRight = -g_fSideSizeXQuarter;
+			}
+
+		}
+		else if (InrayS.x >= -g_fSideSizeXQuarter && InrayS.z < g_fSideSizeZQuarter)			//子+-第四象限
+		{
+			g_SecondField_Collision[3].Cheak = true;
+			//孫判定　同上
+			if (InrayS.x >= -g_fSideSizeXEighth && InrayS.z >= g_fSideSizeZEighth)			//孫++第一象限
+			{
+				g_ThirdField_Collision[13].Cheak = true;
+				*HitPosUp = g_fSideSizeZQuarter;
+				*HitPosDown = g_fSideSizeZEighth;
+				*HitPosLeft = -g_fSideSizeXEighth;
+				*HitPosRight = 0.0f;
+			}
+			else if (InrayS.x < -g_fSideSizeXEighth && InrayS.z >= g_fSideSizeZEighth)			//孫-+第二象限
+			{
+				g_ThirdField_Collision[12].Cheak = true;
+				*HitPosUp = g_fSideSizeZQuarter;
+				*HitPosDown = g_fSideSizeZEighth;
+				*HitPosLeft = -g_fSideSizeXQuarter;
+				*HitPosRight = -g_fSideSizeXEighth;
+			}
+			else if (InrayS.x < -g_fSideSizeXEighth && InrayS.z < g_fSideSizeZEighth)			//孫--第三象限
+			{
+				g_ThirdField_Collision[14].Cheak = true;
+				*HitPosUp = g_fSideSizeZEighth;
+				*HitPosDown = 0.0f;
+				*HitPosLeft = -g_fSideSizeXQuarter;
+				*HitPosRight = -g_fSideSizeXEighth;
+			}
+			else if (InrayS.x >= -g_fSideSizeXEighth && InrayS.z < g_fSideSizeZEighth)			//孫+-第四象限
+			{
+				g_ThirdField_Collision[15].Cheak = true;
+				*HitPosUp = g_fSideSizeZEighth;
+				*HitPosDown = 0.0f;
+				*HitPosLeft = -g_fSideSizeXEighth;
+				*HitPosRight = 0.0f;
+			}
+		}
+	}
+	else if (InrayS.x < 0.0f && InrayS.z < 0.0f)			//親--第三象限
+	{
+		g_FirstField_Collision[2].Cheak = true;
+		if (InrayS.x >= -g_fSideSizeXQuarter && InrayS.z >= -g_fSideSizeZQuarter)			//子++第一象限
+		{
+			g_SecondField_Collision[9].Cheak = true;
+			//孫判定　同上
+			if (InrayS.x >= -g_fSideSizeXEighth && InrayS.z >= -g_fSideSizeZEighth)			//孫++第一象限
+			{
+				g_ThirdField_Collision[37].Cheak = true;
+				*HitPosUp = 0.0f;
+				*HitPosDown = -g_fSideSizeZEighth;
+				*HitPosLeft = -g_fSideSizeXEighth;
+				*HitPosRight = 0.0f;
+			}
+			else if (InrayS.x < -g_fSideSizeXEighth && InrayS.z >= -g_fSideSizeZEighth)			//孫-+第二象限
+			{
+				g_ThirdField_Collision[36].Cheak = true;
+				*HitPosUp = 0.0f;
+				*HitPosDown = -g_fSideSizeZEighth;
+				*HitPosLeft = -g_fSideSizeXQuarter;
+				*HitPosRight = -g_fSideSizeXEighth;
+			}
+			else if (InrayS.x < -g_fSideSizeXEighth && InrayS.z < -g_fSideSizeZEighth)			//孫--第三象限
+			{
+				g_ThirdField_Collision[38].Cheak = true;
+				*HitPosUp = -g_fSideSizeZEighth;
+				*HitPosDown = -g_fSideSizeZQuarter;
+				*HitPosLeft = -g_fSideSizeXQuarter;
+				*HitPosRight = -g_fSideSizeXEighth;
+			}
+			else if (InrayS.x >= -g_fSideSizeXEighth && InrayS.z < -g_fSideSizeZEighth)			//孫+-第四象限
+			{
+				g_ThirdField_Collision[39].Cheak = true;
+				*HitPosUp = -g_fSideSizeZEighth;
+				*HitPosDown = -g_fSideSizeZQuarter;
+				*HitPosLeft = -g_fSideSizeXEighth;
+				*HitPosRight = 0.0f;
+			}
+		}
+		else if (InrayS.x < -g_fSideSizeXQuarter && InrayS.z >= -g_fSideSizeZQuarter)			//子-+第二象限
+		{
+			g_SecondField_Collision[8].Cheak = true;
+			//孫判定　同上
+			if (InrayS.x >= -g_fSideSizeXQuarter - g_fSideSizeXEighth && InrayS.z >= -g_fSideSizeZEighth)			//孫++第一象限
+			{
+				g_ThirdField_Collision[33].Cheak = true;
+				*HitPosUp = 0.0f;
+				*HitPosDown = -g_fSideSizeZEighth;
+				*HitPosLeft = -g_fSideSizeXQuarter - g_fSideSizeXEighth;
+				*HitPosRight = -g_fSideSizeXQuarter;
+			}
+			else if (InrayS.x < -g_fSideSizeXQuarter - g_fSideSizeXEighth && InrayS.z >= -g_fSideSizeZEighth)			//孫-+第二象限
+			{
+				g_ThirdField_Collision[32].Cheak = true;
+				*HitPosUp = 0.0f;
+				*HitPosDown = -g_fSideSizeZEighth;
+				*HitPosLeft = -g_fSideSizeXQuarter - g_fSideSizeXQuarter;
+				*HitPosRight = -g_fSideSizeXQuarter - g_fSideSizeXEighth;
+			}
+			else if (InrayS.x < -g_fSideSizeXQuarter - g_fSideSizeXEighth && InrayS.z < -g_fSideSizeZEighth)			//孫--第三象限
+			{
+				g_ThirdField_Collision[34].Cheak = true;
+				*HitPosUp = -g_fSideSizeZEighth;
+				*HitPosDown = -g_fSideSizeZQuarter;
+				*HitPosLeft = -g_fSideSizeXQuarter - g_fSideSizeXQuarter;
+				*HitPosRight = -g_fSideSizeXQuarter - g_fSideSizeXEighth;
+			}
+			else if (InrayS.x >= -g_fSideSizeXQuarter - g_fSideSizeXEighth && InrayS.z < -g_fSideSizeZEighth)			//孫+-第四象限
+			{
+				g_ThirdField_Collision[35].Cheak = true;
+				*HitPosUp = -g_fSideSizeZEighth;
+				*HitPosDown = -g_fSideSizeZQuarter;
+				*HitPosLeft = -g_fSideSizeXQuarter - g_fSideSizeXEighth;
+				*HitPosRight = -g_fSideSizeXQuarter;
+			}
+		}
+		else if (InrayS.x < -g_fSideSizeXQuarter && InrayS.z < -g_fSideSizeZQuarter)			//子--第三象限
+		{
+			g_SecondField_Collision[10].Cheak = true;
+			//孫判定　同上
+			if (InrayS.x >= -g_fSideSizeXQuarter - g_fSideSizeXEighth && InrayS.z >= -g_fSideSizeZQuarter - g_fSideSizeZEighth)			//孫++第一象限
+			{
+				g_ThirdField_Collision[41].Cheak = true;
+				*HitPosUp = -g_fSideSizeZQuarter;
+				*HitPosDown = -g_fSideSizeZQuarter - g_fSideSizeZEighth;
+				*HitPosLeft = -g_fSideSizeXQuarter - g_fSideSizeXEighth;
+				*HitPosRight = -g_fSideSizeXQuarter;
+			}
+			else if (InrayS.x < -g_fSideSizeXQuarter - g_fSideSizeXEighth && InrayS.z >= -g_fSideSizeZQuarter - g_fSideSizeZEighth)			//孫-+第二象限
+			{
+				g_ThirdField_Collision[40].Cheak = true;
+				*HitPosUp = -g_fSideSizeZQuarter;
+				*HitPosDown = -g_fSideSizeZQuarter - g_fSideSizeZEighth;
+				*HitPosLeft = -g_fSideSizeXQuarter - g_fSideSizeXQuarter;
+				*HitPosRight = -g_fSideSizeXQuarter - g_fSideSizeXEighth;
+			}
+			else if (InrayS.x < -g_fSideSizeXQuarter - g_fSideSizeXEighth && InrayS.z < -g_fSideSizeZQuarter - g_fSideSizeZEighth)			//孫--第三象限
+			{
+				g_ThirdField_Collision[42].Cheak = true;
+				*HitPosUp = -g_fSideSizeZQuarter - g_fSideSizeZEighth;
+				*HitPosDown = -g_fSideSizeZQuarter - g_fSideSizeZQuarter;
+				*HitPosLeft = -g_fSideSizeXQuarter - g_fSideSizeXQuarter;
+				*HitPosRight = -g_fSideSizeXQuarter - g_fSideSizeXEighth;
+			}
+			else if (InrayS.x >= -g_fSideSizeXQuarter - g_fSideSizeXEighth && InrayS.z < -g_fSideSizeZQuarter - g_fSideSizeZEighth)			//孫+-第四象限
+			{
+				g_ThirdField_Collision[43].Cheak = true;
+				*HitPosUp = -g_fSideSizeZQuarter - g_fSideSizeZEighth;
+				*HitPosDown = -g_fSideSizeZQuarter - g_fSideSizeZQuarter;
+				*HitPosLeft = -g_fSideSizeXQuarter - g_fSideSizeXEighth;
+				*HitPosRight = -g_fSideSizeXQuarter;
+			}
+
+		}
+		else if (InrayS.x >= -g_fSideSizeXQuarter && InrayS.z < -g_fSideSizeZQuarter)			//子+-第四象限
+		{
+			g_SecondField_Collision[11].Cheak = true;
+			//孫判定　同上
+			if (InrayS.x >= -g_fSideSizeXEighth && InrayS.z >= -g_fSideSizeZQuarter - g_fSideSizeZEighth)			//孫++第一象限
+			{
+				g_ThirdField_Collision[45].Cheak = true;
+				*HitPosUp = -g_fSideSizeZQuarter;
+				*HitPosDown = -g_fSideSizeZQuarter - g_fSideSizeZEighth;
+				*HitPosLeft = -g_fSideSizeXEighth;
+				*HitPosRight = 0.0f;
+			}
+			else if (InrayS.x < -g_fSideSizeXEighth && InrayS.z >= -g_fSideSizeZQuarter - g_fSideSizeZEighth)			//孫-+第二象限
+			{
+				g_ThirdField_Collision[44].Cheak = true;
+				*HitPosUp = -g_fSideSizeZQuarter;
+				*HitPosDown = -g_fSideSizeZQuarter - g_fSideSizeZEighth;
+				*HitPosLeft = -g_fSideSizeXQuarter;
+				*HitPosRight = -g_fSideSizeXEighth;
+			}
+			else if (InrayS.x < -g_fSideSizeXEighth && InrayS.z < -g_fSideSizeZQuarter - g_fSideSizeZEighth)			//孫--第三象限
+			{
+				g_ThirdField_Collision[46].Cheak = true;
+				*HitPosUp = -g_fSideSizeZQuarter - g_fSideSizeZEighth;
+				*HitPosDown = -g_fSideSizeZQuarter - g_fSideSizeZQuarter;
+				*HitPosLeft = -g_fSideSizeXQuarter;
+				*HitPosRight = -g_fSideSizeXEighth;
+			}
+			else if (InrayS.x >= -g_fSideSizeXEighth && InrayS.z < -g_fSideSizeZQuarter - g_fSideSizeZEighth)			//孫+-第四象限
+			{
+				g_ThirdField_Collision[47].Cheak = true;
+				*HitPosUp = -g_fSideSizeZQuarter - g_fSideSizeZEighth;
+				*HitPosDown = -g_fSideSizeZQuarter - g_fSideSizeZQuarter;
+				*HitPosLeft = -g_fSideSizeXEighth;
+				*HitPosRight = 0.0f;
+			}
+		}
+	}
+	else if (InrayS.x >= 0.0f && InrayS.z < 0.0f)			//親+-第四象限
+	{
+		g_FirstField_Collision[3].Cheak = true;
+		if (InrayS.x >= g_fSideSizeXQuarter && InrayS.z >= -g_fSideSizeZQuarter)			//子++第一象限
+		{
+			g_SecondField_Collision[13].Cheak = true;
+			//孫判定　同上
+			if (InrayS.x >= g_fSideSizeXQuarter + g_fSideSizeXEighth && InrayS.z >= -g_fSideSizeZEighth)			//孫++第一象限
+			{
+				g_ThirdField_Collision[53].Cheak = true;
+				*HitPosUp = 0.0f;
+				*HitPosDown = -g_fSideSizeZEighth;
+				*HitPosLeft = g_fSideSizeXQuarter + g_fSideSizeXEighth;
+				*HitPosRight = g_fSideSizeXQuarter + g_fSideSizeXQuarter;
+			}
+			else if (InrayS.x < g_fSideSizeXQuarter + g_fSideSizeXEighth && InrayS.z >= -g_fSideSizeZEighth)			//孫-+第二象限
+			{
+				g_ThirdField_Collision[52].Cheak = true;
+				*HitPosUp = 0.0f;
+				*HitPosDown = -g_fSideSizeZEighth;
+				*HitPosLeft = g_fSideSizeXQuarter;
+				*HitPosRight = g_fSideSizeXQuarter + g_fSideSizeXEighth;
+			}
+			else if (InrayS.x < g_fSideSizeXQuarter + g_fSideSizeXEighth && InrayS.z < -g_fSideSizeZEighth)			//孫--第三象限
+			{
+				g_ThirdField_Collision[54].Cheak = true;
+				*HitPosUp = -g_fSideSizeZEighth;
+				*HitPosDown = -g_fSideSizeZQuarter;
+				*HitPosLeft = g_fSideSizeXQuarter;
+				*HitPosRight = g_fSideSizeXQuarter + g_fSideSizeXEighth;
+			}
+			else if (InrayS.x >= g_fSideSizeXQuarter + g_fSideSizeXEighth && InrayS.z < -g_fSideSizeZEighth)			//孫+-第四象限
+			{
+				g_ThirdField_Collision[55].Cheak = true;
+				*HitPosUp = -g_fSideSizeZEighth;
+				*HitPosDown = -g_fSideSizeZQuarter;
+				*HitPosLeft = g_fSideSizeXQuarter + g_fSideSizeXEighth;
+				*HitPosRight = g_fSideSizeXQuarter + g_fSideSizeXQuarter;
+			}
+		}
+		else if (InrayS.x < g_fSideSizeXQuarter && InrayS.z >= -g_fSideSizeZQuarter)			//子-+第二象限
+		{
+			g_SecondField_Collision[12].Cheak = true;
+			//孫判定　同上
+			if (InrayS.x >= g_fSideSizeXEighth && InrayS.z >= -g_fSideSizeZEighth)			//孫++第一象限
+			{
+				g_ThirdField_Collision[49].Cheak = true;
+				*HitPosUp = 0.0f;
+				*HitPosDown = -g_fSideSizeZEighth;
+				*HitPosLeft = g_fSideSizeXEighth;
+				*HitPosRight = g_fSideSizeXQuarter;
+			}
+			else if (InrayS.x < g_fSideSizeXEighth && InrayS.z >= -g_fSideSizeZEighth)			//孫-+第二象限
+			{
+				g_ThirdField_Collision[48].Cheak = true;
+				*HitPosUp = 0.0f;
+				*HitPosDown = -g_fSideSizeZEighth;
+				*HitPosLeft = 0.0f;
+				*HitPosRight = g_fSideSizeXEighth;
+			}
+			else if (InrayS.x < g_fSideSizeXEighth && InrayS.z < -g_fSideSizeZEighth)			//孫--第三象限
+			{
+				g_ThirdField_Collision[50].Cheak = true;
+				*HitPosUp = -g_fSideSizeZEighth;
+				*HitPosDown = -g_fSideSizeZQuarter;
+				*HitPosLeft = 0.0f;
+				*HitPosRight = g_fSideSizeXEighth;
+			}
+			else if (InrayS.x >= g_fSideSizeXEighth && InrayS.z < -g_fSideSizeZEighth)			//孫+-第四象限
+			{
+				g_ThirdField_Collision[51].Cheak = true;
+				*HitPosUp = -g_fSideSizeZEighth;
+				*HitPosDown = -g_fSideSizeZQuarter;
+				*HitPosLeft = g_fSideSizeXEighth;
+				*HitPosRight = g_fSideSizeXQuarter;
+			}
+		}
+		else if (InrayS.x < g_fSideSizeXQuarter && InrayS.z < -g_fSideSizeZQuarter)			//子--第三象限
+		{
+			g_SecondField_Collision[14].Cheak = true;
+			//孫判定　同上
+			if (InrayS.x >= g_fSideSizeXEighth && InrayS.z >= -g_fSideSizeZQuarter - g_fSideSizeZEighth)			//孫++第一象限
+			{
+				g_ThirdField_Collision[57].Cheak = true;
+				*HitPosUp = -g_fSideSizeZQuarter;
+				*HitPosDown = -g_fSideSizeZQuarter - g_fSideSizeZEighth;
+				*HitPosLeft = g_fSideSizeXEighth;
+				*HitPosRight = g_fSideSizeXQuarter;
+			}
+			else if (InrayS.x < g_fSideSizeXEighth && InrayS.z >= -g_fSideSizeZQuarter - g_fSideSizeZEighth)			//孫-+第二象限
+			{
+				g_ThirdField_Collision[56].Cheak = true;
+				*HitPosUp = -g_fSideSizeZQuarter;
+				*HitPosDown = -g_fSideSizeZQuarter - g_fSideSizeZEighth;
+				*HitPosLeft = 0.0f;
+				*HitPosRight = g_fSideSizeXEighth;
+			}
+			else if (InrayS.x < g_fSideSizeXEighth && InrayS.z < -g_fSideSizeZQuarter - g_fSideSizeZEighth)			//孫--第三象限
+			{
+				g_ThirdField_Collision[58].Cheak = true;
+				*HitPosUp = -g_fSideSizeZQuarter - g_fSideSizeZEighth;
+				*HitPosDown = -g_fSideSizeZQuarter - g_fSideSizeZQuarter;
+				*HitPosLeft = 0.0f;
+				*HitPosRight = g_fSideSizeXEighth;
+			}
+			else if (InrayS.x >= g_fSideSizeXEighth && InrayS.z < -g_fSideSizeZQuarter - g_fSideSizeZEighth)			//孫+-第四象限
+			{
+				g_ThirdField_Collision[59].Cheak = true;
+				*HitPosUp = -g_fSideSizeZQuarter - g_fSideSizeZEighth;
+				*HitPosDown = -g_fSideSizeZQuarter - g_fSideSizeZQuarter;
+				*HitPosLeft = g_fSideSizeXEighth;
+				*HitPosRight = g_fSideSizeXQuarter;
+			}
+
+		}
+		else if (InrayS.x >= g_fSideSizeXQuarter && InrayS.z < -g_fSideSizeZQuarter)			//子+-第四象限
+		{
+			g_SecondField_Collision[15].Cheak = true;
+			//孫判定　同上
+			if (InrayS.x >= g_fSideSizeXQuarter + g_fSideSizeXEighth && InrayS.z >= -g_fSideSizeZQuarter - g_fSideSizeZEighth)			//孫++第一象限
+			{
+				g_ThirdField_Collision[61].Cheak = true;
+				*HitPosUp = -g_fSideSizeZQuarter;
+				*HitPosDown = -g_fSideSizeZQuarter - g_fSideSizeZEighth;
+				*HitPosLeft = g_fSideSizeXQuarter + g_fSideSizeXEighth;
+				*HitPosRight = g_fSideSizeXQuarter + g_fSideSizeXQuarter;
+			}
+			else if (InrayS.x < g_fSideSizeXQuarter + g_fSideSizeXEighth && InrayS.z >= -g_fSideSizeZQuarter - g_fSideSizeZEighth)			//孫-+第二象限
+			{
+				g_ThirdField_Collision[60].Cheak = true;
+				*HitPosUp = -g_fSideSizeZQuarter;
+				*HitPosDown = -g_fSideSizeZQuarter - g_fSideSizeZEighth;
+				*HitPosLeft = g_fSideSizeXQuarter;
+				*HitPosRight = g_fSideSizeXQuarter + g_fSideSizeXEighth;
+			}
+			else if (InrayS.x < g_fSideSizeXQuarter + g_fSideSizeXEighth && InrayS.z < -g_fSideSizeZQuarter - g_fSideSizeZEighth)			//孫--第三象限
+			{
+				g_ThirdField_Collision[62].Cheak = true;
+				*HitPosUp = -g_fSideSizeZQuarter - g_fSideSizeZEighth;
+				*HitPosDown = -g_fSideSizeZQuarter - g_fSideSizeZQuarter;
+				*HitPosLeft = g_fSideSizeXQuarter;
+				*HitPosRight = g_fSideSizeXQuarter + g_fSideSizeXEighth;
+			}
+			else if (InrayS.x >= g_fSideSizeXQuarter + g_fSideSizeXEighth && InrayS.z < -g_fSideSizeZQuarter - g_fSideSizeZEighth)			//孫+-第四象限
+			{
+				g_ThirdField_Collision[63].Cheak = true;
+				*HitPosUp = -g_fSideSizeZQuarter - g_fSideSizeZEighth;
+				*HitPosDown = -g_fSideSizeZQuarter - g_fSideSizeZQuarter;
+				*HitPosLeft = g_fSideSizeXQuarter + g_fSideSizeXEighth;
+				*HitPosRight = g_fSideSizeXQuarter + g_fSideSizeXQuarter;
+			}
+		}
+	}
+
+}
+
+
+//=============================================================================
+// 地形との当たり判定 rayS,rayG,vtxHOUSEN,posy 返り値void　プレイヤーの当たり判定で使用。球面補間で使用するため。
+//=============================================================================
+void FieldHit(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVECTOR3 *vtxNor, float *posY, int *RaidPolygonNum)
+{
+	//頂点バッファの中身を埋める
+	VERTEX_3D *pVtx;
+	WORD *pIdx;
+	//当たり判定高速化用の座標四隅
+	float HitPosUp;
+	float HitPosDown;
+	float HitPosLeft;
+	float HitPosRight;
+	HitPosUp = HitPosDown = HitPosLeft = HitPosRight = 0.0f;
+
+	//高速化処理。4分木で当たり判定をする範囲を絞る。
+	SpeedUpFieldHitPoly(InrayS, &HitPosUp, &HitPosDown, &HitPosLeft, &HitPosRight, RaidPolygonNum);
+
+
+
+	// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
+	g_pD3DVtxBuffFieldDraw->Lock(0, 0, (void**)&pVtx, 0);
+	g_pD3DIdxBuffFieldDraw->Lock(0, 0, (void**)&pIdx, 0);
+
+
+		for (int nCntVtx = 0; nCntVtx < g_nNumVertexIndexField; nCntVtx++)
+		{
+			//縮退ポリゴンのときはコンティニュー。最終ポリゴンの時はbreak;
+			if (nCntVtx == g_nNumVertexIndexField - 2)
+			{
+				break;
+			}
+			else if (pIdx[nCntVtx] == pIdx[nCntVtx + 1])
+			{
+				continue;
+			}
+			else if (pIdx[nCntVtx + 1] == pIdx[nCntVtx + 2])
+			{
+				continue;
+			}
+			//高速当たり判定用ポリゴンの座標内なら当たり判定実行　XチェックからZチェック。ともにtrueだと判定
+			else if (pVtx[pIdx[nCntVtx]].vtx.x >= HitPosLeft && pVtx[pIdx[nCntVtx]].vtx.x <= HitPosRight)
+			{
+				if (pVtx[pIdx[nCntVtx]].vtx.z <= HitPosUp && pVtx[pIdx[nCntVtx]].vtx.z >= HitPosDown)
+				{
+					// 頂点座標の設定
+					D3DXVECTOR3 vtx[3];
+					D3DXVECTOR3 vtxHen[2];
+					D3DXVECTOR3 NaibunPos;
+
+					vtx[0] = pVtx[pIdx[nCntVtx]].vtx + g_posField;
+					vtx[1] = pVtx[pIdx[nCntVtx + 1]].vtx + g_posField;
+					vtx[2] = pVtx[pIdx[nCntVtx + 2]].vtx + g_posField;
+
+					//レイキャストで調べる。trueで座標yを変更
+					if (RayCast(InrayS, InrayG, vtx[0], vtx[1], vtx[2], &NaibunPos))
+					{
+						vtxHen[0] = vtx[1] - vtx[0];
+						vtxHen[1] = vtx[2] - vtx[0];
+
+						//プレイやの傾く軸(地形の法線)
+						D3DXVECTOR3 vtxHOUSEN;
+						D3DXVec3Cross(&vtxHOUSEN, &vtxHen[0], &vtxHen[1]);
+						if (vtxHOUSEN.y <= 0) vtxHOUSEN *= -1;
+						*vtxNor = vtxHOUSEN;
+						*posY = NaibunPos.y + 1.0f;
+						break;
+					}
+				}
+			}
+		}
+
+	// 頂点データをアンロックする
+	g_pD3DVtxBuffFieldDraw->Unlock();
+	// インデックスデータをアンロックする
+	g_pD3DIdxBuffFieldDraw->Unlock();
+
+}
+
+void SpeedUpFieldHitPoly(D3DXVECTOR3 InrayS, float *HitPosUp, float *HitPosDown, float *HitPosLeft, float *HitPosRight,int *RaidPolygonNum)
+{
+	//判定用フラグを初期化　g_ThirdField_Collisionはプレイヤーの球面補間を計算時に現在乗っているポリゴン番号として使用
+	//親判定
+	for (int CntPartition = 0; CntPartition < FIELD_PARTITION_FIRST_NUM; CntPartition++)
+	{
+		g_FirstField_Collision[CntPartition].Cheak = false;
+	}
+	//子判定
+	for (int CntPartition = 0; CntPartition < FIELD_PARTITION_SECOND_NUM; CntPartition++)
+	{
+		g_SecondField_Collision[CntPartition].Cheak = false;
+	}
+	//孫判定
+	for (int CntPartition = 0; CntPartition < FIELD_PARTITION_THIRD_NUM; CntPartition++)
+	{
+		g_ThirdField_Collision[CntPartition].Cheak = false;
+	}
+
+	//判定　X,Zがプラスかマイナスか　基準はg_posFieldの中心(x0,z0)
+	if (InrayS.x >= 0.0f && InrayS.z >= 0.0f)			//親++第一象限
+	{
+		g_FirstField_Collision[1].Cheak = true;
+		//子判定　親の時と同じく、第一象限のなかでさらにプラスかマイナスか判定
+		if (InrayS.x >= g_fSideSizeXQuarter && InrayS.z >= g_fSideSizeZQuarter)			//子++第一象限
+		{
+			g_SecondField_Collision[5].Cheak = true;
+			//孫判定　同上
+			if (InrayS.x >= g_fSideSizeXQuarter + g_fSideSizeXEighth && InrayS.z >= g_fSideSizeZQuarter + g_fSideSizeZEighth)			//孫++第一象限
+			{
+				g_ThirdField_Collision[21].Cheak = true;
+				*HitPosUp = g_fSideSizeZQuarter + g_fSideSizeZQuarter;
+				*HitPosDown = g_fSideSizeZQuarter + g_fSideSizeZEighth;
+				*HitPosLeft = g_fSideSizeXQuarter + g_fSideSizeXEighth;
+				*HitPosRight = g_fSideSizeXQuarter + g_fSideSizeXQuarter;
+			}
+			else if (InrayS.x < g_fSideSizeXQuarter + g_fSideSizeXEighth && InrayS.z >= g_fSideSizeZQuarter + g_fSideSizeZEighth)			//孫-+第二象限
+			{
+				g_ThirdField_Collision[20].Cheak = true;
+				*HitPosUp = g_fSideSizeZQuarter + g_fSideSizeZQuarter;
+				*HitPosDown = g_fSideSizeZQuarter + g_fSideSizeZEighth;
+				*HitPosLeft = g_fSideSizeXQuarter;
+				*HitPosRight = g_fSideSizeXQuarter + g_fSideSizeXEighth;
+			}
+			else if (InrayS.x < g_fSideSizeXQuarter + g_fSideSizeXEighth && InrayS.z < g_fSideSizeZQuarter + g_fSideSizeZEighth)			//孫--第三象限
+			{
+				g_ThirdField_Collision[22].Cheak = true;
+				*HitPosUp = g_fSideSizeZQuarter + g_fSideSizeZEighth;
+				*HitPosDown = g_fSideSizeZQuarter;
+				*HitPosLeft = g_fSideSizeXQuarter;
+				*HitPosRight = g_fSideSizeXQuarter + g_fSideSizeXEighth;
+			}
+			else if (InrayS.x >= g_fSideSizeXQuarter + g_fSideSizeXEighth && InrayS.z < g_fSideSizeZQuarter + g_fSideSizeZEighth)			//孫+-第四象限
+			{
+				g_ThirdField_Collision[23].Cheak = true;
+				*HitPosUp = g_fSideSizeZQuarter + g_fSideSizeZEighth;
+				*HitPosDown = g_fSideSizeZQuarter;
+				*HitPosLeft = g_fSideSizeXQuarter + g_fSideSizeXEighth;
+				*HitPosRight = g_fSideSizeXQuarter + g_fSideSizeXQuarter;
+			}
+		}
+		else if (InrayS.x < g_fSideSizeXQuarter && InrayS.z >= g_fSideSizeZQuarter)			//子-+第二象限
+		{
+			g_SecondField_Collision[4].Cheak = true;
+			//孫判定　同上
+			if (InrayS.x >= g_fSideSizeXEighth && InrayS.z >= g_fSideSizeZQuarter + g_fSideSizeZEighth)			//孫++第一象限
+			{
+				g_ThirdField_Collision[17].Cheak = true;
+				*HitPosUp = g_fSideSizeZQuarter + g_fSideSizeZQuarter;
+				*HitPosDown = g_fSideSizeZQuarter + g_fSideSizeZEighth;
+				*HitPosLeft = g_fSideSizeXEighth;
+				*HitPosRight = g_fSideSizeXQuarter;
+			}
+			else if (InrayS.x < g_fSideSizeXEighth && InrayS.z >= g_fSideSizeZQuarter + g_fSideSizeZEighth)			//孫-+第二象限
+			{
+				g_ThirdField_Collision[16].Cheak = true;
+				*HitPosUp = g_fSideSizeZQuarter + g_fSideSizeZQuarter;
+				*HitPosDown = g_fSideSizeZQuarter + g_fSideSizeZEighth;
+				*HitPosLeft = 0.0f;
+				*HitPosRight = g_fSideSizeXEighth;
+			}
+			else if (InrayS.x < g_fSideSizeXEighth && InrayS.z < g_fSideSizeZQuarter + g_fSideSizeZEighth)			//孫--第三象限
+			{
+				g_ThirdField_Collision[18].Cheak = true;
+				*HitPosUp = g_fSideSizeZQuarter + g_fSideSizeZEighth;
+				*HitPosDown = g_fSideSizeZQuarter;
+				*HitPosLeft = 0.0f;
+				*HitPosRight = g_fSideSizeXEighth;
+			}
+			else if (InrayS.x >= g_fSideSizeXEighth && InrayS.z < g_fSideSizeZQuarter + g_fSideSizeZEighth)			//孫+-第四象限
+			{
+				g_ThirdField_Collision[19].Cheak = true;
+				*HitPosUp = g_fSideSizeZQuarter + g_fSideSizeZEighth;
+				*HitPosDown = g_fSideSizeZQuarter;
+				*HitPosLeft = g_fSideSizeXEighth;
+				*HitPosRight = g_fSideSizeXQuarter;
+			}
+		}
+		else if (InrayS.x < g_fSideSizeXQuarter && InrayS.z < g_fSideSizeZQuarter)			//子--第三象限
+		{
+			g_SecondField_Collision[6].Cheak = true;
+			//孫判定　同上
+			if (InrayS.x >= g_fSideSizeXEighth && InrayS.z >= g_fSideSizeZEighth)			//孫++第一象限
+			{
+				g_ThirdField_Collision[25].Cheak = true;
+				*HitPosUp = g_fSideSizeZQuarter;
+				*HitPosDown = g_fSideSizeZEighth;
+				*HitPosLeft = g_fSideSizeXEighth;
+				*HitPosRight = g_fSideSizeXQuarter;
+			}
+			else if (InrayS.x < g_fSideSizeXEighth && InrayS.z >= g_fSideSizeZEighth)			//孫-+第二象限
+			{
+				g_ThirdField_Collision[24].Cheak = true;
+				*HitPosUp = g_fSideSizeZQuarter;
+				*HitPosDown = g_fSideSizeZEighth;
+				*HitPosLeft = 0.0f;
+				*HitPosRight = g_fSideSizeXEighth;
+			}
+			else if (InrayS.x < g_fSideSizeXEighth && InrayS.z < g_fSideSizeZEighth)			//孫--第三象限
+			{
+				g_ThirdField_Collision[26].Cheak = true;
+				*HitPosUp = g_fSideSizeZEighth;
+				*HitPosDown = 0.0f;
+				*HitPosLeft = 0.0f;
+				*HitPosRight = g_fSideSizeXEighth;
+			}
+			else if (InrayS.x >= g_fSideSizeXEighth && InrayS.z < g_fSideSizeZEighth)			//孫+-第四象限
+			{
+				g_ThirdField_Collision[27].Cheak = true;
+				*HitPosUp = g_fSideSizeZEighth;
+				*HitPosDown = 0.0f;
+				*HitPosLeft = g_fSideSizeXEighth;
+				*HitPosRight = g_fSideSizeXQuarter;
+			}
+
+		}
+		else if (InrayS.x >= g_fSideSizeXQuarter && InrayS.z < g_fSideSizeZQuarter)			//子+-第四象限
+		{
+			g_SecondField_Collision[7].Cheak = true;
+			//孫判定　同上
+			if (InrayS.x >= g_fSideSizeXQuarter + g_fSideSizeXEighth && InrayS.z >= g_fSideSizeZEighth)			//孫++第一象限
+			{
+				g_ThirdField_Collision[29].Cheak = true;
+				*HitPosUp = g_fSideSizeZQuarter;
+				*HitPosDown = g_fSideSizeZEighth;
+				*HitPosLeft = g_fSideSizeXQuarter + g_fSideSizeXEighth;
+				*HitPosRight = g_fSideSizeXQuarter + g_fSideSizeXQuarter;
+			}
+			else if (InrayS.x < g_fSideSizeXQuarter + g_fSideSizeXEighth && InrayS.z >= g_fSideSizeZEighth)			//孫-+第二象限
+			{
+				g_ThirdField_Collision[28].Cheak = true;
+				*HitPosUp = g_fSideSizeZQuarter;
+				*HitPosDown = g_fSideSizeZEighth;
+				*HitPosLeft = g_fSideSizeXQuarter;
+				*HitPosRight = g_fSideSizeXQuarter + g_fSideSizeXEighth;
+			}
+			else if (InrayS.x < g_fSideSizeXQuarter + g_fSideSizeXEighth && InrayS.z < g_fSideSizeZEighth)			//孫--第三象限
+			{
+				g_ThirdField_Collision[30].Cheak = true;
+				*HitPosUp = g_fSideSizeZEighth;
+				*HitPosDown = 0.0f;
+				*HitPosLeft = g_fSideSizeXQuarter;
+				*HitPosRight = g_fSideSizeXQuarter + g_fSideSizeXEighth;
+			}
+			else if (InrayS.x >= g_fSideSizeXQuarter + g_fSideSizeXEighth && InrayS.z < g_fSideSizeZEighth)			//孫+-第四象限
+			{
+				g_ThirdField_Collision[31].Cheak = true;
+				*HitPosUp = g_fSideSizeZEighth;
+				*HitPosDown = 0.0f;
+				*HitPosLeft = g_fSideSizeXQuarter + g_fSideSizeXEighth;
+				*HitPosRight = g_fSideSizeXQuarter + g_fSideSizeXQuarter;
+			}
+		}
+	}
+	else if (InrayS.x < 0.0f && InrayS.z >= 0.0f)			//親-+第二象限
+	{
+		g_FirstField_Collision[0].Cheak = true;
+		//子判定　親の時と同じく、第一象限のなかでさらにプラスかマイナスか判定
+		if (InrayS.x >= -g_fSideSizeXQuarter && InrayS.z >= g_fSideSizeZQuarter)			//子++第一象限
+		{
+			g_SecondField_Collision[1].Cheak = true;
+			//孫判定　同上
+			if (InrayS.x >= -g_fSideSizeXEighth && InrayS.z >= g_fSideSizeZQuarter + g_fSideSizeZEighth)			//孫++第一象限
+			{
+				g_ThirdField_Collision[5].Cheak = true;
+				*HitPosUp = g_fSideSizeZQuarter + g_fSideSizeZQuarter;
+				*HitPosDown = g_fSideSizeZQuarter + g_fSideSizeZEighth;
+				*HitPosLeft = -g_fSideSizeXEighth;
+				*HitPosRight = 0.0f;
+			}
+			else if (InrayS.x < -g_fSideSizeXEighth && InrayS.z >= g_fSideSizeZQuarter + g_fSideSizeZEighth)			//孫-+第二象限
+			{
+				g_ThirdField_Collision[4].Cheak = true;
+				*HitPosUp = g_fSideSizeZQuarter + g_fSideSizeZQuarter;
+				*HitPosDown = g_fSideSizeZQuarter + g_fSideSizeZEighth;
+				*HitPosLeft = -g_fSideSizeXQuarter;
+				*HitPosRight = -g_fSideSizeXEighth;
+			}
+			else if (InrayS.x < -g_fSideSizeXEighth && InrayS.z < g_fSideSizeZQuarter + g_fSideSizeZEighth)			//孫--第三象限
+			{
+				g_ThirdField_Collision[6].Cheak = true;
+				*HitPosUp = g_fSideSizeZQuarter + g_fSideSizeZEighth;
+				*HitPosDown = g_fSideSizeZQuarter;
+				*HitPosLeft = -g_fSideSizeXQuarter;
+				*HitPosRight = -g_fSideSizeXEighth;
+			}
+			else if (InrayS.x >= -g_fSideSizeXEighth && InrayS.z < g_fSideSizeZQuarter + g_fSideSizeZEighth)			//孫+-第四象限
+			{
+				g_ThirdField_Collision[7].Cheak = true;
+				*HitPosUp = g_fSideSizeZQuarter + g_fSideSizeZEighth;
+				*HitPosDown = g_fSideSizeZQuarter;
+				*HitPosLeft = -g_fSideSizeXEighth;
+				*HitPosRight = 0.0f;
+			}
+		}
+		else if (InrayS.x < -g_fSideSizeXQuarter && InrayS.z >= g_fSideSizeZQuarter)			//子-+第二象限
+		{
+			g_SecondField_Collision[0].Cheak = true;
+			//孫判定　同上
+			if (InrayS.x >= -g_fSideSizeXQuarter - g_fSideSizeXEighth && InrayS.z >= g_fSideSizeZQuarter + g_fSideSizeZEighth)			//孫++第一象限
+			{
+				g_ThirdField_Collision[1].Cheak = true;
+				*HitPosUp = g_fSideSizeZQuarter + g_fSideSizeZQuarter;
+				*HitPosDown = g_fSideSizeZQuarter + g_fSideSizeZEighth;
+				*HitPosLeft = -g_fSideSizeXQuarter - g_fSideSizeXEighth;
+				*HitPosRight = -g_fSideSizeXQuarter;
+			}
+			else if (InrayS.x < -g_fSideSizeXQuarter - g_fSideSizeXEighth && InrayS.z >= g_fSideSizeZQuarter + g_fSideSizeZEighth)			//孫-+第二象限
+			{
+				g_ThirdField_Collision[0].Cheak = true;
+				*HitPosUp = g_fSideSizeZQuarter + g_fSideSizeZQuarter;
+				*HitPosDown = g_fSideSizeZQuarter + g_fSideSizeZEighth;
+				*HitPosLeft = -g_fSideSizeXQuarter - g_fSideSizeXQuarter;
+				*HitPosRight = -g_fSideSizeXQuarter - g_fSideSizeXEighth;
+			}
+			else if (InrayS.x < -g_fSideSizeXQuarter - g_fSideSizeXEighth && InrayS.z < g_fSideSizeZQuarter + g_fSideSizeZEighth)			//孫--第三象限
+			{
+				g_ThirdField_Collision[2].Cheak = true;
+				*HitPosUp = g_fSideSizeZQuarter + g_fSideSizeZEighth;
+				*HitPosDown = g_fSideSizeZQuarter;
+				*HitPosLeft = -g_fSideSizeXQuarter - g_fSideSizeXQuarter;
+				*HitPosRight = -g_fSideSizeXQuarter - g_fSideSizeXEighth;
+			}
+			else if (InrayS.x >= -g_fSideSizeXQuarter - g_fSideSizeXEighth && InrayS.z < g_fSideSizeZQuarter + g_fSideSizeZEighth)			//孫+-第四象限
+			{
+				g_ThirdField_Collision[3].Cheak = true;
+				*HitPosUp = g_fSideSizeZQuarter + g_fSideSizeZEighth;
+				*HitPosDown = g_fSideSizeZQuarter;
+				*HitPosLeft = -g_fSideSizeXQuarter - g_fSideSizeXEighth;
+				*HitPosRight = -g_fSideSizeXQuarter;
+			}
+		}
+		else if (InrayS.x < -g_fSideSizeXQuarter && InrayS.z < g_fSideSizeZQuarter)			//子--第三象限
+		{
+			g_SecondField_Collision[2].Cheak = true;
+			//孫判定　同上
+			if (InrayS.x >= -g_fSideSizeXQuarter - g_fSideSizeXEighth && InrayS.z >= g_fSideSizeZEighth)			//孫++第一象限
+			{
+				g_ThirdField_Collision[9].Cheak = true;
+				*HitPosUp = g_fSideSizeZQuarter;
+				*HitPosDown = g_fSideSizeZEighth;
+				*HitPosLeft = -g_fSideSizeXQuarter - g_fSideSizeXEighth;
+				*HitPosRight = -g_fSideSizeXQuarter;
+			}
+			else if (InrayS.x < -g_fSideSizeXQuarter - g_fSideSizeXEighth && InrayS.z >= g_fSideSizeZEighth)			//孫-+第二象限
+			{
+				g_ThirdField_Collision[8].Cheak = true;
+				*HitPosUp = g_fSideSizeZQuarter;
+				*HitPosDown = g_fSideSizeZEighth;
+				*HitPosLeft = -g_fSideSizeXQuarter - g_fSideSizeXQuarter;
+				*HitPosRight = -g_fSideSizeXQuarter - g_fSideSizeXEighth;
+			}
+			else if (InrayS.x < -g_fSideSizeXQuarter - g_fSideSizeXEighth && InrayS.z < g_fSideSizeZEighth)			//孫--第三象限
+			{
+				g_ThirdField_Collision[10].Cheak = true;
+				*HitPosUp = g_fSideSizeZEighth;
+				*HitPosDown = 0.0f;
+				*HitPosLeft = -g_fSideSizeXQuarter - g_fSideSizeXQuarter;
+				*HitPosRight = -g_fSideSizeXQuarter - g_fSideSizeXEighth;
+			}
+			else if (InrayS.x >= -g_fSideSizeXQuarter - g_fSideSizeXEighth && InrayS.z < g_fSideSizeZEighth)			//孫+-第四象限
+			{
+				g_ThirdField_Collision[11].Cheak = true;
+				*HitPosUp = g_fSideSizeZEighth;
+				*HitPosDown = 0.0f;
+				*HitPosLeft = -g_fSideSizeXQuarter - g_fSideSizeXEighth;
+				*HitPosRight = -g_fSideSizeXQuarter;
+			}
+
+		}
+		else if (InrayS.x >= -g_fSideSizeXQuarter && InrayS.z < g_fSideSizeZQuarter)			//子+-第四象限
+		{
+			g_SecondField_Collision[3].Cheak = true;
+			//孫判定　同上
+			if (InrayS.x >= -g_fSideSizeXEighth && InrayS.z >= g_fSideSizeZEighth)			//孫++第一象限
+			{
+				g_ThirdField_Collision[13].Cheak = true;
+				*HitPosUp = g_fSideSizeZQuarter;
+				*HitPosDown = g_fSideSizeZEighth;
+				*HitPosLeft = -g_fSideSizeXEighth;
+				*HitPosRight = 0.0f;
+			}
+			else if (InrayS.x < -g_fSideSizeXEighth && InrayS.z >= g_fSideSizeZEighth)			//孫-+第二象限
+			{
+				g_ThirdField_Collision[12].Cheak = true;
+				*HitPosUp = g_fSideSizeZQuarter;
+				*HitPosDown = g_fSideSizeZEighth;
+				*HitPosLeft = -g_fSideSizeXQuarter;
+				*HitPosRight = -g_fSideSizeXEighth;
+			}
+			else if (InrayS.x < -g_fSideSizeXEighth && InrayS.z < g_fSideSizeZEighth)			//孫--第三象限
+			{
+				g_ThirdField_Collision[14].Cheak = true;
+				*HitPosUp = g_fSideSizeZEighth;
+				*HitPosDown = 0.0f;
+				*HitPosLeft = -g_fSideSizeXQuarter;
+				*HitPosRight = -g_fSideSizeXEighth;
+			}
+			else if (InrayS.x >= -g_fSideSizeXEighth && InrayS.z < g_fSideSizeZEighth)			//孫+-第四象限
+			{
+				g_ThirdField_Collision[15].Cheak = true;
+				*HitPosUp = g_fSideSizeZEighth;
+				*HitPosDown = 0.0f;
+				*HitPosLeft = -g_fSideSizeXEighth;
+				*HitPosRight = 0.0f;
+			}
+		}
+	}
+	else if (InrayS.x < 0.0f && InrayS.z < 0.0f)			//親--第三象限
+	{
+		g_FirstField_Collision[2].Cheak = true;
+		if (InrayS.x >= -g_fSideSizeXQuarter && InrayS.z >= -g_fSideSizeZQuarter)			//子++第一象限
+		{
+			g_SecondField_Collision[9].Cheak = true;
+			//孫判定　同上
+			if (InrayS.x >= -g_fSideSizeXEighth && InrayS.z >= -g_fSideSizeZEighth)			//孫++第一象限
+			{
+				g_ThirdField_Collision[37].Cheak = true;
+				*HitPosUp = 0.0f;
+				*HitPosDown = -g_fSideSizeZEighth;
+				*HitPosLeft = -g_fSideSizeXEighth;
+				*HitPosRight = 0.0f;
+			}
+			else if (InrayS.x < -g_fSideSizeXEighth && InrayS.z >= -g_fSideSizeZEighth)			//孫-+第二象限
+			{
+				g_ThirdField_Collision[36].Cheak = true;
+				*HitPosUp = 0.0f;
+				*HitPosDown = -g_fSideSizeZEighth;
+				*HitPosLeft = -g_fSideSizeXQuarter;
+				*HitPosRight = -g_fSideSizeXEighth;
+			}
+			else if (InrayS.x < -g_fSideSizeXEighth && InrayS.z < -g_fSideSizeZEighth)			//孫--第三象限
+			{
+				g_ThirdField_Collision[38].Cheak = true;
+				*HitPosUp = -g_fSideSizeZEighth;
+				*HitPosDown = -g_fSideSizeZQuarter;
+				*HitPosLeft = -g_fSideSizeXQuarter;
+				*HitPosRight = -g_fSideSizeXEighth;
+			}
+			else if (InrayS.x >= -g_fSideSizeXEighth && InrayS.z < -g_fSideSizeZEighth)			//孫+-第四象限
+			{
+				g_ThirdField_Collision[39].Cheak = true;
+				*HitPosUp = -g_fSideSizeZEighth;
+				*HitPosDown = -g_fSideSizeZQuarter;
+				*HitPosLeft = -g_fSideSizeXEighth;
+				*HitPosRight = 0.0f;
+			}
+		}
+		else if (InrayS.x < -g_fSideSizeXQuarter && InrayS.z >= -g_fSideSizeZQuarter)			//子-+第二象限
+		{
+			g_SecondField_Collision[8].Cheak = true;
+			//孫判定　同上
+			if (InrayS.x >= -g_fSideSizeXQuarter - g_fSideSizeXEighth && InrayS.z >= -g_fSideSizeZEighth)			//孫++第一象限
+			{
+				g_ThirdField_Collision[33].Cheak = true;
+				*HitPosUp = 0.0f;
+				*HitPosDown = -g_fSideSizeZEighth;
+				*HitPosLeft = -g_fSideSizeXQuarter - g_fSideSizeXEighth;
+				*HitPosRight = -g_fSideSizeXQuarter;
+			}
+			else if (InrayS.x < -g_fSideSizeXQuarter - g_fSideSizeXEighth && InrayS.z >= -g_fSideSizeZEighth)			//孫-+第二象限
+			{
+				g_ThirdField_Collision[32].Cheak = true;
+				*HitPosUp = 0.0f;
+				*HitPosDown = -g_fSideSizeZEighth;
+				*HitPosLeft = -g_fSideSizeXQuarter - g_fSideSizeXQuarter;
+				*HitPosRight = -g_fSideSizeXQuarter - g_fSideSizeXEighth;
+			}
+			else if (InrayS.x < -g_fSideSizeXQuarter - g_fSideSizeXEighth && InrayS.z < -g_fSideSizeZEighth)			//孫--第三象限
+			{
+				g_ThirdField_Collision[34].Cheak = true;
+				*HitPosUp = -g_fSideSizeZEighth;
+				*HitPosDown = -g_fSideSizeZQuarter;
+				*HitPosLeft = -g_fSideSizeXQuarter - g_fSideSizeXQuarter;
+				*HitPosRight = -g_fSideSizeXQuarter - g_fSideSizeXEighth;
+			}
+			else if (InrayS.x >= -g_fSideSizeXQuarter - g_fSideSizeXEighth && InrayS.z < -g_fSideSizeZEighth)			//孫+-第四象限
+			{
+				g_ThirdField_Collision[35].Cheak = true;
+				*HitPosUp = -g_fSideSizeZEighth;
+				*HitPosDown = -g_fSideSizeZQuarter;
+				*HitPosLeft = -g_fSideSizeXQuarter - g_fSideSizeXEighth;
+				*HitPosRight = -g_fSideSizeXQuarter;
+			}
+		}
+		else if (InrayS.x < -g_fSideSizeXQuarter && InrayS.z < -g_fSideSizeZQuarter)			//子--第三象限
+		{
+			g_SecondField_Collision[10].Cheak = true;
+			//孫判定　同上
+			if (InrayS.x >= -g_fSideSizeXQuarter - g_fSideSizeXEighth && InrayS.z >= -g_fSideSizeZQuarter - g_fSideSizeZEighth)			//孫++第一象限
+			{
+				g_ThirdField_Collision[41].Cheak = true;
+				*HitPosUp = -g_fSideSizeZQuarter;
+				*HitPosDown = -g_fSideSizeZQuarter - g_fSideSizeZEighth;
+				*HitPosLeft = -g_fSideSizeXQuarter - g_fSideSizeXEighth;
+				*HitPosRight = -g_fSideSizeXQuarter;
+			}
+			else if (InrayS.x < -g_fSideSizeXQuarter - g_fSideSizeXEighth && InrayS.z >= -g_fSideSizeZQuarter - g_fSideSizeZEighth)			//孫-+第二象限
+			{
+				g_ThirdField_Collision[40].Cheak = true;
+				*HitPosUp = -g_fSideSizeZQuarter;
+				*HitPosDown = -g_fSideSizeZQuarter - g_fSideSizeZEighth;
+				*HitPosLeft = -g_fSideSizeXQuarter - g_fSideSizeXQuarter;
+				*HitPosRight = -g_fSideSizeXQuarter - g_fSideSizeXEighth;
+			}
+			else if (InrayS.x < -g_fSideSizeXQuarter - g_fSideSizeXEighth && InrayS.z < -g_fSideSizeZQuarter - g_fSideSizeZEighth)			//孫--第三象限
+			{
+				g_ThirdField_Collision[42].Cheak = true;
+				*HitPosUp = -g_fSideSizeZQuarter - g_fSideSizeZEighth;
+				*HitPosDown = -g_fSideSizeZQuarter - g_fSideSizeZQuarter;
+				*HitPosLeft = -g_fSideSizeXQuarter - g_fSideSizeXQuarter;
+				*HitPosRight = -g_fSideSizeXQuarter - g_fSideSizeXEighth;
+			}
+			else if (InrayS.x >= -g_fSideSizeXQuarter - g_fSideSizeXEighth && InrayS.z < -g_fSideSizeZQuarter - g_fSideSizeZEighth)			//孫+-第四象限
+			{
+				g_ThirdField_Collision[43].Cheak = true;
+				*HitPosUp = -g_fSideSizeZQuarter - g_fSideSizeZEighth;
+				*HitPosDown = -g_fSideSizeZQuarter - g_fSideSizeZQuarter;
+				*HitPosLeft = -g_fSideSizeXQuarter - g_fSideSizeXEighth;
+				*HitPosRight = -g_fSideSizeXQuarter;
+			}
+
+		}
+		else if (InrayS.x >= -g_fSideSizeXQuarter && InrayS.z < -g_fSideSizeZQuarter)			//子+-第四象限
+		{
+			g_SecondField_Collision[11].Cheak = true;
+			//孫判定　同上
+			if (InrayS.x >= -g_fSideSizeXEighth && InrayS.z >= -g_fSideSizeZQuarter - g_fSideSizeZEighth)			//孫++第一象限
+			{
+				g_ThirdField_Collision[45].Cheak = true;
+				*HitPosUp = -g_fSideSizeZQuarter;
+				*HitPosDown = -g_fSideSizeZQuarter - g_fSideSizeZEighth;
+				*HitPosLeft = -g_fSideSizeXEighth;
+				*HitPosRight = 0.0f;
+			}
+			else if (InrayS.x < -g_fSideSizeXEighth && InrayS.z >= -g_fSideSizeZQuarter - g_fSideSizeZEighth)			//孫-+第二象限
+			{
+				g_ThirdField_Collision[44].Cheak = true;
+				*HitPosUp = -g_fSideSizeZQuarter;
+				*HitPosDown = -g_fSideSizeZQuarter - g_fSideSizeZEighth;
+				*HitPosLeft = -g_fSideSizeXQuarter;
+				*HitPosRight = -g_fSideSizeXEighth;
+			}
+			else if (InrayS.x < -g_fSideSizeXEighth && InrayS.z < -g_fSideSizeZQuarter - g_fSideSizeZEighth)			//孫--第三象限
+			{
+				g_ThirdField_Collision[46].Cheak = true;
+				*HitPosUp = -g_fSideSizeZQuarter - g_fSideSizeZEighth;
+				*HitPosDown = -g_fSideSizeZQuarter - g_fSideSizeZQuarter;
+				*HitPosLeft = -g_fSideSizeXQuarter;
+				*HitPosRight = -g_fSideSizeXEighth;
+			}
+			else if (InrayS.x >= -g_fSideSizeXEighth && InrayS.z < -g_fSideSizeZQuarter - g_fSideSizeZEighth)			//孫+-第四象限
+			{
+				g_ThirdField_Collision[47].Cheak = true;
+				*HitPosUp = -g_fSideSizeZQuarter - g_fSideSizeZEighth;
+				*HitPosDown = -g_fSideSizeZQuarter - g_fSideSizeZQuarter;
+				*HitPosLeft = -g_fSideSizeXEighth;
+				*HitPosRight = 0.0f;
+			}
+		}
+	}
+	else if (InrayS.x >= 0.0f && InrayS.z < 0.0f)			//親+-第四象限
+	{
+		g_FirstField_Collision[3].Cheak = true;
+		if (InrayS.x >= g_fSideSizeXQuarter && InrayS.z >= -g_fSideSizeZQuarter)			//子++第一象限
+		{
+			g_SecondField_Collision[13].Cheak = true;
+			//孫判定　同上
+			if (InrayS.x >= g_fSideSizeXQuarter + g_fSideSizeXEighth && InrayS.z >= -g_fSideSizeZEighth)			//孫++第一象限
+			{
+				g_ThirdField_Collision[53].Cheak = true;
+				*HitPosUp = 0.0f;
+				*HitPosDown = -g_fSideSizeZEighth;
+				*HitPosLeft = g_fSideSizeXQuarter + g_fSideSizeXEighth;
+				*HitPosRight = g_fSideSizeXQuarter + g_fSideSizeXQuarter;
+			}
+			else if (InrayS.x < g_fSideSizeXQuarter + g_fSideSizeXEighth && InrayS.z >= -g_fSideSizeZEighth)			//孫-+第二象限
+			{
+				g_ThirdField_Collision[52].Cheak = true;
+				*HitPosUp = 0.0f;
+				*HitPosDown = -g_fSideSizeZEighth;
+				*HitPosLeft = g_fSideSizeXQuarter;
+				*HitPosRight = g_fSideSizeXQuarter + g_fSideSizeXEighth;
+			}
+			else if (InrayS.x < g_fSideSizeXQuarter + g_fSideSizeXEighth && InrayS.z < -g_fSideSizeZEighth)			//孫--第三象限
+			{
+				g_ThirdField_Collision[54].Cheak = true;
+				*HitPosUp = -g_fSideSizeZEighth;
+				*HitPosDown = -g_fSideSizeZQuarter;
+				*HitPosLeft = g_fSideSizeXQuarter;
+				*HitPosRight = g_fSideSizeXQuarter + g_fSideSizeXEighth;
+			}
+			else if (InrayS.x >= g_fSideSizeXQuarter + g_fSideSizeXEighth && InrayS.z < -g_fSideSizeZEighth)			//孫+-第四象限
+			{
+				g_ThirdField_Collision[55].Cheak = true;
+				*HitPosUp = -g_fSideSizeZEighth;
+				*HitPosDown = -g_fSideSizeZQuarter;
+				*HitPosLeft = g_fSideSizeXQuarter + g_fSideSizeXEighth;
+				*HitPosRight = g_fSideSizeXQuarter + g_fSideSizeXQuarter;
+			}
+		}
+		else if (InrayS.x < g_fSideSizeXQuarter && InrayS.z >= -g_fSideSizeZQuarter)			//子-+第二象限
+		{
+			g_SecondField_Collision[12].Cheak = true;
+			//孫判定　同上
+			if (InrayS.x >= g_fSideSizeXEighth && InrayS.z >= -g_fSideSizeZEighth)			//孫++第一象限
+			{
+				g_ThirdField_Collision[49].Cheak = true;
+				*HitPosUp = 0.0f;
+				*HitPosDown = -g_fSideSizeZEighth;
+				*HitPosLeft = g_fSideSizeXEighth;
+				*HitPosRight = g_fSideSizeXQuarter;
+			}
+			else if (InrayS.x < g_fSideSizeXEighth && InrayS.z >= -g_fSideSizeZEighth)			//孫-+第二象限
+			{
+				g_ThirdField_Collision[48].Cheak = true;
+				*HitPosUp = 0.0f;
+				*HitPosDown = -g_fSideSizeZEighth;
+				*HitPosLeft = 0.0f;
+				*HitPosRight = g_fSideSizeXEighth;
+			}
+			else if (InrayS.x < g_fSideSizeXEighth && InrayS.z < -g_fSideSizeZEighth)			//孫--第三象限
+			{
+				g_ThirdField_Collision[50].Cheak = true;
+				*HitPosUp = -g_fSideSizeZEighth;
+				*HitPosDown = -g_fSideSizeZQuarter;
+				*HitPosLeft = 0.0f;
+				*HitPosRight = g_fSideSizeXEighth;
+			}
+			else if (InrayS.x >= g_fSideSizeXEighth && InrayS.z < -g_fSideSizeZEighth)			//孫+-第四象限
+			{
+				g_ThirdField_Collision[51].Cheak = true;
+				*HitPosUp = -g_fSideSizeZEighth;
+				*HitPosDown = -g_fSideSizeZQuarter;
+				*HitPosLeft = g_fSideSizeXEighth;
+				*HitPosRight = g_fSideSizeXQuarter;
+			}
+		}
+		else if (InrayS.x < g_fSideSizeXQuarter && InrayS.z < -g_fSideSizeZQuarter)			//子--第三象限
+		{
+			g_SecondField_Collision[14].Cheak = true;
+			//孫判定　同上
+			if (InrayS.x >= g_fSideSizeXEighth && InrayS.z >= -g_fSideSizeZQuarter - g_fSideSizeZEighth)			//孫++第一象限
+			{
+				g_ThirdField_Collision[57].Cheak = true;
+				*HitPosUp = -g_fSideSizeZQuarter;
+				*HitPosDown = -g_fSideSizeZQuarter - g_fSideSizeZEighth;
+				*HitPosLeft = g_fSideSizeXEighth;
+				*HitPosRight = g_fSideSizeXQuarter;
+			}
+			else if (InrayS.x < g_fSideSizeXEighth && InrayS.z >= -g_fSideSizeZQuarter - g_fSideSizeZEighth)			//孫-+第二象限
+			{
+				g_ThirdField_Collision[56].Cheak = true;
+				*HitPosUp = -g_fSideSizeZQuarter;
+				*HitPosDown = -g_fSideSizeZQuarter - g_fSideSizeZEighth;
+				*HitPosLeft = 0.0f;
+				*HitPosRight = g_fSideSizeXEighth;
+			}
+			else if (InrayS.x < g_fSideSizeXEighth && InrayS.z < -g_fSideSizeZQuarter - g_fSideSizeZEighth)			//孫--第三象限
+			{
+				g_ThirdField_Collision[58].Cheak = true;
+				*HitPosUp = -g_fSideSizeZQuarter - g_fSideSizeZEighth;
+				*HitPosDown = -g_fSideSizeZQuarter - g_fSideSizeZQuarter;
+				*HitPosLeft = 0.0f;
+				*HitPosRight = g_fSideSizeXEighth;
+			}
+			else if (InrayS.x >= g_fSideSizeXEighth && InrayS.z < -g_fSideSizeZQuarter - g_fSideSizeZEighth)			//孫+-第四象限
+			{
+				g_ThirdField_Collision[59].Cheak = true;
+				*HitPosUp = -g_fSideSizeZQuarter - g_fSideSizeZEighth;
+				*HitPosDown = -g_fSideSizeZQuarter - g_fSideSizeZQuarter;
+				*HitPosLeft = g_fSideSizeXEighth;
+				*HitPosRight = g_fSideSizeXQuarter;
+			}
+
+		}
+		else if (InrayS.x >= g_fSideSizeXQuarter && InrayS.z < -g_fSideSizeZQuarter)			//子+-第四象限
+		{
+			g_SecondField_Collision[15].Cheak = true;
+			//孫判定　同上
+			if (InrayS.x >= g_fSideSizeXQuarter + g_fSideSizeXEighth && InrayS.z >= -g_fSideSizeZQuarter - g_fSideSizeZEighth)			//孫++第一象限
+			{
+				g_ThirdField_Collision[61].Cheak = true;
+				*HitPosUp = -g_fSideSizeZQuarter;
+				*HitPosDown = -g_fSideSizeZQuarter - g_fSideSizeZEighth;
+				*HitPosLeft = g_fSideSizeXQuarter + g_fSideSizeXEighth;
+				*HitPosRight = g_fSideSizeXQuarter + g_fSideSizeXQuarter;
+			}
+			else if (InrayS.x < g_fSideSizeXQuarter + g_fSideSizeXEighth && InrayS.z >= -g_fSideSizeZQuarter - g_fSideSizeZEighth)			//孫-+第二象限
+			{
+				g_ThirdField_Collision[60].Cheak = true;
+				*HitPosUp = -g_fSideSizeZQuarter;
+				*HitPosDown = -g_fSideSizeZQuarter - g_fSideSizeZEighth;
+				*HitPosLeft = g_fSideSizeXQuarter;
+				*HitPosRight = g_fSideSizeXQuarter + g_fSideSizeXEighth;
+			}
+			else if (InrayS.x < g_fSideSizeXQuarter + g_fSideSizeXEighth && InrayS.z < -g_fSideSizeZQuarter - g_fSideSizeZEighth)			//孫--第三象限
+			{
+				g_ThirdField_Collision[62].Cheak = true;
+				*HitPosUp = -g_fSideSizeZQuarter - g_fSideSizeZEighth;
+				*HitPosDown = -g_fSideSizeZQuarter - g_fSideSizeZQuarter;
+				*HitPosLeft = g_fSideSizeXQuarter;
+				*HitPosRight = g_fSideSizeXQuarter + g_fSideSizeXEighth;
+			}
+			else if (InrayS.x >= g_fSideSizeXQuarter + g_fSideSizeXEighth && InrayS.z < -g_fSideSizeZQuarter - g_fSideSizeZEighth)			//孫+-第四象限
+			{
+				g_ThirdField_Collision[63].Cheak = true;
+				*HitPosUp = -g_fSideSizeZQuarter - g_fSideSizeZEighth;
+				*HitPosDown = -g_fSideSizeZQuarter - g_fSideSizeZQuarter;
+				*HitPosLeft = g_fSideSizeXQuarter + g_fSideSizeXEighth;
+				*HitPosRight = g_fSideSizeXQuarter + g_fSideSizeXQuarter;
+			}
+		}
+	}
+
+	//プレイヤーの球面補間で必要な処理。どの地面ポリゴンに乗っているかを保存している
+	for (int CntPartition = 0; CntPartition < FIELD_PARTITION_THIRD_NUM; CntPartition++)
+	{
+		if (g_ThirdField_Collision[CntPartition].Cheak == true)
+		{
+			*RaidPolygonNum = CntPartition;
+			break;
+		}
+	}
+
+}
+
+
+
 

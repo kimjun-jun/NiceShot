@@ -32,5 +32,10 @@ int GetFieldBlockZNum(void);
 void SetFieldInterPolationFieldType(int type);
 float GetFieldBlockXSize(void);
 float GetFieldBlockZSize(void);
+
 void FieldHit(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVECTOR3 *vtxNor, float *posY);
+void SpeedUpFieldHitPoly(D3DXVECTOR3 InrayS, float *HitPosUp, float *HitPosDown, float *HitPosLeft, float *HitPosRight);
+
+void FieldHit(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVECTOR3 *vtxNor, float *posY, int *RaidPolygonNum);
+void SpeedUpFieldHitPoly(D3DXVECTOR3 InrayS, float *HitPosUp, float *HitPosDown, float *HitPosLeft, float *HitPosRight, int *RaidPolygonNum);
 

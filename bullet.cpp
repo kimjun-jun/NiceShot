@@ -114,7 +114,8 @@ void UpdateBullet(void)
 	{
 		if (g_aBullet[nCntBullet].use)
 		{
-			//バレットがプレイヤーの一定範囲内なら若干のホーミング
+			//バレットがプレイヤーの一定範囲内なら若干のホーミング　未使用
+			/*
 			PLAYER_HONTAI *p = GetPlayerHoudai();
 
 			for (int CntPlayer = 0; CntPlayer < PLAYER_MAX; CntPlayer++)
@@ -139,10 +140,17 @@ void UpdateBullet(void)
 			{
 				g_aBullet[nCntBullet].Hormingmove = p[g_aBullet[nCntBullet].HormingPlayerType].pos - g_aBullet[nCntBullet].pos;
 			}
+			*/
 
-			g_aBullet[nCntBullet].pos.x += g_aBullet[nCntBullet].move.x + (g_aBullet[nCntBullet].Hormingmove.x / 30.0f);
-			g_aBullet[nCntBullet].pos.y -= g_aBullet[nCntBullet].Gravity + g_aBullet[nCntBullet].move.y - (g_aBullet[nCntBullet].Hormingmove.y / 10.0f);
-			g_aBullet[nCntBullet].pos.z += g_aBullet[nCntBullet].move.z + (g_aBullet[nCntBullet].Hormingmove.z / 30.0f);
+			//ホーミングは未使用
+			//g_aBullet[nCntBullet].pos.x += g_aBullet[nCntBullet].move.x + (g_aBullet[nCntBullet].Hormingmove.x / 30.0f);
+			//g_aBullet[nCntBullet].pos.y -= g_aBullet[nCntBullet].Gravity + g_aBullet[nCntBullet].move.y - (g_aBullet[nCntBullet].Hormingmove.y / 10.0f);
+			//g_aBullet[nCntBullet].pos.z += g_aBullet[nCntBullet].move.z + (g_aBullet[nCntBullet].Hormingmove.z / 30.0f);
+
+			g_aBullet[nCntBullet].pos.x += g_aBullet[nCntBullet].move.x;
+			g_aBullet[nCntBullet].pos.y -= g_aBullet[nCntBullet].Gravity + g_aBullet[nCntBullet].move.y;
+			g_aBullet[nCntBullet].pos.z += g_aBullet[nCntBullet].move.z;
+
 			g_aBullet[nCntBullet].Gravity += g_aBullet[nCntBullet].GravityAdd;
 			if (g_aBullet[nCntBullet].Gravity > VALUE_GRAVITYMAX_BULLET) g_aBullet[nCntBullet].Gravity = VALUE_GRAVITYMAX_BULLET;
 

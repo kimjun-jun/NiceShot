@@ -180,31 +180,6 @@ void UpdateItem(void)
 			//フィールドに落ちてるときはくるくる回転させる
 			g_aItem[nCntItem].rot.y += VALUE_ROTATE_ITEM;
 
-			//// 影の位置設定
-			//SetPositionShadow(g_aItem[nCntItem].nIdxShadow, D3DXVECTOR3(g_aItem[nCntItem].pos.x, 0.1f, g_aItem[nCntItem].pos.z), D3DXVECTOR3(g_aItem[nCntItem].fRadius * 2.0f, g_aItem[nCntItem].fRadius * 2.0f, g_aItem[nCntItem].fRadius * 2.0f));
-
-			////影のサイズを調整
-			//float fSizeX = 20.0f + (g_aItem[nCntItem].pos.y - 10.0f) * 0.05f;
-			//if (fSizeX < 20.0f)
-			//{
-			//	fSizeX = 20.0f;
-			//}
-			//float fSizeY = 20.0f + (g_aItem[nCntItem].pos.y - 10.0f) * 0.05f;
-			//if (fSizeY < 20.0f)
-			//{
-			//	fSizeY = 20.0f;
-			//}
-
-			//SetVertexShadow(g_aItem[nCntItem].nIdxShadow, fSizeX, fSizeY);
-
-			////影の色を調整
-			//float colA = (200.0f - (g_aItem[nCntItem].pos.y - 10.0f)) / 400.0f;
-			//if (colA < 0.0f)
-			//{
-			//	colA = 0.0f;
-			//}
-			//SetColorShadow(g_aItem[nCntItem].nIdxShadow, D3DXCOLOR(1.0f, 1.0f, 1.0f, colA));
-
 			//地形の角度とプレイヤーの角度を計算。drawでクオータニオンで使う
 			D3DXVec3Cross(&g_aItem[nCntItem].rotTOaxis, &g_aItem[nCntItem].rotVecAxis, &g_aItem[nCntItem].Upvec);
 			float kakezan = D3DXVec3Dot(&g_aItem[nCntItem].rotVecAxis, &g_aItem[nCntItem].Upvec);
@@ -218,38 +193,36 @@ void UpdateItem(void)
 			}
 			else g_aItem[nCntItem].Qrot = 0.0f;
 		}
-
-		//アイテムを復活させる制御。
-		for (int nCntItem = 0; nCntItem < MAX_ITEM; nCntItem++)
-		{
-			if (g_aItem[0].GoukeiDrop > DROP_ITEM_MAX) break;
-			if (g_aItem[nCntItem].bUse==false)
-			{
-				g_aItem[nCntItem].Droptime += DROP_ITEM_CHARGE_ADDTIME;
-				if (g_aItem[nCntItem].Droptime >= DROP_ITEM_CHARGE_CNT)
-				{
-					D3DXVECTOR3 pos = D3DXVECTOR3(float(rand() % 500) + 100.0f, 1000.0f, float(rand() % 500) + 100.0f);
-					int x = rand() % 2;
-					int z = rand() % 2;
-					if (x == 1) pos.x *= -1;
-					if (z == 1) pos.z *= -1;
-					int ItemNum = rand() % ITEMTYPE_MAX;
-					//ライフ、カメラ、霧アイテムの時はもう一度抽選
-					if (ItemNum == ITEMTYPE_LIFE && ItemNum == ITEMTYPE_CAMERA && ItemNum == ITEMTYPE_KIRI) ItemNum = rand() % ITEMTYPE_MAX;
-					SetItem(pos, D3DXVECTOR3(1.0f, 1.0f, 1.0f),D3DXVECTOR3(0.0f, 0.0f, 0.0f), ItemNum);
-					//SetItem(pos, D3DXVECTOR3(1.0f, 1.0f, 1.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ITEMTYPE_TIKEI);
-					g_aItem[nCntItem].fCollisionEnd = false;
-					g_aItem[nCntItem].Droptime = 0.0f;
-					g_aItem[0].GoukeiDrop++;
-					PlaySound(SOUND_LABEL_SE_nyu);
-				}
-				break;
-			}
-		}
-
 		if (g_aItem[nCntItem].GettingSignal == true)
 		{
 			GettingItem(nCntItem);
+		}
+	}
+	//アイテムを復活させる制御。
+	for (int nCntItem = 0; nCntItem < MAX_ITEM; nCntItem++)
+	{
+		if (g_aItem[0].GoukeiDrop > DROP_ITEM_MAX) break;
+		if (g_aItem[nCntItem].bUse == false)
+		{
+			g_aItem[nCntItem].Droptime += DROP_ITEM_CHARGE_ADDTIME;
+			if (g_aItem[nCntItem].Droptime >= DROP_ITEM_CHARGE_CNT)
+			{
+				D3DXVECTOR3 pos = D3DXVECTOR3(float(rand() % 500) + 100.0f, 1000.0f, float(rand() % 500) + 100.0f);
+				int x = rand() % 2;
+				int z = rand() % 2;
+				if (x == 1) pos.x *= -1;
+				if (z == 1) pos.z *= -1;
+				int ItemNum = rand() % ITEMTYPE_MAX;
+				//ライフ、カメラ、霧アイテムの時はもう一度抽選
+				if (ItemNum == ITEMTYPE_LIFE && ItemNum == ITEMTYPE_CAMERA && ItemNum == ITEMTYPE_KIRI) ItemNum = rand() % ITEMTYPE_MAX;
+				SetItem(pos, D3DXVECTOR3(1.0f, 1.0f, 1.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ItemNum);
+				//SetItem(pos, D3DXVECTOR3(1.0f, 1.0f, 1.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ITEMTYPE_TIKEI);
+				g_aItem[nCntItem].fCollisionEnd = false;
+				g_aItem[nCntItem].Droptime = 0.0f;
+				g_aItem[0].GoukeiDrop++;
+				PlaySound(SOUND_LABEL_SE_nyu);
+			}
+			break;
 		}
 	}
 }
@@ -382,7 +355,7 @@ void GettingItem(int nIdxItem)
 		
 		//プレイヤーとアイテムの距離を計算し/5分づつ近づける
 		PLAYER_HONTAI *p = GetPlayerHoudai();
-		D3DXVECTOR3 distance = p->pos - g_aItem[nIdxItem].pos;
+		D3DXVECTOR3 distance = p[g_aItem[nIdxItem].GetPlayerType].pos - g_aItem[nIdxItem].pos;
 		distance /= 5.0f;
 		g_aItem[nIdxItem].pos += distance;
 		g_aItem[nIdxItem].scl -= D3DXVECTOR3(ITEM_SMALL_SCL, ITEM_SMALL_SCL, ITEM_SMALL_SCL);

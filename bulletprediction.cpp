@@ -35,10 +35,10 @@ typedef struct
 } BULLETPREDICTION;
 
 static D3DXCOLOR PLAYER_COLOR[] = {
-	D3DXCOLOR(1.0f, 1.0f, 0.1f, 0.2f),//p1カラー
-	D3DXCOLOR(0.2f, 0.2f, 1.0f, 0.2f),//p2カラー
-	D3DXCOLOR(1.0f, 0.2f, 0.2f, 0.2f),//p3カラー
-	D3DXCOLOR(0.2f, 1.0f, 0.2f, 0.2f),//p4カラー
+	D3DXCOLOR(1.0f, 1.0f, 0.1f, 0.01f),//p1カラー
+	D3DXCOLOR(0.2f, 0.2f, 1.0f, 0.01f),//p2カラー
+	D3DXCOLOR(1.0f, 0.2f, 0.2f, 0.01f),//p3カラー
+	D3DXCOLOR(0.2f, 1.0f, 0.2f, 0.01f),//p4カラー
 };
 
 //*****************************************************************************
@@ -131,6 +131,7 @@ void UpdateBulletprediction(void)
 	for (int CntPlayer=0;CntPlayer<PLAYER_MAX;CntPlayer++)
 	{
 		D3DXVECTOR3	BulletPredictionPos = player[CntPlayer].BposStart;
+		D3DXCOLOR	col = PLAYER_COLOR[CntPlayer];
 		float Gravity = 0.0f;
 		float time = 1.0f;
 		float maxtime = 10.0f;
@@ -151,8 +152,9 @@ void UpdateBulletprediction(void)
 			time++;
 			//重力最大値制限
 			if (Gravity > VALUE_GRAVITYMAX_BULLET) Gravity = VALUE_GRAVITYMAX_BULLET;
-
-			SetBulletprediction(BulletPredictionPos, CntPlayer, PLAYER_COLOR[CntPlayer], BULLETPREDICTION_SIZE_X, BULLETPREDICTION_SIZE_Y);
+			//徐々にアルファ値を強くして遠距離地点を見やすくする
+			col.a += 0.01f;
+			SetBulletprediction(BulletPredictionPos, CntPlayer, col, BULLETPREDICTION_SIZE_X, BULLETPREDICTION_SIZE_Y);
 
 
 		} while (BulletPredictionPos.y >= 0.0f);

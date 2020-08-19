@@ -57,6 +57,7 @@ SOUNDPARAM g_aParam[SOUND_LABEL_MAX] =
 	{ "data/SE/_sound_anime_smoke1.wav", 0 },
 	{ "data/SE/avalanche1.wav", 0 },
 	{ "data/SE/whip-gesture2.wav", 0 },
+	{ "data/SE/glass-break4.wav", 0 },
 
 };
 
@@ -203,13 +204,14 @@ bool InitSound(HWND hWnd)
 	SourceVolumeChange(0.8f, SOUND_LABEL_BGM_gameclear01);
 	SourceVolumeChange(0.8f, SOUND_LABEL_BGM_gameover01);
 	SourceVolumeChange(3, SOUND_LABEL_SE_attack01);
-	SourceVolumeChange(5, SOUND_LABEL_SE_attack02);
+	SourceVolumeChange(10, SOUND_LABEL_SE_attack02);
 	SourceVolumeChange(5, SOUND_LABEL_SE_attack03);
 	SourceVolumeChange(5, SOUND_LABEL_SE_nyu);
 	SourceVolumeChange(5, SOUND_LABEL_SE_rap1);
 	SourceVolumeChange(5, SOUND_LABEL_SE_speed);
 	SourceVolumeChange(30, SOUND_LABEL_SE_quake);
 	SourceVolumeChange(5, SOUND_LABEL_SE_kurukuru);
+	SourceVolumeChange(20, SOUND_LABEL_SE_parin);
 	return true;
 }
 

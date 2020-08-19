@@ -25,6 +25,7 @@ public:
 	float						AmmoBornCnt;							//!< 残弾回復カウント。時間で回復
 	int							AmmoNum;								//!< 残弾数。最大5個
 	int							ModelType;								//!< どのモデル状態か判定
+	int							RidePolygonNum;							//!< どの地形ポリゴンに乗っているか判定
 	void						SetMoveABL(int CntPlayer);				//!< 移動制御(ABボタンLスティックで移動制御)
 	void						SetCameraABL(int CntPlayer);			//!< カメラ制御(ABボタンLスティックで移動制御)
 	void						SetMoveLR(int CntPlayer);				//!< 移動制御(LRスティックで移動制御)

@@ -292,6 +292,7 @@ void CheakHit(int scene)
 					}
 					PlaySound(SOUND_LABEL_SE_kurukuru);
 					i[CntItem].GettingSignal = true;
+					i[CntItem].GetPlayerType = CntPlayer;
 				}
 			}
 		}

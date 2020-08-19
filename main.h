@@ -104,8 +104,8 @@
 #define BORN_AMMO_ADDTIME					(1.0f)																		//!< 弾薬復活させるための加算タイム
 #define BORN_AMMO_MAXTIME					(120.0f)																	//!< 1弾薬復活するのに必要なタイム
 #define MORPHING_TIME						(300.0f)																	//!< モーフィングアイテム有効時間
-#define BACKCAMERA_TIME						(300.0f)																	//!< バックカメラアイテム有効時間
-#define KIRI_TIME							(300.0f)																	//!< フォグ霧アイテムの有効時間
+#define BACKCAMERA_TIME						(150.0f)																	//!< バックカメラアイテム有効時間
+#define KIRI_TIME							(150.0f)																	//!< フォグ霧アイテムの有効時間
 #define SCREENDAMEGE_TIME					(30.0f)																		//!< 被ダメージ時の画面フェード時間
 #define	MAX_SHADOW							(256)																		//!< 影最大数
 #define	BULLETKAKUSAN_MAX					(3)																			//!< バレット拡散数
@@ -116,8 +116,8 @@
 #define BULLET_MODEL_SIZE					(15.0f)																		//!< モデルサイズ
 #define ITEM_MODEL_SIZE						(15.0f)																		//!< モデルサイズ
 #define DROP_ITEM_MAX						(10)																		//!< フィールドに落ちてるアイテムの数
-#define DROP_ITEM_CHARGE_ADDTIME			(0.1f)																		//!< アイテムをリスポーンさせる時の加算タイム
-#define DROP_ITEM_CHARGE_CNT				(300.0f)																	//!< アイテムをリスポーンさせる時の所要タイム
+#define DROP_ITEM_CHARGE_ADDTIME			(1.0f)																		//!< アイテムをリスポーンさせる時の加算タイム
+#define DROP_ITEM_CHARGE_CNT				(60.0f)																		//!< アイテムをリスポーンさせる時の所要タイム
 #define	MAX_ITEM							(20)																		//!< アイテムワーク最大数
 
 
