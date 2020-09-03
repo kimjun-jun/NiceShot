@@ -8,15 +8,14 @@
 #include "input.h"
 #include "player.h"
 #include "bullet.h"
-#include "load.h"
 #include "fade.h"
 #include "camera.h"
 #include "shadow.h"
 #include "bullettex.h"
-#include "morphing.h"
 #include "field.h"
 #include "sound.h"
 #include "effect.h"
+#include "library.h"
 
 //*****************************************************************************
 // É}ÉNÉçíËã`
@@ -64,11 +63,14 @@ HRESULT InitPlayer(void)
 		g_PlayerHoudai[CntPlayer].bulletmove = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 
 		g_PlayerHoudai[CntPlayer].q = D3DXQUATERNION(0,0,0,1);
-		g_PlayerHoudai[CntPlayer].BrotQ = D3DXQUATERNION(0, 0, 0, 1);
 		g_PlayerHoudai[CntPlayer].RotVecAxis = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 		g_PlayerHoudai[CntPlayer].Upvec = D3DXVECTOR3(0, 1, 0);
 		g_PlayerHoudai[CntPlayer].Frontvec = D3DXVECTOR3(0, 0, 1);
 		g_PlayerHoudai[CntPlayer].UpRotTOaxis = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		g_PlayerHoudai[CntPlayer].UpFieldNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		g_PlayerHoudai[CntPlayer].RightFieldNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		g_PlayerHoudai[CntPlayer].LeftFieldNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		g_PlayerHoudai[CntPlayer].DownFieldNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 		g_PlayerHoudai[CntPlayer].FrontRotTOaxis = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 		g_PlayerHoudai[CntPlayer].speed = 0.0f;
 		g_PlayerHoudai[CntPlayer].speedbuff = 1.0f;
@@ -326,6 +328,10 @@ HRESULT ReInitPlayer(void)
 		g_PlayerHoudai[CntPlayer].bulletmove = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 		g_PlayerHoudai[CntPlayer].q = D3DXQUATERNION(0, 0, 0, 1);
 		g_PlayerHoudai[CntPlayer].RotVecAxis = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		g_PlayerHoudai[CntPlayer].UpFieldNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		g_PlayerHoudai[CntPlayer].RightFieldNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		g_PlayerHoudai[CntPlayer].LeftFieldNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		g_PlayerHoudai[CntPlayer].DownFieldNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 		g_PlayerHoudai[CntPlayer].Upvec = D3DXVECTOR3(0, 1, 0);
 		g_PlayerHoudai[CntPlayer].Frontvec = D3DXVECTOR3(0, 0, 1);
 		g_PlayerHoudai[CntPlayer].UpRotTOaxis = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
@@ -372,7 +378,7 @@ HRESULT ReInitPlayer(void)
 		g_PlayerBulletStartPos[CntPlayer].scl = D3DXVECTOR3(1.0f, 1.0f, 1.0f);
 		g_PlayerBulletStartPos[CntPlayer].move = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 
-		ResetMorphing(&g_PlayerHousin[CntPlayer], &g_PlayerHousinOriginal[CntPlayer]);
+		ResetModel(&g_PlayerHousin[CntPlayer], &g_PlayerHousinOriginal[CntPlayer]);
 	}
 
 	// âeÇÃèâä˙âª
@@ -501,10 +507,8 @@ void UpdatePlayer(void)
 		if (g_PlayerHoudai[CntPlayer].use)
 		{
 			g_PlayerHoudai[CntPlayer].SetMoveABL(CntPlayer);
-			//g_PlayerHoudai[CntPlayer].SetMoveLR(CntPlayer);
 			g_PlayerHoudai[CntPlayer].SetQ(CntPlayer);
 			g_PlayerHoudai[CntPlayer].SetCameraABL(CntPlayer);
-			//g_PlayerHoudai[CntPlayer].SetCameraLR(CntPlayer);
 			g_PlayerHoudai[CntPlayer].SetBulletALL(CntPlayer);
 			g_PlayerHoudai[CntPlayer].SetKiri(CntPlayer);
 			g_PlayerHoudai[CntPlayer].SetMorphing(CntPlayer);
@@ -593,7 +597,6 @@ void DrawPlayer(void)
 			D3DXMATRIX mtxScl, mtxRot, mtxTranslate;
 			D3DXMATERIAL *pD3DXMat;
 			D3DMATERIAL9 matDef;
-			g_PlayerHoudai[CntPlayer].BrotQ = D3DXQUATERNION(0, 0, 0, 1);
 			D3DXMATRIX mtxQ;
 			D3DXMatrixIdentity(&mtxQ);
 			

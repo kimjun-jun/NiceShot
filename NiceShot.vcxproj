@@ -131,11 +131,10 @@
     <ClInclude Include="field.h" />
     <ClInclude Include="input.h" />
     <ClInclude Include="item.h" />
+    <ClInclude Include="library.h" />
     <ClInclude Include="life.h" />
     <ClInclude Include="light.h" />
-    <ClInclude Include="load.h" />
     <ClInclude Include="main.h" />
-    <ClInclude Include="morphing.h" />
     <ClInclude Include="player.h" />
     <ClInclude Include="rank.h" />
     <ClInclude Include="result.h" />
@@ -163,11 +162,10 @@
     <ClCompile Include="field.cpp" />
     <ClCompile Include="input.cpp" />
     <ClCompile Include="item.cpp" />
+    <ClCompile Include="library.cpp" />
     <ClCompile Include="life.cpp" />
     <ClCompile Include="light.cpp" />
-    <ClCompile Include="load.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="morphing.cpp" />
     <ClCompile Include="player.cpp" />
     <ClCompile Include="rank.cpp" />
     <ClCompile Include="result.cpp" />

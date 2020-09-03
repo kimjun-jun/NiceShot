@@ -16,7 +16,6 @@
 #include "item.h"
 #include "time.h"
 #include "sound.h"
-#include "morphing.h"
 #include "explosion.h"
 #include "damege.h"
 #include "status.h"

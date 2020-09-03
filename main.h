@@ -310,10 +310,13 @@ public:
 	D3DXVECTOR3					Upvec;				//!< モデルの上方向
 	D3DXVECTOR3					Frontvec;			//!< モデルの前方向
 	D3DXVECTOR3					RotVecAxis;			//!< クオータニオンの時に使う地形の法線ベクトル
+	D3DXVECTOR3					UpFieldNorVec;		//!< 姿勢の球面線形補間時に使う地形の法線ベクトル　プレイヤーが乗っているポリゴンの一つ上のポリゴン
+	D3DXVECTOR3					RightFieldNorVec;	//!< 姿勢の球面線形補間時に使う地形の法線ベクトル　プレイヤーが乗っているポリゴンの一つ右のポリゴン
+	D3DXVECTOR3					LeftFieldNorVec;	//!< 姿勢の球面線形補間時に使う地形の法線ベクトル　プレイヤーが乗っているポリゴンの一つ左のポリゴン
+	D3DXVECTOR3					DownFieldNorVec;	//!< 姿勢の球面線形補間時に使う地形の法線ベクトル　プレイヤーが乗っているポリゴンの一つ下のポリゴン
 	D3DXVECTOR3					UpRotTOaxis;		//!< 地形法線とプレイヤーUpベクトルの外積値
 	D3DXVECTOR3					FrontRotTOaxis;		//!< 地形法線とプレイヤーFrontベクトルの外積値
 	D3DXQUATERNION				q;					//!< プレイヤー用クオータニオン
-	D3DXQUATERNION				BrotQ;				//!< バレッド用クオータニオン
 	float						speed;				//!< 移動スピード
 	float						speedbuff;			//!< 移動スピードアイテムバフ
 	float						speedbufftime;		//!< 移動スピードアイテム効果時間
@@ -389,33 +392,6 @@ int GetScene(void);
 * @details ゲーム起動時に使用ゲームループ時に使用
 */
 void InitGame(void);
-
-/**
-* @brief D3DXVECTOR3からfloatに変換して移動距離の値を計算する関数 SpdCal
-* @param[in] D3DXVECTOR3 move 三次元移動値
-* @return float 一次元で移動距離の値を返す
-* @details D3DXVECTOR3型で決めた移動値からfloat移動距離を求める
-*/
-float SpdCal(D3DXVECTOR3 move);
-
-/**
-* @brief レイキャスト関数 RayCast
-* @param[in] D3DXVECTOR3 rayS　レイ始点座標
-* @param[in] D3DXVECTOR3 rayG　レイ終点座標
-* @param[in] D3DXVECTOR3 vtx0　判定する三角ポリゴンの頂点1座標
-* @param[in] D3DXVECTOR3 vtx1　判定する三角ポリゴンの頂点2座標
-* @param[in] D3DXVECTOR3 vtx2　判定する三角ポリゴンの頂点3座標
-* @param[out] D3DXVECTOR3 *ReturnVtx　判定結果を格納
-* @return bool ture:当たっている false:当たっていない
-* @details 任意のレイ始終点を決め当たり判定をしたい任意の3頂点を用いて計算する。リターンがfalseならReturnVtxは更新されない。tureなら三角ポリゴンとレイが交わっている交点をReturnVtxに格納
-*/
-bool RayCast(D3DXVECTOR3 rayS, D3DXVECTOR3 rayG, D3DXVECTOR3 vtx0, D3DXVECTOR3 vtx1, D3DXVECTOR3 vtx2, D3DXVECTOR3 *ReturnVtx);
-
-
-
-
-
-
 
 
 

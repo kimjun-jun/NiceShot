@@ -81,6 +81,7 @@ HRESULT InitTime(int type)
 	}
 	g_time_maneger = FPS_TIME_COUNT;
 	MakeVertexTime();
+	SetTextureTime();
 	return S_OK;
 }
 
@@ -99,6 +100,7 @@ void ReInitTime(void)
 
 	g_time_maneger = FPS_TIME_COUNT;
 	MakeVertexTime();
+	SetTextureTime();
 	UpdateTime();
 }
 
