@@ -156,9 +156,15 @@ float LerpEaseOut(float t);
 */
 float LerpEaseInEaseOut(float t);
 
-
-
-
+/**
+* @brief [2D用]点と直緯(2点から求める)の最短距離計算関数	 PointAndLineMinDistance
+* @param[in] D3DXVECTOR3	Point		座標
+* @param[in] D3DXVECTOR3	LinePoint1	座標
+* @param[in] D3DXVECTOR3	LinePoint2	座標
+* @return float　計算結果(最短距離)
+* @details [2D用]点から直線までの最短距離を求めるときに使用
+*/
+float PointAndLineMinDistance(D3DXVECTOR3 Point, D3DXVECTOR3 LinePoint1, D3DXVECTOR3 LinePoint2);
 
 
 

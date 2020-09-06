@@ -10,8 +10,8 @@
 // マクロ定義
 //*****************************************************************************
 #define	TEXTURE_TUTORIAL		("data/TEXTURE/tutorialbg.png")						//!< 読み込むテクスチャファイル名
-#define	TUTORIAL_SIZE_X			(SCREEN_W/4)										//!< チュートリアルの幅
-#define	TUTORIAL_SIZE_Y			(SCREEN_H/4)										//!< チュートリアルの高さ
+#define	TUTORIAL_SIZE_X			(SCREEN_W/4-50)										//!< チュートリアルの幅
+#define	TUTORIAL_SIZE_Y			(SCREEN_H/4-50)										//!< チュートリアルの高さ
 #define	TUTORIAL_POS_X			(SCREEN_CENTER_X)									//!< チュートリアルの表示位置
 #define	TUTORIAL_POS_Y			(SCREEN_CENTER_Y)									//!< チュートリアルの表示位置
 #define TUTORIAL_GOUKEI			(4)													//!< チュートリアル構造体の合計

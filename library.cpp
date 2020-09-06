@@ -329,7 +329,29 @@ float LerpEaseInEaseOut(float t)
 	return t * t * (3.0f - 2.0f * t);
 }
 
+//=============================================================================
+// [2D用]点と直緯(2点から求める)の最短距離　計算関数	点から直線までの最短距離を求めるときに使用
+// 戻り値：D3DXVECTOR3　計算結果(最短距離の座標)
+//　abs(ax1+by1+c) / sqrt(a^2+b^2)
+//=============================================================================
+float PointAndLineMinDistance(D3DXVECTOR3 Point, D3DXVECTOR3 LinePoint1, D3DXVECTOR3 LinePoint2)
+{
+	D3DXVECTOR2 VecLinePoint1To2, VecLinePoint1ToPoint;
+	//ベクトルを求める
+	VecLinePoint1To2.x = LinePoint2.x - LinePoint1.x;
+	VecLinePoint1To2.y = LinePoint2.z - LinePoint1.z;
+	VecLinePoint1ToPoint.x = Point.x - LinePoint1.x;
+	VecLinePoint1ToPoint.y = Point.z - LinePoint1.z;
 
+	//ベクトルの外積の絶対値が平行四辺形sの面積になる
+	//vl.x * vr.y - vl.y * vr.x
+	float CrossVec = (VecLinePoint1To2.x*VecLinePoint1ToPoint.y) - (VecLinePoint1To2.y*VecLinePoint1ToPoint.x);
+	float s = fabsf(CrossVec);
+	//平行四辺形の面積(s)と底辺(VecLinePoint1To2)から高さ(MinDistance)を求める
+	float VecLinePoint1To2Len =D3DXVec2Length(&VecLinePoint1To2);
+	float MinDistance = s / VecLinePoint1To2Len;
+	return MinDistance;
+}
 
 bool CheckHitColumnLB(D3DXVECTOR3 yarnvec, D3DXVECTOR3 vec, D3DXVECTOR3 yarnpos, D3DXVECTOR3 bottompos, float yarnradius, float radius)
 {
