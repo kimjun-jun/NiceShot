@@ -1067,22 +1067,22 @@ void FieldHitGetSphereVec(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVECTOR3 *v
 						if (pVtx[pIdx[nCntVtx]].vtx.z < pVtx[pIdx[nCntVtx + 1]].vtx.z)
 						{
 							//特別な頂点番号
-							if(nCntVtx== g_nNumVertexIndexField - g_nNumBlockXField * 2)
-							{ 
+							if (nCntVtx == g_nNumVertexIndexField - g_nNumBlockXField * 2)
+							{
 								//頂点境界辺に近づくと球面線形補間で姿勢ベクトルを制御
-								float MinDistance = PointAndLineMinDistance(InrayS, pVtx[pIdx[nCntVtx+1]].vtx, pVtx[pIdx[nCntVtx + 2]].vtx);
+								float MinDistance = PointAndLineMinDistance(InrayS, pVtx[pIdx[nCntVtx + 1]].vtx, pVtx[pIdx[nCntVtx + 2]].vtx);
 								if (SPHERELINEAR_LEN > MinDistance)
 								{
 									//辺先にある地面ポリゴンの法線を求める
 									D3DXVECTOR3 NextPolyNorVec;
-									D3DXVec3Cross(&NextPolyNorVec, &D3DXVECTOR3(pVtx[pIdx[nCntVtx+3]].vtx-pVtx[pIdx[nCntVtx+1]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx+2]].vtx - pVtx[pIdx[nCntVtx+1]].vtx));
+									D3DXVec3Cross(&NextPolyNorVec, &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 3]].vtx - pVtx[pIdx[nCntVtx + 1]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 2]].vtx - pVtx[pIdx[nCntVtx + 1]].vtx));
 									if (NextPolyNorVec.y <= 0) NextPolyNorVec *= -1;
-									D3DXVec3Normalize(&NextPolyNorVec,&NextPolyNorVec);
+									D3DXVec3Normalize(&NextPolyNorVec, &NextPolyNorVec);
 									D3DXVECTOR3 NowPolyNorVec;
 									D3DXVec3Normalize(&NowPolyNorVec, &vtxHOUSEN);
 									D3DXVECTOR3 NewPolyNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 									//SPHERELINEAR_LEN(5)-MinDistance(0～5)*10 = 補間倍率(0～0.5の範囲)
-									SphereLinear(&NewPolyNorVec, &NowPolyNorVec, &NextPolyNorVec, (SPHERELINEAR_LEN-MinDistance)/10);
+									SphereLinear(&NewPolyNorVec, &NowPolyNorVec, &NextPolyNorVec, (SPHERELINEAR_LEN - MinDistance) / 10);
 									*vtxNor = NewPolyNorVec;
 								}
 							}
@@ -1102,7 +1102,7 @@ void FieldHitGetSphereVec(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVECTOR3 *v
 							else if (pVtx[pIdx[nCntVtx]].vtx == pVtx[pIdx[nCntVtx + 1]].vtx || pVtx[pIdx[nCntVtx + 1]].vtx == pVtx[pIdx[nCntVtx + 2]].vtx)
 							{
 								//縮退ポリゴン
-								int a=0;
+								int a = 0;
 							}
 							else
 							{
@@ -1111,58 +1111,132 @@ void FieldHitGetSphereVec(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVECTOR3 *v
 								float MinDistanceRightUp = PointAndLineMinDistance(InrayS, pVtx[pIdx[nCntVtx + 1]].vtx, pVtx[pIdx[nCntVtx + 2]].vtx);
 								float MinDistanceDown = PointAndLineMinDistance(InrayS, pVtx[pIdx[nCntVtx]].vtx, pVtx[pIdx[nCntVtx + 1]].vtx);
 								float MinDistanceLeft = PointAndLineMinDistance(InrayS, pVtx[pIdx[nCntVtx]].vtx, pVtx[pIdx[nCntVtx + 2]].vtx);
+								//プレイヤー座標から2辺までの距離がSPHERELINEAR_LENより短いと、その先に続く二つの地形の法線平均値をとり、その値で補間させる
+								if (SPHERELINEAR_LEN > MinDistanceRightUp && SPHERELINEAR_LEN > MinDistanceDown)
+								{
+									// 1つめ　辺先にある地面ポリゴンの法線を求める MinDistanceRightUp
+									D3DXVECTOR3 NextPolyNorVec1;
+									D3DXVec3Cross(&NextPolyNorVec1, &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 3]].vtx - pVtx[pIdx[nCntVtx + 1]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 2]].vtx - pVtx[pIdx[nCntVtx + 1]].vtx));
+									if (NextPolyNorVec1.y <= 0) NextPolyNorVec1 *= -1;
+									D3DXVec3Normalize(&NextPolyNorVec1, &NextPolyNorVec1);
 
-								//プレイヤー座標から三辺までの距離が一番短い地形と補間
-								if (MinDistanceRightUp < MinDistanceDown && MinDistanceRightUp < MinDistanceLeft)
-								{
-									if (SPHERELINEAR_LEN > MinDistanceRightUp)
-									{
-										//辺先にある地面ポリゴンの法線を求める
-										D3DXVECTOR3 NextPolyNorVec;
-										D3DXVec3Cross(&NextPolyNorVec, &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 3]].vtx - pVtx[pIdx[nCntVtx + 1]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 2]].vtx - pVtx[pIdx[nCntVtx + 1]].vtx));
-										if (NextPolyNorVec.y <= 0) NextPolyNorVec *= -1;
-										D3DXVec3Normalize(&NextPolyNorVec, &NextPolyNorVec);
-										D3DXVECTOR3 NowPolyNorVec;
-										D3DXVec3Normalize(&NowPolyNorVec, &vtxHOUSEN);
-										D3DXVECTOR3 NewPolyNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-										//SPHERELINEAR_LEN(5)-MinDistance(0～5)*10 = 補間倍率(0～0.5の範囲)
-										SphereLinear(&NewPolyNorVec, &NowPolyNorVec, &NextPolyNorVec, (SPHERELINEAR_LEN - MinDistanceRightUp) / 10);
-										*vtxNor = NewPolyNorVec;
-									}
+									// 2つめ　辺先にある地面ポリゴンの法線を求める MinDistanceDown
+									D3DXVECTOR3 NextPolyNorVec2;
+									D3DXVec3Cross(&NextPolyNorVec2, &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 2]].vtx - pVtx[pIdx[nCntVtx]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx + (g_nNumBlockXField * 2 + 6)]].vtx - pVtx[pIdx[nCntVtx]].vtx));
+									if (NextPolyNorVec2.y <= 0) NextPolyNorVec2 *= -1;
+									D3DXVec3Normalize(&NextPolyNorVec2, &NextPolyNorVec2);
+
+									//二つの法線平均値を求める
+									D3DXVECTOR3 AveNextPolyNorVec = (NextPolyNorVec1 + NextPolyNorVec2) / 2.0f;
+
+									//競合している二つの距離の平均を求める
+									float MinRtionDistance = (MinDistanceRightUp+ MinDistanceDown)/2.0f;
+
+									D3DXVECTOR3 NowPolyNorVec;
+									D3DXVec3Normalize(&NowPolyNorVec, &vtxHOUSEN);
+									D3DXVECTOR3 NewPolyNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+									//SPHERELINEAR_LEN(5)-MinDistance(0～5)*10 = 補間倍率(0～0.5の範囲)
+									SphereLinear(&NewPolyNorVec, &NowPolyNorVec, &AveNextPolyNorVec, (SPHERELINEAR_LEN - MinRtionDistance) / 10);
+									*vtxNor = NewPolyNorVec;
 								}
-								if (MinDistanceRightUp < MinDistanceLeft)
+								else if (SPHERELINEAR_LEN > MinDistanceRightUp && SPHERELINEAR_LEN > MinDistanceLeft)
 								{
-									if (SPHERELINEAR_LEN > MinDistanceDown)
-									{
-										//辺先にある地面ポリゴンの法線を求める
-										D3DXVECTOR3 NextPolyNorVec;
-										D3DXVec3Cross(&NextPolyNorVec, &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 2]].vtx - pVtx[pIdx[nCntVtx]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx + (g_nNumBlockXField * 2 + 6)]].vtx - pVtx[pIdx[nCntVtx]].vtx));
-										if (NextPolyNorVec.y <= 0) NextPolyNorVec *= -1;
-										D3DXVec3Normalize(&NextPolyNorVec, &NextPolyNorVec);
-										D3DXVECTOR3 NowPolyNorVec;
-										D3DXVec3Normalize(&NowPolyNorVec, &vtxHOUSEN);
-										D3DXVECTOR3 NewPolyNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-										//SPHERELINEAR_LEN(5)-MinDistance(0～5)*10 = 補間倍率(0～0.5の範囲)
-										SphereLinear(&NewPolyNorVec, &NowPolyNorVec, &NextPolyNorVec, (SPHERELINEAR_LEN - MinDistanceDown) / 10);
-										*vtxNor = NewPolyNorVec;
-									}
+									// 1つめ　辺先にある地面ポリゴンの法線を求める MinDistanceRightUp
+									D3DXVECTOR3 NextPolyNorVec1;
+									D3DXVec3Cross(&NextPolyNorVec1, &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 3]].vtx - pVtx[pIdx[nCntVtx + 1]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 2]].vtx - pVtx[pIdx[nCntVtx + 1]].vtx));
+									if (NextPolyNorVec1.y <= 0) NextPolyNorVec1 *= -1;
+									D3DXVec3Normalize(&NextPolyNorVec1, &NextPolyNorVec1);
+
+									// 2つめ　辺先にある地面ポリゴンの法線を求める MinDistanceLeft
+									D3DXVECTOR3 NextPolyNorVec2;
+									D3DXVec3Cross(&NextPolyNorVec2, &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 2]].vtx - pVtx[pIdx[nCntVtx]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx + (g_nNumBlockXField * 2 + 6)]].vtx - pVtx[pIdx[nCntVtx]].vtx));
+									if (NextPolyNorVec2.y <= 0) NextPolyNorVec2 *= -1;
+									D3DXVec3Normalize(&NextPolyNorVec2, &NextPolyNorVec2);
+
+									//二つの法線平均値を求める
+									D3DXVECTOR3 AveNextPolyNorVec = (NextPolyNorVec1 + NextPolyNorVec2) / 2.0f;
+
+									//競合している二つの距離の平均を求める
+									float MinRtionDistance = (MinDistanceRightUp + MinDistanceLeft) / 2.0f;
+
+									D3DXVECTOR3 NowPolyNorVec;
+									D3DXVec3Normalize(&NowPolyNorVec, &vtxHOUSEN);
+									D3DXVECTOR3 NewPolyNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+									//SPHERELINEAR_LEN(5)-MinDistance(0～5)*10 = 補間倍率(0～0.5の範囲)
+									SphereLinear(&NewPolyNorVec, &NowPolyNorVec, &AveNextPolyNorVec, (SPHERELINEAR_LEN - MinRtionDistance) / 10);
+									*vtxNor = NewPolyNorVec;
+
 								}
-								else 
+								else if (SPHERELINEAR_LEN > MinDistanceDown && SPHERELINEAR_LEN > MinDistanceLeft)
 								{
-									if (SPHERELINEAR_LEN > MinDistanceLeft)
-									{
-										//辺先にある地面ポリゴンの法線を求める
-										D3DXVECTOR3 NextPolyNorVec;
-										D3DXVec3Cross(&NextPolyNorVec, &D3DXVECTOR3(pVtx[pIdx[nCntVtx - 1]].vtx - pVtx[pIdx[nCntVtx]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 1]].vtx - pVtx[pIdx[nCntVtx]].vtx));
-										if (NextPolyNorVec.y <= 0) NextPolyNorVec *= -1;
-										D3DXVec3Normalize(&NextPolyNorVec, &NextPolyNorVec);
-										D3DXVECTOR3 NowPolyNorVec;
-										D3DXVec3Normalize(&NowPolyNorVec, &vtxHOUSEN);
-										D3DXVECTOR3 NewPolyNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-										//SPHERELINEAR_LEN(5)-MinDistance(0～5)*10 = 補間倍率(0～0.5の範囲)
-										SphereLinear(&NewPolyNorVec, &NowPolyNorVec, &NextPolyNorVec, (SPHERELINEAR_LEN - MinDistanceLeft) / 10);
-										*vtxNor = NewPolyNorVec;
-									}
+									// 1つめ　辺先にある地面ポリゴンの法線を求める MinDistanceDown
+									D3DXVECTOR3 NextPolyNorVec1;
+									D3DXVec3Cross(&NextPolyNorVec1, &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 2]].vtx - pVtx[pIdx[nCntVtx]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx + (g_nNumBlockXField * 2 + 6)]].vtx - pVtx[pIdx[nCntVtx]].vtx));
+									if (NextPolyNorVec1.y <= 0) NextPolyNorVec1 *= -1;
+									D3DXVec3Normalize(&NextPolyNorVec1, &NextPolyNorVec1);
+
+									// 2つめ　辺先にある地面ポリゴンの法線を求める MinDistanceLeft
+									D3DXVECTOR3 NextPolyNorVec2;
+									D3DXVec3Cross(&NextPolyNorVec2, &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 2]].vtx - pVtx[pIdx[nCntVtx]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx + (g_nNumBlockXField * 2 + 6)]].vtx - pVtx[pIdx[nCntVtx]].vtx));
+									if (NextPolyNorVec2.y <= 0) NextPolyNorVec2 *= -1;
+									D3DXVec3Normalize(&NextPolyNorVec2, &NextPolyNorVec2);
+
+									//二つの法線平均値を求める
+									D3DXVECTOR3 AveNextPolyNorVec = (NextPolyNorVec1 + NextPolyNorVec2) / 2.0f;
+
+									//競合している二つの距離の平均を求める
+									float MinRtionDistance = (MinDistanceDown + MinDistanceLeft) / 2.0f;
+
+									D3DXVECTOR3 NowPolyNorVec;
+									D3DXVec3Normalize(&NowPolyNorVec, &vtxHOUSEN);
+									D3DXVECTOR3 NewPolyNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+									//SPHERELINEAR_LEN(5)-MinDistance(0～5)*10 = 補間倍率(0～0.5の範囲)
+									SphereLinear(&NewPolyNorVec, &NowPolyNorVec, &AveNextPolyNorVec, (SPHERELINEAR_LEN - MinRtionDistance) / 10);
+									*vtxNor = NewPolyNorVec;
+
+								}
+								//1辺しか干渉していない
+								else if (SPHERELINEAR_LEN > MinDistanceRightUp)
+								{
+									//辺先にある地面ポリゴンの法線を求める
+									D3DXVECTOR3 NextPolyNorVec;
+									D3DXVec3Cross(&NextPolyNorVec, &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 3]].vtx - pVtx[pIdx[nCntVtx + 1]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 2]].vtx - pVtx[pIdx[nCntVtx + 1]].vtx));
+									if (NextPolyNorVec.y <= 0) NextPolyNorVec *= -1;
+									D3DXVec3Normalize(&NextPolyNorVec, &NextPolyNorVec);
+									D3DXVECTOR3 NowPolyNorVec;
+									D3DXVec3Normalize(&NowPolyNorVec, &vtxHOUSEN);
+									D3DXVECTOR3 NewPolyNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+									//SPHERELINEAR_LEN(5)-MinDistance(0～5)*10 = 補間倍率(0～0.5の範囲)
+									SphereLinear(&NewPolyNorVec, &NowPolyNorVec, &NextPolyNorVec, (SPHERELINEAR_LEN - MinDistanceRightUp) / 10);
+									*vtxNor = NewPolyNorVec;
+								}
+								else if (SPHERELINEAR_LEN > MinDistanceDown)
+								{
+									//辺先にある地面ポリゴンの法線を求める
+									D3DXVECTOR3 NextPolyNorVec;
+									D3DXVec3Cross(&NextPolyNorVec, &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 2]].vtx - pVtx[pIdx[nCntVtx]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx + (g_nNumBlockXField * 2 + 6)]].vtx - pVtx[pIdx[nCntVtx]].vtx));
+									if (NextPolyNorVec.y <= 0) NextPolyNorVec *= -1;
+									D3DXVec3Normalize(&NextPolyNorVec, &NextPolyNorVec);
+									D3DXVECTOR3 NowPolyNorVec;
+									D3DXVec3Normalize(&NowPolyNorVec, &vtxHOUSEN);
+									D3DXVECTOR3 NewPolyNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+									//SPHERELINEAR_LEN(5)-MinDistance(0～5)*10 = 補間倍率(0～0.5の範囲)
+									SphereLinear(&NewPolyNorVec, &NowPolyNorVec, &NextPolyNorVec, (SPHERELINEAR_LEN - MinDistanceDown) / 10);
+									*vtxNor = NewPolyNorVec;
+								}
+								else if (SPHERELINEAR_LEN > MinDistanceLeft)
+								{
+									//辺先にある地面ポリゴンの法線を求める
+									D3DXVECTOR3 NextPolyNorVec;
+									D3DXVec3Cross(&NextPolyNorVec, &D3DXVECTOR3(pVtx[pIdx[nCntVtx - 1]].vtx - pVtx[pIdx[nCntVtx]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 1]].vtx - pVtx[pIdx[nCntVtx]].vtx));
+									if (NextPolyNorVec.y <= 0) NextPolyNorVec *= -1;
+									D3DXVec3Normalize(&NextPolyNorVec, &NextPolyNorVec);
+									D3DXVECTOR3 NowPolyNorVec;
+									D3DXVec3Normalize(&NowPolyNorVec, &vtxHOUSEN);
+									D3DXVECTOR3 NewPolyNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+									//SPHERELINEAR_LEN(5)-MinDistance(0～5)*10 = 補間倍率(0～0.5の範囲)
+									SphereLinear(&NewPolyNorVec, &NowPolyNorVec, &NextPolyNorVec, (SPHERELINEAR_LEN - MinDistanceLeft) / 10);
+									*vtxNor = NewPolyNorVec;
 								}
 							}
 						}
@@ -1210,58 +1284,133 @@ void FieldHitGetSphereVec(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVECTOR3 *v
 								float MinDistanceRight = PointAndLineMinDistance(InrayS, pVtx[pIdx[nCntVtx + 1]].vtx, pVtx[pIdx[nCntVtx + 2]].vtx);
 								float MinDistanceUp = PointAndLineMinDistance(InrayS, pVtx[pIdx[nCntVtx]].vtx, pVtx[pIdx[nCntVtx + 2]].vtx);
 								float MinDistanceLeftDown = PointAndLineMinDistance(InrayS, pVtx[pIdx[nCntVtx]].vtx, pVtx[pIdx[nCntVtx + 1]].vtx);
+								//プレイヤー座標から2辺までの距離がSPHERELINEAR_LENより短いと、その先に続く二つの地形の法線平均値をとり、その値で補間させる
+								if (SPHERELINEAR_LEN > MinDistanceRight && SPHERELINEAR_LEN > MinDistanceUp)
+								{
+									// 1つめ　辺先にある地面ポリゴンの法線を求める MinDistanceRight
+									D3DXVECTOR3 NextPolyNorVec1;
+									D3DXVec3Cross(&NextPolyNorVec1, &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 1]].vtx - pVtx[pIdx[nCntVtx + 2]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 3]].vtx - pVtx[pIdx[nCntVtx + 2]].vtx));
+									if (NextPolyNorVec1.y <= 0) NextPolyNorVec1 *= -1;
+									D3DXVec3Normalize(&NextPolyNorVec1, &NextPolyNorVec1);
 
-								//プレイヤー座標から三辺までの距離が一番短い地形と補間
-								if (MinDistanceRight < MinDistanceUp && MinDistanceRight < MinDistanceLeftDown)
-								{
-									if (SPHERELINEAR_LEN > MinDistanceRight)
-									{
-										//辺先にある地面ポリゴンの法線を求める
-										D3DXVECTOR3 NextPolyNorVec;
-										D3DXVec3Cross(&NextPolyNorVec, &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 1]].vtx - pVtx[pIdx[nCntVtx + 2]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 3]].vtx - pVtx[pIdx[nCntVtx + 2]].vtx));
-										if (NextPolyNorVec.y <= 0) NextPolyNorVec *= -1;
-										D3DXVec3Normalize(&NextPolyNorVec, &NextPolyNorVec);
-										D3DXVECTOR3 NowPolyNorVec;
-										D3DXVec3Normalize(&NowPolyNorVec, &vtxHOUSEN);
-										D3DXVECTOR3 NewPolyNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-										//SPHERELINEAR_LEN(5)-MinDistance(0～5)*10 = 補間倍率(0～0.5の範囲)
-										SphereLinear(&NewPolyNorVec, &NowPolyNorVec, &NextPolyNorVec, (SPHERELINEAR_LEN - MinDistanceRight) / 10);
-										*vtxNor = NewPolyNorVec;
-									}
+									// 2つめ　辺先にある地面ポリゴンの法線を求める MinDistanceUp
+									D3DXVECTOR3 NextPolyNorVec2;
+									D3DXVec3Cross(&NextPolyNorVec2, &D3DXVECTOR3(pVtx[pIdx[nCntVtx - (g_nNumBlockXField * 2 + 6)]].vtx - pVtx[pIdx[nCntVtx]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 2]].vtx - pVtx[pIdx[nCntVtx]].vtx));
+									if (NextPolyNorVec2.y <= 0) NextPolyNorVec2 *= -1;
+									D3DXVec3Normalize(&NextPolyNorVec2, &NextPolyNorVec2);
+
+									//二つの法線平均値を求める
+									D3DXVECTOR3 AveNextPolyNorVec = (NextPolyNorVec1 + NextPolyNorVec2) / 2.0f;
+
+									//競合している二つの距離の平均を求める
+									float MinRtionDistance = (MinDistanceRight + MinDistanceUp) / 2.0f;
+
+									D3DXVECTOR3 NowPolyNorVec;
+									D3DXVec3Normalize(&NowPolyNorVec, &vtxHOUSEN);
+									D3DXVECTOR3 NewPolyNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+									//SPHERELINEAR_LEN(5)-MinDistance(0～5)*10 = 補間倍率(0～0.5の範囲)
+									SphereLinear(&NewPolyNorVec, &NowPolyNorVec, &AveNextPolyNorVec, (SPHERELINEAR_LEN - MinRtionDistance) / 10);
+									*vtxNor = NewPolyNorVec;
 								}
-								else if (MinDistanceUp < MinDistanceLeftDown)
+								else if (SPHERELINEAR_LEN > MinDistanceRight && SPHERELINEAR_LEN > MinDistanceLeftDown)
 								{
-									if (SPHERELINEAR_LEN > MinDistanceUp)
-									{
-										//辺先にある地面ポリゴンの法線を求める
-										D3DXVECTOR3 NextPolyNorVec;
-										D3DXVec3Cross(&NextPolyNorVec, &D3DXVECTOR3(pVtx[pIdx[nCntVtx - (g_nNumBlockXField * 2 + 6)]].vtx - pVtx[pIdx[nCntVtx]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 2]].vtx - pVtx[pIdx[nCntVtx]].vtx));
-										if (NextPolyNorVec.y <= 0) NextPolyNorVec *= -1;
-										D3DXVec3Normalize(&NextPolyNorVec, &NextPolyNorVec);
-										D3DXVECTOR3 NowPolyNorVec;
-										D3DXVec3Normalize(&NowPolyNorVec, &vtxHOUSEN);
-										D3DXVECTOR3 NewPolyNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-										//SPHERELINEAR_LEN(5)-MinDistance(0～5)*10 = 補間倍率(0～0.5の範囲)
-										SphereLinear(&NewPolyNorVec, &NowPolyNorVec, &NextPolyNorVec, (SPHERELINEAR_LEN - MinDistanceUp) / 10);
-										*vtxNor = NewPolyNorVec;
-									}
+									// 1つめ　辺先にある地面ポリゴンの法線を求める MinDistanceRight
+									D3DXVECTOR3 NextPolyNorVec1;
+									D3DXVec3Cross(&NextPolyNorVec1, &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 1]].vtx - pVtx[pIdx[nCntVtx + 2]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 3]].vtx - pVtx[pIdx[nCntVtx + 2]].vtx));
+									if (NextPolyNorVec1.y <= 0) NextPolyNorVec1 *= -1;
+									D3DXVec3Normalize(&NextPolyNorVec1, &NextPolyNorVec1);
+
+									// 2つめ　辺先にある地面ポリゴンの法線を求める MinDistanceLeftDown
+									D3DXVECTOR3 NextPolyNorVec2;
+									D3DXVec3Cross(&NextPolyNorVec2, &D3DXVECTOR3(pVtx[pIdx[nCntVtx - 1]].vtx - pVtx[pIdx[nCntVtx]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 1]].vtx - pVtx[pIdx[nCntVtx]].vtx));
+									if (NextPolyNorVec2.y <= 0) NextPolyNorVec2 *= -1;
+									D3DXVec3Normalize(&NextPolyNorVec2, &NextPolyNorVec2);
+
+									//二つの法線平均値を求める
+									D3DXVECTOR3 AveNextPolyNorVec = (NextPolyNorVec1 + NextPolyNorVec2) / 2.0f;
+
+									//競合している二つの距離の平均を求める
+									float MinRtionDistance = (MinDistanceRight + MinDistanceLeftDown) / 2.0f;
+
+									D3DXVECTOR3 NowPolyNorVec;
+									D3DXVec3Normalize(&NowPolyNorVec, &vtxHOUSEN);
+									D3DXVECTOR3 NewPolyNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+									//SPHERELINEAR_LEN(5)-MinDistance(0～5)*10 = 補間倍率(0～0.5の範囲)
+									SphereLinear(&NewPolyNorVec, &NowPolyNorVec, &AveNextPolyNorVec, (SPHERELINEAR_LEN - MinRtionDistance) / 10);
+									*vtxNor = NewPolyNorVec;
+
 								}
-								else
+								else if (SPHERELINEAR_LEN > MinDistanceUp && SPHERELINEAR_LEN > MinDistanceLeftDown)
 								{
-									if (SPHERELINEAR_LEN > MinDistanceLeftDown)
-									{
-										//辺先にある地面ポリゴンの法線を求める
-										D3DXVECTOR3 NextPolyNorVec;
-										D3DXVec3Cross(&NextPolyNorVec, &D3DXVECTOR3(pVtx[pIdx[nCntVtx - 1]].vtx - pVtx[pIdx[nCntVtx]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 1]].vtx - pVtx[pIdx[nCntVtx]].vtx));
-										if (NextPolyNorVec.y <= 0) NextPolyNorVec *= -1;
-										D3DXVec3Normalize(&NextPolyNorVec, &NextPolyNorVec);
-										D3DXVECTOR3 NowPolyNorVec;
-										D3DXVec3Normalize(&NowPolyNorVec, &vtxHOUSEN);
-										D3DXVECTOR3 NewPolyNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-										//SPHERELINEAR_LEN(5)-MinDistance(0～5)*10 = 補間倍率(0～0.5の範囲)
-										SphereLinear(&NewPolyNorVec, &NowPolyNorVec, &NextPolyNorVec, (SPHERELINEAR_LEN - MinDistanceLeftDown) / 10);
-										*vtxNor = NewPolyNorVec;
-									}
+									// 1つめ　辺先にある地面ポリゴンの法線を求める MinDistanceUp
+									D3DXVECTOR3 NextPolyNorVec1;
+									D3DXVec3Cross(&NextPolyNorVec1, &D3DXVECTOR3(pVtx[pIdx[nCntVtx - (g_nNumBlockXField * 2 + 6)]].vtx - pVtx[pIdx[nCntVtx]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 2]].vtx - pVtx[pIdx[nCntVtx]].vtx));
+									if (NextPolyNorVec1.y <= 0) NextPolyNorVec1 *= -1;
+									D3DXVec3Normalize(&NextPolyNorVec1, &NextPolyNorVec1);
+
+									// 2つめ　辺先にある地面ポリゴンの法線を求める MinDistanceLeftDown
+									D3DXVECTOR3 NextPolyNorVec2;
+									D3DXVec3Cross(&NextPolyNorVec2, &D3DXVECTOR3(pVtx[pIdx[nCntVtx - (g_nNumBlockXField * 2 + 6)]].vtx - pVtx[pIdx[nCntVtx]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 2]].vtx - pVtx[pIdx[nCntVtx]].vtx));
+									if (NextPolyNorVec2.y <= 0) NextPolyNorVec2 *= -1;
+									D3DXVec3Normalize(&NextPolyNorVec2, &NextPolyNorVec2);
+
+									//二つの法線平均値を求める
+									D3DXVECTOR3 AveNextPolyNorVec = (NextPolyNorVec1 + NextPolyNorVec2) / 2.0f;
+
+									//競合している二つの距離の平均を求める
+									float MinRtionDistance = (MinDistanceUp + MinDistanceLeftDown) / 2.0f;
+
+									D3DXVECTOR3 NowPolyNorVec;
+									D3DXVec3Normalize(&NowPolyNorVec, &vtxHOUSEN);
+									D3DXVECTOR3 NewPolyNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+									//SPHERELINEAR_LEN(5)-MinDistance(0～5)*10 = 補間倍率(0～0.5の範囲)
+									SphereLinear(&NewPolyNorVec, &NowPolyNorVec, &AveNextPolyNorVec, (SPHERELINEAR_LEN - MinRtionDistance) / 10);
+									*vtxNor = NewPolyNorVec;
+
+								}
+
+								//1辺しか干渉していない
+								else if (SPHERELINEAR_LEN > MinDistanceRight)
+								{
+									//辺先にある地面ポリゴンの法線を求める
+									D3DXVECTOR3 NextPolyNorVec;
+									D3DXVec3Cross(&NextPolyNorVec, &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 1]].vtx - pVtx[pIdx[nCntVtx + 2]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 3]].vtx - pVtx[pIdx[nCntVtx + 2]].vtx));
+									if (NextPolyNorVec.y <= 0) NextPolyNorVec *= -1;
+									D3DXVec3Normalize(&NextPolyNorVec, &NextPolyNorVec);
+									D3DXVECTOR3 NowPolyNorVec;
+									D3DXVec3Normalize(&NowPolyNorVec, &vtxHOUSEN);
+									D3DXVECTOR3 NewPolyNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+									//SPHERELINEAR_LEN(5)-MinDistance(0～5)*10 = 補間倍率(0～0.5の範囲)
+									SphereLinear(&NewPolyNorVec, &NowPolyNorVec, &NextPolyNorVec, (SPHERELINEAR_LEN - MinDistanceRight) / 10);
+									*vtxNor = NewPolyNorVec;
+								}
+								else if (SPHERELINEAR_LEN > MinDistanceUp)
+								{
+									//辺先にある地面ポリゴンの法線を求める
+									D3DXVECTOR3 NextPolyNorVec;
+									D3DXVec3Cross(&NextPolyNorVec, &D3DXVECTOR3(pVtx[pIdx[nCntVtx - (g_nNumBlockXField * 2 + 6)]].vtx - pVtx[pIdx[nCntVtx]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 2]].vtx - pVtx[pIdx[nCntVtx]].vtx));
+									if (NextPolyNorVec.y <= 0) NextPolyNorVec *= -1;
+									D3DXVec3Normalize(&NextPolyNorVec, &NextPolyNorVec);
+									D3DXVECTOR3 NowPolyNorVec;
+									D3DXVec3Normalize(&NowPolyNorVec, &vtxHOUSEN);
+									D3DXVECTOR3 NewPolyNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+									//SPHERELINEAR_LEN(5)-MinDistance(0～5)*10 = 補間倍率(0～0.5の範囲)
+									SphereLinear(&NewPolyNorVec, &NowPolyNorVec, &NextPolyNorVec, (SPHERELINEAR_LEN - MinDistanceUp) / 10);
+									*vtxNor = NewPolyNorVec;
+								}
+								else if (SPHERELINEAR_LEN > MinDistanceLeftDown)
+								{
+									//辺先にある地面ポリゴンの法線を求める
+									D3DXVECTOR3 NextPolyNorVec;
+									D3DXVec3Cross(&NextPolyNorVec, &D3DXVECTOR3(pVtx[pIdx[nCntVtx - 1]].vtx - pVtx[pIdx[nCntVtx]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 1]].vtx - pVtx[pIdx[nCntVtx]].vtx));
+									if (NextPolyNorVec.y <= 0) NextPolyNorVec *= -1;
+									D3DXVec3Normalize(&NextPolyNorVec, &NextPolyNorVec);
+									D3DXVECTOR3 NowPolyNorVec;
+									D3DXVec3Normalize(&NowPolyNorVec, &vtxHOUSEN);
+									D3DXVECTOR3 NewPolyNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+									//SPHERELINEAR_LEN(5)-MinDistance(0～5)*10 = 補間倍率(0～0.5の範囲)
+									SphereLinear(&NewPolyNorVec, &NowPolyNorVec, &NextPolyNorVec, (SPHERELINEAR_LEN - MinDistanceLeftDown) / 10);
+									*vtxNor = NewPolyNorVec;
 								}
 							}
 						}
