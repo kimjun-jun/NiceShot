@@ -30,11 +30,10 @@ HitBallTargetの時にテストプレイをしてもらい肌で感じたのは�
 
 作品動画：
 3月末 ver1.1
-https://www.youtube.com/watch?v=Rg5bdDfClKc&t=3s
+https://www.youtube.com/watch?v=Rg5bdDfClKc&t=0s
 
 7月末 ver2.0
-https://www.youtube.com/watch?v=oA6iKpiPQfM&t=88s
-
+https://www.youtube.com/watch?v=oA6iKpiPQfM&t=0s
 
 今後の改善点拡張点：
 
