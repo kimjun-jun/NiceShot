@@ -18,6 +18,68 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\cpp\bullet.cpp" />
+    <ClCompile Include="..\cpp\bulletpoint.cpp" />
+    <ClCompile Include="..\cpp\bulletprediction.cpp" />
+    <ClCompile Include="..\cpp\bullettex.cpp" />
+    <ClCompile Include="..\cpp\camera.cpp" />
+    <ClCompile Include="..\cpp\collision.cpp" />
+    <ClCompile Include="..\cpp\countdown.cpp" />
+    <ClCompile Include="..\cpp\damege.cpp" />
+    <ClCompile Include="..\cpp\debugproc.cpp" />
+    <ClCompile Include="..\cpp\effect.cpp" />
+    <ClCompile Include="..\cpp\explosion.cpp" />
+    <ClCompile Include="..\cpp\fade.cpp" />
+    <ClCompile Include="..\cpp\field.cpp" />
+    <ClCompile Include="..\cpp\input.cpp" />
+    <ClCompile Include="..\cpp\item.cpp" />
+    <ClCompile Include="..\cpp\library.cpp" />
+    <ClCompile Include="..\cpp\life.cpp" />
+    <ClCompile Include="..\cpp\light.cpp" />
+    <ClCompile Include="..\cpp\main.cpp" />
+    <ClCompile Include="..\cpp\player.cpp" />
+    <ClCompile Include="..\cpp\rank.cpp" />
+    <ClCompile Include="..\cpp\result.cpp" />
+    <ClCompile Include="..\cpp\shadow.cpp" />
+    <ClCompile Include="..\cpp\sound.cpp" />
+    <ClCompile Include="..\cpp\status.cpp" />
+    <ClCompile Include="..\cpp\time.cpp" />
+    <ClCompile Include="..\cpp\title.cpp" />
+    <ClCompile Include="..\cpp\tutorial.cpp" />
+    <ClCompile Include="..\cpp\wall.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\h\bullet.h" />
+    <ClInclude Include="..\h\bulletpoint.h" />
+    <ClInclude Include="..\h\bulletprediction.h" />
+    <ClInclude Include="..\h\bullettex.h" />
+    <ClInclude Include="..\h\camera.h" />
+    <ClInclude Include="..\h\collision.h" />
+    <ClInclude Include="..\h\countdown.h" />
+    <ClInclude Include="..\h\damege.h" />
+    <ClInclude Include="..\h\debugproc.h" />
+    <ClInclude Include="..\h\effect.h" />
+    <ClInclude Include="..\h\explosion.h" />
+    <ClInclude Include="..\h\fade.h" />
+    <ClInclude Include="..\h\field.h" />
+    <ClInclude Include="..\h\input.h" />
+    <ClInclude Include="..\h\item.h" />
+    <ClInclude Include="..\h\library.h" />
+    <ClInclude Include="..\h\life.h" />
+    <ClInclude Include="..\h\light.h" />
+    <ClInclude Include="..\h\main.h" />
+    <ClInclude Include="..\h\player.h" />
+    <ClInclude Include="..\h\rank.h" />
+    <ClInclude Include="..\h\result.h" />
+    <ClInclude Include="..\h\shadow.h" />
+    <ClInclude Include="..\h\sound.h" />
+    <ClInclude Include="..\h\status.h" />
+    <ClInclude Include="..\h\time.h" />
+    <ClInclude Include="..\h\title.h" />
+    <ClInclude Include="..\h\tutorial.h" />
+    <ClInclude Include="..\h\wall.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{C4080E5F-E3BF-4058-8CA7-73D5482053D7}</ProjectGuid>
@@ -115,68 +177,6 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClInclude Include="bullet.h" />
-    <ClInclude Include="bulletpoint.h" />
-    <ClInclude Include="bulletprediction.h" />
-    <ClInclude Include="bullettex.h" />
-    <ClInclude Include="camera.h" />
-    <ClInclude Include="collision.h" />
-    <ClInclude Include="countdown.h" />
-    <ClInclude Include="damege.h" />
-    <ClInclude Include="debugproc.h" />
-    <ClInclude Include="effect.h" />
-    <ClInclude Include="explosion.h" />
-    <ClInclude Include="fade.h" />
-    <ClInclude Include="field.h" />
-    <ClInclude Include="input.h" />
-    <ClInclude Include="item.h" />
-    <ClInclude Include="library.h" />
-    <ClInclude Include="life.h" />
-    <ClInclude Include="light.h" />
-    <ClInclude Include="main.h" />
-    <ClInclude Include="player.h" />
-    <ClInclude Include="rank.h" />
-    <ClInclude Include="result.h" />
-    <ClInclude Include="shadow.h" />
-    <ClInclude Include="sound.h" />
-    <ClInclude Include="status.h" />
-    <ClInclude Include="time.h" />
-    <ClInclude Include="title.h" />
-    <ClInclude Include="tutorial.h" />
-    <ClInclude Include="wall.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="bullet.cpp" />
-    <ClCompile Include="bulletpoint.cpp" />
-    <ClCompile Include="bulletprediction.cpp" />
-    <ClCompile Include="bullettex.cpp" />
-    <ClCompile Include="camera.cpp" />
-    <ClCompile Include="collision.cpp" />
-    <ClCompile Include="countdown.cpp" />
-    <ClCompile Include="damege.cpp" />
-    <ClCompile Include="debugproc.cpp" />
-    <ClCompile Include="effect.cpp" />
-    <ClCompile Include="explosion.cpp" />
-    <ClCompile Include="fade.cpp" />
-    <ClCompile Include="field.cpp" />
-    <ClCompile Include="input.cpp" />
-    <ClCompile Include="item.cpp" />
-    <ClCompile Include="library.cpp" />
-    <ClCompile Include="life.cpp" />
-    <ClCompile Include="light.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="player.cpp" />
-    <ClCompile Include="rank.cpp" />
-    <ClCompile Include="result.cpp" />
-    <ClCompile Include="shadow.cpp" />
-    <ClCompile Include="sound.cpp" />
-    <ClCompile Include="status.cpp" />
-    <ClCompile Include="time.cpp" />
-    <ClCompile Include="title.cpp" />
-    <ClCompile Include="tutorial.cpp" />
-    <ClCompile Include="wall.cpp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
