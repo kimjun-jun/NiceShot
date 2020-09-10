@@ -10,8 +10,10 @@
 
 |-project(ソリューションファイル)
 
-|-date|-BGM
+|-date-
 
+      |-BGM
+      
       |-MODEL
 
       |-SE
