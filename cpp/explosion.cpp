@@ -13,7 +13,7 @@
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define	TEXTURE_EXPLOSION		"data/TEXTURE/bomb.png"			// 読み込むテクスチャファイル名
+#define	TEXTURE_EXPLOSION		"../data/TEXTURE/bomb.png"			// 読み込むテクスチャファイル名
 #define	BULLET_SIZE_X			(50.0f)							// ビルボードの幅
 #define	BULLET_SIZE_Y			(50.0f)							// ビルボードの高さ
 #define	VALUE_MOVE_EXPLOSION	(2.0f)							// 移動速度

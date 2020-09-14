@@ -48,22 +48,22 @@
 #define	POLYGON_2D_NUM				(2)																			//!< ポリゴン数
 																												
 //画像の参照名																									
-#define TEXTURE_GAME_SCORE			"data/TEXTURE/BG/0-9.png"													//!< 読み込むテクスチャファイル名
-#define	TEXTURE_MEISAI				"data/MODEL/28513607_p4_master1200.jpg"										//!< 読み込むテクスチャファイル名
-#define	TEXTURE_STATUS_TIKEI_ITEM	"data/MODEL/landmark_aogashima.png"											//!< 地形変形アイテム
-#define	TEXTURE_STATUS_LIFE_ITEM	"data/MODEL/life000.png"													//!< ライフ回復
-#define	TEXTURE_STATUS_SENSYA_ITEM	"data/MODEL/war_sensya_noman.png"											//!< 戦車変形アイテム
-#define	TEXTURE_STATUS_BULLET_ITEM	"data/MODEL/bullettex.png"													//!< バレットアイテム
-#define	TEXTURE_STATUS_SPEED_ITEM	"data/MODEL/1213810.png"													//!< スピードアップアイテム
-#define	TEXTURE_STATUS_CAMERA_ITEM	"data/MODEL/mark_camera_satsuei_ok.png"										//!< 強制バックカメラアイテム
-#define	TEXTURE_STATUS_KIRI_ITEM	"data/MODEL/yama_kiri.png"													//!< 霧アイテム
+#define TEXTURE_GAME_SCORE			"../data/TEXTURE/BG/0-9.png"													//!< 読み込むテクスチャファイル名
+#define	TEXTURE_MEISAI				"../data/MODEL/28513607_p4_master1200.jpg"										//!< 読み込むテクスチャファイル名
+#define	TEXTURE_STATUS_TIKEI_ITEM	"../data/MODEL/landmark_aogashima.png"											//!< 地形変形アイテム
+#define	TEXTURE_STATUS_LIFE_ITEM	"../data/MODEL/life000.png"													//!< ライフ回復
+#define	TEXTURE_STATUS_SENSYA_ITEM	"../data/MODEL/war_sensya_noman.png"											//!< 戦車変形アイテム
+#define	TEXTURE_STATUS_BULLET_ITEM	"../data/MODEL/bullettex.png"													//!< バレットアイテム
+#define	TEXTURE_STATUS_SPEED_ITEM	"../data/MODEL/1213810.png"													//!< スピードアップアイテム
+#define	TEXTURE_STATUS_CAMERA_ITEM	"../data/MODEL/mark_camera_satsuei_ok.png"										//!< 強制バックカメラアイテム
+#define	TEXTURE_STATUS_KIRI_ITEM	"../data/MODEL/yama_kiri.png"													//!< 霧アイテム
 																												
 //モデルの参照																									
-#define	MODEL_HOUDAI				"data/MODEL/PlayerSensyaHoudai.x"											//!< 読み込むモデル名
-#define	MODEL_HOUTOU				"data/MODEL/PlayerSensyaHoutou.x"											//!< 読み込むモデル名
-#define	MODEL_HOUSIN				"data/MODEL/PlayerSensyaHousin.x"											//!< 読み込むモデル名
-#define	MODEL_HOUSINMO				"data/MODEL/PlayerSensyaHousinMo.x"											//!< 読み込むモデル名
-#define	MODEL_BULLETPOS				"data/MODEL/PlayerSensyaBulletPos.x"										//!< 読み込むモデル名
+#define	MODEL_HOUDAI				"../data/MODEL/PlayerSensyaHoudai.x"											//!< 読み込むモデル名
+#define	MODEL_HOUTOU				"../data/MODEL/PlayerSensyaHoutou.x"											//!< 読み込むモデル名
+#define	MODEL_HOUSIN				"../data/MODEL/PlayerSensyaHousin.x"											//!< 読み込むモデル名
+#define	MODEL_HOUSINMO				"../data/MODEL/PlayerSensyaHousinMo.x"											//!< 読み込むモデル名
+#define	MODEL_BULLETPOS				"../data/MODEL/PlayerSensyaBulletPos.x"										//!< 読み込むモデル名
 
 //キャラクターなどの合計
 #define PLAYER_MAX							(4)																			//!< プレイヤー最大人数

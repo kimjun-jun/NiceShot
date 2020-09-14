@@ -409,7 +409,7 @@ HRESULT Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	// フィールドの初期化
 	{
 		// 地面の初期化
-		InitMeshField(D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), 32, 32, 60.0f,60.0f);
+		InitMeshField(D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), 32, 32, 100.0f,100.0f);
 
 		// 壁の初期化
 		InitMeshWall(D3DXVECTOR3(0.0f, 0.0f, 960.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f),

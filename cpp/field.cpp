@@ -17,8 +17,8 @@
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define	TEXTURE_FILENAME				"data/TEXTURE/white.png"		// 読み込むテクスチャファイル名
-#define	TEXTURE_NOISE					"data/TEXTURE/noise.bmp"		// 読み込むテクスチャファイル名
+#define	TEXTURE_FILENAME				"../data/TEXTURE/white.png"		// 読み込むテクスチャファイル名
+#define	TEXTURE_NOISE					"../data/TEXTURE/noise.bmp"		// 読み込むテクスチャファイル名
 #define FIELD_PARTITION_FIRST_NUM		(4)
 #define FIELD_PARTITION_SECOND_NUM		(16)
 #define FIELD_PARTITION_THIRD_NUM		(64)

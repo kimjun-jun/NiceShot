@@ -8,9 +8,9 @@
 
 
 // マクロ定義
-#define TEXTURE_GAME_DOT						"data/TEXTURE/BG/dot.png"												//!< 読み込むテクスチャファイル名
-#define TEXTURE_GAME_SCORE						"data/TEXTURE/BG/0-9.png"												//!< 読み込むテクスチャファイル名
-#define TEXTURE_GAME_TIMELOGO					"data/TEXTURE/sozai/TIME.png" 											//!< 読み込むテクスチャファイル名
+#define TEXTURE_GAME_DOT						"../data/TEXTURE/BG/dot.png"												//!< 読み込むテクスチャファイル名
+#define TEXTURE_GAME_SCORE						"../data/TEXTURE/BG/0-9.png"												//!< 読み込むテクスチャファイル名
+#define TEXTURE_GAME_TIMELOGO					"../data/TEXTURE/sozai/TIME.png" 											//!< 読み込むテクスチャファイル名
 #define TEXTURE_TIME_SIZE_X						(30)																	//!< テクスチャサイズY
 #define TEXTURE_TIME_SIZE_Y						(30)																	//!< テクスチャサイズX
 #define SCORE_TEXTURE_PATTERN_DIVIDE_X			(10)																	//!< アニメパターンのテクスチャ内分割数（X)  

@@ -12,7 +12,7 @@
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define	TEXTURE_BULLETPOINT			"data/TEXTURE/rakatiten.png"		// 読み込むテクスチャファイル名
+#define	TEXTURE_BULLETPOINT			"../data/TEXTURE/rakatiten.png"		// 読み込むテクスチャファイル名
 #define	BULLETPOINT_WIDTH			(50.0f)								// アイコンの半径幅
 #define	BULLETPOINT_HEIGHT			(80.0f)								// アイコンの半径幅
 #define	BULLETPOINT_LEN				(300.0f)							// プレイヤーとアイコンの距離

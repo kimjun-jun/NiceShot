@@ -37,24 +37,24 @@ ITEM				g_aItem[MAX_ITEM];			// アイテムワーク
 
 const char *c_aFileNameItemModel[ITEMTYPE_MAX] =
 {
-	"data/MODEL/tikeiItem.x",		// 地形変形アイテム
-	"data/MODEL/lifeItem.x",		// ライフ回復
-	"data/MODEL/sensyaItem.x",		// 戦車変形アイテム
-	"data/MODEL/bulletItem.x",		// バレットアイテム
-	"data/MODEL/speedItem.x",		// スピードアップアイテム
-	"data/MODEL/cameraItem.x",		// 強制バックカメラアイテム
-	"data/MODEL/kiriItem.x",		// 霧アイテム
+	"../data/MODEL/tikeiItem.x",		// 地形変形アイテム
+	"../data/MODEL/lifeItem.x",		// ライフ回復
+	"../data/MODEL/sensyaItem.x",		// 戦車変形アイテム
+	"../data/MODEL/bulletItem.x",		// バレットアイテム
+	"../data/MODEL/speedItem.x",		// スピードアップアイテム
+	"../data/MODEL/cameraItem.x",		// 強制バックカメラアイテム
+	"../data/MODEL/kiriItem.x",		// 霧アイテム
 };
 
 const char *c_aFileNameItemTex[ITEMTYPE_MAX] =
 {
-	"data/MODEL/landmark_aogashima.png",		// 地形変形アイテム
-	"data/MODEL/life000.png",					// ライフ回復
-	"data/MODEL/war_sensya_noman.png",			// 戦車変形アイテム
-	"data/MODEL/bullettex.png",					// バレットアイテム
-	"data/MODEL/1213810.png",					// スピードアップアイテム
-	"data/MODEL/mark_camera_satsuei_ok.png",	// 強制バックカメラアイテム
-	"data/MODEL/yama_kiri.png",					// 霧アイテム
+	"../data/MODEL/landmark_aogashima.png",		// 地形変形アイテム
+	"../data/MODEL/life000.png",					// ライフ回復
+	"../data/MODEL/war_sensya_noman.png",			// 戦車変形アイテム
+	"../data/MODEL/bullettex.png",					// バレットアイテム
+	"../data/MODEL/1213810.png",					// スピードアップアイテム
+	"../data/MODEL/mark_camera_satsuei_ok.png",	// 強制バックカメラアイテム
+	"../data/MODEL/yama_kiri.png",					// 霧アイテム
 };
 
 //=============================================================================

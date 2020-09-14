@@ -9,7 +9,7 @@
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define	TEXTURE_DAMEGE			("data/TEXTURE/screendamage.png")			
+#define	TEXTURE_DAMEGE			("../data/TEXTURE/screendamage.png")			
 #define	DAMEGE_SIZE_X			(SCREEN_W/4)										// チュートリアルの幅
 #define	DAMEGE_SIZE_Y			(SCREEN_H/4)										// チュートリアルの高さ
 #define	DAMEGE_POS_X			(SCREEN_CENTER_X)									// チュートリアルの表示位置

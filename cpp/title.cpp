@@ -13,9 +13,9 @@
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define	TEXTURE_TITLE		"data/TEXTURE/bg000.jpg"		// 読み込むテクスチャファイル名
-#define	TEXTURE_TITLE_LOGO	"data/TEXTURE/title_logo.png"	// 読み込むテクスチャファイル名
-#define	TEXTURE_LOGO_START	"data/TEXTURE/press_enter.png"	// 読み込むテクスチャファイル名
+#define	TEXTURE_TITLE		"../data/TEXTURE/bg000.jpg"		// 読み込むテクスチャファイル名
+#define	TEXTURE_TITLE_LOGO	"../data/TEXTURE/title_logo.png"	// 読み込むテクスチャファイル名
+#define	TEXTURE_LOGO_START	"../data/TEXTURE/press_enter.png"	// 読み込むテクスチャファイル名
 
 #define	TITLE_LOGO_WIDTH		(150)						// タイトルロゴの幅
 #define	TITLE_LOGO_HEIGHT		(100)						// タイトルロゴの高さ

@@ -13,7 +13,7 @@
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define	TEXTURE_BULLETPREDICTION		"data/TEXTURE/effect000.jpg"	// 読み込むテクスチャファイル名
+#define	TEXTURE_BULLETPREDICTION		"../data/TEXTURE/effect000.jpg"	// 読み込むテクスチャファイル名
 #define	BULLETPREDICTION_SIZE_X			(5.0f)							// ビルボードの幅
 #define	BULLETPREDICTION_SIZE_Y			(5.0f)							// ビルボードの高さ
 

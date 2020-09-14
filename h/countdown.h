@@ -10,7 +10,7 @@
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define TEXTURE_GAME_COUNTDOWNGO			_T("data/TEXTURE/sozai/go.png")													//!< 読み込むテクスチャファイル名
+#define TEXTURE_GAME_COUNTDOWNGO			_T("../data/TEXTURE/sozai/go.png")													//!< 読み込むテクスチャファイル名
 #define TEXTURE_COUNTDOWN_SIZE_X			(50)																			//!< テクスチャサイズ 
 #define TEXTURE_COUNTDOWN_SIZE_Y			(50)																			//!< 同上  
 #define TEXTURE_COUNTDOWNGO_SIZE_X			(200)																			//!< テクスチャロゴサイズ 

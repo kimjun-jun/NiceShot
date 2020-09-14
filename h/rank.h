@@ -9,9 +9,9 @@
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define	TEXTURE_RANK2		("data/TEXTURE/2i.png")							//!< 読み込むテクスチャファイル名
-#define	TEXTURE_RANK3		("data/TEXTURE/3i.png")							//!< 読み込むテクスチャファイル名
-#define	TEXTURE_RANK4		("data/TEXTURE/4i.png")							//!< 読み込むテクスチャファイル名
+#define	TEXTURE_RANK2		("../data/TEXTURE/2i.png")							//!< 読み込むテクスチャファイル名
+#define	TEXTURE_RANK3		("../data/TEXTURE/3i.png")							//!< 読み込むテクスチャファイル名
+#define	TEXTURE_RANK4		("../data/TEXTURE/4i.png")							//!< 読み込むテクスチャファイル名
 #define	RANK_SIZE_X			(SCREEN_W/4)									//!< やられた順位テクスチャの幅
 #define	RANK_SIZE_Y			(SCREEN_H/4)									//!< やられた順位テクスチャの高さ
 #define	RANK_POS_X			(SCREEN_W)										//!< やられた順位テクスチャの表示位置
