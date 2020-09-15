@@ -498,23 +498,23 @@ void UpdatePad(void)
 
 		//左アナログスティック(アナログ操作)
 		//ANALOG上							 
-		if (dijs.lY < -200)				padState[i] |= BUTTON_ANALOG_L_UP;
+		if (dijs.lY < -100)				padState[i] |= BUTTON_ANALOG_L_UP;
 		//ANALOG右
-		if (dijs.lX > 50)				padState[i] |= BUTTON_ANALOG_L_RIGHT;
+		if (dijs.lX > 25)				padState[i] |= BUTTON_ANALOG_L_RIGHT;
 		//ANALOG下
-		if (dijs.lY > 200)				padState[i] |= BUTTON_ANALOG_L_DOWN;
+		if (dijs.lY > 100)				padState[i] |= BUTTON_ANALOG_L_DOWN;
 		//ANALOG左
-		if (dijs.lX < -50)				padState[i] |= BUTTON_ANALOG_L_LEFT;
+		if (dijs.lX < -25)				padState[i] |= BUTTON_ANALOG_L_LEFT;
 
 		//右アナログスティック(アナログ操作)
 		//ANALOG上							 
-		if (dijs.lRy < 28000)			padState[i] |= BUTTON_ANALOG_R_UP;
+		if (dijs.lRy < 30000)			padState[i] |= BUTTON_ANALOG_R_UP;
 		//ANALOG右
-		if (dijs.lRx > 36000)			padState[i] |= BUTTON_ANALOG_R_RIGHT;
+		if (dijs.lRx > 34000)			padState[i] |= BUTTON_ANALOG_R_RIGHT;
 		//ANALOG下
-		if (dijs.lRy > 36000)			padState[i] |= BUTTON_ANALOG_R_DOWN;
+		if (dijs.lRy > 34000)			padState[i] |= BUTTON_ANALOG_R_DOWN;
 		//ANALOG左
-		if (dijs.lRx < 28000)			padState[i] |= BUTTON_ANALOG_R_LEFT;
+		if (dijs.lRx < 30000)			padState[i] |= BUTTON_ANALOG_R_LEFT;
 
 		//十字キー(デジタル操作)
 		//DIGITAL上

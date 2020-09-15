@@ -18,8 +18,11 @@ public:
 	D3DXVECTOR3					bulletmove;								//!< バレット進行方向
 	D3DXVECTOR3					BposStart;								//!< バレットの発射位置
 	D3DXVECTOR3					BmoveRot;								//!< 弾が進行する角度
+	D3DXVECTOR3					movepos;								//!< モデルの移動方向(量)
+	D3DXVECTOR3					moverot;								//!< モデルの回転方向(量)
 	bool						BackCameraItemSignal;					//!< バックカメラアイテムを使用しているかどうか
 	bool						KiriSignal;								//!< 霧アイテムを使用しているかどうか
+	bool						dashFlag;								//!< ダッシュ判定　入力がある間true.それ以外はfalse
 	float						BackCameraItemTime;						//!< バックカメラアイテムの効果時間
 	float						KiriItemTime;							//!< 霧アイテムの効果時間
 	float						AmmoBornCnt;							//!< 残弾回復カウント。時間で回復
@@ -27,9 +30,9 @@ public:
 	int							ModelType;								//!< どのモデル状態か判定
 	int							RidePolygonNum;							//!< どの地形ポリゴンに乗っているか判定
 	void						SetMoveABL(int CntPlayer);				//!< 移動制御(ABボタンLスティックで移動制御)
-	void						SetCameraABL(int CntPlayer);			//!< カメラ制御(ABボタンLスティックで移動制御)
-	void						SetMoveLR(int CntPlayer);				//!< 移動制御(LRスティックで移動制御)
-	void						SetCameraLR(int CntPlayer);				//!< カメラ制御(LRスティックで移動制御)
+	void						SetCamera(int CntPlayer);				//!< カメラ更新
+	void						SetMoveL(int CntPlayer);				//!< 移動制御(LRスティックで移動制御)
+	void						SetCameraR(int CntPlayer);				//!< カメラ制御(LRスティックで移動制御)
 	void						SetQ(int CntPlayer);					//!< クォータニオン制御
 	void						SetBulletALL(int CntPlayer);			//!< バレット関連制御
 	void						SetKiri(int CntPlayer);					//!< フォグ制御
