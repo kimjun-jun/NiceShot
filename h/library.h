@@ -166,14 +166,60 @@ float LerpEaseInEaseOut(float t);
 */
 float PointAndLineMinDistance(D3DXVECTOR3 Point, D3DXVECTOR3 LinePoint1, D3DXVECTOR3 LinePoint2);
 
+/**
+* @brief [3D用]円柱と直緯の当たり判定関数	CheckHitColumnLB
+* @param[in] D3DXVECTOR3	yarnvec				方向ベクトル
+* @param[in] D3DXVECTOR3	cylindervec			方向ベクトル
+* @param[in] D3DXVECTOR3	yarnpos				座標
+* @param[in] D3DXVECTOR3	bottompos			座標
+* @param[in] float			yarnradius			半径
+* @param[in] float			cylinderradius		半径
+* @return bool　true:当たっている　false:当たっていない
+* @details 円柱と直線が当たっているか判定で使用
+*/
+bool CheckHitColumnLB(D3DXVECTOR3 yarnvec, D3DXVECTOR3 cylindervec, D3DXVECTOR3 yarnpos, D3DXVECTOR3 bottompos, float yarnradius, float cylinderradius);
 
+/**
+* @brief 当たり判定高速化のフラグ初期化処理	InitCntPartition
+* @details 当たり判定高速化でどの平面エリアに属しているかの判定フラグを初期化する
+*/
+void InitCntPartition(void);
 
-bool CheckHitColumnLB(D3DXVECTOR3 yarnvec, D3DXVECTOR3 vec, D3DXVECTOR3 yarnpos, D3DXVECTOR3 bottompos, float yarnradius, float radius);
+/**
+* @brief 当たり判定高速化判定関数	SpeedUpFieldHitPoly
+* @param[in] D3DXVECTOR3	InPos					判定する入力座標
+* @param[in] float			*HitPosUp				属しているエリアの最大Z座標
+* @param[in] float			*HitPosDown				属しているエリアの最小Z座標
+* @param[in] float			*HitPosLeft				属しているエリアの最大X座標
+* @param[in] float			*HitPosRight			属しているエリアの最小X座標
+* @param[in] float			fSideSizeXQuarter		フィールドのX1/4サイズ
+* @param[in] float			fSideSizeZQuarter		フィールドのZ1/4サイズ
+* @param[in] float			fSideSizeXEighth		フィールドのX1/8サイズ
+* @param[in] float			fSideSizeZEighth		フィールドのZ1/8サイズ
+* @details 属しているHitPosのXZ最大最小をポインターとして返す。このエリア内にInPosがあるという
+*/
+void SpeedUpFieldHitPoly(D3DXVECTOR3 InPos, float *HitPosUp, float *HitPosDown, float *HitPosLeft, float *HitPosRight
+	,float fSideSizeXQuarter, float fSideSizeZQuarter, float fSideSizeXEighth, float fSideSizeZEighth);
 
+/**
+* @brief 球面線形補間算出関数	SphereLinear
+* @param[in] D3DXVECTOR3	*out		補間ベクトル（出力）	補間されたプレイヤーの姿勢ベクトル
+* @param[in] D3DXVECTOR3	*start		開始ベクトル			プレイヤーの姿勢ベクトル
+* @param[in] D3DXVECTOR3	*end		終了ベクトル			目的地形の法線ベクトル
+* @param[in] float			t			スタートからエンドまでの補間値の割合　
+* @details ベクトルの回転を球面で処理する。姿勢制御などで使用
+*/
+void SphereLinear(D3DXVECTOR3* out, D3DXVECTOR3* start, D3DXVECTOR3* end, float t);
 
-
-
-
+/**
+* @brief 球面線形補間による姿勢補間関数	CalcInterPause
+* @param[in] D3DXVECTOR3	*out		補間ベクトル（出力）	補間されたプレイヤーの姿勢ベクトル
+* @param[in] D3DXVECTOR3	*start		開始ベクトル			プレイヤーの姿勢ベクトル
+* @param[in] D3DXVECTOR3	*end		終了ベクトル			目的地形の法線ベクトル
+* @param[in] float			t			スタートからエンドまでの補間値の割合　
+* @details ベクトルの回転を球面で処理する。姿勢制御などで使用。マトリクスから直接制御するために使用
+*/
+//D3DXMATRIX* CalcInterPause(D3DXMATRIX* out, D3DXMATRIX* start, D3DXMATRIX* end, float t);
 
 
 /**
@@ -212,7 +258,11 @@ enum METHOD
 	NONE
 };
 
-
+struct FIELD_COLLISION
+{
+	FIELD_COLLISION				*Parent;				// 4分割の4分割の4分割の合計3種類(親NULL、親PARENT、親CHILD)　＝4*4*4=64タイプ
+	bool						Cheak;					// 正常に当たり判定しているかどうかの判定
+};
 
 
 
@@ -327,7 +377,6 @@ struct HLANIMATION_DESC
 // Forward declarations 
 //--------------------------------------------------------------------------------------
 void OnFrameMoveAnime(double fTime, ID3DXAnimationController* AnimController);
-
 void DrawMeshContainer(LPD3DXMESHCONTAINER pMeshContainerBase, LPD3DXFRAME pFrameBase, METHOD SkinningMethod, LPDIRECT3DTEXTURE9 pD3DTexture);
 void DrawFrame(LPD3DXFRAME pFrame, METHOD SkinningMethod, LPDIRECT3DTEXTURE9 pD3DTexture);
 HRESULT SetupBoneMatrixPointersOnMesh(LPD3DXMESHCONTAINER pMeshContainerBase, LPD3DXFRAME pFrameRoot);
@@ -336,7 +385,4 @@ void UpdateFrameMatrices(LPD3DXFRAME pFrameBase, LPD3DXMATRIX pParentMatrix);
 void UpdateSkinningMethod(LPD3DXFRAME pFrameBase, METHOD SkinningMethod, D3DXMATRIXA16* pBoneMatrices, UINT NumBoneMatricesMax, bool* bUseSoftwareVP);
 HRESULT GenerateSkinnedMesh(D3DXMESHCONTAINER_DERIVED* pMeshContainer, METHOD SkinningMethod, D3DXMATRIXA16* pBoneMatrices, UINT NumBoneMatricesMax, bool* bUseSoftwareVP);
 void ReleaseAttributeTable(LPD3DXFRAME pFrameBase);
-
-
-
 void LoadAnimSet(ORIANIMATION *pAnim);

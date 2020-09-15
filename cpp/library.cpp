@@ -7,6 +7,729 @@
 #include "../h/library.h"
 
 
+//---------------------------------------------------------------------------------当たり判定高速化用
+//
+#define FIELD_PARTITION_FIRST_NUM		(4)
+#define FIELD_PARTITION_SECOND_NUM		(16)
+#define FIELD_PARTITION_THIRD_NUM		(64)
+FIELD_COLLISION g_Field_Collision[FIELD_PARTITION_THIRD_NUM];
+//=============================================================================
+// 当たり判定高速化のフラグ初期化処理
+//=============================================================================
+void InitCntPartition(void)
+{
+
+	//今回は使わない
+	/*
+	//親判定
+	for (int CntPartition = 0; CntPartition < FIELD_PARTITION_FIRST_NUM; CntPartition++)
+	{
+		g_FirstField_Collision[CntPartition].Parent = NULL;
+		g_FirstField_Collision[CntPartition].Num = CntPartition;
+		g_FirstField_Collision[CntPartition].Cheak = false;
+	}
+	//子判定
+	for (int CntPartition = 0; CntPartition < FIELD_PARTITION_SECOND_NUM; CntPartition++)
+	{
+		switch (CntPartition)
+		{
+		case 0:case 1:case 2:case 3:
+			g_SecondField_Collision[CntPartition].Parent = &g_FirstField_Collision[0];
+			break;
+		case 4:case 5:case 6:case 7:
+			g_SecondField_Collision[CntPartition].Parent = &g_FirstField_Collision[1];
+			break;
+		case 8:case 9:case 10:case 11:
+			g_SecondField_Collision[CntPartition].Parent = &g_FirstField_Collision[2];
+			break;
+		case 12:case 13:case 14:case 15:
+			g_SecondField_Collision[CntPartition].Parent = &g_FirstField_Collision[3];
+			break;
+		default:
+			break;
+		}
+		g_SecondField_Collision[CntPartition].Num = CntPartition;
+		g_SecondField_Collision[CntPartition].Cheak = false;
+	}
+	*/
+
+	//孫判定
+	for (int CntPartition = 0; CntPartition < FIELD_PARTITION_THIRD_NUM; CntPartition++)
+	{
+		//今回は使わない
+		/*
+		switch (CntPartition)
+		{
+		case 0:case 1:case 2:case 3:
+			g_Field_Collision[CntPartition].Parent = &g_SecondField_Collision[0];
+			break;
+		case 4:case 5:case 6:case 7:
+			g_Field_Collision[CntPartition].Parent = &g_SecondField_Collision[1];
+			break;
+		case 8:case 9:case 10:case 11:
+			g_Field_Collision[CntPartition].Parent = &g_SecondField_Collision[2];
+			break;
+		case 12:case 13:case 14:case 15:
+			g_Field_Collision[CntPartition].Parent = &g_SecondField_Collision[3];
+			break;
+
+		case 16:case 17:case 18:case 19:
+			g_Field_Collision[CntPartition].Parent = &g_SecondField_Collision[4];
+			break;
+		case 20:case 21:case 22:case 23:
+			g_Field_Collision[CntPartition].Parent = &g_SecondField_Collision[5];
+			break;
+		case 24:case 25:case 26:case 27:
+			g_Field_Collision[CntPartition].Parent = &g_SecondField_Collision[6];
+			break;
+		case 28:case 29:case 30:case 31:
+			g_Field_Collision[CntPartition].Parent = &g_SecondField_Collision[7];
+			break;
+
+		case 32:case 33:case 34:case 35:
+			g_Field_Collision[CntPartition].Parent = &g_SecondField_Collision[8];
+			break;
+		case 36:case 37:case 38:case 39:
+			g_Field_Collision[CntPartition].Parent = &g_SecondField_Collision[9];
+			break;
+		case 40:case 41:case 42:case 43:
+			g_Field_Collision[CntPartition].Parent = &g_SecondField_Collision[10];
+			break;
+		case 44:case 45:case 46:case 47:
+			g_Field_Collision[CntPartition].Parent = &g_SecondField_Collision[11];
+			break;
+
+		case 48:case 49:case 50:case 51:
+			g_Field_Collision[CntPartition].Parent = &g_SecondField_Collision[12];
+			break;
+		case 52:case 53:case 54:case 55:
+			g_Field_Collision[CntPartition].Parent = &g_SecondField_Collision[13];
+			break;
+		case 56:case 57:case 58:case 59:
+			g_Field_Collision[CntPartition].Parent = &g_SecondField_Collision[14];
+			break;
+		case 60:case 61:case 62:case 63:
+			g_Field_Collision[CntPartition].Parent = &g_SecondField_Collision[15];
+			break;
+		}
+		*/
+
+		g_Field_Collision[CntPartition].Cheak = false;
+	}
+}
+
+//=============================================================================
+// 当たり判定高速化判定関数
+//=============================================================================
+void SpeedUpFieldHitPoly(D3DXVECTOR3 InrayS, float *HitPosUp, float *HitPosDown, float *HitPosLeft, float *HitPosRight
+	, float fSideSizeXQuarter, float fSideSizeZQuarter, float fSideSizeXEighth, float fSideSizeZEighth)
+{
+	//判定用フラグを初期化　g_Field_Collisionはプレイヤーの球面補間を計算時に現在乗っているポリゴン番号として使用
+	InitCntPartition();
+
+	//判定　X,Zがプラスかマイナスか　基準はg_posFieldの中心(x0,z0)　if()分岐3つだけど長い
+	if (InrayS.x >= 0.0f && InrayS.z >= 0.0f)			//親++第一象限
+	{
+		//子判定　親の時と同じく、第一象限のなかでさらにプラスかマイナスか判定
+		if (InrayS.x >= fSideSizeXQuarter && InrayS.z >= fSideSizeZQuarter)			//子++第一象限
+		{
+			//孫判定　同上
+			if (InrayS.x >= fSideSizeXQuarter + fSideSizeXEighth && InrayS.z >= fSideSizeZQuarter + fSideSizeZEighth)			//孫++第一象限
+			{
+				g_Field_Collision[21].Cheak = true;
+				*HitPosUp = fSideSizeZQuarter + fSideSizeZQuarter;
+				*HitPosDown = fSideSizeZQuarter + fSideSizeZEighth;
+				*HitPosLeft = fSideSizeXQuarter + fSideSizeXEighth;
+				*HitPosRight = fSideSizeXQuarter + fSideSizeXQuarter;
+			}
+			else if (InrayS.x < fSideSizeXQuarter + fSideSizeXEighth && InrayS.z >= fSideSizeZQuarter + fSideSizeZEighth)			//孫-+第二象限
+			{
+				g_Field_Collision[20].Cheak = true;
+				*HitPosUp = fSideSizeZQuarter + fSideSizeZQuarter;
+				*HitPosDown = fSideSizeZQuarter + fSideSizeZEighth;
+				*HitPosLeft = fSideSizeXQuarter;
+				*HitPosRight = fSideSizeXQuarter + fSideSizeXEighth;
+			}
+			else if (InrayS.x < fSideSizeXQuarter + fSideSizeXEighth && InrayS.z < fSideSizeZQuarter + fSideSizeZEighth)			//孫--第三象限
+			{
+				g_Field_Collision[22].Cheak = true;
+				*HitPosUp = fSideSizeZQuarter + fSideSizeZEighth;
+				*HitPosDown = fSideSizeZQuarter;
+				*HitPosLeft = fSideSizeXQuarter;
+				*HitPosRight = fSideSizeXQuarter + fSideSizeXEighth;
+			}
+			else if (InrayS.x >= fSideSizeXQuarter + fSideSizeXEighth && InrayS.z < fSideSizeZQuarter + fSideSizeZEighth)			//孫+-第四象限
+			{
+				g_Field_Collision[23].Cheak = true;
+				*HitPosUp = fSideSizeZQuarter + fSideSizeZEighth;
+				*HitPosDown = fSideSizeZQuarter;
+				*HitPosLeft = fSideSizeXQuarter + fSideSizeXEighth;
+				*HitPosRight = fSideSizeXQuarter + fSideSizeXQuarter;
+			}
+		}
+		else if (InrayS.x < fSideSizeXQuarter && InrayS.z >= fSideSizeZQuarter)			//子-+第二象限
+		{
+			//孫判定　同上
+			if (InrayS.x >= fSideSizeXEighth && InrayS.z >= fSideSizeZQuarter + fSideSizeZEighth)			//孫++第一象限
+			{
+				g_Field_Collision[17].Cheak = true;
+				*HitPosUp = fSideSizeZQuarter + fSideSizeZQuarter;
+				*HitPosDown = fSideSizeZQuarter + fSideSizeZEighth;
+				*HitPosLeft = fSideSizeXEighth;
+				*HitPosRight = fSideSizeXQuarter;
+			}
+			else if (InrayS.x < fSideSizeXEighth && InrayS.z >= fSideSizeZQuarter + fSideSizeZEighth)			//孫-+第二象限
+			{
+				g_Field_Collision[16].Cheak = true;
+				*HitPosUp = fSideSizeZQuarter + fSideSizeZQuarter;
+				*HitPosDown = fSideSizeZQuarter + fSideSizeZEighth;
+				*HitPosLeft = 0.0f;
+				*HitPosRight = fSideSizeXEighth;
+			}
+			else if (InrayS.x < fSideSizeXEighth && InrayS.z < fSideSizeZQuarter + fSideSizeZEighth)			//孫--第三象限
+			{
+				g_Field_Collision[18].Cheak = true;
+				*HitPosUp = fSideSizeZQuarter + fSideSizeZEighth;
+				*HitPosDown = fSideSizeZQuarter;
+				*HitPosLeft = 0.0f;
+				*HitPosRight = fSideSizeXEighth;
+			}
+			else if (InrayS.x >= fSideSizeXEighth && InrayS.z < fSideSizeZQuarter + fSideSizeZEighth)			//孫+-第四象限
+			{
+				g_Field_Collision[19].Cheak = true;
+				*HitPosUp = fSideSizeZQuarter + fSideSizeZEighth;
+				*HitPosDown = fSideSizeZQuarter;
+				*HitPosLeft = fSideSizeXEighth;
+				*HitPosRight = fSideSizeXQuarter;
+			}
+		}
+		else if (InrayS.x < fSideSizeXQuarter && InrayS.z < fSideSizeZQuarter)			//子--第三象限
+		{
+			//孫判定　同上
+			if (InrayS.x >= fSideSizeXEighth && InrayS.z >= fSideSizeZEighth)			//孫++第一象限
+			{
+				g_Field_Collision[25].Cheak = true;
+				*HitPosUp = fSideSizeZQuarter;
+				*HitPosDown = fSideSizeZEighth;
+				*HitPosLeft = fSideSizeXEighth;
+				*HitPosRight = fSideSizeXQuarter;
+			}
+			else if (InrayS.x < fSideSizeXEighth && InrayS.z >= fSideSizeZEighth)			//孫-+第二象限
+			{
+				g_Field_Collision[24].Cheak = true;
+				*HitPosUp = fSideSizeZQuarter;
+				*HitPosDown = fSideSizeZEighth;
+				*HitPosLeft = 0.0f;
+				*HitPosRight = fSideSizeXEighth;
+			}
+			else if (InrayS.x < fSideSizeXEighth && InrayS.z < fSideSizeZEighth)			//孫--第三象限
+			{
+				g_Field_Collision[26].Cheak = true;
+				*HitPosUp = fSideSizeZEighth;
+				*HitPosDown = 0.0f;
+				*HitPosLeft = 0.0f;
+				*HitPosRight = fSideSizeXEighth;
+			}
+			else if (InrayS.x >= fSideSizeXEighth && InrayS.z < fSideSizeZEighth)			//孫+-第四象限
+			{
+				g_Field_Collision[27].Cheak = true;
+				*HitPosUp = fSideSizeZEighth;
+				*HitPosDown = 0.0f;
+				*HitPosLeft = fSideSizeXEighth;
+				*HitPosRight = fSideSizeXQuarter;
+			}
+
+		}
+		else if (InrayS.x >= fSideSizeXQuarter && InrayS.z < fSideSizeZQuarter)			//子+-第四象限
+		{
+			//孫判定　同上
+			if (InrayS.x >= fSideSizeXQuarter + fSideSizeXEighth && InrayS.z >= fSideSizeZEighth)			//孫++第一象限
+			{
+				g_Field_Collision[29].Cheak = true;
+				*HitPosUp = fSideSizeZQuarter;
+				*HitPosDown = fSideSizeZEighth;
+				*HitPosLeft = fSideSizeXQuarter + fSideSizeXEighth;
+				*HitPosRight = fSideSizeXQuarter + fSideSizeXQuarter;
+			}
+			else if (InrayS.x < fSideSizeXQuarter + fSideSizeXEighth && InrayS.z >= fSideSizeZEighth)			//孫-+第二象限
+			{
+				g_Field_Collision[28].Cheak = true;
+				*HitPosUp = fSideSizeZQuarter;
+				*HitPosDown = fSideSizeZEighth;
+				*HitPosLeft = fSideSizeXQuarter;
+				*HitPosRight = fSideSizeXQuarter + fSideSizeXEighth;
+			}
+			else if (InrayS.x < fSideSizeXQuarter + fSideSizeXEighth && InrayS.z < fSideSizeZEighth)			//孫--第三象限
+			{
+				g_Field_Collision[30].Cheak = true;
+				*HitPosUp = fSideSizeZEighth;
+				*HitPosDown = 0.0f;
+				*HitPosLeft = fSideSizeXQuarter;
+				*HitPosRight = fSideSizeXQuarter + fSideSizeXEighth;
+			}
+			else if (InrayS.x >= fSideSizeXQuarter + fSideSizeXEighth && InrayS.z < fSideSizeZEighth)			//孫+-第四象限
+			{
+				g_Field_Collision[31].Cheak = true;
+				*HitPosUp = fSideSizeZEighth;
+				*HitPosDown = 0.0f;
+				*HitPosLeft = fSideSizeXQuarter + fSideSizeXEighth;
+				*HitPosRight = fSideSizeXQuarter + fSideSizeXQuarter;
+			}
+		}
+	}
+	else if (InrayS.x < 0.0f && InrayS.z >= 0.0f)			//親-+第二象限
+	{
+		//子判定　親の時と同じく、第一象限のなかでさらにプラスかマイナスか判定
+		if (InrayS.x >= -fSideSizeXQuarter && InrayS.z >= fSideSizeZQuarter)			//子++第一象限
+		{
+
+			//孫判定　同上
+			if (InrayS.x >= -fSideSizeXEighth && InrayS.z >= fSideSizeZQuarter + fSideSizeZEighth)			//孫++第一象限
+			{
+				g_Field_Collision[5].Cheak = true;
+				*HitPosUp = fSideSizeZQuarter + fSideSizeZQuarter;
+				*HitPosDown = fSideSizeZQuarter + fSideSizeZEighth;
+				*HitPosLeft = -fSideSizeXEighth;
+				*HitPosRight = 0.0f;
+			}
+			else if (InrayS.x < -fSideSizeXEighth && InrayS.z >= fSideSizeZQuarter + fSideSizeZEighth)			//孫-+第二象限
+			{
+				g_Field_Collision[4].Cheak = true;
+				*HitPosUp = fSideSizeZQuarter + fSideSizeZQuarter;
+				*HitPosDown = fSideSizeZQuarter + fSideSizeZEighth;
+				*HitPosLeft = -fSideSizeXQuarter;
+				*HitPosRight = -fSideSizeXEighth;
+			}
+			else if (InrayS.x < -fSideSizeXEighth && InrayS.z < fSideSizeZQuarter + fSideSizeZEighth)			//孫--第三象限
+			{
+				g_Field_Collision[6].Cheak = true;
+				*HitPosUp = fSideSizeZQuarter + fSideSizeZEighth;
+				*HitPosDown = fSideSizeZQuarter;
+				*HitPosLeft = -fSideSizeXQuarter;
+				*HitPosRight = -fSideSizeXEighth;
+			}
+			else if (InrayS.x >= -fSideSizeXEighth && InrayS.z < fSideSizeZQuarter + fSideSizeZEighth)			//孫+-第四象限
+			{
+				g_Field_Collision[7].Cheak = true;
+				*HitPosUp = fSideSizeZQuarter + fSideSizeZEighth;
+				*HitPosDown = fSideSizeZQuarter;
+				*HitPosLeft = -fSideSizeXEighth;
+				*HitPosRight = 0.0f;
+			}
+		}
+		else if (InrayS.x < -fSideSizeXQuarter && InrayS.z >= fSideSizeZQuarter)			//子-+第二象限
+		{
+			//孫判定　同上
+			if (InrayS.x >= -fSideSizeXQuarter - fSideSizeXEighth && InrayS.z >= fSideSizeZQuarter + fSideSizeZEighth)			//孫++第一象限
+			{
+				g_Field_Collision[1].Cheak = true;
+				*HitPosUp = fSideSizeZQuarter + fSideSizeZQuarter;
+				*HitPosDown = fSideSizeZQuarter + fSideSizeZEighth;
+				*HitPosLeft = -fSideSizeXQuarter - fSideSizeXEighth;
+				*HitPosRight = -fSideSizeXQuarter;
+			}
+			else if (InrayS.x < -fSideSizeXQuarter - fSideSizeXEighth && InrayS.z >= fSideSizeZQuarter + fSideSizeZEighth)			//孫-+第二象限
+			{
+				g_Field_Collision[0].Cheak = true;
+				*HitPosUp = fSideSizeZQuarter + fSideSizeZQuarter;
+				*HitPosDown = fSideSizeZQuarter + fSideSizeZEighth;
+				*HitPosLeft = -fSideSizeXQuarter - fSideSizeXQuarter;
+				*HitPosRight = -fSideSizeXQuarter - fSideSizeXEighth;
+			}
+			else if (InrayS.x < -fSideSizeXQuarter - fSideSizeXEighth && InrayS.z < fSideSizeZQuarter + fSideSizeZEighth)			//孫--第三象限
+			{
+				g_Field_Collision[2].Cheak = true;
+				*HitPosUp = fSideSizeZQuarter + fSideSizeZEighth;
+				*HitPosDown = fSideSizeZQuarter;
+				*HitPosLeft = -fSideSizeXQuarter - fSideSizeXQuarter;
+				*HitPosRight = -fSideSizeXQuarter - fSideSizeXEighth;
+			}
+			else if (InrayS.x >= -fSideSizeXQuarter - fSideSizeXEighth && InrayS.z < fSideSizeZQuarter + fSideSizeZEighth)			//孫+-第四象限
+			{
+				g_Field_Collision[3].Cheak = true;
+				*HitPosUp = fSideSizeZQuarter + fSideSizeZEighth;
+				*HitPosDown = fSideSizeZQuarter;
+				*HitPosLeft = -fSideSizeXQuarter - fSideSizeXEighth;
+				*HitPosRight = -fSideSizeXQuarter;
+			}
+		}
+		else if (InrayS.x < -fSideSizeXQuarter && InrayS.z < fSideSizeZQuarter)			//子--第三象限
+		{
+			//孫判定　同上
+			if (InrayS.x >= -fSideSizeXQuarter - fSideSizeXEighth && InrayS.z >= fSideSizeZEighth)			//孫++第一象限
+			{
+				g_Field_Collision[9].Cheak = true;
+				*HitPosUp = fSideSizeZQuarter;
+				*HitPosDown = fSideSizeZEighth;
+				*HitPosLeft = -fSideSizeXQuarter - fSideSizeXEighth;
+				*HitPosRight = -fSideSizeXQuarter;
+			}
+			else if (InrayS.x < -fSideSizeXQuarter - fSideSizeXEighth && InrayS.z >= fSideSizeZEighth)			//孫-+第二象限
+			{
+				g_Field_Collision[8].Cheak = true;
+				*HitPosUp = fSideSizeZQuarter;
+				*HitPosDown = fSideSizeZEighth;
+				*HitPosLeft = -fSideSizeXQuarter - fSideSizeXQuarter;
+				*HitPosRight = -fSideSizeXQuarter - fSideSizeXEighth;
+			}
+			else if (InrayS.x < -fSideSizeXQuarter - fSideSizeXEighth && InrayS.z < fSideSizeZEighth)			//孫--第三象限
+			{
+				g_Field_Collision[10].Cheak = true;
+				*HitPosUp = fSideSizeZEighth;
+				*HitPosDown = 0.0f;
+				*HitPosLeft = -fSideSizeXQuarter - fSideSizeXQuarter;
+				*HitPosRight = -fSideSizeXQuarter - fSideSizeXEighth;
+			}
+			else if (InrayS.x >= -fSideSizeXQuarter - fSideSizeXEighth && InrayS.z < fSideSizeZEighth)			//孫+-第四象限
+			{
+				g_Field_Collision[11].Cheak = true;
+				*HitPosUp = fSideSizeZEighth;
+				*HitPosDown = 0.0f;
+				*HitPosLeft = -fSideSizeXQuarter - fSideSizeXEighth;
+				*HitPosRight = -fSideSizeXQuarter;
+			}
+
+		}
+		else if (InrayS.x >= -fSideSizeXQuarter && InrayS.z < fSideSizeZQuarter)			//子+-第四象限
+		{
+			//孫判定　同上
+			if (InrayS.x >= -fSideSizeXEighth && InrayS.z >= fSideSizeZEighth)			//孫++第一象限
+			{
+				g_Field_Collision[13].Cheak = true;
+				*HitPosUp = fSideSizeZQuarter;
+				*HitPosDown = fSideSizeZEighth;
+				*HitPosLeft = -fSideSizeXEighth;
+				*HitPosRight = 0.0f;
+			}
+			else if (InrayS.x < -fSideSizeXEighth && InrayS.z >= fSideSizeZEighth)			//孫-+第二象限
+			{
+				g_Field_Collision[12].Cheak = true;
+				*HitPosUp = fSideSizeZQuarter;
+				*HitPosDown = fSideSizeZEighth;
+				*HitPosLeft = -fSideSizeXQuarter;
+				*HitPosRight = -fSideSizeXEighth;
+			}
+			else if (InrayS.x < -fSideSizeXEighth && InrayS.z < fSideSizeZEighth)			//孫--第三象限
+			{
+				g_Field_Collision[14].Cheak = true;
+				*HitPosUp = fSideSizeZEighth;
+				*HitPosDown = 0.0f;
+				*HitPosLeft = -fSideSizeXQuarter;
+				*HitPosRight = -fSideSizeXEighth;
+			}
+			else if (InrayS.x >= -fSideSizeXEighth && InrayS.z < fSideSizeZEighth)			//孫+-第四象限
+			{
+				g_Field_Collision[15].Cheak = true;
+				*HitPosUp = fSideSizeZEighth;
+				*HitPosDown = 0.0f;
+				*HitPosLeft = -fSideSizeXEighth;
+				*HitPosRight = 0.0f;
+			}
+		}
+	}
+	else if (InrayS.x < 0.0f && InrayS.z < 0.0f)			//親--第三象限
+	{
+		if (InrayS.x >= -fSideSizeXQuarter && InrayS.z >= -fSideSizeZQuarter)			//子++第一象限
+		{
+			//孫判定　同上
+			if (InrayS.x >= -fSideSizeXEighth && InrayS.z >= -fSideSizeZEighth)			//孫++第一象限
+			{
+				g_Field_Collision[37].Cheak = true;
+				*HitPosUp = 0.0f;
+				*HitPosDown = -fSideSizeZEighth;
+				*HitPosLeft = -fSideSizeXEighth;
+				*HitPosRight = 0.0f;
+			}
+			else if (InrayS.x < -fSideSizeXEighth && InrayS.z >= -fSideSizeZEighth)			//孫-+第二象限
+			{
+				g_Field_Collision[36].Cheak = true;
+				*HitPosUp = 0.0f;
+				*HitPosDown = -fSideSizeZEighth;
+				*HitPosLeft = -fSideSizeXQuarter;
+				*HitPosRight = -fSideSizeXEighth;
+			}
+			else if (InrayS.x < -fSideSizeXEighth && InrayS.z < -fSideSizeZEighth)			//孫--第三象限
+			{
+				g_Field_Collision[38].Cheak = true;
+				*HitPosUp = -fSideSizeZEighth;
+				*HitPosDown = -fSideSizeZQuarter;
+				*HitPosLeft = -fSideSizeXQuarter;
+				*HitPosRight = -fSideSizeXEighth;
+			}
+			else if (InrayS.x >= -fSideSizeXEighth && InrayS.z < -fSideSizeZEighth)			//孫+-第四象限
+			{
+				g_Field_Collision[39].Cheak = true;
+				*HitPosUp = -fSideSizeZEighth;
+				*HitPosDown = -fSideSizeZQuarter;
+				*HitPosLeft = -fSideSizeXEighth;
+				*HitPosRight = 0.0f;
+			}
+		}
+		else if (InrayS.x < -fSideSizeXQuarter && InrayS.z >= -fSideSizeZQuarter)			//子-+第二象限
+		{
+			//孫判定　同上
+			if (InrayS.x >= -fSideSizeXQuarter - fSideSizeXEighth && InrayS.z >= -fSideSizeZEighth)			//孫++第一象限
+			{
+				g_Field_Collision[33].Cheak = true;
+				*HitPosUp = 0.0f;
+				*HitPosDown = -fSideSizeZEighth;
+				*HitPosLeft = -fSideSizeXQuarter - fSideSizeXEighth;
+				*HitPosRight = -fSideSizeXQuarter;
+			}
+			else if (InrayS.x < -fSideSizeXQuarter - fSideSizeXEighth && InrayS.z >= -fSideSizeZEighth)			//孫-+第二象限
+			{
+				g_Field_Collision[32].Cheak = true;
+				*HitPosUp = 0.0f;
+				*HitPosDown = -fSideSizeZEighth;
+				*HitPosLeft = -fSideSizeXQuarter - fSideSizeXQuarter;
+				*HitPosRight = -fSideSizeXQuarter - fSideSizeXEighth;
+			}
+			else if (InrayS.x < -fSideSizeXQuarter - fSideSizeXEighth && InrayS.z < -fSideSizeZEighth)			//孫--第三象限
+			{
+				g_Field_Collision[34].Cheak = true;
+				*HitPosUp = -fSideSizeZEighth;
+				*HitPosDown = -fSideSizeZQuarter;
+				*HitPosLeft = -fSideSizeXQuarter - fSideSizeXQuarter;
+				*HitPosRight = -fSideSizeXQuarter - fSideSizeXEighth;
+			}
+			else if (InrayS.x >= -fSideSizeXQuarter - fSideSizeXEighth && InrayS.z < -fSideSizeZEighth)			//孫+-第四象限
+			{
+				g_Field_Collision[35].Cheak = true;
+				*HitPosUp = -fSideSizeZEighth;
+				*HitPosDown = -fSideSizeZQuarter;
+				*HitPosLeft = -fSideSizeXQuarter - fSideSizeXEighth;
+				*HitPosRight = -fSideSizeXQuarter;
+			}
+		}
+		else if (InrayS.x < -fSideSizeXQuarter && InrayS.z < -fSideSizeZQuarter)			//子--第三象限
+		{
+			//孫判定　同上
+			if (InrayS.x >= -fSideSizeXQuarter - fSideSizeXEighth && InrayS.z >= -fSideSizeZQuarter - fSideSizeZEighth)			//孫++第一象限
+			{
+				g_Field_Collision[41].Cheak = true;
+				*HitPosUp = -fSideSizeZQuarter;
+				*HitPosDown = -fSideSizeZQuarter - fSideSizeZEighth;
+				*HitPosLeft = -fSideSizeXQuarter - fSideSizeXEighth;
+				*HitPosRight = -fSideSizeXQuarter;
+			}
+			else if (InrayS.x < -fSideSizeXQuarter - fSideSizeXEighth && InrayS.z >= -fSideSizeZQuarter - fSideSizeZEighth)			//孫-+第二象限
+			{
+				g_Field_Collision[40].Cheak = true;
+				*HitPosUp = -fSideSizeZQuarter;
+				*HitPosDown = -fSideSizeZQuarter - fSideSizeZEighth;
+				*HitPosLeft = -fSideSizeXQuarter - fSideSizeXQuarter;
+				*HitPosRight = -fSideSizeXQuarter - fSideSizeXEighth;
+			}
+			else if (InrayS.x < -fSideSizeXQuarter - fSideSizeXEighth && InrayS.z < -fSideSizeZQuarter - fSideSizeZEighth)			//孫--第三象限
+			{
+				g_Field_Collision[42].Cheak = true;
+				*HitPosUp = -fSideSizeZQuarter - fSideSizeZEighth;
+				*HitPosDown = -fSideSizeZQuarter - fSideSizeZQuarter;
+				*HitPosLeft = -fSideSizeXQuarter - fSideSizeXQuarter;
+				*HitPosRight = -fSideSizeXQuarter - fSideSizeXEighth;
+			}
+			else if (InrayS.x >= -fSideSizeXQuarter - fSideSizeXEighth && InrayS.z < -fSideSizeZQuarter - fSideSizeZEighth)			//孫+-第四象限
+			{
+				g_Field_Collision[43].Cheak = true;
+				*HitPosUp = -fSideSizeZQuarter - fSideSizeZEighth;
+				*HitPosDown = -fSideSizeZQuarter - fSideSizeZQuarter;
+				*HitPosLeft = -fSideSizeXQuarter - fSideSizeXEighth;
+				*HitPosRight = -fSideSizeXQuarter;
+			}
+
+		}
+		else if (InrayS.x >= -fSideSizeXQuarter && InrayS.z < -fSideSizeZQuarter)			//子+-第四象限
+		{
+			//孫判定　同上
+			if (InrayS.x >= -fSideSizeXEighth && InrayS.z >= -fSideSizeZQuarter - fSideSizeZEighth)			//孫++第一象限
+			{
+				g_Field_Collision[45].Cheak = true;
+				*HitPosUp = -fSideSizeZQuarter;
+				*HitPosDown = -fSideSizeZQuarter - fSideSizeZEighth;
+				*HitPosLeft = -fSideSizeXEighth;
+				*HitPosRight = 0.0f;
+			}
+			else if (InrayS.x < -fSideSizeXEighth && InrayS.z >= -fSideSizeZQuarter - fSideSizeZEighth)			//孫-+第二象限
+			{
+				g_Field_Collision[44].Cheak = true;
+				*HitPosUp = -fSideSizeZQuarter;
+				*HitPosDown = -fSideSizeZQuarter - fSideSizeZEighth;
+				*HitPosLeft = -fSideSizeXQuarter;
+				*HitPosRight = -fSideSizeXEighth;
+			}
+			else if (InrayS.x < -fSideSizeXEighth && InrayS.z < -fSideSizeZQuarter - fSideSizeZEighth)			//孫--第三象限
+			{
+				g_Field_Collision[46].Cheak = true;
+				*HitPosUp = -fSideSizeZQuarter - fSideSizeZEighth;
+				*HitPosDown = -fSideSizeZQuarter - fSideSizeZQuarter;
+				*HitPosLeft = -fSideSizeXQuarter;
+				*HitPosRight = -fSideSizeXEighth;
+			}
+			else if (InrayS.x >= -fSideSizeXEighth && InrayS.z < -fSideSizeZQuarter - fSideSizeZEighth)			//孫+-第四象限
+			{
+				g_Field_Collision[47].Cheak = true;
+				*HitPosUp = -fSideSizeZQuarter - fSideSizeZEighth;
+				*HitPosDown = -fSideSizeZQuarter - fSideSizeZQuarter;
+				*HitPosLeft = -fSideSizeXEighth;
+				*HitPosRight = 0.0f;
+			}
+		}
+	}
+	else if (InrayS.x >= 0.0f && InrayS.z < 0.0f)			//親+-第四象限
+	{
+		if (InrayS.x >= fSideSizeXQuarter && InrayS.z >= -fSideSizeZQuarter)			//子++第一象限
+		{
+			//孫判定　同上
+			if (InrayS.x >= fSideSizeXQuarter + fSideSizeXEighth && InrayS.z >= -fSideSizeZEighth)			//孫++第一象限
+			{
+				g_Field_Collision[53].Cheak = true;
+				*HitPosUp = 0.0f;
+				*HitPosDown = -fSideSizeZEighth;
+				*HitPosLeft = fSideSizeXQuarter + fSideSizeXEighth;
+				*HitPosRight = fSideSizeXQuarter + fSideSizeXQuarter;
+			}
+			else if (InrayS.x < fSideSizeXQuarter + fSideSizeXEighth && InrayS.z >= -fSideSizeZEighth)			//孫-+第二象限
+			{
+				g_Field_Collision[52].Cheak = true;
+				*HitPosUp = 0.0f;
+				*HitPosDown = -fSideSizeZEighth;
+				*HitPosLeft = fSideSizeXQuarter;
+				*HitPosRight = fSideSizeXQuarter + fSideSizeXEighth;
+			}
+			else if (InrayS.x < fSideSizeXQuarter + fSideSizeXEighth && InrayS.z < -fSideSizeZEighth)			//孫--第三象限
+			{
+				g_Field_Collision[54].Cheak = true;
+				*HitPosUp = -fSideSizeZEighth;
+				*HitPosDown = -fSideSizeZQuarter;
+				*HitPosLeft = fSideSizeXQuarter;
+				*HitPosRight = fSideSizeXQuarter + fSideSizeXEighth;
+			}
+			else if (InrayS.x >= fSideSizeXQuarter + fSideSizeXEighth && InrayS.z < -fSideSizeZEighth)			//孫+-第四象限
+			{
+				g_Field_Collision[55].Cheak = true;
+				*HitPosUp = -fSideSizeZEighth;
+				*HitPosDown = -fSideSizeZQuarter;
+				*HitPosLeft = fSideSizeXQuarter + fSideSizeXEighth;
+				*HitPosRight = fSideSizeXQuarter + fSideSizeXQuarter;
+			}
+		}
+		else if (InrayS.x < fSideSizeXQuarter && InrayS.z >= -fSideSizeZQuarter)			//子-+第二象限
+		{
+			//孫判定　同上
+			if (InrayS.x >= fSideSizeXEighth && InrayS.z >= -fSideSizeZEighth)			//孫++第一象限
+			{
+				g_Field_Collision[49].Cheak = true;
+				*HitPosUp = 0.0f;
+				*HitPosDown = -fSideSizeZEighth;
+				*HitPosLeft = fSideSizeXEighth;
+				*HitPosRight = fSideSizeXQuarter;
+			}
+			else if (InrayS.x < fSideSizeXEighth && InrayS.z >= -fSideSizeZEighth)			//孫-+第二象限
+			{
+				g_Field_Collision[48].Cheak = true;
+				*HitPosUp = 0.0f;
+				*HitPosDown = -fSideSizeZEighth;
+				*HitPosLeft = 0.0f;
+				*HitPosRight = fSideSizeXEighth;
+			}
+			else if (InrayS.x < fSideSizeXEighth && InrayS.z < -fSideSizeZEighth)			//孫--第三象限
+			{
+				g_Field_Collision[50].Cheak = true;
+				*HitPosUp = -fSideSizeZEighth;
+				*HitPosDown = -fSideSizeZQuarter;
+				*HitPosLeft = 0.0f;
+				*HitPosRight = fSideSizeXEighth;
+			}
+			else if (InrayS.x >= fSideSizeXEighth && InrayS.z < -fSideSizeZEighth)			//孫+-第四象限
+			{
+				g_Field_Collision[51].Cheak = true;
+				*HitPosUp = -fSideSizeZEighth;
+				*HitPosDown = -fSideSizeZQuarter;
+				*HitPosLeft = fSideSizeXEighth;
+				*HitPosRight = fSideSizeXQuarter;
+			}
+		}
+		else if (InrayS.x < fSideSizeXQuarter && InrayS.z < -fSideSizeZQuarter)			//子--第三象限
+		{
+			//孫判定　同上
+			if (InrayS.x >= fSideSizeXEighth && InrayS.z >= -fSideSizeZQuarter - fSideSizeZEighth)			//孫++第一象限
+			{
+				g_Field_Collision[57].Cheak = true;
+				*HitPosUp = -fSideSizeZQuarter;
+				*HitPosDown = -fSideSizeZQuarter - fSideSizeZEighth;
+				*HitPosLeft = fSideSizeXEighth;
+				*HitPosRight = fSideSizeXQuarter;
+			}
+			else if (InrayS.x < fSideSizeXEighth && InrayS.z >= -fSideSizeZQuarter - fSideSizeZEighth)			//孫-+第二象限
+			{
+				g_Field_Collision[56].Cheak = true;
+				*HitPosUp = -fSideSizeZQuarter;
+				*HitPosDown = -fSideSizeZQuarter - fSideSizeZEighth;
+				*HitPosLeft = 0.0f;
+				*HitPosRight = fSideSizeXEighth;
+			}
+			else if (InrayS.x < fSideSizeXEighth && InrayS.z < -fSideSizeZQuarter - fSideSizeZEighth)			//孫--第三象限
+			{
+				g_Field_Collision[58].Cheak = true;
+				*HitPosUp = -fSideSizeZQuarter - fSideSizeZEighth;
+				*HitPosDown = -fSideSizeZQuarter - fSideSizeZQuarter;
+				*HitPosLeft = 0.0f;
+				*HitPosRight = fSideSizeXEighth;
+			}
+			else if (InrayS.x >= fSideSizeXEighth && InrayS.z < -fSideSizeZQuarter - fSideSizeZEighth)			//孫+-第四象限
+			{
+				g_Field_Collision[59].Cheak = true;
+				*HitPosUp = -fSideSizeZQuarter - fSideSizeZEighth;
+				*HitPosDown = -fSideSizeZQuarter - fSideSizeZQuarter;
+				*HitPosLeft = fSideSizeXEighth;
+				*HitPosRight = fSideSizeXQuarter;
+			}
+
+		}
+		else if (InrayS.x >= fSideSizeXQuarter && InrayS.z < -fSideSizeZQuarter)			//子+-第四象限
+		{
+			//孫判定　同上
+			if (InrayS.x >= fSideSizeXQuarter + fSideSizeXEighth && InrayS.z >= -fSideSizeZQuarter - fSideSizeZEighth)			//孫++第一象限
+			{
+				g_Field_Collision[61].Cheak = true;
+				*HitPosUp = -fSideSizeZQuarter;
+				*HitPosDown = -fSideSizeZQuarter - fSideSizeZEighth;
+				*HitPosLeft = fSideSizeXQuarter + fSideSizeXEighth;
+				*HitPosRight = fSideSizeXQuarter + fSideSizeXQuarter;
+			}
+			else if (InrayS.x < fSideSizeXQuarter + fSideSizeXEighth && InrayS.z >= -fSideSizeZQuarter - fSideSizeZEighth)			//孫-+第二象限
+			{
+				g_Field_Collision[60].Cheak = true;
+				*HitPosUp = -fSideSizeZQuarter;
+				*HitPosDown = -fSideSizeZQuarter - fSideSizeZEighth;
+				*HitPosLeft = fSideSizeXQuarter;
+				*HitPosRight = fSideSizeXQuarter + fSideSizeXEighth;
+			}
+			else if (InrayS.x < fSideSizeXQuarter + fSideSizeXEighth && InrayS.z < -fSideSizeZQuarter - fSideSizeZEighth)			//孫--第三象限
+			{
+				g_Field_Collision[62].Cheak = true;
+				*HitPosUp = -fSideSizeZQuarter - fSideSizeZEighth;
+				*HitPosDown = -fSideSizeZQuarter - fSideSizeZQuarter;
+				*HitPosLeft = fSideSizeXQuarter;
+				*HitPosRight = fSideSizeXQuarter + fSideSizeXEighth;
+			}
+			else if (InrayS.x >= fSideSizeXQuarter + fSideSizeXEighth && InrayS.z < -fSideSizeZQuarter - fSideSizeZEighth)			//孫+-第四象限
+			{
+				g_Field_Collision[63].Cheak = true;
+				*HitPosUp = -fSideSizeZQuarter - fSideSizeZEighth;
+				*HitPosDown = -fSideSizeZQuarter - fSideSizeZQuarter;
+				*HitPosLeft = fSideSizeXQuarter + fSideSizeXEighth;
+				*HitPosRight = fSideSizeXQuarter + fSideSizeXQuarter;
+			}
+		}
+	}
+
+}
+//
+//---------------------------------------------------------------------------------当たり判定高速化用
+
+//---------------------------------------------------------------------------------その他
+//
 //=============================================================================
 // モデル読み込み処理
 //=============================================================================
@@ -75,6 +798,34 @@ HRESULT LoadMesh(char *FileName, LPD3DXBUFFER *pD3DXBuffMat, DWORD *nNumMat, LPD
 }
 
 //=============================================================================
+// D3DXVECTOR3からfloatに変換。移動距離の値を計算する関数
+// 戻り値：移動距離の値
+//=============================================================================
+float SpdCal(D3DXVECTOR3 move)
+{
+	float spd;
+	float crossvec;
+	crossvec = float(sqrt((move.x*move.x) + (move.z*move.z)));
+	return spd = float(sqrt((move.y*move.y) + (crossvec*crossvec)));
+}
+
+//=============================================================================
+// ホーミングタイプ01処理　常時ホーミング Y座標は変化させない
+// 戻り値：なし
+//=============================================================================
+void HormingType01(D3DXVECTOR3 *StartPos, D3DXVECTOR3 EndPos, float MoveValue)
+{
+	D3DXVECTOR3 distance = EndPos - *(StartPos);
+	float XZrot = atan2f(distance.z, distance.x);
+	StartPos->x += (cosf(XZrot) * MoveValue);
+	StartPos->z += (sinf(XZrot) * MoveValue);
+}
+//
+//---------------------------------------------------------------------------------その他
+
+//---------------------------------------------------------------------------------モーフィング
+//
+//=============================================================================
 // ゲーム中モーフィング実行関数
 //=============================================================================
 void DoMorphing(GPUMODEL *FromModel, GPUMODEL *ToModel)
@@ -137,7 +888,11 @@ void ResetModel(GPUMODEL *FromModel, GPUMODEL *ToModel)
 	FromModel->pD3DVtxBuff->Unlock();
 	FromModel->pD3DIdxBuff->Unlock();
 }
+//
+//---------------------------------------------------------------------------------モーフィング
 
+//------------------------------------------------------------------------------------------当たり判定一覧
+//
 //=============================================================================
 // レイキャスト関数
 // 戻り値：trueならレイとポリゴンの内分点をポインターに数値入力
@@ -192,15 +947,54 @@ bool RayCast(D3DXVECTOR3 rayS, D3DXVECTOR3 rayG, D3DXVECTOR3 vtx0, D3DXVECTOR3 v
 }
 
 //=============================================================================
-// D3DXVECTOR3からfloatに変換。移動距離の値を計算する関数
-// 戻り値：移動距離の値
+// [2D用]点と直緯(2点から求める)の最短距離　計算関数	点から直線までの最短距離を求めるときに使用
+// 戻り値：D3DXVECTOR3　計算結果(最短距離の座標)
+//　abs(ax1+by1+c) / sqrt(a^2+b^2)
 //=============================================================================
-float SpdCal(D3DXVECTOR3 move)
+float PointAndLineMinDistance(D3DXVECTOR3 Point, D3DXVECTOR3 LinePoint1, D3DXVECTOR3 LinePoint2)
 {
-	float spd;
-	float crossvec;
-	crossvec = float(sqrt((move.x*move.x) + (move.z*move.z)));
-	return spd = float(sqrt((move.y*move.y) + (crossvec*crossvec)));
+	D3DXVECTOR2 VecLinePoint1To2, VecLinePoint1ToPoint;
+	//ベクトルを求める
+	VecLinePoint1To2.x = LinePoint2.x - LinePoint1.x;
+	VecLinePoint1To2.y = LinePoint2.z - LinePoint1.z;
+	VecLinePoint1ToPoint.x = Point.x - LinePoint1.x;
+	VecLinePoint1ToPoint.y = Point.z - LinePoint1.z;
+
+	//ベクトルの外積の絶対値が平行四辺形sの面積になる
+	//vl.x * vr.y - vl.y * vr.x
+	float CrossVec = (VecLinePoint1To2.x*VecLinePoint1ToPoint.y) - (VecLinePoint1To2.y*VecLinePoint1ToPoint.x);
+	float s = fabsf(CrossVec);
+	//平行四辺形の面積(s)と底辺(VecLinePoint1To2)から高さ(MinDistance)を求める
+	float VecLinePoint1To2Len = D3DXVec2Length(&VecLinePoint1To2);
+	float MinDistance = s / VecLinePoint1To2Len;
+	return MinDistance;
+}
+
+//=============================================================================
+// [3D用]円柱と直緯の当たり判定　関数	円柱と直線が当たっているか判定で使用
+// 戻り値：bool　true:当たっている　false:当たっていない
+//=============================================================================
+bool CheckHitColumnLB(D3DXVECTOR3 yarnvec, D3DXVECTOR3 vec, D3DXVECTOR3 yarnpos, D3DXVECTOR3 bottompos, float yarnradius, float radius)
+{
+	//yarnpos 中心座標 
+	//pos 円2中心座標		//pos 円2中心座標
+	//yarnradius 糸の半径		//yarnradius 糸の半径
+	//radius 円の半径		//radius 円の半径
+	//yarnlength 糸の長さ		//yarnlength 糸の長さ
+	//length 円柱の高さ		//length 円柱の高さ
+	D3DXVECTOR3 normalvec;
+	D3DXVec3Cross(&normalvec, &yarnvec, &vec);
+	D3DXVECTOR3 vOneToTwo = yarnpos - bottompos; //円１と円２の間のベクトル
+	float inner_product = D3DXVec3Dot(&normalvec, &vOneToTwo);
+	//float DistSq = D3DXVec3LengthSq(&naiseki); //ベクトルの長さの二乗
+	inner_product *= inner_product;		inner_product *= inner_product;
+	if (inner_product < (yarnradius + radius)*(yarnradius + radius)) //半径の合計の二乗と比較
+	{
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 //=============================================================================
@@ -263,18 +1057,11 @@ bool IsCollisionFanAndPoint(D3DXVECTOR3 CenterPos, D3DXVECTOR3 TargetPos, float 
 	return false;
 }
 
-//=============================================================================
-// ホーミングタイプ01処理　常時ホーミング Y座標は変化させない
-// 戻り値：なし
-//=============================================================================
-void HormingType01(D3DXVECTOR3 *StartPos, D3DXVECTOR3 EndPos, float MoveValue)
-{
-	D3DXVECTOR3 distance = EndPos - *(StartPos);
-	float XZrot = atan2f(distance.z, distance.x);
-	StartPos->x += (cosf(XZrot) * MoveValue);
-	StartPos->z += (sinf(XZrot) * MoveValue);
-}
+//
+//------------------------------------------------------------------------------------------当たり判定一覧
 
+//------------------------------------------------------------------------------------------補間一覧
+//
 //=============================================================================
 // 補間関数(Lerp = Linear interpolation)
 // 戻り値：補間計算後のD3DXVECTOR3
@@ -329,54 +1116,80 @@ float LerpEaseInEaseOut(float t)
 	return t * t * (3.0f - 2.0f * t);
 }
 
-//=============================================================================
-// [2D用]点と直緯(2点から求める)の最短距離　計算関数	点から直線までの最短距離を求めるときに使用
-// 戻り値：D3DXVECTOR3　計算結果(最短距離の座標)
-//　abs(ax1+by1+c) / sqrt(a^2+b^2)
-//=============================================================================
-float PointAndLineMinDistance(D3DXVECTOR3 Point, D3DXVECTOR3 LinePoint1, D3DXVECTOR3 LinePoint2)
-{
-	D3DXVECTOR2 VecLinePoint1To2, VecLinePoint1ToPoint;
-	//ベクトルを求める
-	VecLinePoint1To2.x = LinePoint2.x - LinePoint1.x;
-	VecLinePoint1To2.y = LinePoint2.z - LinePoint1.z;
-	VecLinePoint1ToPoint.x = Point.x - LinePoint1.x;
-	VecLinePoint1ToPoint.y = Point.z - LinePoint1.z;
+//
+//------------------------------------------------------------------------------------------補間一覧
 
-	//ベクトルの外積の絶対値が平行四辺形sの面積になる
-	//vl.x * vr.y - vl.y * vr.x
-	float CrossVec = (VecLinePoint1To2.x*VecLinePoint1ToPoint.y) - (VecLinePoint1To2.y*VecLinePoint1ToPoint.x);
-	float s = fabsf(CrossVec);
-	//平行四辺形の面積(s)と底辺(VecLinePoint1To2)から高さ(MinDistance)を求める
-	float VecLinePoint1To2Len =D3DXVec2Length(&VecLinePoint1To2);
-	float MinDistance = s / VecLinePoint1To2Len;
-	return MinDistance;
+//=============================================================================
+//球面線形補間算出関数
+//=============================================================================
+void SphereLinear(D3DXVECTOR3* out, D3DXVECTOR3* start, D3DXVECTOR3* end, float t)
+{
+
+	D3DXVECTOR3 s, e;
+	D3DXVec3Normalize(&s, start);
+	D3DXVec3Normalize(&e, end);
+
+
+	// 2ベクトル間の角度（鋭角側）
+	float angle = acosf(D3DXVec3Dot(&s, &e));
+
+	// sinθ
+	float SinTh = sinf(angle);
+
+	// 補間係数
+	float Ps = sinf(angle * (1 - t));
+	float Pe = sinf(angle * t);
+
+	*out = (Ps * s + Pe * e) / SinTh;
+
+	// 一応正規化して球面線形補間に
+	D3DXVec3Normalize(out, out);
 }
 
-bool CheckHitColumnLB(D3DXVECTOR3 yarnvec, D3DXVECTOR3 vec, D3DXVECTOR3 yarnpos, D3DXVECTOR3 bottompos, float yarnradius, float radius)
+/*
+//球面線形補間による姿勢補間関数
+// 球面線形補間による補間姿勢算出関数
+// out : 補間姿勢（出力）
+// start : 開始姿勢
+// end : 目標姿勢
+// t : 補間係数（0～1）
+D3DXMATRIX* CalcInterPause(D3DXMATRIX* out, D3DXMATRIX* start, D3DXMATRIX* end, float t)
 {
-	//yarnpos 中心座標 
-	//pos 円2中心座標		//pos 円2中心座標
-	//yarnradius 糸の半径		//yarnradius 糸の半径
-	//radius 円の半径		//radius 円の半径
-	//yarnlength 糸の長さ		//yarnlength 糸の長さ
-	//length 円柱の高さ		//length 円柱の高さ
-	D3DXVECTOR3 normalvec;
-	D3DXVec3Cross(&normalvec, &yarnvec, &vec);
-	D3DXVECTOR3 vOneToTwo = yarnpos - bottompos; //円１と円２の間のベクトル
-	float inner_product = D3DXVec3Dot(&normalvec, &vOneToTwo);
-	//float DistSq = D3DXVec3LengthSq(&naiseki); //ベクトルの長さの二乗
-	inner_product *= inner_product;		inner_product *= inner_product;
-	if (inner_product < (yarnradius + radius)*(yarnradius + radius)) //半径の合計の二乗と比較
-	{
-		{
-			return true;
-		}
-	}
-	return false;
+
+	// 各姿勢ベクトル抽出
+	D3DXVECTOR3 Sy, Sz;
+	D3DXVECTOR3 Ey, Ez;
+
+	memcpy(&Sy, start->m[1], sizeof(float) * 3);
+	memcpy(&Sz, start->m[2], sizeof(float) * 3);
+	memcpy(&Ey, end->m[1], sizeof(float) * 3);
+	memcpy(&Ez, end->m[2], sizeof(float) * 3);
+
+	// 中間ベクトル算出
+	D3DXVECTOR3 IY, IZ;
+	SphereLinear(&IY, &Sy, &Ey, t);
+	SphereLinear(&IZ, &Sz, &Ez, t);
+
+	// 中間ベクトルから姿勢ベクトルを再算出
+	D3DXVECTOR3 IX;
+	D3DXVec3Cross(&IX, &IY, &IZ);
+	D3DXVec3Cross(&IY, &IZ, &IX);
+	D3DXVec3Normalize(&IX, &IX);
+	D3DXVec3Normalize(&IY, &IY);
+	D3DXVec3Normalize(&IZ, &IZ);
+
+	memset(out, 0, sizeof(D3DXMATRIX));
+	memcpy(out->m[0], &IX, sizeof(float) * 3);
+	memcpy(out->m[1], &IY, sizeof(float) * 3);
+	memcpy(out->m[2], &IZ, sizeof(float) * 3);
+	out->_44 = 1.0f;
+
+	return out;
 }
+*/
 
-
+//-----------------------------------------------------------------------------------------------スキンメッシュ読み込みから描画まで
+//
 //--------------------------------------------------------------------------------------
 // Name: AllocateName()
 // Desc: Allocates memory for a string to hold the name of a frame or mesh
@@ -400,8 +1213,6 @@ HRESULT AllocateName(LPCSTR Name, LPSTR* pNewName)
 
 	return S_OK;
 }
-
-
 
 //--------------------------------------------------------------------------------------
 // Name: CAllocateHierarchy::CreateFrame()
@@ -440,8 +1251,6 @@ e_Exit:
 	delete pFrame;
 	return hr;
 }
-
-
 
 //--------------------------------------------------------------------------------------
 // Name: CAllocateHierarchy::CreateMeshContainer()
@@ -643,9 +1452,6 @@ e_Exit:
 	return hr;
 }
 
-
-
-
 //--------------------------------------------------------------------------------------
 // Name: CAllocateHierarchy::DestroyFrame()
 // Desc: 
@@ -656,9 +1462,6 @@ HRESULT CAllocateHierarchy::DestroyFrame(LPD3DXFRAME pFrameToFree)
 	SAFE_DELETE(pFrameToFree);
 	return S_OK;
 }
-
-
-
 
 //--------------------------------------------------------------------------------------
 // Name: CAllocateHierarchy::DestroyMeshContainer()
@@ -692,8 +1495,6 @@ HRESULT CAllocateHierarchy::DestroyMeshContainer(LPD3DXMESHCONTAINER pMeshContai
 	SAFE_DELETE(pMeshContainer);
 	return S_OK;
 }
-
-
 
 //--------------------------------------------------------------------------------------
 // Called either by CreateMeshContainer when loading a skin mesh, or when 
@@ -978,9 +1779,6 @@ e_Exit:
 	return hr;
 }
 
-
-
-
 //--------------------------------------------------------------------------------------
 // This callback function will be called once at the beginning of every frame. This is the
 // best location for your application to handle updates to the scene, but is not 
@@ -992,7 +1790,6 @@ void OnFrameMoveAnime(double fTime, ID3DXAnimationController* AnimController)
 	if (AnimController != NULL)
 		AnimController->AdvanceTime(fTime, NULL);
 }
-
 
 //--------------------------------------------------------------------------------------
 // Called to render a mesh in the hierarchy
@@ -1143,9 +1940,6 @@ void DrawMeshContainer(LPD3DXMESHCONTAINER pMeshContainerBase, LPD3DXFRAME pFram
 	}
 }
 
-
-
-
 //--------------------------------------------------------------------------------------
 // Called to render a frame in the hierarchy
 //--------------------------------------------------------------------------------------
@@ -1173,8 +1967,6 @@ void DrawFrame(LPD3DXFRAME pFrame, METHOD SkinningMethod, LPDIRECT3DTEXTURE9 pD3
 		DrawFrame(pFrame->pFrameFirstChild, SkinningMethod, pD3DTexture);
 	}
 }
-
-
 
 //--------------------------------------------------------------------------------------
 // Called to setup the pointers for a given bone to its transformation matrix
@@ -1209,7 +2001,6 @@ HRESULT SetupBoneMatrixPointersOnMesh(LPD3DXMESHCONTAINER pMeshContainerBase, LP
 	return S_OK;
 }
 
-
 //--------------------------------------------------------------------------------------
 // Called to setup the pointers for a given bone to its transformation matrix
 //--------------------------------------------------------------------------------------
@@ -1241,9 +2032,6 @@ HRESULT SetupBoneMatrixPointers(LPD3DXFRAME pFrame, LPD3DXFRAME pFrameRoot)
 	return S_OK;
 }
 
-
-
-
 //--------------------------------------------------------------------------------------
 // update the frame matrices
 //--------------------------------------------------------------------------------------
@@ -1266,7 +2054,6 @@ void UpdateFrameMatrices(LPD3DXFRAME pFrameBase, LPD3DXMATRIX pParentMatrix)
 		UpdateFrameMatrices(pFrame->pFrameFirstChild, &pFrame->CombinedTransformationMatrix);
 	}
 }
-
 
 //--------------------------------------------------------------------------------------
 // update the skinning method
@@ -1299,7 +2086,9 @@ void UpdateSkinningMethod(LPD3DXFRAME pFrameBase, METHOD SkinningMethod, D3DXMAT
 	}
 }
 
-
+//--------------------------------------------------------------------------------------
+// ReleaseAttributeTable
+//--------------------------------------------------------------------------------------
 void ReleaseAttributeTable(LPD3DXFRAME pFrameBase)
 {
 	D3DXFRAME_DERIVED* pFrame = (D3DXFRAME_DERIVED*)pFrameBase;
@@ -1324,13 +2113,12 @@ void ReleaseAttributeTable(LPD3DXFRAME pFrameBase)
 		ReleaseAttributeTable(pFrame->pFrameFirstChild);
 	}
 }
+//
+//
+//-----------------------------------------------------------------------------------------------スキンメッシュ読み込みから描画まで
 
-
-
-
-
-
-
+//-----------------------------------------------------------------------------------------------モーション読み込みからセット、更新、モーションブレンドまで
+//
 //アニメーションセットのロード　Xファイルに複数保存したアニメーション情報を一個づつ読み込み。読み込んだアニメーションセットはSetTrackAnimationSet()にセットすると再生
 //Xファイルのアニメーションセットに保存されているインデックスとGetAnimationSet()のインデックスは順番が反対になっている。
 //if　Xファイル(0歩く1撃つ2止まる)→GetAnimationSet(0止まる1撃つ2歩く)
@@ -1348,7 +2136,6 @@ void LoadAnimSet(ORIANIMATION *pAnim)
 
 }
 
-
 //ループ時間を設定（SetLoopTimeメソッド）
 bool ORIANIMATION::SetLoopTime(ORIANIMATION *pAnim, UINT animID, FLOAT time)
 {
@@ -1362,7 +2149,6 @@ bool ORIANIMATION::SetLoopTime(ORIANIMATION *pAnim, UINT animID, FLOAT time)
 
 	return true;
 }
-
 bool SetLoopTime(ORIANIMATION *pAnim, UINT animID, FLOAT time)
 {
 	// 指定のアニメーションIDの存在をチェック
@@ -1375,7 +2161,6 @@ bool SetLoopTime(ORIANIMATION *pAnim, UINT animID, FLOAT time)
 
 	return true;
 }
-
 
 //動作開始にかかる時間を設定（SetShiftTimeメソッド）
 bool ORIANIMATION::SetShiftTime(ORIANIMATION *pAnim, UINT animID, FLOAT interval)
@@ -1390,7 +2175,6 @@ bool ORIANIMATION::SetShiftTime(ORIANIMATION *pAnim, UINT animID, FLOAT interval
 
 	return true;
 }
-
 bool SetShiftTime(ORIANIMATION *pAnim, UINT animID, FLOAT interval)
 {
 	// 指定のアニメーションIDの存在をチェック
@@ -1402,7 +2186,6 @@ bool SetShiftTime(ORIANIMATION *pAnim, UINT animID, FLOAT interval)
 
 	return true;
 }
-
 
 //アニメーションの切り替え（ChangeAnimationメソッド）
 bool ORIANIMATION::ChangeAnimation(ORIANIMATION *pAnim, UINT NextAnimID)
@@ -1443,8 +2226,6 @@ bool ORIANIMATION::ChangeAnimation(ORIANIMATION *pAnim, UINT NextAnimID)
 
 	return true;
 }
-
-
 bool ChangeAnimation(ORIANIMATION *pAnim, UINT NextAnimID)
 {
 	// 指定のアニメーションIDの存在をチェック
@@ -1512,8 +2293,6 @@ bool ORIANIMATION::AdvanceTime(ORIANIMATION *pAnim, FLOAT time)
 
 	return true;
 }
-
-
 bool AdvanceTime(ORIANIMATION *pAnim, FLOAT time)
 {
 	// 合成中か否かを判定
@@ -1539,3 +2318,5 @@ bool AdvanceTime(ORIANIMATION *pAnim, FLOAT time)
 
 	return true;
 }
+//
+//-----------------------------------------------------------------------------------------------モーション読み込みからセット、更新、モーションブレンドまで
