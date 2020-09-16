@@ -172,48 +172,48 @@ void CheakHit(int scene)
 							if (b[CntPlayerBullet].pos.z >= Wall[CntWall].pos.z)
 							{
 								// 爆発の生成
-								D3DXVECTOR3 ExploPos = D3DXVECTOR3(b[CntPlayerBullet].pos.x, b[CntPlayerBullet].pos.y, b[CntPlayerBullet].pos.z- EXPLOSION_COLLISIONPOS_BUFFSIZE);
-								SetExplosion(ExploPos, 40.0f, 40.0f, EXPLOSIONTYPE_BULLET_PLAYER, PLAYER_COLOR[b[CntPlayerBullet].UsePlayerType]);
+								//D3DXVECTOR3 ExploPos = D3DXVECTOR3(b[CntPlayerBullet].pos.x, b[CntPlayerBullet].pos.y, b[CntPlayerBullet].pos.z- EXPLOSION_COLLISIONPOS_BUFFSIZE);
+								//SetExplosion(ExploPos, 40.0f, 40.0f, EXPLOSIONTYPE_BULLET_PLAYER, PLAYER_COLOR[b[CntPlayerBullet].UsePlayerType]);
 								// バレット破棄
 								ReleaseBullet(CntPlayerBullet);
 								// SE再生
-								PlaySound(SOUND_LABEL_SE_damage);
+								//PlaySound(SOUND_LABEL_SE_damage);
 							}
 							break;
 						case 1:
 							if (b[CntPlayerBullet].pos.x <= Wall[CntWall].pos.x)
 							{
 								// 爆発の生成
-								D3DXVECTOR3 ExploPos = D3DXVECTOR3(b[CntPlayerBullet].pos.x + EXPLOSION_COLLISIONPOS_BUFFSIZE, b[CntPlayerBullet].pos.y, b[CntPlayerBullet].pos.z);
-								SetExplosion(ExploPos, 40.0f, 40.0f, EXPLOSIONTYPE_BULLET_PLAYER, PLAYER_COLOR[b[CntPlayerBullet].UsePlayerType]);
+								//D3DXVECTOR3 ExploPos = D3DXVECTOR3(b[CntPlayerBullet].pos.x + EXPLOSION_COLLISIONPOS_BUFFSIZE, b[CntPlayerBullet].pos.y, b[CntPlayerBullet].pos.z);
+								//SetExplosion(ExploPos, 40.0f, 40.0f, EXPLOSIONTYPE_BULLET_PLAYER, PLAYER_COLOR[b[CntPlayerBullet].UsePlayerType]);
 								// バレット破棄
 								ReleaseBullet(CntPlayerBullet);
 								// SE再生
-								PlaySound(SOUND_LABEL_SE_damage);
+								//PlaySound(SOUND_LABEL_SE_damage);
 							}
 							break;
 						case 2:
 							if (b[CntPlayerBullet].pos.x >= Wall[CntWall].pos.x)
 							{
 								// 爆発の生成
-								D3DXVECTOR3 ExploPos = D3DXVECTOR3(b[CntPlayerBullet].pos.x - EXPLOSION_COLLISIONPOS_BUFFSIZE, b[CntPlayerBullet].pos.y, b[CntPlayerBullet].pos.z);
-								SetExplosion(ExploPos, 40.0f, 40.0f, EXPLOSIONTYPE_BULLET_PLAYER, PLAYER_COLOR[b[CntPlayerBullet].UsePlayerType]);
+								//D3DXVECTOR3 ExploPos = D3DXVECTOR3(b[CntPlayerBullet].pos.x - EXPLOSION_COLLISIONPOS_BUFFSIZE, b[CntPlayerBullet].pos.y, b[CntPlayerBullet].pos.z);
+								//SetExplosion(ExploPos, 40.0f, 40.0f, EXPLOSIONTYPE_BULLET_PLAYER, PLAYER_COLOR[b[CntPlayerBullet].UsePlayerType]);
 								// バレット破棄
 								ReleaseBullet(CntPlayerBullet);
 								// SE再生
-								PlaySound(SOUND_LABEL_SE_damage);
+								//PlaySound(SOUND_LABEL_SE_damage);
 							}
 							break;
 						case 3:
 							if (b[CntPlayerBullet].pos.z <= Wall[CntWall].pos.z)
 							{
 								// 爆発の生成
-								D3DXVECTOR3 ExploPos = D3DXVECTOR3(b[CntPlayerBullet].pos.x, b[CntPlayerBullet].pos.y, b[CntPlayerBullet].pos.z + EXPLOSION_COLLISIONPOS_BUFFSIZE);
-								SetExplosion(ExploPos, 40.0f, 40.0f, EXPLOSIONTYPE_BULLET_PLAYER, PLAYER_COLOR[b[CntPlayerBullet].UsePlayerType]);
+								//D3DXVECTOR3 ExploPos = D3DXVECTOR3(b[CntPlayerBullet].pos.x, b[CntPlayerBullet].pos.y, b[CntPlayerBullet].pos.z + EXPLOSION_COLLISIONPOS_BUFFSIZE);
+								//SetExplosion(ExploPos, 40.0f, 40.0f, EXPLOSIONTYPE_BULLET_PLAYER, PLAYER_COLOR[b[CntPlayerBullet].UsePlayerType]);
 								// バレット破棄
 								ReleaseBullet(CntPlayerBullet);
 								// SE再生
-								PlaySound(SOUND_LABEL_SE_damage);
+								//PlaySound(SOUND_LABEL_SE_damage);
 							}
 							break;
 						default:
@@ -233,7 +233,7 @@ void CheakHit(int scene)
 					switch (i[CntItem].nType)
 					{
 					case ITEMTYPE_TIKEI:
-						SetFieldInterPolationFieldType(rand() % 2);
+						SetFieldInterPolationFieldType(FIELD_TYPE_PLAYERADVANTAGE, CntPlayer);
 						//SetFieldInterPolationFieldType(0);
 						PlaySound(SOUND_LABEL_SE_enter03);
 						PlaySound(SOUND_LABEL_SE_quake);

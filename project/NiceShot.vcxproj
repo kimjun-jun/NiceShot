@@ -26,6 +26,7 @@
     <ClCompile Include="..\cpp\library.cpp" />
     <ClCompile Include="..\cpp\main.cpp" />
     <ClCompile Include="..\cpp\map\field.cpp" />
+    <ClCompile Include="..\cpp\map\sky.cpp" />
     <ClCompile Include="..\cpp\map\wall.cpp" />
     <ClCompile Include="..\cpp\object\bullet\bullet.cpp" />
     <ClCompile Include="..\cpp\object\bullet\bulletgauge.cpp" />
@@ -58,6 +59,7 @@
     <ClInclude Include="..\h\library.h" />
     <ClInclude Include="..\h\main.h" />
     <ClInclude Include="..\h\map\field.h" />
+    <ClInclude Include="..\h\map\sky.h" />
     <ClInclude Include="..\h\map\wall.h" />
     <ClInclude Include="..\h\object\bullet\bullet.h" />
     <ClInclude Include="..\h\object\bullet\bulletgauge.h" />

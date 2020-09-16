@@ -147,6 +147,9 @@
     <ClCompile Include="..\cpp\other\sound.cpp">
       <Filter>cpp\other</Filter>
     </ClCompile>
+    <ClCompile Include="..\cpp\map\sky.cpp">
+      <Filter>cpp\map</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\h\collision.h">
@@ -238,6 +241,9 @@
     </ClInclude>
     <ClInclude Include="..\h\scene\tutorial.h">
       <Filter>h\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\map\sky.h">
+      <Filter>h\map</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

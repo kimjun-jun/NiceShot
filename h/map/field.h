@@ -6,6 +6,16 @@
 */
 #pragma once
 
+/**
+ * @enum RAND
+ * ƒ‰ƒ“ƒ_ƒ€‚ÌŽí—Þ
+ */
+enum FIELD_TYPE
+{
+	FIELD_TYPE_BOKOBOKO,
+	FIELD_TYPE_NADARAKA,
+	FIELD_TYPE_PLAYERADVANTAGE,
+};
 
 
 
@@ -20,7 +30,7 @@ void DrawMeshField(void);
 LPDIRECT3DVERTEXBUFFER9 *GetFieldBuff(void);
 int GetFieldBlockXNum(void);
 int GetFieldBlockZNum(void);
-void SetFieldInterPolationFieldType(int type);
+void SetFieldInterPolationFieldType(int type, int CntPlayer);
 float GetFieldBlockXSize(void);
 float GetFieldBlockZSize(void);
 

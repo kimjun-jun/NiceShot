@@ -27,6 +27,7 @@
 void ClearField(void);				//初期化
 void SetFieldType01(void);			//オリジナル1 
 void SetFieldType02(void);			//オリジナル2 
+void SetFieldType03(void);			//オリジナル3 
 bool InterPolationField(void);		//地形を徐々に変化させる
 void SetDegenerationPoly(void);		//縮退ポリゴンの座標を再計算する関数　地形変形後、縮退ポリゴンの座標を設定する
 
@@ -60,6 +61,7 @@ bool InterPolationFieldSignal;					// 地形変形信号
 bool InterPolationFieldSignalEnd;				// 地形変形信号終了したかどうか
 bool InterPolationFieldSignalFirstTime;			// 地形変形初めての読み込み時の信号。一度変形開始して移動量を求める。
 static int InterPolationFieldType;				// 地形変形タイプ
+static int InterPolationFieldPlayerNum;			// 地形変形アイテムを取得したプレイヤーナンバー
 
 
 static D3DXCOLOR PLAYER_COLOR[] = {
@@ -83,6 +85,7 @@ HRESULT InitMeshField(D3DXVECTOR3 pos, D3DXVECTOR3 rot,
 	InterPolationFieldSignalFirstTime = false;
 
 	InterPolationFieldType = -1;
+	InterPolationFieldPlayerNum = -1;
 	// ポリゴン表示位置の中心座標を設定
 	g_posField = pos;
 
@@ -387,21 +390,28 @@ void UninitMeshField(void)
 //=============================================================================
 void UpdateMeshField(void)
 {
-	if (InterPolationFieldType == 0)
+	switch (InterPolationFieldType)
 	{
 		ClearField();
+	case FIELD_TYPE_BOKOBOKO:
 		SetFieldType01();
-	}
-	else if (InterPolationFieldType == 1)
-	{
-		ClearField();
+		break;
+	case FIELD_TYPE_NADARAKA:
 		SetFieldType02();
+		break;
+	case FIELD_TYPE_PLAYERADVANTAGE:
+		SetFieldType03();
+		break;
+	default:
+		break;
 	}
+
 	if (InterPolationFieldSignal == false)
 	{
 		InterPolationFieldSignal = InterPolationField();
 	}
 
+	//プレイヤーと地面の当たり判定
 	PLAYER_HONTAI *player = GetPlayerHoudai();
 	for (int CntPlayer = 0; CntPlayer < PLAYER_MAX; CntPlayer++)
 	{
@@ -410,6 +420,7 @@ void UpdateMeshField(void)
 			&player[CntPlayer].RotVecAxis, &player[CntPlayer].pos.y);
 	}
 
+	//アイテムと地面の当たり判定
 	ITEM *item = GetItem();
 	for (int CntItem = 0; CntItem < MAX_ITEM; CntItem++)
 	{
@@ -431,6 +442,7 @@ void UpdateMeshField(void)
 		}
 	}
 
+	//バレットと地面の当たり判定
 	BULLET *bullet = GetBullet();
 	for (int Cntbullet = 0; Cntbullet < BULLET_MAX; Cntbullet++)
 	{
@@ -536,9 +548,13 @@ float GetFieldBlockZSize(void)
 //=============================================================================
 // 地形変形タイプ
 //=============================================================================
-void SetFieldInterPolationFieldType(int type)
+void SetFieldInterPolationFieldType(int type,int CntPlayer)
 {
+	//フラグセット
 	InterPolationFieldType = type;
+	InterPolationFieldPlayerNum = CntPlayer;
+
+	//地形が変わるとアイテムの当たり判定ももう一度やりなおす
 	ITEM *item = GetItem();
 	for (int CntItem = 0; CntItem < MAX_ITEM; CntItem++)
 	{
@@ -568,7 +584,7 @@ void ClearField(void)
 }
 
 //=============================================================================
-// 地形の自動生成01 ぼこぼこぎみ地形
+// 地形の自動生成01 ぼこぼこぎみ地形　ブロック数32*32　ブロックサイズ60*60～100*100
 //=============================================================================
 void SetFieldType01(void)
 {
@@ -631,7 +647,7 @@ void SetFieldType01(void)
 }
 
 //=============================================================================
-// 地形の自動生成02　見通しのいい地形
+// 地形の自動生成02　見通しのいい地形　ブロック数32*32　ブロックサイズ60*60～100*100
 //=============================================================================
 void SetFieldType02(void)
 {
@@ -695,6 +711,119 @@ void SetFieldType02(void)
 }
 
 //=============================================================================
+// 地形の自動生成03　取得プレイヤーが有利になる地形(相手プレイヤー付近を盆地)　　ブロック数32*32　ブロックサイズ200*200
+//=============================================================================
+void SetFieldType03(void)
+{
+	{
+		VERTEX_3D *pVtx;
+		WORD *pIdx;
+		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
+		g_pD3DVtxBuffFieldEnd->Lock(0, 0, (void**)&pVtx, 0);
+		g_pD3DIdxBuffFieldDraw->Lock(0, 0, (void**)&pIdx, 0);
+
+		//上限　高さを設定
+		for (int nCntVtx = 0; nCntVtx < g_nNumVertexField / 4; nCntVtx++)
+		{
+			//高さを決める頂点を決定
+			int YTXrandNum(rand() % g_nNumVertexField);
+
+			//高さを決め代入
+			int VTXrandY(rand() % 400);
+			if (pVtx[YTXrandNum].vtx == pVtx[YTXrandNum + 1].vtx)
+			{
+				pVtx[YTXrandNum].vtx.y = pVtx[YTXrandNum + 1].vtx.y = float(VTXrandY);
+				continue;
+			}
+			else if (pVtx[YTXrandNum + 1].vtx == pVtx[YTXrandNum + 2].vtx)
+			{
+				pVtx[YTXrandNum + 1].vtx.y = pVtx[YTXrandNum + 2].vtx.y = float(VTXrandY);
+				continue;
+			}
+			pVtx[YTXrandNum].vtx.y = float(VTXrandY);
+		}
+
+		//縮退ポリゴンの座標を調整
+		//SetDegenerationPoly();
+
+		//隣接頂点の高さ平均値を(ダイアモンドスクエア、フラクタルを参考)
+		for (int nCntVtxZ = 0; nCntVtxZ < (g_nNumBlockZField + 1); nCntVtxZ++)
+		{
+			for (int nCntVtxX = 0; nCntVtxX < (g_nNumBlockXField + 1); nCntVtxX++)
+			{
+				//縮退ポリゴンよけなさい
+				if (nCntVtxZ*nCntVtxX == g_nNumVertexIndexField - 2) break;
+				else if (pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx == pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX + 1].vtx)	continue;
+				else if (pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX + 1].vtx == pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX + 2].vtx) continue;
+
+				// 頂点座標の設定
+				//頂点最端の高さは固定。壁際の頂点のこと。
+				//上側
+				if (nCntVtxZ == 0 || nCntVtxX == 0 || nCntVtxZ == g_nNumBlockZField || nCntVtxX == g_nNumBlockXField)
+					pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx.y = 400.0f;
+				//中側　上下左右の平均値を算出
+				//隣接頂点の高さの平均値を求め、中心の頂点の高さとする。
+				else
+				{
+					float y = (pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX - 1].vtx.y + pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX + 1].vtx.y +
+						pVtx[(nCntVtxZ - 1) * (g_nNumBlockXField + 1) + nCntVtxX].vtx.y + pVtx[(nCntVtxZ + 1) * (g_nNumBlockXField + 1) + nCntVtxX].vtx.y) / 4;
+					pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx.y = fabsf(y);
+				}
+			}
+		}
+
+		//相手プレイヤー付近の地形を盆地化
+		PLAYER_HONTAI *p = GetPlayerHoudai();
+		for (int CntPlayer = 0; CntPlayer < PLAYER_MAX; CntPlayer++)
+		{
+			if (CntPlayer != InterPolationFieldPlayerNum)
+			{
+				float HitPosUp;
+				float HitPosDown;
+				float HitPosLeft;
+				float HitPosRight;
+				HitPosUp = HitPosDown = HitPosLeft = HitPosRight = 0.0f;
+				//プレイヤーの乗っているエリアを特定。4分木で範囲を絞る。
+				SpeedUpFieldHitPoly(p[CntPlayer].pos, &HitPosUp, &HitPosDown, &HitPosLeft, &HitPosRight,
+					g_fSideSizeXEighth, g_fSideSizeZEighth, g_fSideSizeXEighth/2, g_fSideSizeZEighth/2);
+
+				for (int nCntVtx = 0; nCntVtx < g_nNumVertexIndexField; nCntVtx++)
+				{
+					//縮退ポリゴンのときはコンティニュー。最終ポリゴンの時はbreak;
+					if (nCntVtx == g_nNumVertexIndexField - 2)
+					{
+						break;
+					}
+					else if (pIdx[nCntVtx] == pIdx[nCntVtx + 1])
+					{
+						continue;
+					}
+					else if (pIdx[nCntVtx + 1] == pIdx[nCntVtx + 2])
+					{
+						continue;
+					}
+					//高速当たり判定用ポリゴンの座標内なら当たり判定実行　XチェックからZチェック。ともにtrueだと判定
+					if (pVtx[pIdx[nCntVtx]].vtx.x >= HitPosLeft && pVtx[pIdx[nCntVtx]].vtx.x <= HitPosRight)
+					{
+						if (pVtx[pIdx[nCntVtx]].vtx.z <= HitPosUp && pVtx[pIdx[nCntVtx]].vtx.z >= HitPosDown)
+						{
+							// 頂点座標の設定
+							pVtx[pIdx[nCntVtx]].vtx.y = 20.0f;
+						}
+					}
+				}
+			}
+		}
+
+		// 頂点データをアンロックする
+		g_pD3DVtxBuffFieldDraw->Unlock();
+		// インデックスデータをアンロックする
+		g_pD3DIdxBuffFieldDraw->Unlock();
+	}
+	InterPolationFieldSignal = false;
+}
+
+//=============================================================================
 // 地形の変形処理　生成されたフィールドに変形する
 //=============================================================================
 bool InterPolationField(void)
@@ -721,29 +850,18 @@ bool InterPolationField(void)
 				else if (pVtxDraw[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx == pVtxDraw[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX + 1].vtx) continue;
 				else if (pVtxDraw[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX + 1].vtx == pVtxDraw[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX + 2].vtx) continue;
 
-				//線形　座標を求める	X = StartX + (EndX - StartX) * 今の時間
-				//線形　i(t)= s(1-v(t))+e*v(t)
-				D3DXVECTOR3 vtxvec1 = pVtxEnd[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx - pVtxStart[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx;
-				pVtxDraw[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx = pVtxStart[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx + vtxvec1 * g_time;
+				//補間開始
+				pVtxDraw[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx = MyInterpolation(
+					pVtxStart[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx, 
+					pVtxEnd[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx,
+					0.01f, 1.0f, dt, g_time, LerpEaseInEaseOut);
 
-				//三次　v(t)= -2t^3 = t^2(3-2t)
-			//t(タイム(dt)),b(開始点),c(開始点と目的点の差分),d(合計時間(t))
-			//t/=d/2.0f
-			//c/2.0f*t*t+b
-			//-c/2.0f*(t*(t-2)-1)+b
-			//D3DXVECTOR3 c = pVtxF[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx - pVtxS[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx;
-			//D3DXVECTOR3 oldpos = pVtxS[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx;
-			//pVtxG[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx =
-			//	-c / 2.0f*(t*(t-2)-1) + pVtxG[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx;
-
-			//pVtxS[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx = oldpos;
-
-			// 反射光の設定
-				if (pVtxDraw[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx.y >= 60.0f)
+				// 反射光の設定
+				if (pVtxDraw[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx.y >= 200.0f)
 				{
 					pVtxDraw[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].diffuse = D3DXCOLOR(0.4f, 0.4f, 0.4f, 1.0f);//山
 				}
-				else if (pVtxDraw[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx.y <= 59.9f && pVtxDraw[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx.y > 20.0f)
+				else if (pVtxDraw[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx.y < 200.0f && pVtxDraw[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx.y > 20.0f)
 				{
 					pVtxDraw[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].diffuse = D3DXCOLOR(0.3f, 1.0f, 0.3f, 1.0f);//緑
 				}
@@ -810,8 +928,6 @@ void SetDegenerationPoly(void)
 		}
 	}
 }
-
-
 
 //=============================================================================
 // 地形との当たり判定 rayS,rayG,vtxHOUSEN,posy 返り値void プレイヤー以外の当たり判定で使用
@@ -891,7 +1007,6 @@ void FieldHit(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVECTOR3 *vtxNor, float
 
 }
 
-
 //=============================================================================
 // 地形との当たり判定 rayS,rayG,vtxHOUSEN,posy 返り値void　プレイヤーの当たり判定で使用。球面補間で使用するため。
 //=============================================================================
@@ -909,7 +1024,7 @@ void FieldHitGetSphereVec(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVECTOR3 *v
 
 	//高速化処理。4分木で当たり判定をする範囲を絞る。
 	SpeedUpFieldHitPoly(InrayS, &HitPosUp, &HitPosDown, &HitPosLeft, &HitPosRight,
-		g_fSideSizeXHalf, g_fSideSizeZHalf, g_fSideSizeXEighth, g_fSideSizeZEighth);
+		g_fSideSizeXQuarter, g_fSideSizeZQuarter, g_fSideSizeXEighth, g_fSideSizeZEighth);
 
 
 	// 頂点データの範囲をロックし、頂点バッファへのポインタを取得

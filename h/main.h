@@ -35,44 +35,48 @@
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define	FVF_VERTEX_2D				(D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1)								//!< ２Ｄポリゴン頂点フォーマット( 頂点座標[2D] / 反射光 / テクスチャ座標 )
-#define	FVF_VERTEX_3D				(D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_DIFFUSE | D3DFVF_TEX1)					//!< ３Ｄポリゴン頂点フォーマット( 頂点座標[3D] / 法線 / 反射光 / テクスチャ座標 )
-#define SCREEN_W					(1280)																		//!< ウインドウの幅
-#define SCREEN_H					(960)																		//!< ウインドウの高さ
-#define SCREEN_CENTER_X				(SCREEN_W / 2)																//!< ウインドウの中心Ｘ座標
-#define SCREEN_CENTER_Y				(SCREEN_H / 2)																//!< ウインドウの中心Ｙ座標
-#define SCREEN_SEPARATE_BUFF		(2.5f)																		//!< 画面分割時の描画範囲と描画範囲の隙間
+#define	FVF_VERTEX_2D				(D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1)										//!< ２Ｄポリゴン頂点フォーマット( 頂点座標[2D] / 反射光 / テクスチャ座標 )
+#define	FVF_VERTEX_3D				(D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_DIFFUSE | D3DFVF_TEX1)							//!< ３Ｄポリゴン頂点フォーマット( 頂点座標[3D] / 法線 / 反射光 / テクスチャ座標 )
+#define SCREEN_W					(1280)																				//!< ウインドウの幅
+#define SCREEN_H					(960)																				//!< ウインドウの高さ
+#define SCREEN_CENTER_X				(SCREEN_W / 2)																		//!< ウインドウの中心Ｘ座標
+#define SCREEN_CENTER_Y				(SCREEN_H / 2)																		//!< ウインドウの中心Ｙ座標
+#define SCREEN_SEPARATE_BUFF		(2.5f)																				//!< 画面分割時の描画範囲と描画範囲の隙間
 
-//2Dポリゴンに関するパラメータ																					
-#define	POLYGON_2D_VERTEX			(4)																			//!< 頂点数
-#define	POLYGON_2D_NUM				(2)																			//!< ポリゴン数
-																												
-//画像の参照名																									
-#define TEXTURE_GAME_SCORE			"../data/TEXTURE/BG/0-9.png"													//!< 読み込むテクスチャファイル名
-#define	TEXTURE_MEISAI				"../data/MODEL/28513607_p4_master1200.jpg"										//!< 読み込むテクスチャファイル名
-#define	TEXTURE_STATUS_TIKEI_ITEM	"../data/MODEL/landmark_aogashima.png"											//!< 地形変形アイテム
-#define	TEXTURE_STATUS_LIFE_ITEM	"../data/MODEL/life000.png"													//!< ライフ回復
-#define	TEXTURE_STATUS_SENSYA_ITEM	"../data/MODEL/war_sensya_noman.png"											//!< 戦車変形アイテム
-#define	TEXTURE_STATUS_BULLET_ITEM	"../data/MODEL/bullettex.png"													//!< バレットアイテム
-#define	TEXTURE_STATUS_SPEED_ITEM	"../data/MODEL/1213810.png"													//!< スピードアップアイテム
-#define	TEXTURE_STATUS_CAMERA_ITEM	"../data/MODEL/mark_camera_satsuei_ok.png"										//!< 強制バックカメラアイテム
-#define	TEXTURE_STATUS_KIRI_ITEM	"../data/MODEL/yama_kiri.png"													//!< 霧アイテム
-																												
-//モデルの参照																									
-#define	MODEL_HOUDAI				"../data/MODEL/PlayerSensyaHoudai.x"											//!< 読み込むモデル名
-#define	MODEL_HOUTOU				"../data/MODEL/PlayerSensyaHoutou.x"											//!< 読み込むモデル名
-#define	MODEL_HOUSIN				"../data/MODEL/PlayerSensyaHousin.x"											//!< 読み込むモデル名
-#define	MODEL_HOUSINMO				"../data/MODEL/PlayerSensyaHousinMo.x"											//!< 読み込むモデル名
-#define	MODEL_BULLETPOS				"../data/MODEL/PlayerSensyaBulletPos.x"										//!< 読み込むモデル名
+//2Dポリゴンに関するパラメータ																							
+#define	POLYGON_2D_VERTEX			(4)																					//!< 頂点数
+#define	POLYGON_2D_NUM				(2)																					//!< ポリゴン数
+																														
+//画像の参照名																											
+#define TEXTURE_GAME_SCORE			"../data/TEXTURE/BG/0-9.png"														//!< 読み込むテクスチャファイル名
+#define	TEXTURE_MEISAI				"../data/MODEL/28513607_p4_master1200.jpg"											//!< 読み込むテクスチャファイル名
+#define	TEXTURE_STATUS_TIKEI_ITEM	"../data/MODEL/landmark_aogashima.png"												//!< 地形変形アイテム
+#define	TEXTURE_STATUS_LIFE_ITEM	"../data/MODEL/life000.png"															//!< ライフ回復
+#define	TEXTURE_STATUS_SENSYA_ITEM	"../data/MODEL/war_sensya_noman.png"												//!< 戦車変形アイテム
+#define	TEXTURE_STATUS_BULLET_ITEM	"../data/MODEL/bullettex.png"														//!< バレットアイテム
+#define	TEXTURE_STATUS_SPEED_ITEM	"../data/MODEL/1213810.png"															//!< スピードアップアイテム
+#define	TEXTURE_STATUS_CAMERA_ITEM	"../data/MODEL/mark_camera_satsuei_ok.png"											//!< 強制バックカメラアイテム
+#define	TEXTURE_STATUS_KIRI_ITEM	"../data/MODEL/yama_kiri.png"														//!< 霧アイテム
+																													
+//モデルの参照																										
+#define	MODEL_HOUDAI				"../data/MODEL/PlayerSensyaHoudai.x"												//!< 読み込むモデル名
+#define	MODEL_HOUTOU				"../data/MODEL/PlayerSensyaHoutou.x"												//!< 読み込むモデル名
+#define	MODEL_HOUSIN				"../data/MODEL/PlayerSensyaHousin.x"												//!< 読み込むモデル名
+#define	MODEL_HOUSINMO				"../data/MODEL/PlayerSensyaHousinMo.x"												//!< 読み込むモデル名
+#define	MODEL_BULLETPOS				"../data/MODEL/PlayerSensyaBulletPos.x"												//!< 読み込むモデル名
 
 //キャラクターなどの合計
 #define PLAYER_MAX							(4)																			//!< プレイヤー最大人数
 #define BULLETPOINT_MAX						(PLAYER_MAX)																//!< 着地点の最大数
 
+//モデル等のサイズ
+#define	BULLET_EFFECT_SIZE					(4.0f)																		//!< 歩きに比べてのダッシュの速度倍率
+#define	BULLET_EFFECT_TIME					(240)																		//!< 左右歩きの移動量倍率(-1000～1000が入力範囲なのでそれに乗算する)
+
 //移動量マクロ
-#define	PLAYER_VALUE_DASHRATE			(2.0f)											//歩きに比べてのダッシュの速度倍率
-#define	PLAYER_MOVE_RATE_X				(1.0f/40000.0f)									//左右歩きの移動量倍率(-1000～1000が入力範囲なのでそれに乗算する)
-#define	PLAYER_MOVE_RATE_Y				(1.0f/300.0f)									//前後歩きの移動量倍率(-1000～1000が入力範囲なのでそれに乗算する)
+#define	PLAYER_VALUE_DASHRATE				(2.0f)																		//!< 歩きに比べてのダッシュの速度倍率
+#define	PLAYER_MOVE_RATE_X					(1.0f/40000.0f)																//!< 左右歩きの移動量倍率(-1000～1000が入力範囲なのでそれに乗算する)
+#define	PLAYER_MOVE_RATE_Y					(1.0f/100.0f)																//!< 前後歩きの移動量倍率(-1000～1000が入力範囲なのでそれに乗算する)
 #define VALUE_MOVE_BULLET					(15.0f)																		//!< バレットの速度
 #define VALUE_LEN_BULLET					(10.0f)																		//!< プレイヤー中心としたバレットの発射位置までの距離
 #define VALUE_LENTIMES_BULLET				(2.5f)																		//!< プレイヤー中心としたバレットの発射位置にたいする倍率
@@ -132,7 +136,7 @@
 #define	EFFECT_BULLET_TIME					(10)																		//!< エフェクトバレットの生存時間
 #define	EFFECT_SPEEDUP_SIZE_X				(25.0f)																		//!< エフェクトスピードアップの幅
 #define	EFFECT_SPEEDUP_SIZE_Y				(10.0f)																		//!< エフェクトスピードアップの高さ
-#define	EFFECT_SPEEDUP_TIME					(10)																			//!< エフェクトスピードアップの生存時間
+#define	EFFECT_SPEEDUP_TIME					(10)																		//!< エフェクトスピードアップの生存時間
 
 /**
  * @enum E_STAGE

@@ -12,6 +12,7 @@
 #include "../h/object/player.h"
 #include "../h/map/field.h"
 #include "../h/map/wall.h"
+#include "../h/map/sky.h"
 #include "../h/other/shadow.h"
 #include "../h/collision.h"
 #include "../h/scene/time.h"
@@ -408,18 +409,22 @@ HRESULT Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 
 	// フィールドの初期化
 	{
+		// 空の初期化
+		InitMeshSky(D3DXVECTOR3(0.0f, -100.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), 16, 8, 4000.0f, true);
+
 		// 地面の初期化
-		InitMeshField(D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), 32, 32, 100.0f,100.0f);
+		InitMeshField(D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), 32, 32, 250.0f,250.0f);
 
 		// 壁の初期化
-		InitMeshWall(D3DXVECTOR3(0.0f, 0.0f, 960.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f),
-			D3DXCOLOR(0.2f, 0.2f, 0.2f, 1.0f), 1, 1, 1920.0f, 1920.0f);
-		InitMeshWall(D3DXVECTOR3(-960.0f, 0.0f, 0.0f), D3DXVECTOR3(0.0f, -D3DX_PI * 0.50f, 0.0f),
-			D3DXCOLOR(0.2f, 0.2f, 0.2f, 1.0f), 1, 1, 1920.0f, 1920.0f);
-		InitMeshWall(D3DXVECTOR3(960.0f, 0.0f, 0.0f), D3DXVECTOR3(0.0f, D3DX_PI * 0.50f, 0.0f),
-			D3DXCOLOR(0.2f, 0.2f, 0.2f, 1.0f), 1, 1, 1920.0f, 1920.0f);
-		InitMeshWall(D3DXVECTOR3(0.0f, 0.0f, -960.0f), D3DXVECTOR3(0.0f, D3DX_PI, 0.0f),
-			D3DXCOLOR(0.2f, 0.2f, 0.2f, 1.0f), 1, 1, 1920.0f, 1920.0f);
+		InitMeshWall(D3DXVECTOR3(0.0f, 0.0f, 2600.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f),
+			D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f), 1, 1, 5200.0f, 800.0f);
+		InitMeshWall(D3DXVECTOR3(-2600.0f, 0.0f, 0.0f), D3DXVECTOR3(0.0f, -D3DX_PI * 0.50f, 0.0f),
+			D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f), 1, 1, 5200.0f, 800.0f);
+		InitMeshWall(D3DXVECTOR3(2600.0f, 0.0f, 0.0f), D3DXVECTOR3(0.0f, D3DX_PI * 0.50f, 0.0f),
+			D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f), 1, 1, 5200.0f, 800.0f);
+		InitMeshWall(D3DXVECTOR3(0.0f, 0.0f, -2600.0f), D3DXVECTOR3(0.0f, D3DX_PI, 0.0f),
+			D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f), 1, 1, 5200.0f, 800.0f);
+
 		/*
 		// 壁(裏側用の半透明)
 		InitMeshWall(D3DXVECTOR3(0.0f, 0.0f, 875.0f), D3DXVECTOR3(0.0f, D3DX_PI, 0.0f),
@@ -480,6 +485,7 @@ void Uninit(void)
 	UninitStatus();
 	UninitRank();
 	//UninitBulletPoint();
+	UninitMeshSky();
 	UninitMeshField();
 	UninitMeshWall();
 	UninitPlayer();
@@ -620,6 +626,7 @@ void Draw(void)
 					//DrawBulletPoint(i);
 
 					//フィールド
+					DrawMeshSky();
 					DrawMeshField();
 					DrawMeshWall();
 
@@ -658,6 +665,7 @@ void Draw(void)
 						//DrawBulletPoint(i);
 
 						//フィールド
+						DrawMeshSky();
 						DrawMeshField();
 						DrawMeshWall();
 
@@ -703,6 +711,7 @@ void Draw(void)
 						//DrawBulletPoint(i);
 
 						//フィールド
+						DrawMeshSky();
 						DrawMeshField();
 						DrawMeshWall();
 
@@ -741,6 +750,7 @@ void Draw(void)
 						DrawItem();
 
 						//フィールド
+						DrawMeshSky();
 						DrawMeshField();
 						DrawMeshWall();
 

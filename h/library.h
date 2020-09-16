@@ -121,7 +121,7 @@ D3DXVECTOR3 MyInterpolation(D3DXVECTOR3 StartPos, D3DXVECTOR3 EndPos, float min,
 
 //ï‚ä‘ä÷êî MyInterpolationÅ@égópó·
 /*
-	enemy.pos = MyInterpolation(enemy.InterpolationStartPos, enemy.InterpolationEndPos, 0.0f, 1.0f, 1.0f, 120.0f, LerpEaseIn(float t));
+	enemy.pos = MyInterpolation(enemy.InterpolationStartPos, enemy.InterpolationEndPos, 0.0f, 1.0f, 1.0f, 120.0f, LerpEaseIn);
 */
 
 /**

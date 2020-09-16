@@ -1198,7 +1198,7 @@ void PLAYER_HONTAI::SetBulletALL(int CntPlayer)
 		if (IsButtonTriggered(CntPlayer, BUTTON_R1))
 		{
 
-			SetBullet(g_PlayerHoudai[CntPlayer].BposStart, g_PlayerHoudai[CntPlayer].bulletmove, 4.0f, 4.0f, 60 * 4, CntPlayer);
+			SetBullet(g_PlayerHoudai[CntPlayer].BposStart, g_PlayerHoudai[CntPlayer].bulletmove, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer);
 			//SetBullet(g_PlayerBulletStartPos[CntPlayer].pos, move, 4.0f, 4.0f, 60 * 4, CntPlayer);
 
 			//ägéUíeèàóù
@@ -1213,8 +1213,8 @@ void PLAYER_HONTAI::SetBulletALL(int CntPlayer)
 					-cosf(g_PlayerHoutou[CntPlayer].rot.y + g_PlayerHoudai[CntPlayer].rot.y - 0.3f) *VALUE_MOVE_BULLET);
 				//SetBullet(BposStart, leftB, 4.0f, 4.0f, 60 * 4, CntPlayer);
 				//SetBullet(BposStart, rightB, 4.0f, 4.0f, 60 * 4, CntPlayer);
-				SetBullet(g_PlayerHoudai[CntPlayer].BposStart, leftB, 4.0f, 4.0f, 60 * 4, CntPlayer);
-				SetBullet(g_PlayerHoudai[CntPlayer].BposStart, rightB, 4.0f, 4.0f, 60 * 4, CntPlayer);
+				SetBullet(g_PlayerHoudai[CntPlayer].BposStart, leftB, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer);
+				SetBullet(g_PlayerHoudai[CntPlayer].BposStart, rightB, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer);
 
 			}
 			g_PlayerHoudai[CntPlayer].AmmoNum -= 1;
