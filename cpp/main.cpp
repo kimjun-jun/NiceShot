@@ -5,39 +5,39 @@
 * @date 2020/01/15
 */
 #include "../h/main.h"
-#include "../h/debugproc.h"
-#include "../h/input.h"
-#include "../h/camera.h"
-#include "../h/light.h"
-#include "../h/player.h"
-#include "../h/field.h"
-#include "../h/wall.h"
-#include "../h/shadow.h"
+#include "../h/other/debugproc.h"
+#include "../h/other/input.h"
+#include "../h/object/camera.h"
+#include "../h/other/light.h"
+#include "../h/object/player.h"
+#include "../h/map/field.h"
+#include "../h/map/wall.h"
+#include "../h/other/shadow.h"
 #include "../h/collision.h"
-#include "../h/time.h"
-#include "../h/title.h"
-#include "../h/result.h"
-#include "../h/fade.h"
-#include "../h/tutorial.h"
-#include "../h/effect.h"
-#include "../h/bullet.h"
-#include "../h/bulletpoint.h"
-#include "../h/explosion.h"
-#include "../h/rank.h"
-#include "../h/countdown.h"
-#include "../h/item.h"
-#include "../h/life.h"
-#include "../h/bullettex.h"
-#include "../h/damege.h"
-#include "../h/status.h"
-#include "../h/sound.h"
-#include "../h/bulletprediction.h"
+#include "../h/scene/time.h"
+#include "../h/scene/title.h"
+#include "../h/scene/result.h"
+#include "../h/scene/fade.h"
+#include "../h/scene/tutorial.h"
+#include "../h/effect/effect.h"
+#include "../h/object/bullet/bullet.h"
+#include "../h/object/bullet/bulletpoint.h"
+#include "../h/effect/explosion.h"
+#include "../h/scene/rank.h"
+#include "../h/scene/countdown.h"
+#include "../h/object/item.h"
+#include "../h/object/life.h"
+#include "../h/object/bullet/bullettex.h"
+#include "../h/effect/damege.h"
+#include "../h/object/status.h"
+#include "../h/other/sound.h"
+#include "../h/object/bullet/bulletprediction.h"
 
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
 #define CLASS_NAME		"AppClass"				//!< ウインドウのクラス名
-#define WINDOW_NAME		_T("ナイスショット！")	//!< ウインドウのキャプション名
+#define WINDOW_NAME		_T("NiceShot！")	//!< ウインドウのキャプション名
 
 //*****************************************************************************
 // プロトタイプ宣言

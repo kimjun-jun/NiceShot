@@ -19,183 +19,225 @@
     <Filter Include="h">
       <UniqueIdentifier>{57ae052a-2949-4256-b852-77341a825699}</UniqueIdentifier>
     </Filter>
+    <Filter Include="cpp\effect">
+      <UniqueIdentifier>{9d370243-79fd-484d-b870-9aee64b92d23}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp\map">
+      <UniqueIdentifier>{39de7acb-bb73-483c-a9b8-9ab40afb9558}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp\object">
+      <UniqueIdentifier>{98a96e2d-dc47-47f3-8d8b-daa529a73ca2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp\other">
+      <UniqueIdentifier>{0343b9d1-da55-4dbb-a4dc-e06cedf668c0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp\scene">
+      <UniqueIdentifier>{17a0f19d-5da0-4a38-9e55-28b002b7801a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp\object\bullet">
+      <UniqueIdentifier>{5d532c76-1539-4750-a5ef-2c72661360ba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="h\effect">
+      <UniqueIdentifier>{8d97ac0f-8e78-4f2f-9ac2-6d6cd33ff5bd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="h\scene">
+      <UniqueIdentifier>{9b26a6b2-db78-4162-9f44-7b5492e5f5e8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="h\other">
+      <UniqueIdentifier>{1b8cd7ca-d130-4ee8-a3fd-17daefc43ff1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="h\object">
+      <UniqueIdentifier>{5355b4b6-760b-40d6-bfe0-840d10af5c09}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="h\map">
+      <UniqueIdentifier>{87f939d6-98b4-45ea-a247-27fce4cc9dac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="h\object\bullet">
+      <UniqueIdentifier>{f191a436-44ff-46e5-b3de-2c3f45334114}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\cpp\bullet.cpp">
-      <Filter>cpp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\cpp\bulletpoint.cpp">
-      <Filter>cpp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\cpp\bulletprediction.cpp">
-      <Filter>cpp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\cpp\bullettex.cpp">
-      <Filter>cpp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\cpp\camera.cpp">
-      <Filter>cpp</Filter>
-    </ClCompile>
     <ClCompile Include="..\cpp\collision.cpp">
-      <Filter>cpp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\cpp\countdown.cpp">
-      <Filter>cpp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\cpp\damege.cpp">
-      <Filter>cpp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\cpp\debugproc.cpp">
-      <Filter>cpp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\cpp\effect.cpp">
-      <Filter>cpp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\cpp\explosion.cpp">
-      <Filter>cpp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\cpp\fade.cpp">
-      <Filter>cpp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\cpp\field.cpp">
-      <Filter>cpp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\cpp\input.cpp">
-      <Filter>cpp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\cpp\item.cpp">
       <Filter>cpp</Filter>
     </ClCompile>
     <ClCompile Include="..\cpp\library.cpp">
       <Filter>cpp</Filter>
     </ClCompile>
-    <ClCompile Include="..\cpp\life.cpp">
-      <Filter>cpp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\cpp\light.cpp">
-      <Filter>cpp</Filter>
-    </ClCompile>
     <ClCompile Include="..\cpp\main.cpp">
       <Filter>cpp</Filter>
     </ClCompile>
-    <ClCompile Include="..\cpp\player.cpp">
-      <Filter>cpp</Filter>
+    <ClCompile Include="..\cpp\effect\damege.cpp">
+      <Filter>cpp\effect</Filter>
     </ClCompile>
-    <ClCompile Include="..\cpp\rank.cpp">
-      <Filter>cpp</Filter>
+    <ClCompile Include="..\cpp\effect\effect.cpp">
+      <Filter>cpp\effect</Filter>
     </ClCompile>
-    <ClCompile Include="..\cpp\result.cpp">
-      <Filter>cpp</Filter>
+    <ClCompile Include="..\cpp\effect\explosion.cpp">
+      <Filter>cpp\effect</Filter>
     </ClCompile>
-    <ClCompile Include="..\cpp\shadow.cpp">
-      <Filter>cpp</Filter>
+    <ClCompile Include="..\cpp\map\field.cpp">
+      <Filter>cpp\map</Filter>
     </ClCompile>
-    <ClCompile Include="..\cpp\sound.cpp">
-      <Filter>cpp</Filter>
+    <ClCompile Include="..\cpp\map\wall.cpp">
+      <Filter>cpp\map</Filter>
     </ClCompile>
-    <ClCompile Include="..\cpp\status.cpp">
-      <Filter>cpp</Filter>
+    <ClCompile Include="..\cpp\scene\countdown.cpp">
+      <Filter>cpp\scene</Filter>
     </ClCompile>
-    <ClCompile Include="..\cpp\time.cpp">
-      <Filter>cpp</Filter>
+    <ClCompile Include="..\cpp\scene\fade.cpp">
+      <Filter>cpp\scene</Filter>
     </ClCompile>
-    <ClCompile Include="..\cpp\title.cpp">
-      <Filter>cpp</Filter>
+    <ClCompile Include="..\cpp\scene\rank.cpp">
+      <Filter>cpp\scene</Filter>
     </ClCompile>
-    <ClCompile Include="..\cpp\tutorial.cpp">
-      <Filter>cpp</Filter>
+    <ClCompile Include="..\cpp\scene\result.cpp">
+      <Filter>cpp\scene</Filter>
     </ClCompile>
-    <ClCompile Include="..\cpp\wall.cpp">
-      <Filter>cpp</Filter>
+    <ClCompile Include="..\cpp\scene\time.cpp">
+      <Filter>cpp\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\scene\title.cpp">
+      <Filter>cpp\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\scene\tutorial.cpp">
+      <Filter>cpp\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\object\camera.cpp">
+      <Filter>cpp\object</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\object\item.cpp">
+      <Filter>cpp\object</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\object\life.cpp">
+      <Filter>cpp\object</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\object\player.cpp">
+      <Filter>cpp\object</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\object\status.cpp">
+      <Filter>cpp\object</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\object\bullet\bullet.cpp">
+      <Filter>cpp\object\bullet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\object\bullet\bulletgauge.cpp">
+      <Filter>cpp\object\bullet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\object\bullet\bulletpoint.cpp">
+      <Filter>cpp\object\bullet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\object\bullet\bulletprediction.cpp">
+      <Filter>cpp\object\bullet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\object\bullet\bullettex.cpp">
+      <Filter>cpp\object\bullet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\other\debugproc.cpp">
+      <Filter>cpp\other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\other\input.cpp">
+      <Filter>cpp\other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\other\light.cpp">
+      <Filter>cpp\other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\other\shadow.cpp">
+      <Filter>cpp\other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\other\sound.cpp">
+      <Filter>cpp\other</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\h\bullet.h">
-      <Filter>h</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\bulletpoint.h">
-      <Filter>h</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\bulletprediction.h">
-      <Filter>h</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\bullettex.h">
-      <Filter>h</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\camera.h">
-      <Filter>h</Filter>
-    </ClInclude>
     <ClInclude Include="..\h\collision.h">
-      <Filter>h</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\countdown.h">
-      <Filter>h</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\damege.h">
-      <Filter>h</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\debugproc.h">
-      <Filter>h</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\effect.h">
-      <Filter>h</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\explosion.h">
-      <Filter>h</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\fade.h">
-      <Filter>h</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\field.h">
-      <Filter>h</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\input.h">
-      <Filter>h</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\item.h">
       <Filter>h</Filter>
     </ClInclude>
     <ClInclude Include="..\h\library.h">
       <Filter>h</Filter>
     </ClInclude>
-    <ClInclude Include="..\h\life.h">
-      <Filter>h</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\light.h">
-      <Filter>h</Filter>
-    </ClInclude>
     <ClInclude Include="..\h\main.h">
       <Filter>h</Filter>
     </ClInclude>
-    <ClInclude Include="..\h\player.h">
-      <Filter>h</Filter>
+    <ClInclude Include="..\h\effect\damege.h">
+      <Filter>h\effect</Filter>
     </ClInclude>
-    <ClInclude Include="..\h\rank.h">
-      <Filter>h</Filter>
+    <ClInclude Include="..\h\effect\effect.h">
+      <Filter>h\effect</Filter>
     </ClInclude>
-    <ClInclude Include="..\h\result.h">
-      <Filter>h</Filter>
+    <ClInclude Include="..\h\effect\explosion.h">
+      <Filter>h\effect</Filter>
     </ClInclude>
-    <ClInclude Include="..\h\shadow.h">
-      <Filter>h</Filter>
+    <ClInclude Include="..\h\map\field.h">
+      <Filter>h\map</Filter>
     </ClInclude>
-    <ClInclude Include="..\h\sound.h">
-      <Filter>h</Filter>
+    <ClInclude Include="..\h\map\wall.h">
+      <Filter>h\map</Filter>
     </ClInclude>
-    <ClInclude Include="..\h\status.h">
-      <Filter>h</Filter>
+    <ClInclude Include="..\h\object\camera.h">
+      <Filter>h\object</Filter>
     </ClInclude>
-    <ClInclude Include="..\h\time.h">
-      <Filter>h</Filter>
+    <ClInclude Include="..\h\object\item.h">
+      <Filter>h\object</Filter>
     </ClInclude>
-    <ClInclude Include="..\h\title.h">
-      <Filter>h</Filter>
+    <ClInclude Include="..\h\object\life.h">
+      <Filter>h\object</Filter>
     </ClInclude>
-    <ClInclude Include="..\h\tutorial.h">
-      <Filter>h</Filter>
+    <ClInclude Include="..\h\object\player.h">
+      <Filter>h\object</Filter>
     </ClInclude>
-    <ClInclude Include="..\h\wall.h">
-      <Filter>h</Filter>
+    <ClInclude Include="..\h\object\status.h">
+      <Filter>h\object</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\object\bullet\bullet.h">
+      <Filter>h\object\bullet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\object\bullet\bulletgauge.h">
+      <Filter>h\object\bullet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\object\bullet\bulletpoint.h">
+      <Filter>h\object\bullet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\object\bullet\bulletprediction.h">
+      <Filter>h\object\bullet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\object\bullet\bullettex.h">
+      <Filter>h\object\bullet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\other\debugproc.h">
+      <Filter>h\other</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\other\input.h">
+      <Filter>h\other</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\other\light.h">
+      <Filter>h\other</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\other\shadow.h">
+      <Filter>h\other</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\other\sound.h">
+      <Filter>h\other</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\scene\countdown.h">
+      <Filter>h\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\scene\fade.h">
+      <Filter>h\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\scene\rank.h">
+      <Filter>h\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\scene\result.h">
+      <Filter>h\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\scene\time.h">
+      <Filter>h\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\scene\title.h">
+      <Filter>h\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\scene\tutorial.h">
+      <Filter>h\scene</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
