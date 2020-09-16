@@ -93,7 +93,7 @@ HRESULT InitItem(void)
 	for(int nCntItem = 0; nCntItem < MAX_ITEM; nCntItem++)
 	{
 		g_aItem[nCntItem].pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-		g_aItem[nCntItem].scl = D3DXVECTOR3(1.0f, 1.0f, 1.0f);
+		g_aItem[nCntItem].scl = D3DXVECTOR3(2.0f, 2.0f, 2.0f);
 		g_aItem[nCntItem].rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 		g_aItem[nCntItem].Upvec = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
 		g_aItem[nCntItem].rotVecAxis = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
@@ -110,7 +110,7 @@ HRESULT InitItem(void)
 	}
 	for (int nCntItem = 0; nCntItem < DROP_ITEM_MAX; nCntItem++)
 	{
-		D3DXVECTOR3 pos = D3DXVECTOR3(float(rand() % 500) + 100.0f, 1000.0f, float(rand() % 500) + 100.0f);
+		D3DXVECTOR3 pos = D3DXVECTOR3(float(rand() % int(WALL_SIZE_X/4)) + 100.0f, ITEM_INIT_POSY, float(rand() % int(WALL_SIZE_X / 4)) + 100.0f);
 		int x = rand() % 2;
 		int z = rand() % 2;
 		if (x == 1) pos.x *= -1;
@@ -132,8 +132,8 @@ HRESULT InitItem(void)
 		int ItemNum = rand() % ITEMTYPE_MAX;
 		//ライフ、カメラ、霧アイテムの時はもう一度抽選
 		if (ItemNum == ITEMTYPE_LIFE && ItemNum == ITEMTYPE_CAMERA && ItemNum == ITEMTYPE_KIRI) ItemNum = rand() % ITEMTYPE_MAX;
-		//SetItem(pos, D3DXVECTOR3(1.0f, 1.0f, 1.0f),D3DXVECTOR3(0.0f, 0.0f, 0.0f), ItemNum);
-		SetItem(pos, D3DXVECTOR3(1.0f, 1.0f, 1.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ITEMTYPE_TIKEI);
+		SetItem(pos, D3DXVECTOR3(2.0f, 2.0f, 2.0f),D3DXVECTOR3(0.0f, 0.0f, 0.0f), ItemNum);
+		//SetItem(pos, D3DXVECTOR3(1.0f, 1.0f, 1.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ITEMTYPE_TIKEI);
 
 	}
 
@@ -207,7 +207,7 @@ void UpdateItem(void)
 			g_aItem[nCntItem].Droptime += DROP_ITEM_CHARGE_ADDTIME;
 			if (g_aItem[nCntItem].Droptime >= DROP_ITEM_CHARGE_CNT)
 			{
-				D3DXVECTOR3 pos = D3DXVECTOR3(float(rand() % 500) + 100.0f, 1000.0f, float(rand() % 500) + 100.0f);
+				D3DXVECTOR3 pos = D3DXVECTOR3(float(rand() % int(WALL_SIZE_X / 4)) + 100.0f, ITEM_INIT_POSY, float(rand() % int(WALL_SIZE_X / 4)) + 100.0f);
 				int x = rand() % 2;
 				int z = rand() % 2;
 				if (x == 1) pos.x *= -1;
@@ -215,8 +215,8 @@ void UpdateItem(void)
 				int ItemNum = rand() % ITEMTYPE_MAX;
 				//ライフ、カメラ、霧アイテムの時はもう一度抽選
 				if (ItemNum == ITEMTYPE_LIFE && ItemNum == ITEMTYPE_CAMERA && ItemNum == ITEMTYPE_KIRI) ItemNum = rand() % ITEMTYPE_MAX;
-				//SetItem(pos, D3DXVECTOR3(1.0f, 1.0f, 1.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ItemNum);
-				SetItem(pos, D3DXVECTOR3(1.0f, 1.0f, 1.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ITEMTYPE_TIKEI);
+				SetItem(pos, D3DXVECTOR3(2.0f, 2.0f, 2.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ItemNum);
+				//SetItem(pos, D3DXVECTOR3(1.0f, 1.0f, 1.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ITEMTYPE_TIKEI);
 				g_aItem[nCntItem].fCollisionEnd = false;
 				g_aItem[nCntItem].Droptime = 0.0f;
 				g_aItem[0].GoukeiDrop++;
@@ -356,7 +356,7 @@ void GettingItem(int nIdxItem)
 		//プレイヤーとアイテムの距離を計算し/5分づつ近づける
 		PLAYER_HONTAI *p = GetPlayerHoudai();
 		D3DXVECTOR3 distance = p[g_aItem[nIdxItem].GetPlayerType].pos - g_aItem[nIdxItem].pos;
-		distance /= 5.0f;
+		distance /= 4.0f;
 		g_aItem[nIdxItem].pos += distance;
 		g_aItem[nIdxItem].scl -= D3DXVECTOR3(ITEM_SMALL_SCL, ITEM_SMALL_SCL, ITEM_SMALL_SCL);
 		if (g_aItem[nIdxItem].scl.x <= ITEM_DELETE_SCL)

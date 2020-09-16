@@ -69,9 +69,24 @@
 #define PLAYER_MAX							(4)																			//!< プレイヤー最大人数
 #define BULLETPOINT_MAX						(PLAYER_MAX)																//!< 着地点の最大数
 
+
+//モデル等の初期座標
+#define	PLAYER_INIT_POSX					(700.0f)																	//!< 初期座標プレイヤー
+#define	PLAYER_INIT_POSY					(300.0f)																	//!< 初期座標プレイヤー
+#define	PLAYER_INIT_POSZ					(700.0f)																	//!< 初期座標プレイヤー
+#define	ITEM_INIT_POSX						(700.0f)																	//!< 初期座標アイテム
+#define	ITEM_INIT_POSY						(500.0f)																	//!< 初期座標アイテム
+#define	ITEM_INIT_POSZ						(700.0f)																	//!< 初期座標アイテム
+#define	WALL_INIT_POSX						(2600.0f)																	//!< 初期座標壁
+#define	WALL_INIT_POSY						(0.0f)																		//!< 初期座標壁
+#define	WALL_INIT_POSZ						(2600.0f)																	//!< 初期座標壁
+
 //モデル等のサイズ
 #define	BULLET_EFFECT_SIZE					(4.0f)																		//!< 歩きに比べてのダッシュの速度倍率
 #define	BULLET_EFFECT_TIME					(240)																		//!< 左右歩きの移動量倍率(-1000～1000が入力範囲なのでそれに乗算する)
+#define	WALL_SIZE_X							(WALL_INIT_POSX*2)															//!< 歩きに比べてのダッシュの速度倍率
+#define	WALL_SIZE_Y							(800.0f)																	//!< 歩きに比べてのダッシュの速度倍率
+
 
 //移動量マクロ
 #define	PLAYER_VALUE_DASHRATE				(2.0f)																		//!< 歩きに比べてのダッシュの速度倍率
@@ -122,7 +137,7 @@
 #define PLAYER_MODEL_SIZE					(15.0f)																		//!< モデルサイズ
 #define BULLET_MODEL_SIZE					(15.0f)																		//!< モデルサイズ
 #define ITEM_MODEL_SIZE						(15.0f)																		//!< モデルサイズ
-#define DROP_ITEM_MAX						(10)																		//!< フィールドに落ちてるアイテムの数
+#define DROP_ITEM_MAX						(20)																		//!< フィールドに落ちてるアイテムの数
 #define DROP_ITEM_CHARGE_ADDTIME			(1.0f)																		//!< アイテムをリスポーンさせる時の加算タイム
 #define DROP_ITEM_CHARGE_CNT				(60.0f)																		//!< アイテムをリスポーンさせる時の所要タイム
 #define	MAX_ITEM							(20)																		//!< アイテムワーク最大数

@@ -292,10 +292,10 @@ HRESULT InitPlayer(void)
 
 
 	//初期化段階で座標と角度をランダムで設定
-	g_PlayerHoudai[0].pos = D3DXVECTOR3(699.0f + rand() % 10 , 300.0f, 699.0f + rand() % 10);
-	g_PlayerHoudai[1].pos = D3DXVECTOR3(-699.0f + rand() % 10, 300.0f, 699.0f + rand() % 10);
-	g_PlayerHoudai[2].pos = D3DXVECTOR3(699.0f + rand() % 10, 300.0f, -699.0f + rand() % 10);
-	g_PlayerHoudai[3].pos = D3DXVECTOR3(-699.0f + rand() % 10, 300.0f, -699.0f + rand() % 10);
+	g_PlayerHoudai[0].pos = D3DXVECTOR3(PLAYER_INIT_POSX + rand() % 200 , PLAYER_INIT_POSY, PLAYER_INIT_POSZ + rand() % 200);
+	g_PlayerHoudai[1].pos = D3DXVECTOR3(-PLAYER_INIT_POSX + rand() % 200, PLAYER_INIT_POSY, PLAYER_INIT_POSZ + rand() % 200);
+	g_PlayerHoudai[2].pos = D3DXVECTOR3(PLAYER_INIT_POSX + rand() % 200, PLAYER_INIT_POSY, -PLAYER_INIT_POSZ + rand() % 200);
+	g_PlayerHoudai[3].pos = D3DXVECTOR3(-PLAYER_INIT_POSX + rand() % 200, PLAYER_INIT_POSY, -PLAYER_INIT_POSZ + rand() % 200);
 
 	g_PlayerHoudai[0].rot = D3DXVECTOR3(0.0f, float(rand() % 6), 0.0f);
 	g_PlayerHoudai[1].rot = D3DXVECTOR3(0.0f, float(rand() % 6), 0.0f);
@@ -1038,8 +1038,13 @@ void PLAYER_HONTAI::SetMoveL(int CntPlayer)
 
 		LAnalogX = float(Button->lX * PLAYER_MOVE_RATE_X);
 		LAnalogY = float(Button->lY * PLAYER_MOVE_RATE_Y * DashRate);
+		g_PlayerHoudai[CntPlayer].dir = FRONT_VEC;
 	}
-
+	//旋回入力は後退中に限りリバースする
+	if (IsButtonPressed(CntPlayer, BUTTON_ANALOG_L_DOWN))
+	{
+		g_PlayerHoudai[CntPlayer].dir = BACK_VEC;
+	}
 	// 無移動時は移動量に慣性をかける
 	else
 	{
@@ -1050,7 +1055,7 @@ void PLAYER_HONTAI::SetMoveL(int CntPlayer)
 
 	//移動量を反映
 	g_PlayerHoudai[CntPlayer].movepos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-	g_PlayerHoudai[CntPlayer].rot.y += LAnalogX;
+	g_PlayerHoudai[CntPlayer].rot.y += LAnalogX * g_PlayerHoudai[CntPlayer].dir;
 	g_PlayerHoudai[CntPlayer].movepos.x = LAnalogY * sinf(g_PlayerHoudai[CntPlayer].rot.y);
 	g_PlayerHoudai[CntPlayer].movepos.z = LAnalogY * cosf(g_PlayerHoudai[CntPlayer].rot.y);
 
