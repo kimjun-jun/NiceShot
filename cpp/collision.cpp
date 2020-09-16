@@ -148,6 +148,8 @@ void CheakHit(int scene)
 									PLAYER_COLOR[b[CntPlayerBullet].UsePlayerType], 150.0f, 150.0f, 40);
 								if (scene == 1)
 								{
+									//switch()
+									p[CntPlayer].vital -= PLAYER_ATTACK_NORMAL;
 									ChangeLife(-1, CntPlayer);
 								}
 								//画面ダメージエフェクト
@@ -239,6 +241,7 @@ void CheakHit(int scene)
 						PlaySound(SOUND_LABEL_SE_quake);
 						break;
 					case ITEMTYPE_LIFE:
+						p[CntPlayer].vital += PLAYER_ATTACK_NORMAL;
 						ChangeLife(1, CntPlayer);
 						PlaySound(SOUND_LABEL_SE_enter03);
 						break;
@@ -266,7 +269,8 @@ void CheakHit(int scene)
 						PlaySound(SOUND_LABEL_SE_rap1);
 						break;
 					case ITEMTYPE_BULLET:
-						p[CntPlayer].AmmoNum = MAX_AMMO;
+						//switch()
+						p[CntPlayer].AmmoNum = PLAYER_AMMOPOWER_NORMAL;
 						ChangeBulletTex(MAX_AMMO, CntPlayer);
 						p[CntPlayer].AmmoBornCnt = 0.0f;
 						PlaySound(SOUND_LABEL_SE_enter03);

@@ -38,6 +38,7 @@
     <ClCompile Include="..\cpp\object\life.cpp" />
     <ClCompile Include="..\cpp\object\player.cpp" />
     <ClCompile Include="..\cpp\object\status.cpp" />
+    <ClCompile Include="..\cpp\object\vitalgauge.cpp" />
     <ClCompile Include="..\cpp\other\debugproc.cpp" />
     <ClCompile Include="..\cpp\other\input.cpp" />
     <ClCompile Include="..\cpp\other\light.cpp" />
@@ -71,6 +72,7 @@
     <ClInclude Include="..\h\object\life.h" />
     <ClInclude Include="..\h\object\player.h" />
     <ClInclude Include="..\h\object\status.h" />
+    <ClInclude Include="..\h\object\vitalgauge.h" />
     <ClInclude Include="..\h\other\debugproc.h" />
     <ClInclude Include="..\h\other\input.h" />
     <ClInclude Include="..\h\other\light.h" />

@@ -102,10 +102,11 @@ HRESULT InitPlayer(void)
 		g_PlayerHoudai[CntPlayer].KiriItemTime = 0.0f;
 		g_PlayerHoudai[CntPlayer].BackCameraItemSignal = false;
 		g_PlayerHoudai[CntPlayer].BackCameraItemTime = 0.0f;
-		g_PlayerHoudai[CntPlayer].AmmoNum = MAX_AMMO;
+		g_PlayerHoudai[CntPlayer].AmmoNum = PLAYER_AMMOPOWER_NORMAL;
 		g_PlayerHoudai[CntPlayer].AmmoBornCnt = 0.0f;
 		g_PlayerHoudai[CntPlayer].ModelType = PLAYER_MODEL_NORMAL;
 		g_PlayerHoudai[CntPlayer].RidePolygonNum = -1;
+		g_PlayerHoudai[CntPlayer].vital = PLAYER_VITAL;
 
 		// Xファイルの読み込み
 		if (LoadMesh(MODEL_HOUDAI, &g_PlayerHoudai[CntPlayer].pD3DXBuffMat,
@@ -358,10 +359,12 @@ HRESULT ReInitPlayer(void)
 		g_PlayerHoudai[CntPlayer].KiriItemTime = 0.0f;
 		g_PlayerHoudai[CntPlayer].BackCameraItemSignal = false;
 		g_PlayerHoudai[CntPlayer].BackCameraItemTime = 0.0f;
-		g_PlayerHoudai[CntPlayer].AmmoNum = MAX_AMMO;
+		g_PlayerHoudai[CntPlayer].AmmoNum = PLAYER_AMMOPOWER_NORMAL;
 		g_PlayerHoudai[CntPlayer].AmmoBornCnt = 0.0f;
 		g_PlayerHoudai[CntPlayer].ModelType = PLAYER_MODEL_NORMAL;
 		g_PlayerHoudai[CntPlayer].RidePolygonNum = -1;
+		g_PlayerHoudai[CntPlayer].vital = PLAYER_VITAL;
+
 
 		//砲塔
 		// 位置・回転・スケールの初期設定
@@ -392,10 +395,11 @@ HRESULT ReInitPlayer(void)
 	//pos.y = 0.0f;
 	//g_PlayerHoudai[0].parameter.shadowIdx = CreateShadow(pos, g_PlayerHoudai[0].parameter.scl);
 
-	g_PlayerHoudai[0].pos = D3DXVECTOR3(699.0f + rand() % 10, 300.0f, 699.0f + rand() % 10);
-	g_PlayerHoudai[1].pos = D3DXVECTOR3(-699.0f + rand() % 10, 300.0f, 699.0f + rand() % 10);
-	g_PlayerHoudai[2].pos = D3DXVECTOR3(699.0f + rand() % 10, 300.0f, -699.0f + rand() % 10);
-	g_PlayerHoudai[3].pos = D3DXVECTOR3(-699.0f + rand() % 10, 300.0f, -699.0f + rand() % 10);
+	//初期化段階で座標と角度をランダムで設定
+	g_PlayerHoudai[0].pos = D3DXVECTOR3(PLAYER_INIT_POSX + rand() % 200, PLAYER_INIT_POSY, PLAYER_INIT_POSZ + rand() % 200);
+	g_PlayerHoudai[1].pos = D3DXVECTOR3(-PLAYER_INIT_POSX + rand() % 200, PLAYER_INIT_POSY, PLAYER_INIT_POSZ + rand() % 200);
+	g_PlayerHoudai[2].pos = D3DXVECTOR3(PLAYER_INIT_POSX + rand() % 200, PLAYER_INIT_POSY, -PLAYER_INIT_POSZ + rand() % 200);
+	g_PlayerHoudai[3].pos = D3DXVECTOR3(-PLAYER_INIT_POSX + rand() % 200, PLAYER_INIT_POSY, -PLAYER_INIT_POSZ + rand() % 200);
 
 	g_PlayerHoudai[0].rot = D3DXVECTOR3(0.0f, float(rand() % 6), 0.0f);
 	g_PlayerHoudai[1].rot = D3DXVECTOR3(0.0f, float(rand() % 6), 0.0f);
@@ -1204,7 +1208,6 @@ void PLAYER_HONTAI::SetBulletALL(int CntPlayer)
 		{
 
 			SetBullet(g_PlayerHoudai[CntPlayer].BposStart, g_PlayerHoudai[CntPlayer].bulletmove, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer);
-			//SetBullet(g_PlayerBulletStartPos[CntPlayer].pos, move, 4.0f, 4.0f, 60 * 4, CntPlayer);
 
 			//拡散弾処理
 			if (g_PlayerHoudai[CntPlayer].ModelType == PLAYER_MODEL_ATTACK)
@@ -1216,14 +1219,14 @@ void PLAYER_HONTAI::SetBulletALL(int CntPlayer)
 				rightB = D3DXVECTOR3(-sinf(g_PlayerHoutou[CntPlayer].rot.y + g_PlayerHoudai[CntPlayer].rot.y - 0.3f)*VALUE_MOVE_BULLET,
 					g_PlayerHoudai[CntPlayer].bulletmove.y,
 					-cosf(g_PlayerHoutou[CntPlayer].rot.y + g_PlayerHoudai[CntPlayer].rot.y - 0.3f) *VALUE_MOVE_BULLET);
-				//SetBullet(BposStart, leftB, 4.0f, 4.0f, 60 * 4, CntPlayer);
-				//SetBullet(BposStart, rightB, 4.0f, 4.0f, 60 * 4, CntPlayer);
 				SetBullet(g_PlayerHoudai[CntPlayer].BposStart, leftB, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer);
 				SetBullet(g_PlayerHoudai[CntPlayer].BposStart, rightB, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer);
 
 			}
+			//残弾を減らす
 			g_PlayerHoudai[CntPlayer].AmmoNum -= 1;
 			ChangeBulletTex(-1, CntPlayer);
+
 			// SE再生
 			PlaySound(SOUND_LABEL_SE_attack03);
 		}
@@ -1231,7 +1234,7 @@ void PLAYER_HONTAI::SetBulletALL(int CntPlayer)
 
 
 	//残弾復活 一定時間経過で1個づつ自動回復
-	if (g_PlayerHoudai[CntPlayer].AmmoNum < MAX_AMMO) g_PlayerHoudai[CntPlayer].AmmoBornCnt += BORN_AMMO_ADDTIME;
+	if (g_PlayerHoudai[CntPlayer].AmmoNum < PLAYER_AMMOPOWER_NORMAL) g_PlayerHoudai[CntPlayer].AmmoBornCnt += BORN_AMMO_ADDTIME;
 	if (g_PlayerHoudai[CntPlayer].AmmoBornCnt >= BORN_AMMO_MAXTIME)
 	{
 		g_PlayerHoudai[CntPlayer].AmmoNum++;

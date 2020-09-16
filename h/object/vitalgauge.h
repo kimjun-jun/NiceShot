@@ -1,5 +1,5 @@
 /**
-* @file bulletgauge.h
+* @file vitalgauge.h
 * @brief NiceShot(3D)戦車ゲーム
 * @author キムラジュン
 * @date 2020/01/15
@@ -10,8 +10,8 @@
 //*****************************************************************************
 // プロトタイプ宣言
 //*****************************************************************************
-HRESULT InitBulletGauge(void);
-void UninitBulletGauge(void);
-void UpdateBulletGauge(void);
-void DrawBulletGauge(void);
+HRESULT InitVitalGauge(void);
+void UninitVitalGauge(void);
+void UpdateVitalGauge(void);
+void DrawVitalGauge(void);
 

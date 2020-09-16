@@ -68,6 +68,22 @@
 //キャラクターなどの合計
 #define PLAYER_MAX							(4)																			//!< プレイヤー最大人数
 #define BULLETPOINT_MAX						(PLAYER_MAX)																//!< 着地点の最大数
+#define BULLETPOINT_MAX						(PLAYER_MAX)																//!< 着地点の最大数
+
+//キャラクターなどのパラメータ
+#define PLAYER_VITAL						(200)																		//!< プレイヤー体力
+#define PLAYER_DEFENCE_STRONG				(15)																		//!< プレイヤー防御力強
+#define PLAYER_DEFENCE_NORMAL				(10)																		//!< プレイヤー防御力中
+#define PLAYER_DEFENCE_WEAK					(5)																			//!< プレイヤー防御力弱
+#define PLAYER_ATTACK_STRONG				(30)																		//!< プレイヤー攻撃力強
+#define PLAYER_ATTACK_NORMAL				(20)																		//!< プレイヤー攻撃力中
+#define PLAYER_ATTACK_WEAK					(10)																		//!< プレイヤー攻撃力弱
+#define PLAYER_SPEED_STRONG					(1.5f)																		//!< プレイヤースピード強
+#define PLAYER_SPEED_NORMAL					(1.0f)																		//!< プレイヤースピード中
+#define PLAYER_SPEED_WEAK					(0.7f)																		//!< プレイヤースピード弱
+#define PLAYER_AMMOPOWER_STRONG				(15)																		//!< プレイヤー弾薬強
+#define PLAYER_AMMOPOWER_NORMAL				(10)																		//!< プレイヤー弾薬中
+#define PLAYER_AMMOPOWER_WEAK				(5)																			//!< プレイヤー弾薬弱
 
 
 //モデル等の初期座標

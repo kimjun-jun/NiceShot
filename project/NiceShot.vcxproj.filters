@@ -150,6 +150,9 @@
     <ClCompile Include="..\cpp\map\sky.cpp">
       <Filter>cpp\map</Filter>
     </ClCompile>
+    <ClCompile Include="..\cpp\object\vitalgauge.cpp">
+      <Filter>cpp\object</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\h\collision.h">
@@ -244,6 +247,9 @@
     </ClInclude>
     <ClInclude Include="..\h\map\sky.h">
       <Filter>h\map</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\object\vitalgauge.h">
+      <Filter>h\object</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

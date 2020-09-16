@@ -33,6 +33,8 @@
 #include "../h/object/status.h"
 #include "../h/other/sound.h"
 #include "../h/object/bullet/bulletprediction.h"
+#include "../h/object/bullet/bulletgauge.h"
+#include "../h/object/vitalgauge.h"
 
 //*****************************************************************************
 // マクロ定義
@@ -401,7 +403,9 @@ HRESULT Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	InitBulletprediction(0);
 	InitExplosion(0);
 	InitLifeTex(0);
+	InitVitalGauge();
 	InitBulletTex(0);
+	InitBulletGauge();
 	InitDamege(0);
 	InitStatus(0);
 	InitRank(0);
@@ -480,7 +484,9 @@ void Uninit(void)
 	UninitExplosion();
 	UninitItem();
 	UninitLifeTex();
+	UninitVitalGauge();
 	UninitBulletTex();
+	UninitBulletGauge();
 	UninitDamege();
 	UninitStatus();
 	UninitRank();
@@ -533,7 +539,8 @@ void Update(void)
 			UpdateItem();
 			UpdateShadow();
 			CheakHit(0);
-			UpdateBulletTex();
+			//UpdateBulletTex();
+			UpdateBulletGauge();
 			UpdateDamege();
 			UpdateStatus();
 			break;
@@ -566,10 +573,12 @@ void Update(void)
 			CheakHit(1);
 			
 			//2Dの更新処理
-			UpdateBulletTex();
+			//UpdateBulletTex();
+			UpdateBulletGauge();
 			UpdateDamege();
 			UpdateStatus();
-			UpdateLifeTex();
+			//UpdateLifeTex();
+			UpdateVitalGauge();
 
 			//時間制限用
 			//AddTime(-1);
@@ -644,8 +653,10 @@ void Draw(void)
 					//2d画面上
 					DrawDamege();
 					DrawStatus();
-					DrawLifeTex();
-					DrawBulletTex();
+					//DrawLifeTex();
+					DrawVitalGauge();
+					//DrawBulletTex();
+					DrawBulletGauge();
 					DrawTutorial();
 				}
 				g_pD3DDevice->SetViewport(&VpMaster);
@@ -683,8 +694,10 @@ void Draw(void)
 						//2d画面上
 						DrawDamege();
 						DrawStatus();
-						DrawLifeTex();
-						DrawBulletTex();
+						//DrawLifeTex();
+						DrawVitalGauge();
+						//DrawBulletTex();
+						DrawBulletGauge();
 					}
 				}
 				g_pD3DDevice->SetViewport(&VpMaster);
@@ -728,8 +741,10 @@ void Draw(void)
 						//2d画面上
 						DrawDamege();
 						DrawStatus();
-						DrawLifeTex();
-						DrawBulletTex();
+						//DrawLifeTex();
+						DrawVitalGauge();
+						//DrawBulletTex();
+						DrawBulletGauge();
 					}
 					else
 					{
@@ -761,8 +776,10 @@ void Draw(void)
 						//2d画面上
 						DrawDamege();
 						DrawStatus();
-						DrawLifeTex();
-						DrawBulletTex();
+						//DrawLifeTex();
+						DrawVitalGauge();
+						//DrawBulletTex();
+						DrawBulletGauge();
 						DrawRank();
 					}
 				}
