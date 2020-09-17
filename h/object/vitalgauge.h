@@ -11,6 +11,7 @@
 // プロトタイプ宣言
 //*****************************************************************************
 HRESULT InitVitalGauge(void);
+HRESULT ReInitVitalGauge(void);
 void UninitVitalGauge(void);
 void UpdateVitalGauge(void);
 void DrawVitalGauge(void);

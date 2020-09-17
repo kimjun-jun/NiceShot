@@ -907,5 +907,7 @@ void InitGame(void)
 	InitLight();
 	InitShadow(1);
 	ReInitPlayer();
+	ReInitVitalGauge();
+	ReInitBulletGauge();
 }
 

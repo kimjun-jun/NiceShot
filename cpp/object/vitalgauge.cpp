@@ -12,7 +12,7 @@
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define	TEXTURE_VITALGAUGE		"../data/TEXTURE/UI_VITALGAUGE.png"		// 読み込むテクスチャファイル名
+#define	TEXTURE_VITALGAUGE		"../data/TEXTURE/UI_VITALGAUGE.jpg"		// 読み込むテクスチャファイル名
 #define	VITALGAUGE_SIZE_X			(1.0f)							// アタックゲージの数字の幅
 #define	VITALGAUGE_SIZE_Y			(30.0f)							// アタックゲージの数字の高さ
 #define	VITALGAUGE_POS_X			(25.0f)							// アタックゲージの表示基準位置Ｘ座標
@@ -73,6 +73,42 @@ HRESULT InitVitalGauge(void)
 }
 
 //=============================================================================
+// 再初期化処理
+//=============================================================================
+HRESULT ReInitVitalGauge(void)
+{
+	// ライフの初期化
+	g_nVitalGauge[0] = PLAYER_VITAL;
+	g_nVitalGauge[1] = PLAYER_VITAL;
+	g_nVitalGauge[2] = PLAYER_VITAL;
+	g_nVitalGauge[3] = PLAYER_VITAL;
+
+	for (int CntPlayer = 0; CntPlayer < PLAYER_MAX; CntPlayer++)
+	{
+		if (g_nVitalGauge[CntPlayer] >= PLAYER_VITAL * (0.2f))
+		{
+			{//頂点バッファの中身を埋める
+				VERTEX_2D *pVtx;
+				// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
+				g_pD3DVtxBuffVitalGauge[CntPlayer]->Lock(0, 0, (void**)&pVtx, 0);
+				for (int nCntPlace = 0; nCntPlace < PLAYER_VITAL; nCntPlace++, pVtx += 4)
+				{
+
+					// 反射光の設定
+					pVtx[0].diffuse = D3DXCOLOR(0.5f, 1.0f, 0.5f, 1.0f);
+					pVtx[1].diffuse = D3DXCOLOR(0.5f, 1.0f, 0.5f, 1.0f);
+					pVtx[2].diffuse = D3DXCOLOR(0.5f, 1.0f, 0.5f, 1.0f);
+					pVtx[3].diffuse = D3DXCOLOR(0.5f, 1.0f, 0.5f, 1.0f);
+				}
+			}
+			// 頂点データをアンロックする
+			g_pD3DVtxBuffVitalGauge[CntPlayer]->Unlock();
+		}
+	}
+	return S_OK;
+}
+
+//=============================================================================
 // 終了処理
 //=============================================================================
 void UninitVitalGauge(void)
@@ -121,10 +157,10 @@ void UpdateVitalGauge(void)
 				{
 
 					// 反射光の設定
-					pVtx[0].diffuse = D3DXCOLOR(0.7f, 1.0f, 0.7f, 1.0f);
-					pVtx[1].diffuse = D3DXCOLOR(0.7f, 1.0f, 0.7f, 1.0f);
-					pVtx[2].diffuse = D3DXCOLOR(0.7f, 1.0f, 0.7f, 1.0f);
-					pVtx[3].diffuse = D3DXCOLOR(0.7f, 1.0f, 0.7f, 1.0f);
+					pVtx[0].diffuse = D3DXCOLOR(0.5f, 1.0f, 0.5f, 1.0f);
+					pVtx[1].diffuse = D3DXCOLOR(0.5f, 1.0f, 0.5f, 1.0f);
+					pVtx[2].diffuse = D3DXCOLOR(0.5f, 1.0f, 0.5f, 1.0f);
+					pVtx[3].diffuse = D3DXCOLOR(0.5f, 1.0f, 0.5f, 1.0f);
 				}
 			}
 			// 頂点データをアンロックする
@@ -141,10 +177,10 @@ void UpdateVitalGauge(void)
 				{
 
 					// 反射光の設定
-					pVtx[0].diffuse = D3DXCOLOR(1.0f, 0.5f, 0.5f, 1.0f);
-					pVtx[1].diffuse = D3DXCOLOR(1.0f, 0.5f, 0.5f, 1.0f);
-					pVtx[2].diffuse = D3DXCOLOR(1.0f, 0.5f, 0.5f, 1.0f);
-					pVtx[3].diffuse = D3DXCOLOR(1.0f, 0.5f, 0.5f, 1.0f);
+					pVtx[0].diffuse = D3DXCOLOR(1.0f, 0.6f, 0.6f, 1.0f);
+					pVtx[1].diffuse = D3DXCOLOR(1.0f, 0.6f, 0.6f, 1.0f);
+					pVtx[2].diffuse = D3DXCOLOR(1.0f, 0.6f, 0.6f, 1.0f);
+					pVtx[3].diffuse = D3DXCOLOR(1.0f, 0.6f, 0.6f, 1.0f);
 				}
 			}
 			// 頂点データをアンロックする

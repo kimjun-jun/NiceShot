@@ -11,6 +11,7 @@
 // プロトタイプ宣言
 //*****************************************************************************
 HRESULT InitBulletGauge(void);
+HRESULT ReInitBulletGauge(void);
 void UninitBulletGauge(void);
 void UpdateBulletGauge(void);
 void DrawBulletGauge(void);

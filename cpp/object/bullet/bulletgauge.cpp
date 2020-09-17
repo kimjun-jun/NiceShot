@@ -72,6 +72,20 @@ HRESULT InitBulletGauge(void)
 }
 
 //=============================================================================
+// çƒèâä˙âªèàóù
+//=============================================================================
+HRESULT ReInitBulletGauge(void)
+{
+	// íeñÚÇÃèâä˙âª
+	g_nBulletGauge[0] = PLAYER_AMMOPOWER_NORMAL;
+	g_nBulletGauge[1] = PLAYER_AMMOPOWER_NORMAL;
+	g_nBulletGauge[2] = PLAYER_AMMOPOWER_NORMAL;
+	g_nBulletGauge[3] = PLAYER_AMMOPOWER_NORMAL;
+
+	return S_OK;
+}
+
+//=============================================================================
 // èIóπèàóù
 //=============================================================================
 void UninitBulletGauge(void)
