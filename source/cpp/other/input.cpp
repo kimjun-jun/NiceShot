@@ -536,9 +536,9 @@ void UpdatePad(void)
 
 		//アナログ対応してる
 		//* L2ボタン
-		if (dijs.lZ > 32767)					padState[i] |= BUTTON_L2;
+		if (dijs.lZ > 34000)					padState[i] |= BUTTON_L2;
 		//* R2ボタン
-		if (dijs.lZ < 32767)					padState[i] |= BUTTON_R2;
+		if (dijs.lZ < 30000)					padState[i] |= BUTTON_R2;
 
 
 		//* Ａボタン

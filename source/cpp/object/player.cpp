@@ -547,10 +547,11 @@ void UpdatePlayer(void)
 		//生きていれば制御可能
 		if (g_PlayerHoudai[CntPlayer].use)
 		{
+			//g_PlayerHoudai[CntPlayer].SetMoveL2R2(CntPlayer);
 			g_PlayerHoudai[CntPlayer].SetMoveL(CntPlayer);
 			g_PlayerHoudai[CntPlayer].SetQ(CntPlayer);
 			g_PlayerHoudai[CntPlayer].SetCamera(CntPlayer);
-			g_PlayerHoudai[CntPlayer].SetBulletALL(CntPlayer);
+			g_PlayerHoudai[CntPlayer].SetBulletALLMoveL2R2Ver(CntPlayer);
 			g_PlayerHoudai[CntPlayer].SetKiri(CntPlayer);
 			g_PlayerHoudai[CntPlayer].SetMorphing(CntPlayer);
 		}
@@ -1166,6 +1167,102 @@ void PLAYER_HONTAI::SetCameraR(int CntPlayer)
 }
 
 //=============================================================================
+// 移動制御(LRスティックでキャタピラ移動制御)
+//=============================================================================
+void PLAYER_HONTAI::SetMoveL2R2(int CntPlayer)
+{
+	g_PlayerHoudai[CntPlayer].oldpos = g_PlayerHoudai[CntPlayer].pos;
+
+	//移動変化はLスティックアナログ値を使用
+	float L2 = 0.0f;		//縦入力
+	float R2 = 0.0f;		//横入力
+	float DashRate = 1.0f;		//スピードアップレート
+
+	//ダッシュ判定
+	if (g_PlayerHoudai[CntPlayer].speedbuffsignal == true)
+	{
+		//スピードバフ時間減少
+		g_PlayerHoudai[CntPlayer].speedbufftime -= VALUE_SPEEDBUFF_SUB;
+		g_PlayerHoudai[CntPlayer].dashFlag = true;
+
+		// エフェクトスピードアップの生成
+		D3DXVECTOR3 EffctSpeedupPos = D3DXVECTOR3(g_PlayerHoudai[CntPlayer].pos.x, g_PlayerHoudai[CntPlayer].pos.y, g_PlayerHoudai[CntPlayer].pos.z);
+		SetEffect(EffctSpeedupPos, D3DXVECTOR3(0.0f, 0.0f, 0.0f), PLAYER_COLOR[CntPlayer], EFFECT_SPEEDUP_SIZE_X, EFFECT_SPEEDUP_SIZE_Y, EFFECT_SPEEDUP_TIME);
+
+		if (g_PlayerHoudai[CntPlayer].speedbufftime <= 0.0f)
+		{
+			g_PlayerHoudai[CntPlayer].dashFlag = false;
+			g_PlayerHoudai[CntPlayer].speedbuffsignal = false;
+		}
+	}
+
+	if (g_PlayerHoudai[CntPlayer].dashFlag == true)
+	{
+		DashRate = PLAYER_VALUE_DASHRATE;
+	}
+
+	//左右のキャタピラを前進交代どちらかのフラグ
+	//両キャタピラ前進方向=0、左キャタピラのみ前進=3.925f、右キャタピラのみ前進=-3.925f、左キャタピラのみ後退=-0.785f、右キャタピラのみ後退=0.785f、
+	float Lrot = 3.925f;
+	float Rrot = -3.925f;
+	int Ldir = 1;
+	int Rdir = 1;
+	//移動処理
+	if (IsButtonPressed(CntPlayer, BUTTON_L1))
+	{
+		Lrot = -0.785f;
+		Ldir *= -1;
+	}
+	if (IsButtonPressed(CntPlayer, BUTTON_R1))
+	{
+		Rrot = 0.785f;
+		Rdir *= -1;
+	}
+
+	//両キャタピラ使用
+	if (IsButtonPressed(CntPlayer, BUTTON_L2) && IsButtonPressed(CntPlayer, BUTTON_R2))
+	{
+		DIJOYSTATE2 *Button = GetIsButton(CntPlayer);
+		//入力中央値32767　R2最小0　L2最大64000
+		L2 = float(Button->lZ * PLAYER_MOVE_RATE_X*2);
+		R2 = L2;
+		
+	}
+	//左キャタピラのみ使用
+	else if (IsButtonPressed(CntPlayer, BUTTON_L2))
+	{
+		DIJOYSTATE2 *Button = GetIsButton(CntPlayer);
+		L2 = float(Button->lZ * PLAYER_MOVE_RATE_X);
+		g_PlayerHoudai[CntPlayer].rot.y += 0.02f*Ldir;
+	}
+	//右キャタピラのみ使用
+	else if (IsButtonPressed(CntPlayer, BUTTON_R2))
+	{
+		DIJOYSTATE2 *Button = GetIsButton(CntPlayer);
+		float IZbuf = Button->lZ * PLAYER_MOVE_RATE_X;
+		R2 = IZbuf;
+		R2 = 32767 * PLAYER_MOVE_RATE_X + (-R2)+ 32767 * PLAYER_MOVE_RATE_X;
+		g_PlayerHoudai[CntPlayer].rot.y -= 0.02f*Rdir;
+	}
+	// 無移動時は移動量に慣性をかける
+	else
+	{
+		g_PlayerHoudai[CntPlayer].movepos *= 0.5f;
+		g_PlayerHoudai[CntPlayer].dashFlag = false;
+	}
+
+	//移動量を反映
+	g_PlayerHoudai[CntPlayer].movepos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	g_PlayerHoudai[CntPlayer].movepos.x = R2 * sinf(g_PlayerHoudai[CntPlayer].rot.y + Rrot) + L2 * sinf(g_PlayerHoudai[CntPlayer].rot.y + Lrot);
+	g_PlayerHoudai[CntPlayer].movepos.z = R2 * cosf(g_PlayerHoudai[CntPlayer].rot.y + Rrot) + L2 * cosf(g_PlayerHoudai[CntPlayer].rot.y + Lrot);
+
+	//プレイヤー座標を更新
+	g_PlayerHoudai[CntPlayer].pos += g_PlayerHoudai[CntPlayer].movepos;
+
+	SetCameraR(CntPlayer);
+}
+
+//=============================================================================
 // クォータニオン制御
 //=============================================================================
 void PLAYER_HONTAI::SetQ(int CntPlayer)
@@ -1236,6 +1333,99 @@ void PLAYER_HONTAI::SetBulletALL(int CntPlayer)
 		//if (IsButtonTriggered(CntPlayer, BUTTON_X))
 		//{
 		if (IsButtonTriggered(CntPlayer, BUTTON_R1))
+		{
+
+			SetBullet(g_PlayerHoudai[CntPlayer].BposStart, g_PlayerHoudai[CntPlayer].bulletmove, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer);
+
+			//拡散弾処理
+			if (g_PlayerHoudai[CntPlayer].ModelType == PLAYER_MODEL_ATTACK)
+			{
+				D3DXVECTOR3 leftB, rightB;
+				leftB = D3DXVECTOR3(-sinf(g_PlayerHoutou[CntPlayer].rot.y + g_PlayerHoudai[CntPlayer].rot.y + 0.3f)*VALUE_MOVE_BULLET,
+					g_PlayerHoudai[CntPlayer].bulletmove.y,
+					-cosf(g_PlayerHoutou[CntPlayer].rot.y + g_PlayerHoudai[CntPlayer].rot.y + 0.3f) *VALUE_MOVE_BULLET);
+				rightB = D3DXVECTOR3(-sinf(g_PlayerHoutou[CntPlayer].rot.y + g_PlayerHoudai[CntPlayer].rot.y - 0.3f)*VALUE_MOVE_BULLET,
+					g_PlayerHoudai[CntPlayer].bulletmove.y,
+					-cosf(g_PlayerHoutou[CntPlayer].rot.y + g_PlayerHoudai[CntPlayer].rot.y - 0.3f) *VALUE_MOVE_BULLET);
+				SetBullet(g_PlayerHoudai[CntPlayer].BposStart, leftB, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer);
+				SetBullet(g_PlayerHoudai[CntPlayer].BposStart, rightB, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer);
+
+			}
+			//残弾を減らす
+			g_PlayerHoudai[CntPlayer].AmmoNum -= 1;
+			ChangeBulletTex(-1, CntPlayer);
+
+			// SE再生
+			PlaySound(SOUND_LABEL_SE_attack03);
+		}
+	}
+
+
+	//残弾復活 一定時間経過で1個づつ自動回復
+	if (g_PlayerHoudai[CntPlayer].AmmoNum < PLAYER_AMMOPOWER_NORMAL) g_PlayerHoudai[CntPlayer].AmmoBornCnt += BORN_AMMO_ADDTIME;
+	if (g_PlayerHoudai[CntPlayer].AmmoBornCnt >= BORN_AMMO_MAXTIME)
+	{
+		g_PlayerHoudai[CntPlayer].AmmoNum++;
+		ChangeBulletTex(1, CntPlayer);
+		g_PlayerHoudai[CntPlayer].AmmoBornCnt = 0.0f;
+	}
+
+}
+
+//=============================================================================
+// バレット関連制御
+//=============================================================================
+void PLAYER_HONTAI::SetBulletALLMoveL2R2Ver(int CntPlayer)
+{
+	g_PlayerHoudai[CntPlayer].Frontvec.x = sinf(g_PlayerHoudai[CntPlayer].rot.y + g_PlayerHoutou[CntPlayer].rot.y);
+	g_PlayerHoudai[CntPlayer].Frontvec.y = 0.0f;
+	g_PlayerHoudai[CntPlayer].Frontvec.z = cosf(g_PlayerHoudai[CntPlayer].rot.y + g_PlayerHoutou[CntPlayer].rot.y);
+
+	//地形の角度とプレイヤーの角度を計算。バレット発射方向で使う
+	D3DXVec3Cross(&g_PlayerHoudai[CntPlayer].FrontRotTOaxis, &g_PlayerHoudai[CntPlayer].RotVecAxis, &g_PlayerHoudai[CntPlayer].Frontvec);
+	float Bkakezan = D3DXVec3Dot(&g_PlayerHoudai[CntPlayer].RotVecAxis, &g_PlayerHoudai[CntPlayer].Frontvec);
+	if (Bkakezan != 0)
+	{
+		float cossita = Bkakezan /
+			sqrtf(g_PlayerHoudai[CntPlayer].RotVecAxis.x*g_PlayerHoudai[CntPlayer].RotVecAxis.x +
+				g_PlayerHoudai[CntPlayer].RotVecAxis.y *g_PlayerHoudai[CntPlayer].RotVecAxis.y +
+				g_PlayerHoudai[CntPlayer].RotVecAxis.z * g_PlayerHoudai[CntPlayer].RotVecAxis.z)
+			*
+			sqrtf(g_PlayerHoudai[CntPlayer].Frontvec.x*g_PlayerHoudai[CntPlayer].Frontvec.x +
+				g_PlayerHoudai[CntPlayer].Frontvec.y *g_PlayerHoudai[CntPlayer].Frontvec.y +
+				g_PlayerHoudai[CntPlayer].Frontvec.z * g_PlayerHoudai[CntPlayer].Frontvec.z);
+		g_PlayerHoudai[CntPlayer].Brot = acosf(cossita);
+	}
+	else
+	{
+		g_PlayerHoudai[CntPlayer].Brot = 1.57f;		//下方向ベクトルrot=0.0f、上方向ベクトルrot=3.14、に対しての前方向ベクトルはrot=1.57f。
+	}
+	g_PlayerHoudai[CntPlayer].Brot -= 1.57f;
+
+
+	//プレイヤーposから発射方向に少しずらした値
+	//地面の傾きに沿って発射するときは問題ない。その傾きから左右に回転してる時だけposがおかしい
+	g_PlayerHoudai[CntPlayer].BposStart.x = g_PlayerHoudai[CntPlayer].pos.x - (sinf(g_PlayerHoutou[CntPlayer].rot.y + g_PlayerHoudai[CntPlayer].rot.y) * VALUE_LEN_BULLET);
+	g_PlayerHoudai[CntPlayer].BposStart.y = g_PlayerHoudai[CntPlayer].pos.y + (sinf(g_PlayerHoudai[CntPlayer].Brot - g_PlayerHousin[CntPlayer].rot.x) * VALUE_LEN_BULLET) + 20.0f;
+	g_PlayerHoudai[CntPlayer].BposStart.z = g_PlayerHoudai[CntPlayer].pos.z - (cosf(g_PlayerHoutou[CntPlayer].rot.y + g_PlayerHoudai[CntPlayer].rot.y) * VALUE_LEN_BULLET);
+
+
+	g_PlayerHoudai[CntPlayer].BmoveRot.x = -sinf(g_PlayerHoutou[CntPlayer].rot.y + g_PlayerHoudai[CntPlayer].rot.y);
+	g_PlayerHoudai[CntPlayer].BmoveRot.y = sinf(g_PlayerHoudai[CntPlayer].Brot - g_PlayerHousin[CntPlayer].rot.x);
+	g_PlayerHoudai[CntPlayer].BmoveRot.z = -cosf(g_PlayerHoutou[CntPlayer].rot.y + g_PlayerHoudai[CntPlayer].rot.y);
+
+	g_PlayerHoudai[CntPlayer].bulletmove.x = (BmoveRot.x) *VALUE_MOVE_BULLET;
+	g_PlayerHoudai[CntPlayer].bulletmove.y = (BmoveRot.y) *VALUE_MOVE_BULLET;
+	g_PlayerHoudai[CntPlayer].bulletmove.z = (BmoveRot.z) *VALUE_MOVE_BULLET;
+
+	// 弾発射
+	if (g_PlayerHoudai[CntPlayer].AmmoNum > 0)
+	{
+		//if (IsButtonTriggered(CntPlayer, BUTTON_X))
+		//{
+		if (IsButtonTriggered(CntPlayer, BUTTON_DIGITAL_UP) || IsButtonTriggered(CntPlayer, BUTTON_DIGITAL_RIGHTUP) || IsButtonTriggered(CntPlayer, BUTTON_DIGITAL_RIGHT) ||
+			IsButtonTriggered(CntPlayer, BUTTON_DIGITAL_RIGHTDOWN) || IsButtonTriggered(CntPlayer, BUTTON_DIGITAL_DOWN) || IsButtonTriggered(CntPlayer, BUTTON_DIGITAL_LEFTDOWN) ||
+			IsButtonTriggered(CntPlayer, BUTTON_DIGITAL_LEFT) || IsButtonTriggered(CntPlayer, BUTTON_DIGITAL_LEFTUP))
 		{
 
 			SetBullet(g_PlayerHoudai[CntPlayer].BposStart, g_PlayerHoudai[CntPlayer].bulletmove, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer);

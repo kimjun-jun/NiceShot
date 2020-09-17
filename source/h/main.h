@@ -107,7 +107,7 @@
 //移動量マクロ
 #define	PLAYER_VALUE_DASHRATE				(2.0f)																		//!< 歩きに比べてのダッシュの速度倍率
 #define	PLAYER_MOVE_RATE_X					(1.0f/40000.0f)																//!< 左右歩きの移動量倍率(-1000～1000が入力範囲なのでそれに乗算する)
-#define	PLAYER_MOVE_RATE_Y					(1.0f/100.0f)																//!< 前後歩きの移動量倍率(-1000～1000が入力範囲なのでそれに乗算する)
+#define	PLAYER_MOVE_RATE_Y					(1.0f/200.0f)																//!< 前後歩きの移動量倍率(-1000～1000が入力範囲なのでそれに乗算する)
 #define VALUE_MOVE_BULLET					(15.0f)																		//!< バレットの速度
 #define VALUE_LEN_BULLET					(10.0f)																		//!< プレイヤー中心としたバレットの発射位置までの距離
 #define VALUE_LENTIMES_BULLET				(2.5f)																		//!< プレイヤー中心としたバレットの発射位置にたいする倍率

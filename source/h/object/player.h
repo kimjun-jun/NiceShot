@@ -34,8 +34,10 @@ public:
 	void						SetCamera(int CntPlayer);				//!< カメラ更新
 	void						SetMoveL(int CntPlayer);				//!< 移動制御(LRスティックで移動制御)
 	void						SetCameraR(int CntPlayer);				//!< カメラ制御(LRスティックで移動制御)
+	void						SetMoveL2R2(int CntPlayer);				//!< 移動制御(L2R2で移動制御)
 	void						SetQ(int CntPlayer);					//!< クォータニオン制御
 	void						SetBulletALL(int CntPlayer);			//!< バレット関連制御
+	void						SetBulletALLMoveL2R2Ver(int CntPlayer);	//!< バレット関連制御 発射ボタンを十字カーソル
 	void						SetKiri(int CntPlayer);					//!< フォグ制御
 	void						SetMorphing(int CntPlayer);				//!< モーフィング制御
 };
