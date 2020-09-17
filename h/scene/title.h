@@ -6,27 +6,48 @@
 */
 #pragma once
 
+
+/**
+ * @enum E_STAGE
+ * 画面遷移定数
+ */
+enum TITLE_SELECT_SCENE//列挙型。defineの番号を自動で割り当ててくれる。
+{
+	TITLE_SELECT_SCENE_TUTORIAL,					//!< 0チュートリアル
+	TITLE_SELECT_SCENE_GAME,						//!< 1ゲーム
+	TITLE_SELECT_SCENE_MAX
+};
+
+
+/**
+*　@class TITLECLASS
+*　@brief 2Dポリゴンを定義する構造体
+*/
+class TITLECLASS :public TEXTURECLASS2D
+{
+public:
+	int				nCountAppearStart = 0;				//!<
+	float			fAlpha = 0.0f;						//!<
+	int				nCountDisp = 0;						//!<
+	bool			bDisp = false;						//!<
+	int				nConutDemo = 0;						//!<
+};
+
 //*****************************************************************************
 // プロトタイプ宣言
 //*****************************************************************************
-/**
-* @brief タイトル初期化関数 InitTitle
-* @return HRESULT
-*/
 HRESULT InitTitle(void);
-
-/**
-* @brief タイトル開放関数 UninitTitle
-*/
+HRESULT ReInitTitle(void);
 void UninitTitle(void);
-
-/**
-* @brief タイトル更新関数 UpdateTitle
-*/
 void UpdateTitle(void);
-
-/**
-* @brief タイトル描画関数 DrawTitle
-*/
 void DrawTitle(void);
 
+void SetTitleSelectTimeCHK(bool b);
+bool GetTitleSelectTimeCHK(void);
+
+/**
+* @brief タイトル時の選択シーン取得関数 GetSelectTitleScene
+* @return int　E_STAGEより	SCENE_TUTORIAL＝1チュートリアル　SCENE_GAME＝3ゲーム
+* @details タイトルcppにある変数SelectTitleSceneをタイトルアップデート中に切り替え事で選択可能
+*/
+int GetSelectTitleScene(void);

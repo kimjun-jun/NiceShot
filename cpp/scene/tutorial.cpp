@@ -76,7 +76,7 @@ void UpdateTutorial(void)
 	if (GetKeyboardTrigger(DIK_RETURN) || IsButtonTriggered(0, BUTTON_START) || IsButtonTriggered(1, BUTTON_START) || IsButtonTriggered(2, BUTTON_START) || IsButtonTriggered(3, BUTTON_START))
 	{// Enter押したら、ステージを切り替える
 		PlaySound(SOUND_LABEL_SE_enter02);
-		SetFade(FADE_OUT, SCENE_GAMECOUNTDOWN, SOUND_LABEL_BGM_normal01);
+		SetFade(FADE_OUT, SCENE_TITLE, SOUND_LABEL_BGM_title01);
 		InitGame();
 	}
 	for (int CntPlayer = 0; CntPlayer < PLAYER_MAX; CntPlayer++)

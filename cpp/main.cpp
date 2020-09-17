@@ -897,7 +897,6 @@ void InitGame(void)
 	InitBullet(1);
 	InitEffect(1);
 	InitExplosion(1);
-	InitItem();
 	InitLifeTex(1);
 	InitBulletTex(1);
 	InitDamege(1);
@@ -906,7 +905,9 @@ void InitGame(void)
 	InitCamera();
 	InitLight();
 	InitShadow(1);
+	ReInitTitle();
 	ReInitPlayer();
+	ReInitItem();
 	ReInitVitalGauge();
 	ReInitBulletGauge();
 }

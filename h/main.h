@@ -389,6 +389,18 @@ public:
 	int							MorphingSignal;			//!< 1,なにもしない　2,モーフィング中　3,モーフィング完了
 };
 
+/**
+*　@struct 2DTEXTURECLASS
+*　@brief 2Dポリゴンを定義する構造体
+*/
+class TEXTURECLASS2D
+{
+public:
+	LPDIRECT3DTEXTURE9		pD3DTexture = NULL;				//!< テクスチャへのポインタ
+	LPDIRECT3DVERTEXBUFFER9 pD3DVtxBuff = NULL;		//!< 頂点バッファインターフェースへのポインタ
+	D3DXVECTOR3				pos;							//!< 座標
+};
+
 //*****************************************************************************
 // プロトタイプ宣言
 //*****************************************************************************

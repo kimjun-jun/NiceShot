@@ -311,6 +311,21 @@ HRESULT InitPlayer(void)
 
 	}
 
+	for (int CntPlayer = 0; CntPlayer < PLAYER_MAX; CntPlayer++)
+	{
+			g_PlayerHoudai[CntPlayer].SetQ(CntPlayer);
+			g_PlayerHoudai[CntPlayer].SetCamera(CntPlayer);
+
+			CAMERA *cam = GetCamera();
+			cam[CntPlayer].at.x = g_PlayerHoudai[CntPlayer].pos.x - (AT_W_CAM * sinf(g_PlayerHoudai[CntPlayer].rot.y + g_PlayerHoutou[CntPlayer].rot.y));
+			cam[CntPlayer].at.y = g_PlayerHoudai[CntPlayer].pos.y + (g_PlayerHousin[CntPlayer].rot.x*100.0f);
+			cam[CntPlayer].at.z = g_PlayerHoudai[CntPlayer].pos.z - (AT_W_CAM * cosf(g_PlayerHoudai[CntPlayer].rot.y + g_PlayerHoutou[CntPlayer].rot.y));
+
+			cam[CntPlayer].pos.x = g_PlayerHoudai[CntPlayer].pos.x + sinf(g_PlayerHoudai[CntPlayer].rot.y + g_PlayerHoutou[CntPlayer].rot.y) * cam[CntPlayer].len;
+			cam[CntPlayer].pos.y = g_PlayerHoudai[CntPlayer].pos.y + POS_H_CAM;
+			cam[CntPlayer].pos.z = g_PlayerHoudai[CntPlayer].pos.z + cosf(g_PlayerHoudai[CntPlayer].rot.y + g_PlayerHoutou[CntPlayer].rot.y) * cam[CntPlayer].len;
+	}
+
 	return S_OK;
 }
 
@@ -412,6 +427,22 @@ HRESULT ReInitPlayer(void)
 			D3DXVECTOR3(g_PlayerHoudai[CntPlayer].pos.x, g_PlayerHoudai[CntPlayer].pos.y - 1000.0f, g_PlayerHoudai[CntPlayer].pos.z),
 			&g_PlayerHoudai[CntPlayer].RotVecAxis, &g_PlayerHoudai[CntPlayer].pos.y);
 	}
+
+	for (int CntPlayer = 0; CntPlayer < PLAYER_MAX; CntPlayer++)
+	{
+		g_PlayerHoudai[CntPlayer].SetQ(CntPlayer);
+		g_PlayerHoudai[CntPlayer].SetCamera(CntPlayer);
+
+		CAMERA *cam = GetCamera();
+		cam[CntPlayer].at.x = g_PlayerHoudai[CntPlayer].pos.x - (AT_W_CAM * sinf(g_PlayerHoudai[CntPlayer].rot.y + g_PlayerHoutou[CntPlayer].rot.y));
+		cam[CntPlayer].at.y = g_PlayerHoudai[CntPlayer].pos.y + (g_PlayerHousin[CntPlayer].rot.x*100.0f);
+		cam[CntPlayer].at.z = g_PlayerHoudai[CntPlayer].pos.z - (AT_W_CAM * cosf(g_PlayerHoudai[CntPlayer].rot.y + g_PlayerHoutou[CntPlayer].rot.y));
+
+		cam[CntPlayer].pos.x = g_PlayerHoudai[CntPlayer].pos.x + sinf(g_PlayerHoudai[CntPlayer].rot.y + g_PlayerHoutou[CntPlayer].rot.y) * cam[CntPlayer].len;
+		cam[CntPlayer].pos.y = g_PlayerHoudai[CntPlayer].pos.y + POS_H_CAM;
+		cam[CntPlayer].pos.z = g_PlayerHoudai[CntPlayer].pos.z + cosf(g_PlayerHoudai[CntPlayer].rot.y + g_PlayerHoutou[CntPlayer].rot.y) * cam[CntPlayer].len;
+	}
+
 	return S_OK;
 }
 

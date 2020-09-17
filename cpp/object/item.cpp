@@ -15,6 +15,7 @@
 // マクロ定義
 //*****************************************************************************
 #define	VALUE_ROTATE_ITEM		(D3DX_PI * 0.01f)			// 回転速度
+#define	VALUE_FALLSPEED_ITEM	(2.0f)						// 落下速度
 #define	ITEM_RADIUS				(20.0f)						// 半径
 
 //*****************************************************************************
@@ -106,7 +107,7 @@ HRESULT InitItem(void)
 		g_aItem[nCntItem].bUse = false;
 		g_aItem[nCntItem].GettingSignal = false;
 		g_aItem[nCntItem].GettingSignalEnd = false;
-		g_aItem[nCntItem].fCollisionEnd = false;
+		g_aItem[nCntItem].CollisionFieldEnd = false;
 	}
 	for (int nCntItem = 0; nCntItem < DROP_ITEM_MAX; nCntItem++)
 	{
@@ -132,8 +133,65 @@ HRESULT InitItem(void)
 		int ItemNum = rand() % ITEMTYPE_MAX;
 		//ライフ、カメラ、霧アイテムの時はもう一度抽選
 		if (ItemNum == ITEMTYPE_LIFE && ItemNum == ITEMTYPE_CAMERA && ItemNum == ITEMTYPE_KIRI) ItemNum = rand() % ITEMTYPE_MAX;
-		SetItem(pos, D3DXVECTOR3(2.0f, 2.0f, 2.0f),D3DXVECTOR3(0.0f, 0.0f, 0.0f), ItemNum);
-		//SetItem(pos, D3DXVECTOR3(1.0f, 1.0f, 1.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ITEMTYPE_TIKEI);
+		//SetItem(pos, D3DXVECTOR3(2.0f, 2.0f, 2.0f),D3DXVECTOR3(0.0f, 0.0f, 0.0f), ItemNum);
+		SetItem(pos, D3DXVECTOR3(1.0f, 1.0f, 1.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ITEMTYPE_TIKEI);
+
+	}
+
+	g_aItem[0].GoukeiDrop = DROP_ITEM_MAX;
+	return S_OK;
+}
+
+//=============================================================================
+// 再初期化処理
+//=============================================================================
+HRESULT ReInitItem(void)
+{
+
+	for (int nCntItem = 0; nCntItem < MAX_ITEM; nCntItem++)
+	{
+		g_aItem[nCntItem].pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		g_aItem[nCntItem].scl = D3DXVECTOR3(2.0f, 2.0f, 2.0f);
+		g_aItem[nCntItem].rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		g_aItem[nCntItem].Upvec = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
+		g_aItem[nCntItem].rotVecAxis = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		g_aItem[nCntItem].rotTOaxis = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		g_aItem[nCntItem].Qrot = 0.0f;
+		g_aItem[nCntItem].fRadius = 0.0f;
+		g_aItem[nCntItem].Droptime = 0.0f;
+		g_aItem[nCntItem].nIdxShadow = -1;
+		g_aItem[nCntItem].nType = -1;
+		g_aItem[nCntItem].bUse = false;
+		g_aItem[nCntItem].GettingSignal = false;
+		g_aItem[nCntItem].GettingSignalEnd = false;
+		g_aItem[nCntItem].CollisionFieldEnd = false;
+	}
+	for (int nCntItem = 0; nCntItem < DROP_ITEM_MAX; nCntItem++)
+	{
+		D3DXVECTOR3 pos = D3DXVECTOR3(float(rand() % int(WALL_SIZE_X / 4)) + 100.0f, ITEM_INIT_POSY, float(rand() % int(WALL_SIZE_X / 4)) + 100.0f);
+		int x = rand() % 2;
+		int z = rand() % 2;
+		if (x == 1) pos.x *= -1;
+		if (z == 1) pos.z *= -1;
+
+		/*
+		enum
+		{
+			ITEMTYPE_TIKEI = 0,		// 地形
+			ITEMTYPE_LIFE,			// ライフ
+			ITEMTYPE_SENSYA,		// 戦車
+			ITEMTYPE_BULLET,		// バレット
+			ITEMTYPE_SPEEDUP,		// スピードアップ
+			ITEMTYPE_CAMERA,		// お邪魔アイテム　強制バックカメラ
+			ITEMTYPE_KIRI,			// お邪魔アイテム　霧
+			ITEMTYPE_MAX
+		};
+		*/
+		int ItemNum = rand() % ITEMTYPE_MAX;
+		//ライフ、カメラ、霧アイテムの時はもう一度抽選
+		if (ItemNum == ITEMTYPE_LIFE && ItemNum == ITEMTYPE_CAMERA && ItemNum == ITEMTYPE_KIRI) ItemNum = rand() % ITEMTYPE_MAX;
+		//SetItem(pos, D3DXVECTOR3(2.0f, 2.0f, 2.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ItemNum);
+		SetItem(pos, D3DXVECTOR3(1.0f, 1.0f, 1.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ITEMTYPE_TIKEI);
 
 	}
 
@@ -180,6 +238,11 @@ void UpdateItem(void)
 			//フィールドに落ちてるときはくるくる回転させる
 			g_aItem[nCntItem].rot.y += VALUE_ROTATE_ITEM;
 
+			//徐々に落ちてくる
+			if (g_aItem[nCntItem].CollisionFieldEnd != true)
+			{
+				g_aItem[nCntItem].pos.y -= VALUE_FALLSPEED_ITEM;
+			}
 			//地形の角度とプレイヤーの角度を計算。drawでクオータニオンで使う
 			D3DXVec3Cross(&g_aItem[nCntItem].rotTOaxis, &g_aItem[nCntItem].rotVecAxis, &g_aItem[nCntItem].Upvec);
 			float kakezan = D3DXVec3Dot(&g_aItem[nCntItem].rotVecAxis, &g_aItem[nCntItem].Upvec);
@@ -215,9 +278,9 @@ void UpdateItem(void)
 				int ItemNum = rand() % ITEMTYPE_MAX;
 				//ライフ、カメラ、霧アイテムの時はもう一度抽選
 				if (ItemNum == ITEMTYPE_LIFE && ItemNum == ITEMTYPE_CAMERA && ItemNum == ITEMTYPE_KIRI) ItemNum = rand() % ITEMTYPE_MAX;
-				SetItem(pos, D3DXVECTOR3(2.0f, 2.0f, 2.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ItemNum);
-				//SetItem(pos, D3DXVECTOR3(1.0f, 1.0f, 1.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ITEMTYPE_TIKEI);
-				g_aItem[nCntItem].fCollisionEnd = false;
+				//SetItem(pos, D3DXVECTOR3(2.0f, 2.0f, 2.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ItemNum);
+				SetItem(pos, D3DXVECTOR3(1.0f, 1.0f, 1.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ITEMTYPE_TIKEI);
+				g_aItem[nCntItem].CollisionFieldEnd = false;
 				g_aItem[nCntItem].Droptime = 0.0f;
 				g_aItem[0].GoukeiDrop++;
 				PlaySound(SOUND_LABEL_SE_nyu);
@@ -331,7 +394,7 @@ void DeleteItem(int nIdxItem)
 	{
 		ReleaseShadow(g_aItem[nIdxItem].nIdxShadow);
 		g_aItem[nIdxItem].bUse = false;
-		g_aItem[nIdxItem].fCollisionEnd = false;
+		g_aItem[nIdxItem].CollisionFieldEnd = false;
 	}
 }
 
