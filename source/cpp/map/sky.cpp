@@ -14,12 +14,14 @@
 #define	TEXTURE_FILENAME	"../data/TEXTURE/sky001.jpg"		// 読み込むテクスチャファイル名
 #define	VALUE_MOVE_SKY		(5.0f)							// 移動速度
 #define	VALUE_ROTATE_SKY	(D3DX_PI * 0.001f)				// 回転速度
+#define	VALUE_TIME_SKY		(0.001f)							// 移動速度
 
 #define	SKY_HEIGHT_RATE		(2.0f)		// 空ドームの高さ係数
 
 #define	TEX_COUNT_LOOP		(1)			// テクスチャの繰り返し回数
 
 #define	MAX_MESH_SKY		(2)			// 空の総数
+
 
 //*****************************************************************************
 // 構造体
@@ -53,6 +55,8 @@ typedef struct
 LPDIRECT3DTEXTURE9 g_pTextureSky = NULL;	// テクスチャ読み込み場所
 MESH_SKY g_aMeshSky[2] = {};				// 空ワーク
 int g_nNumMeshSky = 0;						// 空の数
+float g_MeshSky_time = 0.01f;						// 空の時間　時間によって空の色が変わる
+float g_MeshSky_Addtime = 0.0f;						// 空の時間　時間によって空の色が変わる
 
 //=============================================================================
 // 初期化処理
@@ -64,6 +68,8 @@ HRESULT InitMeshSky(D3DXVECTOR3 pos, D3DXVECTOR3 rot,
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 	MESH_SKY *pMesh;
 
+
+	g_MeshSky_Addtime = VALUE_TIME_SKY;
 	if(g_nNumMeshSky >= MAX_MESH_SKY)
 	{
 		return E_FAIL;
@@ -377,17 +383,84 @@ void UninitMeshSky(void)
 //=============================================================================
 void UpdateMeshSky(void)
 {
-	//MESH_SKY *pMesh;
-	//for(int nCntSky = 0; nCntSky < MAX_MESH_SKY; nCntSky++)
-	//{
-	//	pMesh = &g_aMeshSky[nCntSky];
+	MESH_SKY *pMesh;
+	for (int nCntSky = 0; nCntSky < MAX_MESH_SKY; nCntSky++)
+	{
+		pMesh = &g_aMeshSky[nCntSky];
 
-	//	pMesh->rot.y += D3DX_PI * pMesh->fRotY;
-	//	if(pMesh->rot.y > D3DX_PI)
-	//	{
-	//		pMesh->rot.y -= D3DX_PI * 2.0f;
-	//	}
-	//}
+		pMesh->rot.y += D3DX_PI * pMesh->fRotY;
+		if (pMesh->rot.y > D3DX_PI)
+		{
+			pMesh->rot.y -= D3DX_PI * 2.0f;
+		}
+	}
+
+		pMesh = &g_aMeshSky[0];
+
+		{//頂点バッファの中身を埋める
+			VERTEX_3D *pVtx;
+			// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
+			pMesh->pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+
+			for (int nCntV = 0; nCntV < (pMesh->nNumBlockV + 1); nCntV++)
+			{
+				for (int nCntH = 0; nCntH < (pMesh->nNumBlockH + 1); nCntH++, pVtx++)
+				{
+					// 頂点カラーの設定
+					if (pMesh->bReverse)
+					{
+						pVtx->diffuse = D3DXCOLOR(0.0625f*g_MeshSky_time, 0.0625f*g_MeshSky_time, 0.375f*g_MeshSky_time, 0.5f);
+					}
+					else
+					{
+						pVtx->diffuse = D3DXCOLOR(1.0f*g_MeshSky_time, 1.0f*g_MeshSky_time, 1.0f*g_MeshSky_time, 1.0f);
+					}
+				}
+			}
+
+			// 頂点データをアンロックする
+			pMesh->pVtxBuff->Unlock();
+
+			// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
+			pMesh->pVtxBuffTop->Lock(0, 0, (void**)&pVtx, 0);
+
+			// 法線の設定
+			pVtx->nor = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
+
+			// 頂点カラーの設定
+			if (pMesh->bReverse)
+			{
+				pVtx->diffuse = D3DXCOLOR(0.0675f*g_MeshSky_time, 0.0675f*g_MeshSky_time, 0.375f*g_MeshSky_time, 0.5f);
+			}
+			else
+			{
+				pVtx->diffuse = D3DXCOLOR(1.0f*g_MeshSky_time, 1.0f*g_MeshSky_time, 1.0f*g_MeshSky_time, 1.0f);
+			}
+
+			pVtx++;
+
+			for (int nCntH = 0; nCntH < pMesh->nNumBlockH; nCntH++, pVtx++)
+			{
+				// 頂点カラーの設定
+				if (pMesh->bReverse)
+				{
+					pVtx->diffuse = D3DXCOLOR(0.0675f*g_MeshSky_time, 0.0675f*g_MeshSky_time, 0.375f*g_MeshSky_time, 0.5f);
+				}
+				else
+				{
+					pVtx->diffuse = D3DXCOLOR(1.0f*g_MeshSky_time, 1.0f*g_MeshSky_time, 1.0f*g_MeshSky_time, 1.0f);
+				}
+			}
+
+			// 頂点データをアンロックする
+			pMesh->pVtxBuffTop->Unlock();
+		}
+
+
+	g_MeshSky_time += g_MeshSky_Addtime;
+
+
+	if (g_MeshSky_time >= 1.0) g_MeshSky_Addtime *= -1.0f;
 }
 
 //=============================================================================

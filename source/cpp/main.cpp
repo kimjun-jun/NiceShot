@@ -414,7 +414,7 @@ HRESULT Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	// フィールドの初期化
 	{
 		// 空の初期化
-		InitMeshSky(D3DXVECTOR3(0.0f, -100.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), 16, 8, 4000.0f, true);
+		InitMeshSky(D3DXVECTOR3(0.0f, -100.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), 16, 8, 4000.0f, 0.0001f);
 
 		// 地面の初期化
 		InitMeshField(D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), 32, 32, 250.0f,250.0f);
@@ -531,6 +531,7 @@ void Update(void)
 		case SCENE_TUTORIAL:
 			UpdateTutorial();
 			UpdateMeshField();
+			UpdateMeshSky();
 			UpdatePlayer();
 			UpdateBullet();
 			UpdateBulletprediction();
@@ -551,6 +552,7 @@ void Update(void)
 		case SCENE_GAME:
 			// 地面処理の更新
 			UpdateMeshField();
+			UpdateMeshSky();
 
 			// 壁処理の更新
 			UpdateMeshWall();
