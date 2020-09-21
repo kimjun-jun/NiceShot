@@ -43,6 +43,18 @@
 #define SCREEN_CENTER_Y				(SCREEN_H / 2)																		//!< ウインドウの中心Ｙ座標
 #define SCREEN_SEPARATE_BUFF		(2.5f)																				//!< 画面分割時の描画範囲と描画範囲の隙間
 
+//開放マクロ
+#ifndef SAFE_DELETE
+#define SAFE_DELETE(p)       { if (p) { delete (p);     (p)=NULL; } }
+#endif    
+#ifndef SAFE_DELETE_ARRAY
+#define SAFE_DELETE_ARRAY(p) { if (p) { delete[] (p);   (p)=NULL; } }
+#endif    
+#ifndef SAFE_RELEASE
+#define SAFE_RELEASE(p)      { if (p) { (p)->Release(); (p)=NULL; } }
+#endif
+
+
 //2Dポリゴンに関するパラメータ																							
 #define	POLYGON_2D_VERTEX			(4)																					//!< 頂点数
 #define	POLYGON_2D_NUM				(2)																					//!< ポリゴン数
@@ -65,11 +77,6 @@
 #define	MODEL_HOUSINMO				"../data/MODEL/PlayerSensyaHousinMo.x"												//!< 読み込むモデル名
 #define	MODEL_BULLETPOS				"../data/MODEL/PlayerSensyaBulletPos.x"												//!< 読み込むモデル名
 
-//キャラクターなどの合計
-#define PLAYER_MAX							(4)																			//!< プレイヤー最大人数
-#define BULLETPOINT_MAX						(PLAYER_MAX)																//!< 着地点の最大数
-#define BULLETPOINT_MAX						(PLAYER_MAX)																//!< 着地点の最大数
-
 //キャラクターなどのパラメータ
 #define PLAYER_VITAL						(200)																		//!< プレイヤー体力
 #define PLAYER_DEFENCE_STRONG				(15)																		//!< プレイヤー防御力強
@@ -84,6 +91,56 @@
 #define PLAYER_AMMOPOWER_STRONG				(15)																		//!< プレイヤー弾薬強
 #define PLAYER_AMMOPOWER_NORMAL				(10)																		//!< プレイヤー弾薬中
 #define PLAYER_AMMOPOWER_WEAK				(5)																			//!< プレイヤー弾薬弱
+
+#define	BULLETPREDICTION_MAX			(1000)							// エフェクト最大数
+#define DAMEGE_MAX			(4)
+
+/**
+ * @enum STATUSTYPE
+ * ステータス定数
+ */
+enum STATUSTYPE
+{
+	STATUSTYPE_SPEED = 0,		//!< スピードアップ状態
+	STATUSTYPE_SENSYA,			//!< 戦車強化状態
+	STATUSTYPE_CAMERA,			//!< バックカメラ状態
+	STATUSTYPE_KIRI,			//!< もやもや状態
+	STATUSTYPE_MAX
+};
+
+//オブジェクトの合計
+enum OBJECT_MAX
+{
+	OBJECT_PLAYER_MAX = 4,
+	OBJECT_PLAYER_HOUSIN_MAX = OBJECT_PLAYER_MAX,
+	OBJECT_PLAYER_HOUTOU_MAX = OBJECT_PLAYER_MAX,
+	OBJECT_PLAYER_ORIGINAL_MODEL_MAX = 1,
+	OBJECT_PLAYER_ATTACK_MODEL_MAX = 1,
+	OBJECT_PLAYER_SPEED_MODEL_MAX = 1,
+	OBJECT_PLAYER_NORMAL_MODEL_MAX = 1,
+	OBJECT_CAMERA_MAX = OBJECT_PLAYER_MAX,
+	OBJECT_BULLETPOINT_MAX = OBJECT_PLAYER_MAX,
+	OBJECT_TUTORIAL_MAX = OBJECT_PLAYER_MAX,
+	OBJECT_STATUS_MAX = OBJECT_PLAYER_MAX * STATUSTYPE_MAX,
+	OBJECT_BULLETPREDICTION_MAX = OBJECT_PLAYER_MAX * BULLETPREDICTION_MAX,
+	OBJECT_VITAL_MAX = OBJECT_PLAYER_MAX * PLAYER_VITAL,
+	OBJECT_BULLETGAUGE_MAX = OBJECT_PLAYER_MAX * PLAYER_AMMOPOWER_STRONG,
+	OBJECT_DAMEGE_MAX = 4,
+	OBJECT_EFFECT_MAX = 4096,
+	OBJECT_EXPLOSION_MAX = 128,
+	OBJECT_BULLET_MAX = 120,
+	OBJECT_ITEM_MAX = 20,
+	OBJECT_SHADOW_MAX = 256,
+	OBJECT_COUNTDOWN_MAX = 2,
+	OBJECT_RANK_MAX = 3,
+	OBJECT_RESULT_MAX = 2,
+	OBJECT_TITLE_MAX = 4,
+	OBJECT_ALL_MAX = OBJECT_PLAYER_MAX + OBJECT_PLAYER_HOUSIN_MAX + OBJECT_PLAYER_HOUTOU_MAX + OBJECT_PLAYER_ORIGINAL_MODEL_MAX +
+	OBJECT_PLAYER_ATTACK_MODEL_MAX + OBJECT_PLAYER_SPEED_MODEL_MAX + OBJECT_PLAYER_NORMAL_MODEL_MAX + OBJECT_CAMERA_MAX +
+	OBJECT_BULLETPOINT_MAX + OBJECT_TUTORIAL_MAX + OBJECT_STATUS_MAX + OBJECT_BULLETPREDICTION_MAX + OBJECT_VITAL_MAX +
+	OBJECT_BULLETGAUGE_MAX + OBJECT_DAMEGE_MAX + OBJECT_EFFECT_MAX + OBJECT_EXPLOSION_MAX + OBJECT_BULLET_MAX +
+	OBJECT_ITEM_MAX + OBJECT_SHADOW_MAX + OBJECT_COUNTDOWN_MAX + OBJECT_RANK_MAX + OBJECT_RESULT_MAX + OBJECT_TITLE_MAX
+};
 
 
 //モデル等の初期座標
@@ -100,14 +157,15 @@
 //モデル等のサイズ
 #define	BULLET_EFFECT_SIZE					(4.0f)																		//!< 歩きに比べてのダッシュの速度倍率
 #define	BULLET_EFFECT_TIME					(240)																		//!< 左右歩きの移動量倍率(-1000～1000が入力範囲なのでそれに乗算する)
-#define	WALL_SIZE_X							(WALL_INIT_POSX*2)															//!< 歩きに比べてのダッシュの速度倍率
-#define	WALL_SIZE_Y							(800.0f)																	//!< 歩きに比べてのダッシュの速度倍率
+#define	WALL_SIZE_X							(WALL_INIT_POSX*2)															//!< 壁のサイズX
+#define	WALL_SIZE_Y							(800.0f)																	//!< 壁のサイズY
 
 
 //移動量マクロ
 #define	PLAYER_VALUE_DASHRATE				(2.0f)																		//!< 歩きに比べてのダッシュの速度倍率
 #define	PLAYER_MOVE_RATE_X					(1.0f/40000.0f)																//!< 左右歩きの移動量倍率(-1000～1000が入力範囲なのでそれに乗算する)
 #define	PLAYER_MOVE_RATE_Y					(1.0f/200.0f)																//!< 前後歩きの移動量倍率(-1000～1000が入力範囲なのでそれに乗算する)
+#define	PLAYER_MOVE_RATE_LR2				(1.0f/20000.0f)																//!< キャタピラの移動量倍率(0～65000が入力範囲なのでそれに乗算する)
 #define VALUE_MOVE_BULLET					(15.0f)																		//!< バレットの速度
 #define VALUE_LEN_BULLET					(10.0f)																		//!< プレイヤー中心としたバレットの発射位置までの距離
 #define VALUE_LENTIMES_BULLET				(2.5f)																		//!< プレイヤー中心としたバレットの発射位置にたいする倍率
@@ -145,18 +203,9 @@
 #define BACKCAMERA_TIME						(150.0f)																	//!< バックカメラアイテム有効時間
 #define KIRI_TIME							(150.0f)																	//!< フォグ霧アイテムの有効時間
 #define SCREENDAMEGE_TIME					(30.0f)																		//!< 被ダメージ時の画面フェード時間
-#define	MAX_SHADOW							(256)																		//!< 影最大数
-#define	BULLETKAKUSAN_MAX					(3)																			//!< バレット拡散数
-#define	BULLET_MAX							((MAX_AMMO*BULLETKAKUSAN_MAX*PLAYER_MAX)*2)									//!< 合計のバレットワーク数
-#define	BULLET_PREDICTION_MAX				(4)																			//!< バレット予測線の数
-#define HEADICON_MAX						(PLAYER_MAX*(PLAYER_MAX-1))													//!< 敵の頭上アイコン最大数
 #define PLAYER_MODEL_SIZE					(15.0f)																		//!< モデルサイズ
 #define BULLET_MODEL_SIZE					(15.0f)																		//!< モデルサイズ
 #define ITEM_MODEL_SIZE						(15.0f)																		//!< モデルサイズ
-#define DROP_ITEM_MAX						(20)																		//!< フィールドに落ちてるアイテムの数
-#define DROP_ITEM_CHARGE_ADDTIME			(1.0f)																		//!< アイテムをリスポーンさせる時の加算タイム
-#define DROP_ITEM_CHARGE_CNT				(60.0f)																		//!< アイテムをリスポーンさせる時の所要タイム
-#define	MAX_ITEM							(20)																		//!< アイテムワーク最大数
 
 
 //エフェクト関連定数
@@ -269,137 +318,8 @@ enum ITEMTYPE
 	ITEMTYPE_MAX
 };
 
-/**
- * @enum STATUSTYPE
- * ステータス定数
- */
-enum STATUSTYPE
-{
-	STATUSTYPE_SPEED = 0,		//!< スピードアップ状態
-	STATUSTYPE_SENSYA,			//!< 戦車強化状態
-	STATUSTYPE_CAMERA,			//!< バックカメラ状態
-	STATUSTYPE_KIRI,			//!< もやもや状態
-	STATUSTYPE_MAX
-};
 
-/**
- * @class VERTEX_2D
- * ポリゴン頂点フォーマットに合わせたCLASSを定義
- */
-class VERTEX_2D
-{
-public:
-	D3DXVECTOR3 vtx;		//!< 頂点座標
-	float		rhw;		//!< テクスチャのパースペクティブコレクト用
-	D3DCOLOR	diffuse;	//!< 反射光
-	D3DXVECTOR2 tex;		//!< テクスチャ座標
-};
 
-/**
- * @class VERTEX_3D
- * ３Ｄポリゴン頂点フォーマットに合わせたCLASSを定義
- */
-
-class VERTEX_3D
-{
-public:
-	D3DXVECTOR3 vtx;		//!< 頂点座標
-	D3DXVECTOR3 nor;		//!< 法線ベクトル
-	D3DCOLOR	diffuse;	//!< 反射光
-	D3DXVECTOR2 tex;		//!< テクスチャ座標
-};
-
-/**
- * @class INTERPOLATION_DATA
- * 補間用のデータCLASSを定義
- */
-class INTERPOLATION_DATA
-{
-public:
-	D3DXVECTOR3 pos;		//!< 頂点座標
-	D3DXVECTOR3 rot;		//!< 回転
-	D3DXVECTOR3 scl;		//!< 拡大縮小
-	float		frame;		//!< 実行フレーム数 ( dt = 1.0f/frame )
-};
-
-/**
- * @class ALLCHARACTER
- * キャラクターの標準的な変数をまとめたCLASS
- */
-class ALLCHARACTER
-{
-public:
-	D3DXMATRIX					mtxWorld;			//!< ワールドマトリックス
-	D3DXVECTOR3					pos;				//!< モデルの位置
-	D3DXVECTOR3					oldpos;				//!< モデルの位置
-	D3DXVECTOR3					rot;				//!< モデルの向き(回転)
-	D3DXVECTOR3					scl;				//!< モデルの大きさ(スケール)
-	D3DXVECTOR3					move;				//!< モデルの移動量
-};
-
-/**
- * @class ONECHARACTER
- * キャラクターの標準的な変数をまとめたCLASS(階層関係で1つだけ持ってれば良い変数)
- */
-class ONECHARACTER
-{
-public:
-	D3DXMATRIX					mtxWorldRotBuff;	//!< ワールドマトリックス回転角度保存
-	D3DXVECTOR3					Upvec;				//!< モデルの上方向
-	D3DXVECTOR3					Frontvec;			//!< モデルの前方向
-	D3DXVECTOR3					RotVecAxis;			//!< クオータニオンの時に使う地形の法線ベクトル
-	D3DXVECTOR3					UpFieldNorVec;		//!< 姿勢の球面線形補間時に使う地形の法線ベクトル　プレイヤーが乗っているポリゴンの一つ上のポリゴン
-	D3DXVECTOR3					RightFieldNorVec;	//!< 姿勢の球面線形補間時に使う地形の法線ベクトル　プレイヤーが乗っているポリゴンの一つ右のポリゴン
-	D3DXVECTOR3					LeftFieldNorVec;	//!< 姿勢の球面線形補間時に使う地形の法線ベクトル　プレイヤーが乗っているポリゴンの一つ左のポリゴン
-	D3DXVECTOR3					DownFieldNorVec;	//!< 姿勢の球面線形補間時に使う地形の法線ベクトル　プレイヤーが乗っているポリゴンの一つ下のポリゴン
-	D3DXVECTOR3					UpRotTOaxis;		//!< 地形法線とプレイヤーUpベクトルの外積値
-	D3DXVECTOR3					FrontRotTOaxis;		//!< 地形法線とプレイヤーFrontベクトルの外積値
-	D3DXQUATERNION				q;					//!< プレイヤー用クオータニオン
-	float						speed;				//!< 移動スピード
-	float						speedbuff;			//!< 移動スピードアイテムバフ
-	float						speedbufftime;		//!< 移動スピードアイテム効果時間
-	float						Qrot;				//!< Upベクトルから地形法線への回転角度
-	float						Brot;				//!< Frontベクトルから地形法線への回転角度
-	float						MorphingTime;		//!< モーフィングできる時間
-	int							shadowIdx;			//!< 影のインデックス番号
-	int							dir;				//!< 進行方向
-	bool						use;				//!< 生きてる判定
-	bool						Morphing;			//!< 変形判定
-	bool						MorphingEnd;		//!< 変形終了判定
-	bool						speedbuffsignal;	//!< スピードアップバフ判定
-};
-
-/**
- * @class GPUMODEL
- * モデルの頂点データを使用　モーフィング実行時に元データと変化データの頂点情報を保存
- */
-class GPUMODEL
-{
-public:
-	LPDIRECT3DTEXTURE9			pD3DTexture;			//!< テクスチャへのポインタ
-	LPD3DXMESH					pD3DXMesh;				//!< メッシュ情報へのポインタ
-	LPD3DXBUFFER				pD3DXBuffMat;			//!< マテリアル情報へのポインタ
-	DWORD						nNumMat;				//!< マテリアル情報の数
-	LPDIRECT3DVERTEXBUFFER9		pD3DVtxBuff;			//!< 頂点バッファインターフェースへのポインタ
-	LPDIRECT3DINDEXBUFFER9		pD3DIdxBuff;			//!< インデックスバッファインターフェースへのポインタ
-	DWORD						nNumVertex;				//!< 頂点の数
-	DWORD						nNumVertexIndex;		//!< 頂点のインデックス
-	DWORD						nNumPolygon;			//!< ポリゴンの数
-	float						time;					//!< モーフィング時に補間タイムとして使用
-	int							MorphingSignal;			//!< 1,なにもしない　2,モーフィング中　3,モーフィング完了
-};
-
-/**
-*　@struct 2DTEXTURECLASS
-*　@brief 2Dポリゴンを定義する構造体
-*/
-class TEXTURECLASS2D
-{
-public:
-	LPDIRECT3DTEXTURE9		pD3DTexture = NULL;				//!< テクスチャへのポインタ
-	LPDIRECT3DVERTEXBUFFER9 pD3DVtxBuff = NULL;		//!< 頂点バッファインターフェースへのポインタ
-	D3DXVECTOR3				pos;							//!< 座標
-};
 
 //*****************************************************************************
 // プロトタイプ宣言
@@ -422,26 +342,4 @@ void SetText(char *moji);
 * @details 未使用 Debugのみで使用可能
 */
 void DrawTextType(void);
-
-/**
-* @brief ゲームシーンをセットする関数 SetScene
-* @param[in] Scene 移動先シーンを入力
-* @details ゲームシーンはE_STAGEを参照
-*/
-void SetScene(int Scene);
-
-/**
-* @brief 現在のゲームシーンを入手する関数 GetScene
-* @return int 現在のゲームシーンを返す
-* @details ゲームシーンはE_STAGEを参照
-*/
-int GetScene(void);
-
-/**
-* @brief ゲームを初期化する関数 InitGame
-* @details ゲーム起動時に使用ゲームループ時に使用
-*/
-void InitGame(void);
-
-
 

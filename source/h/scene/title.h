@@ -23,9 +23,14 @@ enum TITLE_SELECT_SCENE//列挙型。defineの番号を自動で割り当ててくれる。
 *　@class TITLECLASS
 *　@brief 2Dポリゴンを定義する構造体
 */
-class TITLECLASS :public TEXTURECLASS2D
+class TITLE :public OBJECT_2D_VERTEXBUFFER
 {
 public:
+	void						Init(void);					//!< 初期化
+	void						Reinit(void);				//!< 再初期化
+	void						Uninit(void);				//!< 終了
+	void						Update(void);				//!< 更新
+	void						Draw(void);					//!< 描画
 	int				nCountAppearStart = 0;				//!<
 	float			fAlpha = 0.0f;						//!<
 	int				nCountDisp = 0;						//!<

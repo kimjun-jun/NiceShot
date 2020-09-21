@@ -9,6 +9,7 @@
 #include "../../../h/object/player.h"
 #include "../../../h/object/camera.h"
 #include "../../../h/object/bullet/bulletprediction.h"
+#include "../../../h/object/objectclass.h"
 
 //*****************************************************************************
 // マクロ定義
@@ -17,22 +18,7 @@
 #define	BULLETPREDICTION_SIZE_X			(5.0f)							// ビルボードの幅
 #define	BULLETPREDICTION_SIZE_Y			(5.0f)							// ビルボードの高さ
 
-#define	MAX_BULLETPREDICTION			(1000)							// エフェクト最大数
 
-//*****************************************************************************
-// 構造体定義
-//*****************************************************************************
-typedef struct
-{
-	D3DXMATRIX	mtxWorld;									//!< ワールドマトリックス
-	D3DXVECTOR3 pos;										//!< 位置
-	D3DXVECTOR3 rot;										//!< 回転
-	D3DXVECTOR3 scale;										//!< スケール
-	D3DXCOLOR	col;										//!< 色
-	float		fSizeX;										//!< 幅
-	float		fSizeY;										//!< 高さ
-	bool		bUse;										//!< 使用しているかどうか
-} BULLETPREDICTION;
 
 static D3DXCOLOR PLAYER_COLOR[] = {
 	D3DXCOLOR(1.0f, 1.0f, 0.1f, 0.01f),//p1カラー

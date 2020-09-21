@@ -8,35 +8,17 @@
 #include "../../h/effect/explosion.h"
 #include "../../h/other/input.h"
 #include "../../h/object/camera.h"
-#include "../../h/other/shadow.h"
+#include "../../h/object/shadow.h"
+#include "../../h/object/objectclass.h"
 
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define	TEXTURE_EXPLOSION		"../data/TEXTURE/bomb.png"			// 読み込むテクスチャファイル名
+#define	TEXTURE_EXPLOSION		"../data/TEXTURE/bomb.png"		// 読み込むテクスチャファイル名
 #define	BULLET_SIZE_X			(50.0f)							// ビルボードの幅
 #define	BULLET_SIZE_Y			(50.0f)							// ビルボードの高さ
 #define	VALUE_MOVE_EXPLOSION	(2.0f)							// 移動速度
 
-#define	MAX_EXPLOSION			(128)							// ビルボード最大数
-
-//*****************************************************************************
-// 構造体定義
-//*****************************************************************************
-typedef struct
-{
-	D3DXVECTOR3 pos;		// 位置
-	D3DXVECTOR3 rot;		// 回転
-	D3DXVECTOR3 scale;		// スケール
-	D3DXCOLOR col;			// 色
-	float fSizeX;			// 幅
-	float fSizeY;			// 高さ
-	int nCounter;			// カウンター
-	int nPatternX;			// パターンNo.X
-	int nPatternY;			// パターンNo.Y
-	int nType;				// 種類
-	bool bUse;				// 使用しているかどうか
-} EXPLOSION;
 
 //*****************************************************************************
 // プロトタイプ宣言

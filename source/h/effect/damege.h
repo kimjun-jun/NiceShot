@@ -15,24 +15,22 @@
 #define	DAMEGE_POS_X			(SCREEN_CENTER_X)									// チュートリアルの表示位置
 #define	DAMEGE_POS_Y			(SCREEN_CENTER_Y)									// チュートリアルの表示位置
 
-#define DAMEGE_GOUKEI			(4)
 
-typedef struct
+class DAMEGE : public OBJECT_2D
 {
-	LPDIRECT3DTEXTURE9		pD3DTexture = NULL;					// テクス?ャへの?リゴン 
-	VERTEX_2D				vertexWk[POLYGON_2D_VERTEX];		// 頂?情報格?ワ?ク
-	D3DXVECTOR3				pos;								// ?リゴンの移動量
-	int						alpha;
-	float					time;
-	bool					use;
-}DAMEGE;
+public:
+	DAMEGE() { alpha = 0, time = 0.0f; };
+	void						Init(void);					//!< 初期化
+	void						Reinit(void);				//!< 再初期化
+	void						Uninit(void);				//!< 終了
+	void						Update(void);				//!< 更新
+	void						Draw(void);					//!< 描画
+	HRESULT						MakeVertexDamege(void);		//!< 頂点設定
+	int							alpha;						//!< アルファ値
+	float						time;						//!< 描画時間
+};
 
 //*****************************************************************************
 // プロトタイプ宣言
 //*****************************************************************************
-HRESULT InitDamege(int type);
-void UninitDamege(void);
-void UpdateDamege(void);
-void DrawDamege(void);
-DAMEGE *GetDamege(void);
 

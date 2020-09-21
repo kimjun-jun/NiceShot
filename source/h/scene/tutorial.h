@@ -17,16 +17,19 @@
 #define TUTORIAL_GOUKEI			(4)													//!< チュートリアル構造体の合計
 
 /**
-*　@struct TUTO
+*　@class TUTO
 *　@brief 2Dポリゴンを定義する構造体
 */
-typedef struct
+class TUTO : public OBJECT_2D
 {
-	LPDIRECT3DTEXTURE9		pD3DTexture = NULL;										//!< テクスチャへのポインタ
-	VERTEX_2D				vertexWk[POLYGON_2D_VERTEX];							//!< 頂点情報格納ワーク
-	D3DXVECTOR3				pos;													//!< ポリゴンの座標
+public:
+	void						Init(void);					//!< 初期化
+	void						Reinit(void);				//!< 再初期化
+	void						Uninit(void);				//!< 終了
+	void						Update(void);				//!< 更新
+	void						Draw(void);					//!< 描画
 	int						cnt;													//!< 描画判定用　2で割った余り判定　0表示　1非表示　今後のテクスチャ情報が増えることを加味してint定義
-}TUTO;
+};
 
 //*****************************************************************************
 // プロトタイプ宣言

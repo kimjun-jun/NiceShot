@@ -8,13 +8,13 @@
 #include "../../../h/object/bullet/bullet.h"
 #include "../../../h/other/input.h"
 #include "../../../h/object/camera.h"
-#include "../../../h/other/shadow.h"
+#include "../../../h/object/shadow.h"
 #include "../../../h/effect/effect.h"
 #include "../../../h/effect/explosion.h"
 #include "../../../h/object/player.h"
-#include "../../../h/object/life.h"
 #include "../../../h/collision.h"
 #include "../../../h/other/sound.h"
+#include "../../../h/object/objectclass.h"
 
 //*****************************************************************************
 // É}ÉNÉçíËã`

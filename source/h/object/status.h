@@ -16,14 +16,16 @@
 #define	STATUS_POS_X_OFFSET		(180.0f)						// ステータスの表示位置オフセット
 #define	STATUS_POS_Y_OFFSET		(120.0f)						// ステータスの表示位置オフセット
 
-#define STATUS_MAX			(4)
 
-typedef struct
+class STATUS : public OBJECT_2D
 {
-	LPDIRECT3DTEXTURE9		pD3DTexture = NULL;					// テクス?ャへの?リゴン 
-	VERTEX_2D				vertexWk[POLYGON_2D_VERTEX];		// 頂?情報格?ワ?ク
-	D3DXVECTOR3				pos;								// ?リゴンの移動量
-}STATUS;
+public:
+	void						Init(void);					//!< 初期化
+	void						Reinit(void);				//!< 再初期化
+	void						Uninit(void);				//!< 終了
+	void						Update(void);				//!< 更新
+	void						Draw(void);					//!< 描画
+};
 
 //*****************************************************************************
 // プロトタイプ宣言

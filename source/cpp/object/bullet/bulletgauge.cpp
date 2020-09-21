@@ -7,6 +7,7 @@
 #include "../../../h/main.h"
 #include "../../../h/object/player.h"
 #include "../../../h/object/bullet/bulletgauge.h"
+#include "../../../h/object/objectclass.h"
 
 //*****************************************************************************
 // マクロ定義
@@ -31,14 +32,6 @@
 // プロトタイプ宣言
 //*****************************************************************************
 HRESULT MakeVertexBulletGauge(LPDIRECT3DDEVICE9 pDevice, int CntPlayer);
-
-//*****************************************************************************
-// グローバル変数宣言
-//*****************************************************************************
-LPDIRECT3DTEXTURE9		g_pD3DTextureBulletGauge = {NULL};						// テクスチャへのポインタ
-LPDIRECT3DVERTEXBUFFER9 g_pD3DVtxBuffBulletGauge[PLAYER_MAX] = { NULL };		// 頂点バッファインターフェースへのポインタ
-D3DXVECTOR3				g_posBulletGauge[PLAYER_MAX];							// 位置
-int						g_nBulletGauge[PLAYER_MAX];								// 弾薬
 
 //=============================================================================
 // 初期化処理

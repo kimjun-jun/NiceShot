@@ -9,14 +9,15 @@
 //*****************************************************************************
 // 構造体定義
 //*****************************************************************************
-typedef struct
+class SHADOW : public OBJECT_3D
 {
-	D3DXMATRIX mtxWorld;	// ワールドマトリックス
-	D3DXVECTOR3 pos;		// 位置
-	D3DXVECTOR3 rot;		// 回転
-	D3DXVECTOR3 scl;		// 拡大縮小
-	bool bUse;				// 使用しているかどうか
-} SHADOW;
+public:
+	void						Init(void);					//!< 初期化
+	void						Reinit(void);				//!< 再初期化
+	void						Uninit(void);				//!< 終了
+	void						Update(void);				//!< 更新
+	void						Draw(void);					//!< 描画
+} ;
 
 //*****************************************************************************
 // プロトタイプ宣言

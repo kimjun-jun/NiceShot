@@ -36,7 +36,7 @@ HRESULT LoadMesh(char *FileName, LPD3DXBUFFER *pD3DXBuffMat, DWORD *nNumMat, LPD
 * @details モーフィング用 現在は頂点情報を線形補間で変化させている
 * @author : 木村純(キムラジュン)
 */
-void DoMorphing(GPUMODEL *FromModel, GPUMODEL *ToModel);
+void DoMorphing(GPUMODEL *FromModel, GPUMODEL *ToModel, float dt, float *time, int *SignalType);
 
 /**
 * @brief モデルリセット関数 ResetModel
@@ -62,6 +62,7 @@ bool RayCast(D3DXVECTOR3 rayS, D3DXVECTOR3 rayG, D3DXVECTOR3 vtx0, D3DXVECTOR3 v
 * @param[in] D3DXVECTOR3 move 三次元移動値
 * @return float 一次元で移動距離の値を返す
 * @details D3DXVECTOR3型で決めた移動値からfloat移動距離を求める
+* @author : 木村純(キムラジュン)
 */
 float SpdCal(D3DXVECTOR3 move);
 
@@ -75,6 +76,7 @@ float SpdCal(D3DXVECTOR3 move);
 * @param[in] float			RangeLen	扇中から延びる射程距離		len
 * @return bool true:範囲内　false:範囲外
 * @details 点と扇の当たり判定をしている。2D外積をしているので二つの直線を比べ左右どちらかにいるかで判定している
+* @author : 木村純(キムラジュン)
 */
 bool IsCollisionFanAndPoint(D3DXVECTOR3 CenterPos, D3DXVECTOR3 TargetPos, float StartRot, float EndRot, float RangeLen);
 
@@ -101,6 +103,7 @@ bool IsCollisionFanAndPoint(D3DXVECTOR3 CenterPos, D3DXVECTOR3 TargetPos, float 
 * @param[in] float			MoveValue	移動量			Value
 * @details スタート座標からエンド座標へ向けてMoveValue分だけホーミングする。利便上引数をD3DXVECTOR3にしている。
 * @details *StartPosのみポインターとし直接座標を変化させている。
+* @author : 木村純(キムラジュン)
 */
 void HormingType01(D3DXVECTOR3 *StartPos, D3DXVECTOR3 EndPos, float MoveValue);
 
@@ -116,6 +119,7 @@ void HormingType01(D3DXVECTOR3 *StartPos, D3DXVECTOR3 EndPos, float MoveValue);
 * @param[in] float			float(*func)(float)	補間値計算関数	任意の補間値計算関数を指定
 * @return D3DXVECTOR3 計算結果座標を返す。
 * @details スタート座標からエンド座標へ向けて補間処理する。引数に任意の補間処理を選択することで好きな種類の補間で計算が可能。
+* @author : 木村純(キムラジュン)
 */
 D3DXVECTOR3 MyInterpolation(D3DXVECTOR3 StartPos, D3DXVECTOR3 EndPos, float min, float max, float dt, float ElapsedTime, float(*func)(float));
 
@@ -129,6 +133,7 @@ D3DXVECTOR3 MyInterpolation(D3DXVECTOR3 StartPos, D3DXVECTOR3 EndPos, float min,
 * @param[in] float	t	時間
 * @return float 計算結果補間値を返す
 * @details MyInterpolation使用時に利用。引数に好きな補間値計算関数(これらの関数群)を指定して使う。
+* @author : 木村純(キムラジュン)
 */
 float Lerp(float t);
 
@@ -137,6 +142,7 @@ float Lerp(float t);
 * @param[in] float	t	時間
 * @return float 計算結果補間値を返す
 * @details MyInterpolation使用時に利用。引数に好きな補間値計算関数(これらの関数群)を指定して使う。
+* @author : 木村純(キムラジュン)
 */
 float LerpEaseIn(float t);
 
@@ -145,6 +151,7 @@ float LerpEaseIn(float t);
 * @param[in] float	t	時間
 * @return float 計算結果補間値を返す
 * @details MyInterpolation使用時に利用。引数に好きな補間値計算関数(これらの関数群)を指定して使う。
+* @author : 木村純(キムラジュン)
 */
 float LerpEaseOut(float t);
 
@@ -153,6 +160,7 @@ float LerpEaseOut(float t);
 * @param[in] float	t	時間
 * @return float 計算結果補間値を返す
 * @details MyInterpolation使用時に利用。引数に好きな補間値計算関数(これらの関数群)を指定して使う。
+* @author : 木村純(キムラジュン)
 */
 float LerpEaseInEaseOut(float t);
 
@@ -163,6 +171,7 @@ float LerpEaseInEaseOut(float t);
 * @param[in] D3DXVECTOR3	LinePoint2	座標
 * @return float　計算結果(最短距離)
 * @details [2D用]点から直線までの最短距離を求めるときに使用
+* @author : 木村純(キムラジュン)
 */
 float PointAndLineMinDistance(D3DXVECTOR3 Point, D3DXVECTOR3 LinePoint1, D3DXVECTOR3 LinePoint2);
 
@@ -182,6 +191,7 @@ bool CheckHitColumnLB(D3DXVECTOR3 yarnvec, D3DXVECTOR3 cylindervec, D3DXVECTOR3 
 /**
 * @brief 当たり判定高速化のフラグ初期化処理	InitCntPartition
 * @details 当たり判定高速化でどの平面エリアに属しているかの判定フラグを初期化する
+* @author : 木村純(キムラジュン)
 */
 void InitCntPartition(void);
 
@@ -197,6 +207,7 @@ void InitCntPartition(void);
 * @param[in] float			fSideSizeXEighth		フィールドのX1/8サイズ
 * @param[in] float			fSideSizeZEighth		フィールドのZ1/8サイズ
 * @details 属しているHitPosのXZ最大最小をポインターとして返す。このエリア内にInPosがあるという
+* @author : 木村純(キムラジュン)
 */
 void SpeedUpFieldHitPoly(D3DXVECTOR3 InPos, float *HitPosUp, float *HitPosDown, float *HitPosLeft, float *HitPosRight
 	,float fSideSizeXQuarter, float fSideSizeZQuarter, float fSideSizeXEighth, float fSideSizeZEighth);
@@ -208,6 +219,7 @@ void SpeedUpFieldHitPoly(D3DXVECTOR3 InPos, float *HitPosUp, float *HitPosDown, 
 * @param[in] D3DXVECTOR3	*end		終了ベクトル			目的地形の法線ベクトル
 * @param[in] float			t			スタートからエンドまでの補間値の割合　
 * @details ベクトルの回転を球面で処理する。姿勢制御などで使用
+* @author : 木村純(キムラジュン)
 */
 void SphereLinear(D3DXVECTOR3* out, D3DXVECTOR3* start, D3DXVECTOR3* end, float t);
 
@@ -218,6 +230,7 @@ void SphereLinear(D3DXVECTOR3* out, D3DXVECTOR3* start, D3DXVECTOR3* end, float 
 * @param[in] D3DXVECTOR3	*end		終了ベクトル			目的地形の法線ベクトル
 * @param[in] float			t			スタートからエンドまでの補間値の割合　
 * @details ベクトルの回転を球面で処理する。姿勢制御などで使用。マトリクスから直接制御するために使用
+* @author : 木村純(キムラジュン)
 */
 //D3DXMATRIX* CalcInterPause(D3DXMATRIX* out, D3DXMATRIX* start, D3DXMATRIX* end, float t);
 
@@ -235,17 +248,6 @@ inline void safe_release(T& p)
 	}
 }
 
-
-//開放マクロ
-#ifndef SAFE_DELETE
-#define SAFE_DELETE(p)       { if (p) { delete (p);     (p)=NULL; } }
-#endif    
-#ifndef SAFE_DELETE_ARRAY
-#define SAFE_DELETE_ARRAY(p) { if (p) { delete[] (p);   (p)=NULL; } }
-#endif    
-#ifndef SAFE_RELEASE
-#define SAFE_RELEASE(p)      { if (p) { (p)->Release(); (p)=NULL; } }
-#endif
 
 // enum for various skinning modes possible
 enum METHOD

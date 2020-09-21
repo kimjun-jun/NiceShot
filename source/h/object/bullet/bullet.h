@@ -15,26 +15,21 @@
 #define	BULLET_SIZE_Y			(50.0f)							// ビルボードの高さ
 
 
-typedef struct
+class BULLET : public OBJECT_3D
 {
-	D3DXVECTOR3			pos;						// 位置
-	D3DXVECTOR3			rot;						// 回転
-	D3DXVECTOR3			scale;						// スケール
-	D3DXVECTOR3			move;						// 移動量
-	D3DXVECTOR3			Hormingmove;				// ホーミング移動量
-	float				fSizeX;						// 幅
-	float				fSizeY;						// 高さ
+public:
+	void						Init(void);					//!< 初期化
+	void						Reinit(void);				//!< 再初期化
+	void						Uninit(void);				//!< 終了
+	void						Update(void);				//!< 更新
+	void						Draw(void);					//!< 描画
 	int					nTimer;						// タイマー
 	int					nIdxShadow;					// 影ID
 	int					UsePlayerType;				// 何プレイヤーが使用してるか識別する
-	int					HormingPlayerType;			// 何プレイヤーにホーミングしてるか識別する
 	float				fRadius;					// 半径
-	float				GravityAdd;					// 重力加速度
 	float				Gravity;					// 重力
 	float				FieldPosY;					// 影用の現在地の地形POSYを記憶
-	bool				HormingSignal;				// ホーミングしてるかどうか、プレイヤーの一定範囲以内になるとtrue
-	bool				use;						// 使用しているかどうか
-} BULLET;
+} ;
 
 //*****************************************************************************
 // プロトタイプ宣言

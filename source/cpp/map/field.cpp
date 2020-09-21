@@ -712,17 +712,20 @@ void SetFieldType02(void)
 }
 
 //=============================================================================
-// 地形の自動生成03　取得プレイヤーが有利になる地形(相手プレイヤー付近を盆地)　　ブロック数32*32　ブロックサイズ200*200
+// 地形の自動生成03　取得プレイヤーが有利になる地形(相手プレイヤー付近を盆地)　　ブロック数32*32　ブロックサイズ250*250
 //=============================================================================
 void SetFieldType03(void)
 {
+	//高さを決める
 	{
 		VERTEX_3D *pVtx;
+		WORD *pIdx;
 		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
 		g_pD3DVtxBuffFieldEnd->Lock(0, 0, (void**)&pVtx, 0);
+		g_pD3DIdxBuffFieldDraw->Lock(0, 0, (void**)&pIdx, 0);
 
 		//上限　高さを設定
-		for (int nCntVtx = 0; nCntVtx < g_nNumVertexField / 4; nCntVtx++)
+		for (int nCntVtx = 0; nCntVtx < g_nNumVertexField; nCntVtx++)
 		{
 			//高さを決める頂点を決定
 			int YTXrandNum(rand() % g_nNumVertexField);
@@ -747,6 +750,31 @@ void SetFieldType03(void)
 		//SetDegenerationPoly();
 
 		//隣接頂点の高さ平均値を(ダイアモンドスクエア、フラクタルを参考)
+
+		//for (int nCntVtx = 0; nCntVtx < g_nNumVertexIndexField/2; nCntVtx++)
+		//{
+		//	//高さを決める頂点を決定
+		//	int YTXrandNum(rand() % g_nNumVertexField);
+		//	//縮退ポリゴンのときはコンティニュー。最終ポリゴンの時はbreak;
+		//	if (YTXrandNum == g_nNumVertexIndexField - 2) break;
+		//	else if (pIdx[YTXrandNum] == pIdx[YTXrandNum + 1]) continue;
+		//	else if (pIdx[YTXrandNum + 1] == pIdx[YTXrandNum + 2]) continue;
+		//	// 頂点座標の設定
+		//	//頂点最端の高さは固定。壁際の頂点のこと。
+		//	//上側
+		//	//if (nCntVtx == 0 || nCntVtxX == 0 || nCntVtxZ == g_nNumBlockZField || nCntVtxX == g_nNumBlockXField)
+		//	//	pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx.y = 200.0f;
+		//	//中側　上下左右の平均値を算出
+		//	//隣接頂点の高さの平均値を求め、中心の頂点の高さとする。
+		//	else
+		//	{
+		//		float y = (pVtx[YTXrandNum - 1].vtx.y + pVtx[YTXrandNum + 1].vtx.y +
+		//			pVtx[(g_nNumBlockXField + 1) + YTXrandNum].vtx.y + pVtx[(g_nNumBlockXField - 1) + YTXrandNum].vtx.y) / 4.0f;
+		//		pVtx[YTXrandNum].vtx.y = fabsf(y);
+		//	}
+		//}
+
+
 		for (int nCntVtxZ = 0; nCntVtxZ < (g_nNumBlockZField + 1); nCntVtxZ++)
 		{
 			for (int nCntVtxX = 0; nCntVtxX < (g_nNumBlockXField + 1); nCntVtxX++)
@@ -755,7 +783,6 @@ void SetFieldType03(void)
 				if (nCntVtxZ*nCntVtxX == g_nNumVertexIndexField - 2) break;
 				else if (pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx == pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX + 1].vtx)	continue;
 				else if (pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX + 1].vtx == pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX + 2].vtx) continue;
-
 				// 頂点座標の設定
 				//頂点最端の高さは固定。壁際の頂点のこと。
 				//上側
@@ -766,15 +793,19 @@ void SetFieldType03(void)
 				else
 				{
 					float y = (pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX - 1].vtx.y + pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX + 1].vtx.y +
-						pVtx[(nCntVtxZ - 1) * (g_nNumBlockXField + 1) + nCntVtxX].vtx.y + pVtx[(nCntVtxZ + 1) * (g_nNumBlockXField + 1) + nCntVtxX].vtx.y) / 4;
+						pVtx[(nCntVtxZ - 1) * (g_nNumBlockXField + 1) + nCntVtxX].vtx.y + pVtx[(nCntVtxZ + 1) * (g_nNumBlockXField + 1) + nCntVtxX].vtx.y) / 4.0f;
 					pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx.y = fabsf(y);
 				}
 			}
 		}
 		// 頂点データをアンロックする
 		g_pD3DVtxBuffFieldEnd->Unlock();
+		g_pD3DIdxBuffFieldDraw->Unlock();
+
 	}
 
+
+	//相手プレイヤー付近の地形を盆地化
 	{
 		VERTEX_3D *pVtx;
 		WORD *pIdx;
@@ -782,7 +813,6 @@ void SetFieldType03(void)
 		//頂点インデックスバッファは共通で1つしかないのでDrawのやつを使っている
 		g_pD3DIdxBuffFieldDraw->Lock(0, 0, (void**)&pIdx, 0);
 
-		//相手プレイヤー付近の地形を盆地化
 		PLAYER_HONTAI *p = GetPlayerHoudai();
 		for (int CntPlayer = 0; CntPlayer < PLAYER_MAX; CntPlayer++)
 		{

@@ -26,25 +26,24 @@
 #define COUNTDOWN_A							(10)																			//!< カウントダウンが0の時GOを描画してGOが薄くなるスピード
 #define COUNTDOWN_CHANGESIZE				(5)																				//!< カウントダウン数字のサイズが拡大していく値
 
-//*****************************************************************************
-//* 構造体定義
-//******************************************************************************* /
 /**
 *　@struct COUNTDOWN
 *　@brief 2Dポリゴンを定義する構造体
 */
-typedef struct
+class COUNTDOWN : public OBJECT_2D
 {
-	LPDIRECT3DTEXTURE9		pD3DTexture = NULL;												 //!< テクスチャへのポインタ
-	VERTEX_2D				texture[POLYGON_2D_VERTEX];										 //!< 頂点情報格納ワーク
-	D3DXVECTOR3				pos;															 //!< ポリゴンの座標
+public:
+	void						Init(void);					//!< 初期化
+	void						Reinit(void);				//!< 再初期化
+	void						Uninit(void);				//!< 終了
+	void						Update(void);				//!< 更新
+	void						Draw(void);					//!< 描画
 	int						nCountAnim;														 //!< アニメカウント
 	int						nPatternAnim;													 //!< アニメパターン
 	int						changeval;														 //!< 拡大する変化量
 	int						color;															 //!< カラー値(今回はアルファ値として使用)
-	bool					use;															 //!< 使用しているかどうか
 	bool					signal;															 //!< 使用するか判定用フラグ
-} COUNTDOWN;
+} ;
 
 //*****************************************************************************
 // プロトタイプ宣言

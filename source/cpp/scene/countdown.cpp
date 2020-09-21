@@ -8,6 +8,7 @@
 #include "../../h/scene/fade.h"
 #include "../../h/other/sound.h"
 #include "../../h/scene/countdown.h"
+#include "../../h/object/objectclass.h"
 
 
 //*****************************************************************************

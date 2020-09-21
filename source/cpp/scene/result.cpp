@@ -9,20 +9,12 @@
 #include "../../h/other/input.h"
 #include "../../h/scene/fade.h"
 #include "../../h/other/sound.h"
+#include "../../h/object/objectclass.h"
 
 //*****************************************************************************
 // プロトタイプ宣言
 //*****************************************************************************
 HRESULT MakeVertexResult(void);
-
-//*****************************************************************************
-// グローバル変数
-//*****************************************************************************
-LPDIRECT3DTEXTURE9		g_pD3DTextureResultok = NULL;		// テクスチャへのポインタ
-LPDIRECT3DTEXTURE9		g_pD3DTextureResultno = NULL;	// テクスチャへのポインタ
-
-VERTEX_2D				g_vertexWkResultok[POLYGON_2D_VERTEX];			// 頂点情報格納ワーク
-VERTEX_2D				g_vertexWkResultno[POLYGON_2D_VERTEX];		// 頂点情報格納ワーク
 
 //=============================================================================
 // 初期化処理

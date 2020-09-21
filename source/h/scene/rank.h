@@ -19,13 +19,15 @@
 
 #define RANK_GOUKEI			(3)
 
-typedef struct
+class RANK : public OBJECT_2D
 {
-	LPDIRECT3DTEXTURE9		pD3DTexture = NULL;								//!< テクスチャへのポインタ 
-	VERTEX_2D				vertexWk[POLYGON_2D_VERTEX];					//!< 頂点情報格納ワーク
-	D3DXVECTOR3				pos;											//!< ポリゴンの座標
-	bool					use;											//!< 使用しているかどうか判定
-}RANK;
+public:
+	void						Init(void);					//!< 初期化
+	void						Reinit(void);				//!< 再初期化
+	void						Uninit(void);				//!< 終了
+	void						Update(void);				//!< 更新
+	void						Draw(void);					//!< 描画
+};
 
 //*****************************************************************************
 // プロトタイプ宣言

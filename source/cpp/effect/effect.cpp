@@ -8,30 +8,13 @@
 #include "../../h/effect/effect.h"
 #include "../../h/other/input.h"
 #include "../../h/object/camera.h"
+#include "../../h/object/objectclass.h"
 
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
 #define	TEXTURE_EFFECT			"../data/TEXTURE/effect000.jpg"	// 読み込むテクスチャファイル名
 
-#define	MAX_EFFECT				(4096)							// エフェクト最大数
-
-//*****************************************************************************
-// 構造体定義
-//*****************************************************************************
-typedef struct
-{
-	D3DXVECTOR3 pos;		// 位置
-	D3DXVECTOR3 rot;		// 回転
-	D3DXVECTOR3 scale;		// スケール
-	D3DXVECTOR3 move;		// 移動量
-	D3DXCOLOR col;			// 色
-	float fSizeX;			// 幅
-	float fSizeY;			// 高さ
-	int nTimer;				// タイマー
-	float nDecAlpha;		// 減衰値
-	bool bUse;				// 使用しているかどうか
-} EFFECT;
 
 //*****************************************************************************
 // プロトタイプ宣言

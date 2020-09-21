@@ -7,6 +7,7 @@
 #include "../../h/main.h"
 #include "../../h/object/player.h"
 #include "../../h/object/status.h"
+#include "../../h/object/objectclass.h"
 
 //*****************************************************************************
 // プロトタイプ宣言

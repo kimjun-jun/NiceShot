@@ -9,6 +9,7 @@
 #include "../../h/other/input.h"
 #include "../../h/scene/fade.h"
 #include "../../h/other/sound.h"
+#include "../../h/object/objectclass.h"
 
 //*****************************************************************************
 // É}ÉNÉçíËã`

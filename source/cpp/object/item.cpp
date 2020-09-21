@@ -8,8 +8,9 @@
 #include "../../h/object/item.h"
 #include "../../h/map/field.h"
 #include "../../h/object/player.h"
-#include "../../h/other/shadow.h"
+#include "../../h/object/shadow.h"
 #include "../../h/other/sound.h"
+#include "../../h/object/objectclass.h"
 
 //*****************************************************************************
 // マクロ定義
@@ -17,6 +18,9 @@
 #define	VALUE_ROTATE_ITEM		(D3DX_PI * 0.01f)			// 回転速度
 #define	VALUE_FALLSPEED_ITEM	(2.0f)						// 落下速度
 #define	ITEM_RADIUS				(20.0f)						// 半径
+#define DROP_ITEM_MAX						(20)																		//!< フィールドに落ちてるアイテムの数
+#define DROP_ITEM_CHARGE_ADDTIME			(1.0f)																		//!< アイテムをリスポーンさせる時の加算タイム
+#define DROP_ITEM_CHARGE_CNT				(60.0f)																		//!< アイテムをリスポーンさせる時の所要タイム
 
 //*****************************************************************************
 // プロトタイプ宣言
@@ -25,16 +29,11 @@
 
 //*****************************************************************************
 // グローバル変数
-
 //*****************************************************************************
 LPDIRECT3DTEXTURE9	g_pD3DTextureItem[ITEMTYPE_MAX];	// テクスチャ読み込み場所
 LPD3DXMESH			g_pMeshItem[ITEMTYPE_MAX];			// ID3DXMeshインターフェイスへのポインタ
 LPD3DXBUFFER		g_pD3DXMatBuffItem[ITEMTYPE_MAX];	// メッシュのマテリアル情報を格納
 DWORD				g_aNumMatItem[ITEMTYPE_MAX];			// 属性情報の総数
-
-D3DXMATRIX			g_mtxWorldItem;				// ワールドマトリックス
-
-ITEM				g_aItem[MAX_ITEM];			// アイテムワーク
 
 const char *c_aFileNameItemModel[ITEMTYPE_MAX] =
 {
@@ -61,7 +60,7 @@ const char *c_aFileNameItemTex[ITEMTYPE_MAX] =
 //=============================================================================
 // 初期化処理
 //=============================================================================
-HRESULT InitItem(void)
+void ITEM::Init(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 
@@ -72,17 +71,14 @@ HRESULT InitItem(void)
 		g_pD3DXMatBuffItem[nCntItemType] = NULL;
 
 		// Xファイルの読み込み
-		if(FAILED(D3DXLoadMeshFromX(c_aFileNameItemModel[nCntItemType],
-									D3DXMESH_SYSTEMMEM,
-									pDevice,
-									NULL,
-									&g_pD3DXMatBuffItem[nCntItemType],
-									NULL,
-									&g_aNumMatItem[nCntItemType],
-									&g_pMeshItem[nCntItemType])))
-		{
-			return E_FAIL;
-		}
+		D3DXLoadMeshFromX(c_aFileNameItemModel[nCntItemType],
+			D3DXMESH_SYSTEMMEM,
+			pDevice,
+			NULL,
+			&g_pD3DXMatBuffItem[nCntItemType],
+			NULL,
+			&g_aNumMatItem[nCntItemType],
+			&g_pMeshItem[nCntItemType]);
 
 		// テクスチャの読み込み
 		D3DXCreateTextureFromFile(pDevice,				// デバイスへのポインタ
@@ -91,23 +87,11 @@ HRESULT InitItem(void)
 
 	}
 
-	for(int nCntItem = 0; nCntItem < MAX_ITEM; nCntItem++)
+	for(int nCntItem = 0; nCntItem < OBJECT_ITEM_MAX; nCntItem++)
 	{
-		g_aItem[nCntItem].pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-		g_aItem[nCntItem].scl = D3DXVECTOR3(2.0f, 2.0f, 2.0f);
-		g_aItem[nCntItem].rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-		g_aItem[nCntItem].Upvec = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
-		g_aItem[nCntItem].rotVecAxis = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-		g_aItem[nCntItem].rotTOaxis = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-		g_aItem[nCntItem].Qrot = 0.0f;
-		g_aItem[nCntItem].fRadius = 0.0f;
-		g_aItem[nCntItem].Droptime = 0.0f;
-		g_aItem[nCntItem].nIdxShadow = -1;
-		g_aItem[nCntItem].nType = -1;
-		g_aItem[nCntItem].bUse = false;
-		g_aItem[nCntItem].GettingSignal = false;
-		g_aItem[nCntItem].GettingSignalEnd = false;
-		g_aItem[nCntItem].CollisionFieldEnd = false;
+		this[nCntItem].SetScl(D3DXVECTOR3(2.0f, 2.0f, 2.0f));
+		this[nCntItem].nIdxShadow = -1;
+		this[nCntItem].nType = -1;
 	}
 	for (int nCntItem = 0; nCntItem < DROP_ITEM_MAX; nCntItem++)
 	{
@@ -137,34 +121,31 @@ HRESULT InitItem(void)
 		//SetItem(pos, D3DXVECTOR3(1.0f, 1.0f, 1.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ITEMTYPE_TIKEI);
 
 	}
+	this[0].GoukeiDrop = DROP_ITEM_MAX;
 
-	g_aItem[0].GoukeiDrop = DROP_ITEM_MAX;
-	return S_OK;
 }
 
 //=============================================================================
 // 再初期化処理
 //=============================================================================
-HRESULT ReInitItem(void)
+void ITEM::Reinit(void)
 {
 
-	for (int nCntItem = 0; nCntItem < MAX_ITEM; nCntItem++)
+	for (int nCntItem = 0; nCntItem < OBJECT_ITEM_MAX; nCntItem++)
 	{
-		g_aItem[nCntItem].pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-		g_aItem[nCntItem].scl = D3DXVECTOR3(2.0f, 2.0f, 2.0f);
-		g_aItem[nCntItem].rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-		g_aItem[nCntItem].Upvec = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
-		g_aItem[nCntItem].rotVecAxis = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-		g_aItem[nCntItem].rotTOaxis = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-		g_aItem[nCntItem].Qrot = 0.0f;
-		g_aItem[nCntItem].fRadius = 0.0f;
-		g_aItem[nCntItem].Droptime = 0.0f;
-		g_aItem[nCntItem].nIdxShadow = -1;
-		g_aItem[nCntItem].nType = -1;
-		g_aItem[nCntItem].bUse = false;
-		g_aItem[nCntItem].GettingSignal = false;
-		g_aItem[nCntItem].GettingSignalEnd = false;
-		g_aItem[nCntItem].CollisionFieldEnd = false;
+		this[nCntItem].SetPos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		this[nCntItem].SetScl = D3DXVECTOR3(2.0f, 2.0f, 2.0f);
+		this[nCntItem].SetRot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		this[nCntItem].SetFieldNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		this[nCntItem].SetFieldNorUpNorCross = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		this[nCntItem].SetQrot = 0.0f;
+		this[nCntItem].SetUse(false);
+		this[nCntItem].Droptime = 0.0f;
+		this[nCntItem].nIdxShadow = -1;
+		this[nCntItem].nType = -1;
+		this[nCntItem].GettingSignal = false;
+		this[nCntItem].GettingSignalEnd = false;
+		this[nCntItem].CollisionFieldEnd = false;
 	}
 	for (int nCntItem = 0; nCntItem < DROP_ITEM_MAX; nCntItem++)
 	{
@@ -173,7 +154,6 @@ HRESULT ReInitItem(void)
 		int z = rand() % 2;
 		if (x == 1) pos.x *= -1;
 		if (z == 1) pos.z *= -1;
-
 		/*
 		enum
 		{
@@ -194,15 +174,13 @@ HRESULT ReInitItem(void)
 		//SetItem(pos, D3DXVECTOR3(1.0f, 1.0f, 1.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ITEMTYPE_TIKEI);
 
 	}
-
-	g_aItem[0].GoukeiDrop = DROP_ITEM_MAX;
-	return S_OK;
+	this[0].GoukeiDrop = DROP_ITEM_MAX;
 }
 
 //=============================================================================
 // 終了処理
 //=============================================================================
-void UninitItem(void)
+void ITEM::Uninit(void)
 {
 	for(int nCntItemType = 0; nCntItemType < ITEMTYPE_MAX; nCntItemType++)
 	{
@@ -229,46 +207,70 @@ void UninitItem(void)
 //=============================================================================
 // 更新処理
 //=============================================================================
-void UpdateItem(void)
+void ITEM::Update(void)
 {
-	for (int nCntItem = 0; nCntItem < MAX_ITEM; nCntItem++)
+	for (int nCntItem = 0; nCntItem < OBJECT_ITEM_MAX; nCntItem++)
 	{
-		if (g_aItem[nCntItem].bUse == true)
+		bool use = this[nCntItem].GetUse();
+		if (use == true)
 		{
+			//-------------------------------------------オブジェクトの値読み込み
+			D3DXVECTOR3 pos = this[nCntItem].GetPos();
+			D3DXVECTOR3 rot = this[nCntItem].GetRot();
+			D3DXVECTOR3 FieldNorVec = this[nCntItem].GetFieldNorVec();
+			D3DXVECTOR3 FieldNorUpNorCross = this[nCntItem].GetFieldNorUpNorCross();
+			float Qrot = this[nCntItem].GetQrot();
+
 			//フィールドに落ちてるときはくるくる回転させる
-			g_aItem[nCntItem].rot.y += VALUE_ROTATE_ITEM;
+			rot.y += VALUE_ROTATE_ITEM;
 
 			//徐々に落ちてくる
-			if (g_aItem[nCntItem].CollisionFieldEnd != true)
+			if (this[nCntItem].CollisionFieldEnd != true)
 			{
-				g_aItem[nCntItem].pos.y -= VALUE_FALLSPEED_ITEM;
+				pos.y -= VALUE_FALLSPEED_ITEM;
 			}
+
 			//地形の角度とプレイヤーの角度を計算。drawでクオータニオンで使う
-			D3DXVec3Cross(&g_aItem[nCntItem].rotTOaxis, &g_aItem[nCntItem].rotVecAxis, &g_aItem[nCntItem].Upvec);
-			float kakezan = D3DXVec3Dot(&g_aItem[nCntItem].rotVecAxis, &g_aItem[nCntItem].Upvec);
+			D3DXVECTOR3 Upvec = D3DXVECTOR3(0.0, 1.0f, 0.0f);
+			D3DXVec3Cross(&FieldNorVec, &FieldNorUpNorCross, &Upvec);
+			float kakezan = D3DXVec3Dot(&FieldNorUpNorCross, &Upvec);
 			if (kakezan != 0)
 			{
 				float cossita = kakezan /
-					sqrtf(g_aItem[nCntItem].rotVecAxis.x*g_aItem[nCntItem].rotVecAxis.x +
-						g_aItem[nCntItem].rotVecAxis.y *g_aItem[nCntItem].rotVecAxis.y +
-						g_aItem[nCntItem].rotVecAxis.z * g_aItem[nCntItem].rotVecAxis.z);
-				g_aItem[nCntItem].Qrot = acosf(cossita);
+					sqrtf(FieldNorUpNorCross.x*FieldNorUpNorCross.x +
+						FieldNorUpNorCross.y *FieldNorUpNorCross.y +
+						FieldNorUpNorCross.z * FieldNorUpNorCross.z);
+				Qrot = acosf(cossita);
 			}
-			else g_aItem[nCntItem].Qrot = 0.0f;
+			else Qrot = 0.0f;
+
+			//-------------------------------------------オブジェクトの値書き込み
+			this[nCntItem].SetPos(pos);
+			this[nCntItem].SetRot(rot);
+			this[nCntItem].SetFieldNorVec(FieldNorVec);
+//			this[nCntItem].SetFieldNorUpNorCross(FieldNorUpNorCross);
+			this[nCntItem].SetQrot(Qrot);
 		}
-		if (g_aItem[nCntItem].GettingSignal == true)
+
+
+		if (this[nCntItem].GettingSignal == true)
 		{
 			GettingItem(nCntItem);
 		}
+
+
 	}
+
+
 	//アイテムを復活させる制御。
-	for (int nCntItem = 0; nCntItem < MAX_ITEM; nCntItem++)
+	for (int nCntItem = 0; nCntItem < OBJECT_ITEM_MAX; nCntItem++)
 	{
-		if (g_aItem[0].GoukeiDrop > DROP_ITEM_MAX) break;
-		if (g_aItem[nCntItem].bUse == false)
+		if (this[0].GoukeiDrop > DROP_ITEM_MAX) break;
+		bool use = this[nCntItem].GetUse();
+		if (use == true)
 		{
-			g_aItem[nCntItem].Droptime += DROP_ITEM_CHARGE_ADDTIME;
-			if (g_aItem[nCntItem].Droptime >= DROP_ITEM_CHARGE_CNT)
+			this[nCntItem].Droptime += DROP_ITEM_CHARGE_ADDTIME;
+			if (this[nCntItem].Droptime >= DROP_ITEM_CHARGE_CNT)
 			{
 				D3DXVECTOR3 pos = D3DXVECTOR3(float(rand() % int(WALL_SIZE_X / 4)) + 100.0f, ITEM_INIT_POSY, float(rand() % int(WALL_SIZE_X / 4)) + 100.0f);
 				int x = rand() % 2;
@@ -280,9 +282,9 @@ void UpdateItem(void)
 				if (ItemNum == ITEMTYPE_LIFE && ItemNum == ITEMTYPE_CAMERA && ItemNum == ITEMTYPE_KIRI) ItemNum = rand() % ITEMTYPE_MAX;
 				SetItem(pos, D3DXVECTOR3(2.0f, 2.0f, 2.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ItemNum);
 				//SetItem(pos, D3DXVECTOR3(1.0f, 1.0f, 1.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ITEMTYPE_TIKEI);
-				g_aItem[nCntItem].CollisionFieldEnd = false;
-				g_aItem[nCntItem].Droptime = 0.0f;
-				g_aItem[0].GoukeiDrop++;
+				this[nCntItem].CollisionFieldEnd = false;
+				this[nCntItem].Droptime = 0.0f;
+				this[0].GoukeiDrop++;
 				PlaySound(SOUND_LABEL_SE_nyu);
 			}
 			break;
@@ -293,15 +295,16 @@ void UpdateItem(void)
 //=============================================================================
 // 描画処理
 //=============================================================================
-void DrawItem(void)
+void ITEM::Draw(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 	// ライティングを有効に
 	pDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
 
-	for(int nCntItem = 0; nCntItem < MAX_ITEM; nCntItem++)
+	for(int nCntItem = 0; nCntItem < OBJECT_ITEM_MAX; nCntItem++)
 	{
-		if (g_aItem[nCntItem].bUse==true)
+		bool use = this[nCntItem].GetUse();
+		if (use == true)
 		{
 			D3DXMATRIX mtxScl, mtxRot, mtxTranslate;
 			D3DXMATERIAL *pD3DXMat;
@@ -310,49 +313,59 @@ void DrawItem(void)
 			D3DXQUATERNION q(0, 0, 0, 1);
 			D3DXMATRIX mtxQ;
 			D3DXMatrixIdentity(&mtxQ);
+
+			//-------------------------------------------オブジェクトの値読み込み
+			D3DXMATRIX mtxWorldItem = this[nCntItem].GetMatrix();
+			D3DXVECTOR3 pos = this[nCntItem].GetPos();
+			D3DXVECTOR3 rot = this[nCntItem].GetRot();
+			D3DXVECTOR3 scl = this[nCntItem].GetScl();
+			D3DXVECTOR3 FieldNorVec = this[nCntItem].GetFieldNorVec();
+			float Qrot = this[nCntItem].GetQrot();
+
+
 			//q=(rotVecAxis法線)*(g_Player.rot回転)  -がキモ？
-			D3DXQuaternionRotationAxis(&q, &g_aItem[nCntItem].rotTOaxis, -g_aItem[nCntItem].Qrot);
+			D3DXQuaternionRotationAxis(&q, &FieldNorVec, -Qrot);
 			D3DXMatrixRotationQuaternion(&mtxQ, &q);
 
 			// ワールドマトリックスの初期化
-			D3DXMatrixIdentity(&g_mtxWorldItem);
+			D3DXMatrixIdentity(&mtxWorldItem);
 
 			// スケールを反映
-			D3DXMatrixScaling(&mtxScl, g_aItem[nCntItem].scl.x, g_aItem[nCntItem].scl.y, g_aItem[nCntItem].scl.z);
-			D3DXMatrixMultiply(&g_mtxWorldItem, &g_mtxWorldItem, &mtxScl);
+			D3DXMatrixScaling(&mtxScl, scl.x, scl.y, scl.z);
+			D3DXMatrixMultiply(&mtxWorldItem, &mtxWorldItem, &mtxScl);
 
 			// 回転を反映
-			D3DXMatrixRotationYawPitchRoll(&mtxRot, g_aItem[nCntItem].rot.y, g_aItem[nCntItem].rot.x, g_aItem[nCntItem].rot.z);
-			D3DXMatrixMultiply(&g_mtxWorldItem, &g_mtxWorldItem, &mtxRot);
-			D3DXMatrixMultiply(&g_mtxWorldItem, &g_mtxWorldItem, &mtxQ);
+			D3DXMatrixRotationYawPitchRoll(&mtxRot, rot.y, rot.x, rot.z);
+			D3DXMatrixMultiply(&mtxWorldItem, &mtxWorldItem, &mtxRot);
+			D3DXMatrixMultiply(&mtxWorldItem, &mtxWorldItem, &mtxQ);
 
 			// 移動を反映
-			D3DXMatrixTranslation(&mtxTranslate, g_aItem[nCntItem].pos.x, g_aItem[nCntItem].pos.y, g_aItem[nCntItem].pos.z);
-			D3DXMatrixMultiply(&g_mtxWorldItem, &g_mtxWorldItem, &mtxTranslate);
+			D3DXMatrixTranslation(&mtxTranslate, pos.x, pos.y, pos.z);
+			D3DXMatrixMultiply(&mtxWorldItem, &mtxWorldItem, &mtxTranslate);
 
 			// ワールドマトリックスの設定
-			pDevice->SetTransform(D3DTS_WORLD, &g_mtxWorldItem);
+			pDevice->SetTransform(D3DTS_WORLD, &mtxWorldItem);
 
 			// 現在のマテリアルを取得
 			pDevice->GetMaterial(&matDef);
 
-			pD3DXMat = (D3DXMATERIAL*)g_pD3DXMatBuffItem[g_aItem[nCntItem].nType]->GetBufferPointer();
+			pD3DXMat = (D3DXMATERIAL*)g_pD3DXMatBuffItem[this[nCntItem].nType]->GetBufferPointer();
 
-			for (int nCntMat = 0; nCntMat < (int)g_aNumMatItem[g_aItem[nCntItem].nType]; nCntMat++)
+			for (int nCntMat = 0; nCntMat < (int)g_aNumMatItem[this[nCntItem].nType]; nCntMat++)
 			{
 				// マテリアルの設定
 				pDevice->SetMaterial(&pD3DXMat[nCntMat].MatD3D);
 				if (pD3DXMat[nCntMat].pTextureFilename != NULL)
 				{
 					// テクスチャの設定
-					pDevice->SetTexture(0, g_pD3DTextureItem[g_aItem[nCntItem].nType]);
+					pDevice->SetTexture(0, g_pD3DTextureItem[this[nCntItem].nType]);
 				}
 
 				// テクスチャの設定
-				pDevice->SetTexture(0, g_pD3DTextureItem[g_aItem[nCntItem].nType]);
+				pDevice->SetTexture(0, g_pD3DTextureItem[this[nCntItem].nType]);
 
 				// 描画
-				g_pMeshItem[g_aItem[nCntItem].nType]->DrawSubset(nCntMat);
+				g_pMeshItem[this[nCntItem].nType]->DrawSubset(nCntMat);
 			}
 			pDevice->SetMaterial(&matDef);
 		}
@@ -364,22 +377,18 @@ void DrawItem(void)
 //=============================================================================
 // アイテムの設定
 //=============================================================================
-void SetItem(D3DXVECTOR3 pos, D3DXVECTOR3 scl, D3DXVECTOR3 rot, int nType)
+void ITEM::SetItem(D3DXVECTOR3 pos, D3DXVECTOR3 scl, D3DXVECTOR3 rot, int nType)
 {
-	for(int nCntItem = 0; nCntItem < MAX_ITEM; nCntItem++)
+	for(int nCntItem = 0; nCntItem < OBJECT_ITEM_MAX; nCntItem++)
 	{
-		if(!g_aItem[nCntItem].bUse)
+		bool use = this[nCntItem].GetUse();
+		if (use == true)
 		{
-			g_aItem[nCntItem].pos = pos;
-			g_aItem[nCntItem].scl = scl;
-			g_aItem[nCntItem].rot = rot;
-			g_aItem[nCntItem].fRadius = ITEM_RADIUS;
-			g_aItem[nCntItem].nType = nType;
-			g_aItem[nCntItem].bUse = true;
-
-			// 影の設定
-			//g_aItem[nCntItem].nIdxShadow = CreateShadow(g_aItem[nCntItem].pos, D3DXVECTOR3(g_aItem[nCntItem].fRadius * 2.0f, g_aItem[nCntItem].fRadius * 2.0f, g_aItem[nCntItem].fRadius * 2.0f));
-
+			this[nCntItem].SetPos(pos);
+			this[nCntItem].SetScl(scl);
+			this[nCntItem].SetRot(rot);
+			this[nCntItem].SetUse(true);
+			this[nCntItem].nType = nType;
 			break;
 		}
 	}
@@ -388,51 +397,56 @@ void SetItem(D3DXVECTOR3 pos, D3DXVECTOR3 scl, D3DXVECTOR3 rot, int nType)
 //=============================================================================
 // アイテムの削除
 //=============================================================================
-void DeleteItem(int nIdxItem)
+void ITEM::DeleteItem(int nIdxItem)
 {
-	if(nIdxItem >= 0 && nIdxItem < MAX_ITEM)
+	if(nIdxItem >= 0 && nIdxItem < OBJECT_ITEM_MAX)
 	{
-		ReleaseShadow(g_aItem[nIdxItem].nIdxShadow);
-		g_aItem[nIdxItem].bUse = false;
-		g_aItem[nIdxItem].CollisionFieldEnd = false;
+		this[nIdxItem].SetUse(false);
+		this[nIdxItem].CollisionFieldEnd = false;
 	}
-}
-
-//=============================================================================
-// アイテムの取得
-//=============================================================================
-ITEM *GetItem(void)
-{
-	return &g_aItem[0];
 }
 
 //=============================================================================
 // アイテムを取得したプレイヤーへ近づける関数
 //=============================================================================
-void GettingItem(int nIdxItem)
+void ITEM::GettingItem(int nIdxItem)
 {
-	if (g_aItem[nIdxItem].GettingSignalEnd == false)
+	if (this[nIdxItem].GettingSignalEnd == false)
 	{
+		//-------------------------------------------オブジェクトの値読み込み
+		D3DXVECTOR3 pos = this[nIdxItem].GetPos();
+		D3DXVECTOR3 rot = this[nIdxItem].GetRot();
+		D3DXVECTOR3 scl = this[nIdxItem].GetScl();
+
 		//くるくる回転を加速
-		g_aItem[nIdxItem].rot.y += VALUE_ROTATE_ITEM*10;
+		rot.y += VALUE_ROTATE_ITEM*10;
 		
 		//プレイヤーとアイテムの距離を計算し/5分づつ近づける
-		PLAYER_HONTAI *p = GetPlayerHoudai();
-		D3DXVECTOR3 distance = p[g_aItem[nIdxItem].GetPlayerType].pos - g_aItem[nIdxItem].pos;
+		this[nIdxItem].p = GetpPlayer();
+
+//		PLAYER_HONTAI *p = GetpPlayer();
+
+		D3DXVECTOR3 PlayerPos = this[nIdxItem].p[this[nIdxItem].GetPlayerType].GetPos();
+
+		D3DXVECTOR3 distance = PlayerPos - pos;
 		distance /= 4.0f;
-		g_aItem[nIdxItem].pos += distance;
-		g_aItem[nIdxItem].scl -= D3DXVECTOR3(ITEM_SMALL_SCL, ITEM_SMALL_SCL, ITEM_SMALL_SCL);
-		if (g_aItem[nIdxItem].scl.x <= ITEM_DELETE_SCL)
+		pos += distance;
+		scl -= D3DXVECTOR3(ITEM_SMALL_SCL, ITEM_SMALL_SCL, ITEM_SMALL_SCL);
+		if (scl.x <= ITEM_DELETE_SCL)
 		{
-			g_aItem[nIdxItem].GettingSignalEnd = true;
+			this[nIdxItem].GettingSignalEnd = true;
 		}
+
+		//-------------------------------------------オブジェクトの値書き込み
+		this[nIdxItem].SetPos(pos);
+		this[nIdxItem].SetRot(rot);
 	}
 
 	else
 	{
 		DeleteItem(nIdxItem);
-		g_aItem[nIdxItem].GettingSignal = false;
-		g_aItem[nIdxItem].GettingSignalEnd = false;
-		g_aItem[0].GoukeiDrop--;
+		this[nIdxItem].GettingSignal = false;
+		this[nIdxItem].GettingSignalEnd = false;
+		this[0].GoukeiDrop--;
 	}
 }

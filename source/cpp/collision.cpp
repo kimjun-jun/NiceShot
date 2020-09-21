@@ -270,9 +270,9 @@ void CheakHit(int scene)
 						break;
 					case ITEMTYPE_BULLET:
 						//switch()
-						p[CntPlayer].AmmoNum = PLAYER_AMMOPOWER_NORMAL;
-						ChangeBulletTex(MAX_AMMO, CntPlayer);
-						p[CntPlayer].AmmoBornCnt = 0.0f;
+						p[CntPlayer].AmmoCnt = PLAYER_AMMOPOWER_NORMAL;
+						//ChangeBulletTex(MAX_AMMO, CntPlayer);
+						p[CntPlayer].AmmoBornTime = 0.0f;
 						PlaySound(SOUND_LABEL_SE_enter03);
 						break;
 					case ITEMTYPE_SPEEDUP:
