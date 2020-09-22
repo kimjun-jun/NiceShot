@@ -23,25 +23,25 @@ enum
 class EXPLOSION : public OBJECT_3D
 {
 public:
+	EXPLOSION() { nCounter = 0, nPatternX = 0, nPatternY = 0, nType = 0, fSizeX = 0.0f, fSizeY = 0.0f; };
 	void						Init(void);					//!< 初期化
 	void						Reinit(void);				//!< 再初期化
 	void						Uninit(void);				//!< 終了
 	void						Update(void);				//!< 更新
 	void						Draw(void);					//!< 描画
-	int nCounter;			// カウンター
-	int nPatternX;			// パターンNo.X
-	int nPatternY;			// パターンNo.Y
-	int nType;				// 種類
+	HRESULT						MakeVertexExplosion(LPDIRECT3DDEVICE9 pDevice);
+	void						SetVertexExplosion(int nIdxBullet, float fSizeX, float fSizeY);
+	void						SetColorExplosion(int nIdxExplosion, D3DXCOLOR col);
+	void						SetTextureExplosion(int nIdxExplosion, int nPatternX, int nPatternY);
+	int							SetExplosion(D3DXVECTOR3 pos, float fSizeX, float fSizeY, int nType, D3DXCOLOR col);
+
+	int							nCounter;			//!< カウンター
+	int							nPatternX;			//!< パターンNo.X
+	int							nPatternY;			//!< パターンNo.Y
+	int							nType;				//!< 種類
+	float						fSizeX;				//!< サイズX
+	float						fSizeY;				//!< サイズY
 } ;
 
 
-//*****************************************************************************
-// プロトタイプ宣言
-//*****************************************************************************
-HRESULT InitExplosion(int type);
-void UninitExplosion(void);
-void UpdateExplosion(void);
-void DrawExplosion(int CntPlayer);
-
-int SetExplosion(D3DXVECTOR3 pos, float fSizeX, float fSizeY, int nType, D3DXCOLOR col);
 

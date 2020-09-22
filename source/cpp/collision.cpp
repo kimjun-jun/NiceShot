@@ -104,7 +104,7 @@ void CheakHit(int scene)
 	WALL *Wall = GetWall();							//wall
 	int WallNum = GetWallNum();						//wall‘”
 	DAMEGE *damede =GetDamege();					//screendamege
-
+	EFFECT *e = GetEffect();
 
 	//ƒvƒŒƒCƒ„[‚É‘Î‚·‚é“–‚½‚è”»’è
 	for (int CntPlayer = 0; CntPlayer < PLAYER_MAX; CntPlayer++)

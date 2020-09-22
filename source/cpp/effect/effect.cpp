@@ -15,61 +15,51 @@
 //*****************************************************************************
 #define	TEXTURE_EFFECT			"../data/TEXTURE/effect000.jpg"	// 読み込むテクスチャファイル名
 
-
-//*****************************************************************************
-// プロトタイプ宣言
-//*****************************************************************************
-HRESULT MakeVertexEffect(LPDIRECT3DDEVICE9 pDevice);
-void SetVertexEffect(int nIdxEffect, float fSizeX, float fSizeY);
-void SetColorEffect(int nIdxEffect, D3DXCOLOR col);
-
 //*****************************************************************************
 // グローバル変数
 //*****************************************************************************
 LPDIRECT3DTEXTURE9		g_pD3DTextureEffect = NULL;		// テクスチャへのポインタ
 LPDIRECT3DVERTEXBUFFER9 g_pD3DVtxBuffEffect = NULL;		// 頂点バッファインターフェースへのポインタ
 
-D3DXMATRIX				g_mtxWorldEffect;				// ワールドマトリックス
-
-EFFECT					g_aEffect[MAX_EFFECT];			// 弾ワーク
-
 //=============================================================================
 // 初期化処理
 //=============================================================================
-HRESULT InitEffect(int type)
+void EFFECT::Init(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 
 	// 頂点情報の作成
 	MakeVertexEffect(pDevice);
-	if (type == 0)
-	{
+
 		// テクスチャの読み込み
 		D3DXCreateTextureFromFile(pDevice,					// デバイスへのポインタ
 			TEXTURE_EFFECT,			// ファイルの名前
 			&g_pD3DTextureEffect);	// 読み込むメモリー
-	}
-	for (int nCntEffect = 0; nCntEffect < MAX_EFFECT; nCntEffect++)
-	{
-		g_aEffect[nCntEffect].pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-		g_aEffect[nCntEffect].rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-		g_aEffect[nCntEffect].scale = D3DXVECTOR3(1.0f, 1.0f, 1.0f);
-		g_aEffect[nCntEffect].move = D3DXVECTOR3(1.0f, 1.0f, 1.0f);
-		g_aEffect[nCntEffect].col = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
-		g_aEffect[nCntEffect].nDecAlpha = 0.0f;
-		g_aEffect[nCntEffect].fSizeX = EFFECT_NORMALSET_SIZE_X;
-		g_aEffect[nCntEffect].fSizeY = EFFECT_NORMALSET_SIZE_Y;
-		g_aEffect[nCntEffect].nTimer = 0;
-		g_aEffect[nCntEffect].bUse = false;
-	}
 
-	return S_OK;
+}
+
+//=============================================================================
+// 再初期化処理
+//=============================================================================
+void EFFECT::Reinit(void)
+{
+	for (int nCntEffect = 0; nCntEffect < OBJECT_EFFECT_MAX; nCntEffect++)
+	{
+		this[nCntEffect].SetPos(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+		this[nCntEffect].SetRot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		this[nCntEffect].SetScl = D3DXVECTOR3(1.0f, 1.0f, 1.0f);
+		this[nCntEffect].SetMove = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		this[nCntEffect].SetCol = D3DXCOLOR(DWORD(0));
+		this[nCntEffect].nTimer = 0;
+		this[nCntEffect].nDecAlpha = 0.0f;
+		this[nCntEffect].SetUse(false);
+	}
 }
 
 //=============================================================================
 // 終了処理
 //=============================================================================
-void UninitEffect(void)
+void  EFFECT::Uninit(void)
 {
 	if (g_pD3DTextureEffect != NULL)
 	{// テクスチャの開放
@@ -87,29 +77,40 @@ void UninitEffect(void)
 //=============================================================================
 // 更新処理
 //=============================================================================
-void UpdateEffect(void)
+void  EFFECT::Update(void)
 {
-	for (int nCntEffect = 0; nCntEffect < MAX_EFFECT; nCntEffect++)
+	for (int nCntEffect = 0; nCntEffect < OBJECT_EFFECT_MAX; nCntEffect++)
 	{
-		if (g_aEffect[nCntEffect].bUse)
+		bool use = this[nCntEffect].GetUse();
+		if (use)
 		{
-			g_aEffect[nCntEffect].pos.x += g_aEffect[nCntEffect].move.x;
-			g_aEffect[nCntEffect].pos.z += g_aEffect[nCntEffect].move.z;
+			//--------------------------------------------オブジェクト値読み込み
+			D3DXVECTOR3 pos = this[nCntEffect].GetPos();
+			D3DXVECTOR3 move = this[nCntEffect].GetMove();
+			D3DXCOLOR col = this[nCntEffect].GetCol();
 
-			g_aEffect[nCntEffect].col.a -= g_aEffect[nCntEffect].nDecAlpha;
-			if (g_aEffect[nCntEffect].col.a <= 0.0f)
+			pos.x += move.x;
+			pos.z += move.z;
+
+			col.a -= this[nCntEffect].nDecAlpha;
+			if (col.a <= 0.0f)
 			{
-				g_aEffect[nCntEffect].col.a = 0.0f;
+				col.a = 0.0f;
 			}
 
 			//カラーセット
-			SetColorEffect(nCntEffect, D3DXCOLOR(g_aEffect[nCntEffect].col.r, g_aEffect[nCntEffect].col.b, g_aEffect[nCntEffect].col.b, g_aEffect[nCntEffect].col.a));
+			SetColorEffect(nCntEffect, col);
 
-			g_aEffect[nCntEffect].nTimer--;
-			if (g_aEffect[nCntEffect].nTimer <= 0)
+			this[nCntEffect].nTimer--;
+			if (this[nCntEffect].nTimer <= 0)
 			{
-				g_aEffect[nCntEffect].bUse = false;
+				this[nCntEffect].SetUse(false);
 			}
+
+			//--------------------------------------------オブジェクト値書き込み
+			this[nCntEffect].SetPos(pos);
+			this[nCntEffect].SetCol(col);
+
 		}
 	}
 }
@@ -117,48 +118,55 @@ void UpdateEffect(void)
 //=============================================================================
 // 描画処理
 //=============================================================================
-void DrawEffect(int CntPlayer)
+void  EFFECT::Draw(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
-	D3DXMATRIX mtxView, mtxScale, mtxTranslate;
 
 	pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);		// αソースカラーの指定
 	pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);			// αデスティネーションカラーの指定
 	pDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
 
-	// Z比較なし
-	//pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS);
-
-	for (int nCntEffect = 0; nCntEffect < MAX_EFFECT; nCntEffect++)
+	for (int nCntEffect = 0; nCntEffect < OBJECT_EFFECT_MAX; nCntEffect++)
 	{
-		if (g_aEffect[nCntEffect].bUse)
+		bool use = this[nCntEffect].GetUse();
+		if (use)
 		{
+			//--------------------------------------------オブジェクト値読み込み
+			D3DXVECTOR3 pos = this[nCntEffect].GetPos();
+			D3DXVECTOR3 scl = this[nCntEffect].GetScl();
+			D3DXCOLOR col = this[nCntEffect].GetCol();
+			D3DXMATRIX mtxWorldEffect = this[nCntEffect].GetMatrix();
+
+			for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
+			{
+				D3DXMATRIX mtxView, mtxScale, mtxTranslate;
+
 				// ワールドマトリックスの初期化
-				D3DXMatrixIdentity(&g_mtxWorldEffect);
+				D3DXMatrixIdentity(&mtxWorldEffect);
 
 				// ビューマトリックスを取得
 				CAMERA *cam = GetCamera();
 
-				g_mtxWorldEffect._11 = cam[CntPlayer].mtxView._11;
-				g_mtxWorldEffect._12 = cam[CntPlayer].mtxView._21;
-				g_mtxWorldEffect._13 = cam[CntPlayer].mtxView._31;
-				g_mtxWorldEffect._21 = cam[CntPlayer].mtxView._12;
-				g_mtxWorldEffect._22 = cam[CntPlayer].mtxView._22;
-				g_mtxWorldEffect._23 = cam[CntPlayer].mtxView._32;
-				g_mtxWorldEffect._31 = cam[CntPlayer].mtxView._13;
-				g_mtxWorldEffect._32 = cam[CntPlayer].mtxView._23;
-				g_mtxWorldEffect._33 = cam[CntPlayer].mtxView._33;
+				mtxWorldEffect._11 = cam[CntPlayer].mtxView._11;
+				mtxWorldEffect._12 = cam[CntPlayer].mtxView._21;
+				mtxWorldEffect._13 = cam[CntPlayer].mtxView._31;
+				mtxWorldEffect._21 = cam[CntPlayer].mtxView._12;
+				mtxWorldEffect._22 = cam[CntPlayer].mtxView._22;
+				mtxWorldEffect._23 = cam[CntPlayer].mtxView._32;
+				mtxWorldEffect._31 = cam[CntPlayer].mtxView._13;
+				mtxWorldEffect._32 = cam[CntPlayer].mtxView._23;
+				mtxWorldEffect._33 = cam[CntPlayer].mtxView._33;
 
 				// スケールを反映
-				D3DXMatrixScaling(&mtxScale, g_aEffect[nCntEffect].scale.x, g_aEffect[nCntEffect].scale.y, g_aEffect[nCntEffect].scale.z);
-				D3DXMatrixMultiply(&g_mtxWorldEffect, &g_mtxWorldEffect, &mtxScale);
+				D3DXMatrixScaling(&mtxScale, scl.x, scl.y, scl.z);
+				D3DXMatrixMultiply(&mtxWorldEffect, &mtxWorldEffect, &mtxScale);
 
 				// 移動を反映
-				D3DXMatrixTranslation(&mtxTranslate, g_aEffect[nCntEffect].pos.x, g_aEffect[nCntEffect].pos.y, g_aEffect[nCntEffect].pos.z);
-				D3DXMatrixMultiply(&g_mtxWorldEffect, &g_mtxWorldEffect, &mtxTranslate);
+				D3DXMatrixTranslation(&mtxTranslate, pos.x, pos.y, pos.z);
+				D3DXMatrixMultiply(&mtxWorldEffect, &mtxWorldEffect, &mtxTranslate);
 
 				// ワールドマトリックスの設定
-				pDevice->SetTransform(D3DTS_WORLD, &g_mtxWorldEffect);
+				pDevice->SetTransform(D3DTS_WORLD, &mtxWorldEffect);
 
 				pDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
 
@@ -175,24 +183,22 @@ void DrawEffect(int CntPlayer)
 				pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, (nCntEffect * 4), POLYGON_2D_NUM);
 
 				pDevice->SetRenderState(D3DRS_LIGHTING, TRUE);
+			}
 		}
 	}
 	pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);		// αソースカラーの指定
 	pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);	// αデスティネーションカラーの指定
 	pDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
 
-	// Z比較あり
-	//pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
-
 }
 
 //=============================================================================
 // 頂点情報の作成
 //=============================================================================
-HRESULT MakeVertexEffect(LPDIRECT3DDEVICE9 pDevice)
+HRESULT EFFECT::MakeVertexEffect(LPDIRECT3DDEVICE9 pDevice)
 {
 	// オブジェクトの頂点バッファを生成
-	if (FAILED(pDevice->CreateVertexBuffer(sizeof(VERTEX_3D) * POLYGON_2D_VERTEX * MAX_EFFECT,	// 頂点データ用に確保するバッファサイズ(バイト単位)
+	if (FAILED(pDevice->CreateVertexBuffer(sizeof(VERTEX_3D) * POLYGON_2D_VERTEX * OBJECT_EFFECT_MAX,	// 頂点データ用に確保するバッファサイズ(バイト単位)
 		D3DUSAGE_WRITEONLY,							// 頂点バッファの使用法　
 		FVF_VERTEX_3D,								// 使用する頂点フォーマット
 		D3DPOOL_MANAGED,							// リソースのバッファを保持するメモリクラスを指定
@@ -208,7 +214,7 @@ HRESULT MakeVertexEffect(LPDIRECT3DDEVICE9 pDevice)
 		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
 		g_pD3DVtxBuffEffect->Lock(0, 0, (void**)&pVtx, 0);
 
-		for (int nCntEffect = 0; nCntEffect < MAX_EFFECT; nCntEffect++, pVtx += 4)
+		for (int nCntEffect = 0; nCntEffect < OBJECT_EFFECT_MAX; nCntEffect++, pVtx += 4)
 		{
 			// 頂点座標の設定
 			pVtx[0].vtx = D3DXVECTOR3(-EFFECT_NORMALSET_SIZE_X / 2, -EFFECT_NORMALSET_SIZE_Y / 2, 0.0f);
@@ -245,7 +251,7 @@ HRESULT MakeVertexEffect(LPDIRECT3DDEVICE9 pDevice)
 //=============================================================================
 // 頂点座標の設定
 //=============================================================================
-void SetVertexEffect(int nIdxEffect, float fSizeX, float fSizeY)
+void  EFFECT::SetVertexEffect(int nIdxEffect, float fSizeX, float fSizeY)
 {
 	{//頂点バッファの中身を埋める
 		VERTEX_3D *pVtx;
@@ -269,7 +275,7 @@ void SetVertexEffect(int nIdxEffect, float fSizeX, float fSizeY)
 //=============================================================================
 // 頂点カラーの設定
 //=============================================================================
-void SetColorEffect(int nIdxEffect, D3DXCOLOR col)
+void  EFFECT::SetColorEffect(int nIdxEffect, D3DXCOLOR col)
 {
 	{//頂点バッファの中身を埋める
 		VERTEX_3D *pVtx;
@@ -293,32 +299,29 @@ void SetColorEffect(int nIdxEffect, D3DXCOLOR col)
 //=============================================================================
 // エフェクトの設定
 //=============================================================================
-int SetEffect(D3DXVECTOR3 pos, D3DXVECTOR3 move, D3DXCOLOR col, float fSizeX, float fSizeY, int nTimer)
+int  EFFECT::SetEffect(D3DXVECTOR3 pos, D3DXVECTOR3 move, D3DXCOLOR col, float fSizeX, float fSizeY, int nTimer)
 {
 	int nIdxEffect = -1;
 
-	for (int nCntEffect = 0; nCntEffect < MAX_EFFECT; nCntEffect++)
+	for (int nCntEffect = 0; nCntEffect < OBJECT_EFFECT_MAX; nCntEffect++)
 	{
-		if (!g_aEffect[nCntEffect].bUse)
+		bool use = this[nCntEffect].GetUse();
+		if (use != true)
 		{
-			g_aEffect[nCntEffect].pos = pos;
-			g_aEffect[nCntEffect].rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-			g_aEffect[nCntEffect].scale = D3DXVECTOR3(1.0f, 1.0f, 1.0f);
-			g_aEffect[nCntEffect].move = move;
-			g_aEffect[nCntEffect].col = col;
-			g_aEffect[nCntEffect].fSizeX = fSizeX;
-			g_aEffect[nCntEffect].fSizeY = fSizeY;
-			g_aEffect[nCntEffect].nTimer = nTimer;
-			g_aEffect[nCntEffect].nDecAlpha = col.a / nTimer;
-			g_aEffect[nCntEffect].bUse = true;
+			this[nCntEffect].SetPos(pos);
+			this[nCntEffect].SetRot(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+			this[nCntEffect].SetScl(D3DXVECTOR3(1.0f, 1.0f, 1.0f));
+			this[nCntEffect].SetMove(move);
+			this[nCntEffect].SetCol(col);
+			this[nCntEffect].nTimer = nTimer;
+			this[nCntEffect].nDecAlpha = col.a / nTimer;
+			this[nCntEffect].SetUse(true);
 
 			// 頂点座標の設定
 			SetVertexEffect(nCntEffect, fSizeX, fSizeY);
 
 			// 頂点カラーの設定
-			SetColorEffect(nCntEffect,
-				D3DXCOLOR(g_aEffect[nCntEffect].col.r, g_aEffect[nCntEffect].col.g,
-					g_aEffect[nCntEffect].col.b, g_aEffect[nCntEffect].col.a));
+			SetColorEffect(nCntEffect,col);
 
 			nIdxEffect = nCntEffect;
 

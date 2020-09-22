@@ -165,8 +165,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	GAME_OBJECT* ObjectAll[OBJECT_ALL_MAX] =
 	{
 		ObjectAll[0] = new PLAYER_HONTAI[OBJECT_PLAYER_MAX],
-		ObjectAll[ObjectAll[0]->GetCnt()] = new PLAYER_PRATS[OBJECT_PLAYER_HOUSIN_MAX],
-		ObjectAll[ObjectAll[0]->GetCnt()] = new PLAYER_PRATS[OBJECT_PLAYER_HOUTOU_MAX],
 		ObjectAll[ObjectAll[0]->GetCnt()] = new TUTO[OBJECT_TUTORIAL_MAX],
 		ObjectAll[ObjectAll[0]->GetCnt()] = new STATUS[OBJECT_STATUS_MAX],
 		ObjectAll[ObjectAll[0]->GetCnt()] = new BULLETPREDICTION[OBJECT_BULLETPREDICTION_MAX],

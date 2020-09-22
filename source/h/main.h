@@ -155,10 +155,11 @@ enum OBJECT_MAX
 #define	WALL_INIT_POSZ						(2600.0f)																	//!< 初期座標壁
 
 //モデル等のサイズ
-#define	BULLET_EFFECT_SIZE					(4.0f)																		//!< 歩きに比べてのダッシュの速度倍率
-#define	BULLET_EFFECT_TIME					(240)																		//!< 左右歩きの移動量倍率(-1000～1000が入力範囲なのでそれに乗算する)
+#define	BULLET_EFFECT_SIZE					(4.0f)																		//!< 
+#define	BULLET_EFFECT_TIME					(240)																		//!< 
 #define	WALL_SIZE_X							(WALL_INIT_POSX*2)															//!< 壁のサイズX
 #define	WALL_SIZE_Y							(800.0f)																	//!< 壁のサイズY
+#define	EXPLOSION_SIZE						(5.0f)																		//!< 
 
 
 //移動量マクロ
