@@ -28,108 +28,91 @@
 #define BULLETGAUGE_P4_POS_Y		SCREEN_H - SCREEN_SEPARATE_BUFF - BULLETGAUGE_POS_Y
 
 
-//*****************************************************************************
-// プロトタイプ宣言
-//*****************************************************************************
-HRESULT MakeVertexBulletGauge(LPDIRECT3DDEVICE9 pDevice, int CntPlayer);
-
 //=============================================================================
 // 初期化処理
 //=============================================================================
-HRESULT InitBulletGauge(void)
+void BULLETGAUGE::Init(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 
-	g_posBulletGauge[0] = D3DXVECTOR3(BULLETGAUGE_P1_POS_X, BULLETGAUGE_P1_POS_Y, 0.0f);
-	g_posBulletGauge[1] = D3DXVECTOR3(BULLETGAUGE_P2_POS_X, BULLETGAUGE_P2_POS_Y, 0.0f);
-	g_posBulletGauge[2] = D3DXVECTOR3(BULLETGAUGE_P3_POS_X, BULLETGAUGE_P3_POS_Y, 0.0f);
-	g_posBulletGauge[3] = D3DXVECTOR3(BULLETGAUGE_P4_POS_X, BULLETGAUGE_P4_POS_Y, 0.0f);
+	this[0].SetPos(D3DXVECTOR3(BULLETGAUGE_P1_POS_X, BULLETGAUGE_P1_POS_Y, 0.0f));
+	this[1].SetPos(D3DXVECTOR3(BULLETGAUGE_P2_POS_X, BULLETGAUGE_P2_POS_Y, 0.0f));
+	this[2].SetPos(D3DXVECTOR3(BULLETGAUGE_P3_POS_X, BULLETGAUGE_P3_POS_Y, 0.0f));
+	this[3].SetPos(D3DXVECTOR3(BULLETGAUGE_P4_POS_X, BULLETGAUGE_P4_POS_Y, 0.0f));
 
-	// 弾薬の初期化
-	g_nBulletGauge[0] = PLAYER_AMMOPOWER_NORMAL;
-	g_nBulletGauge[1] = PLAYER_AMMOPOWER_NORMAL;
-	g_nBulletGauge[2] = PLAYER_AMMOPOWER_NORMAL;
-	g_nBulletGauge[3] = PLAYER_AMMOPOWER_NORMAL;
-
-	// 頂点情報の作成
-	for (int CntPlayer = 0; CntPlayer < PLAYER_MAX; CntPlayer++)
+	for (int CntBulletGauge = 0; CntBulletGauge < OBJECT_BULLETGAUGE_MAX; CntBulletGauge++)
 	{
-		MakeVertexBulletGauge(pDevice,CntPlayer);
+
+		// 弾薬の初期化
+		this[CntBulletGauge].AmmoPower = PLAYER_AMMOPOWER_NORMAL;
+
+		// 頂点情報の作成
+		MakeVertexBulletGauge(pDevice, CntBulletGauge);
+
 	}
+
+	LPDIRECT3DTEXTURE9 pD3DTexture = NULL;
+
 	// テクスチャの読み込み
 	D3DXCreateTextureFromFile(pDevice,					// デバイスへのポインタ
-								TEXTURE_BULLETGAUGE,			// ファイルの名前
-								&g_pD3DTextureBulletGauge);	// 読み込むメモリー
+		TEXTURE_BULLETGAUGE,			// ファイルの名前
+		&pD3DTexture);	// 読み込むメモリー
 
-	return S_OK;
+	this[0].tex2DVB.SetpD3DTexture(pD3DTexture);
 }
 
 //=============================================================================
 // 再初期化処理
 //=============================================================================
-HRESULT ReInitBulletGauge(void)
+void BULLETGAUGE::Reinit(void)
 {
-	// 弾薬の初期化
-	g_nBulletGauge[0] = PLAYER_AMMOPOWER_NORMAL;
-	g_nBulletGauge[1] = PLAYER_AMMOPOWER_NORMAL;
-	g_nBulletGauge[2] = PLAYER_AMMOPOWER_NORMAL;
-	g_nBulletGauge[3] = PLAYER_AMMOPOWER_NORMAL;
-
-	return S_OK;
+	for (int CntBulletGauge = 0; CntBulletGauge < OBJECT_BULLETGAUGE_MAX; CntBulletGauge++)
+	{
+		// 弾薬の初期化
+		this[CntBulletGauge].AmmoPower = PLAYER_AMMOPOWER_NORMAL;
+	}
 }
 
 //=============================================================================
 // 終了処理
 //=============================================================================
-void UninitBulletGauge(void)
+void BULLETGAUGE::Uninit(void)
 {
-	if (g_pD3DTextureBulletGauge != NULL)
-	{// テクスチャの開放
-		g_pD3DTextureBulletGauge->Release();
-		g_pD3DTextureBulletGauge = NULL;
-	}
 
-	for (int CntPlayer = 0; CntPlayer < PLAYER_MAX; CntPlayer++)
-	{
-		if (g_pD3DVtxBuffBulletGauge[CntPlayer] != NULL)
-		{// 頂点バッファの開放
-			g_pD3DVtxBuffBulletGauge[CntPlayer]->Release();
-			g_pD3DVtxBuffBulletGauge[CntPlayer] = NULL;
-		}
-	}
 }
 
 //=============================================================================
 // 更新処理
 //=============================================================================
-void UpdateBulletGauge(void)
+void BULLETGAUGE::Update(void)
 {
-	PLAYER_HONTAI *p =GetPlayerHoudai();
-	for (int CntPlayer = 0; CntPlayer < PLAYER_MAX; CntPlayer++)
+	PLAYER_HONTAI *p =this[0].GetPlayer();
+	for (int CntBulletGauge = 0; CntBulletGauge < OBJECT_BULLETGAUGE_MAX; CntBulletGauge++)
 	{
-			g_nBulletGauge[CntPlayer] = p[CntPlayer].AmmoNum;
+		this[CntBulletGauge].AmmoPower = p[CntBulletGauge].AmmoCnt;
 	}
 }
 
 //=============================================================================
 // 描画処理
 //=============================================================================
-void DrawBulletGauge(void)
+void BULLETGAUGE::Draw(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
-	for (int CntPlayer = 0; CntPlayer < PLAYER_MAX; CntPlayer++)
+
+	for (int CntBulletGauge = 0; CntBulletGauge < OBJECT_BULLETGAUGE_MAX; CntBulletGauge++)
 	{
 		// 頂点バッファをデバイスのデータストリームにバインド
-		pDevice->SetStreamSource(0, g_pD3DVtxBuffBulletGauge[CntPlayer], 0, sizeof(VERTEX_2D));
+		pDevice->SetStreamSource(0, this[CntBulletGauge].tex2DVB.GetpD3DVtxBuff, 0, sizeof(VERTEX_2D));
 
 		// 頂点フォーマットの設定
 		pDevice->SetFVF(FVF_VERTEX_2D);
 
 		// テクスチャの設定
-		pDevice->SetTexture(0, g_pD3DTextureBulletGauge);
+		pDevice->SetTexture(0, this[0].tex2DVB.GetpD3DTexture());
 
 		// ポリゴンの描画
-		for (int nCntPlace = 0; nCntPlace < g_nBulletGauge[CntPlayer]; nCntPlace++)
+		for (int nCntPlace = 0; nCntPlace < this[CntBulletGauge].AmmoPower; nCntPlace++)
 		{
 			pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, (nCntPlace * 4), POLYGON_2D_NUM);
 		}
@@ -139,14 +122,15 @@ void DrawBulletGauge(void)
 //=============================================================================
 // 頂点の作成
 //=============================================================================
-HRESULT MakeVertexBulletGauge(LPDIRECT3DDEVICE9 pDevice, int CntPlayer)
+HRESULT BULLETGAUGE::MakeVertexBulletGauge(LPDIRECT3DDEVICE9 pDevice, int CntBulletGauge)
 {
 	// オブジェクトの頂点バッファを生成
+	LPDIRECT3DVERTEXBUFFER9 VtxBuffBulletGauge = NULL;
     if( FAILED( pDevice->CreateVertexBuffer(sizeof(VERTEX_2D) * (POLYGON_2D_VERTEX * PLAYER_AMMOPOWER_STRONG + 4),		// 頂点データ用に確保するバッファサイズ(バイト単位)
 												D3DUSAGE_WRITEONLY,							// 頂点バッファの使用法　
 												FVF_VERTEX_2D,								// 使用する頂点フォーマット
 												D3DPOOL_MANAGED,							// リソースのバッファを保持するメモリクラスを指定
-												&g_pD3DVtxBuffBulletGauge[CntPlayer],							// 頂点バッファインターフェースへのポインタ
+												&VtxBuffBulletGauge,							// 頂点バッファインターフェースへのポインタ
 												NULL)))										// NULLに設定
 	{
         return E_FAIL;
@@ -156,39 +140,18 @@ HRESULT MakeVertexBulletGauge(LPDIRECT3DDEVICE9 pDevice, int CntPlayer)
 		VERTEX_2D *pVtx;
 
 		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
-		g_pD3DVtxBuffBulletGauge[CntPlayer]->Lock(0, 0, (void**)&pVtx, 0);
+		VtxBuffBulletGauge->Lock(0, 0, (void**)&pVtx, 0);
 
 		for(int nCntPlace = 0; nCntPlace < PLAYER_AMMOPOWER_STRONG; nCntPlace++, pVtx += 4)
 		{
+			//---------------------------オブジェクト値読み込み
+			D3DXVECTOR3 pos = this[CntBulletGauge].GetPos();
+
 			// 頂点座標の設定
-			if (CntPlayer == 0)
-			{
-				pVtx[1].vtx = D3DXVECTOR3(-nCntPlace * BULLETGAUGE_SIZE_X - BULLETGAUGE_SIZE_X, -BULLETGAUGE_SIZE_Y/2, 0.0f) + g_posBulletGauge[0];
-				pVtx[0].vtx = D3DXVECTOR3(-nCntPlace * BULLETGAUGE_SIZE_X - BULLETGAUGE_SIZE_X *2, -BULLETGAUGE_SIZE_Y/2, 0.0f) + g_posBulletGauge[0];
-				pVtx[3].vtx = D3DXVECTOR3(-nCntPlace * BULLETGAUGE_SIZE_X - BULLETGAUGE_SIZE_X, BULLETGAUGE_SIZE_Y/2, 0.0f) + g_posBulletGauge[0];
-				pVtx[2].vtx = D3DXVECTOR3(-nCntPlace * BULLETGAUGE_SIZE_X - BULLETGAUGE_SIZE_X *2, BULLETGAUGE_SIZE_Y/2, 0.0f) + g_posBulletGauge[0];
-			}
-			else if (CntPlayer == 1)
-			{
-				pVtx[1].vtx = D3DXVECTOR3(-nCntPlace * BULLETGAUGE_SIZE_X - BULLETGAUGE_SIZE_X, -BULLETGAUGE_SIZE_Y / 2, 0.0f) + g_posBulletGauge[1];
-				pVtx[0].vtx = D3DXVECTOR3(-nCntPlace * BULLETGAUGE_SIZE_X - BULLETGAUGE_SIZE_X * 2, -BULLETGAUGE_SIZE_Y / 2, 0.0f) + g_posBulletGauge[1];
-				pVtx[3].vtx = D3DXVECTOR3(-nCntPlace * BULLETGAUGE_SIZE_X - BULLETGAUGE_SIZE_X, BULLETGAUGE_SIZE_Y / 2, 0.0f) + g_posBulletGauge[1];
-				pVtx[2].vtx = D3DXVECTOR3(-nCntPlace * BULLETGAUGE_SIZE_X - BULLETGAUGE_SIZE_X * 2, BULLETGAUGE_SIZE_Y / 2, 0.0f) + g_posBulletGauge[1];
-			}
-			else if (CntPlayer == 2)
-			{
-				pVtx[1].vtx = D3DXVECTOR3(-nCntPlace * BULLETGAUGE_SIZE_X - BULLETGAUGE_SIZE_X, -BULLETGAUGE_SIZE_Y / 2, 0.0f) + g_posBulletGauge[2];
-				pVtx[0].vtx = D3DXVECTOR3(-nCntPlace * BULLETGAUGE_SIZE_X - BULLETGAUGE_SIZE_X * 2, -BULLETGAUGE_SIZE_Y / 2, 0.0f) + g_posBulletGauge[2];
-				pVtx[3].vtx = D3DXVECTOR3(-nCntPlace * BULLETGAUGE_SIZE_X - BULLETGAUGE_SIZE_X, BULLETGAUGE_SIZE_Y / 2, 0.0f) + g_posBulletGauge[2];
-				pVtx[2].vtx = D3DXVECTOR3(-nCntPlace * BULLETGAUGE_SIZE_X - BULLETGAUGE_SIZE_X * 2, BULLETGAUGE_SIZE_Y / 2, 0.0f) + g_posBulletGauge[2];
-			}
-			else if (CntPlayer == 3)
-			{
-				pVtx[1].vtx = D3DXVECTOR3(-nCntPlace * BULLETGAUGE_SIZE_X - BULLETGAUGE_SIZE_X, -BULLETGAUGE_SIZE_Y / 2, 0.0f) + g_posBulletGauge[3];
-				pVtx[0].vtx = D3DXVECTOR3(-nCntPlace * BULLETGAUGE_SIZE_X - BULLETGAUGE_SIZE_X * 2, -BULLETGAUGE_SIZE_Y / 2, 0.0f) + g_posBulletGauge[3];
-				pVtx[3].vtx = D3DXVECTOR3(-nCntPlace * BULLETGAUGE_SIZE_X - BULLETGAUGE_SIZE_X, BULLETGAUGE_SIZE_Y / 2, 0.0f) + g_posBulletGauge[3];
-				pVtx[2].vtx = D3DXVECTOR3(-nCntPlace * BULLETGAUGE_SIZE_X - BULLETGAUGE_SIZE_X * 2, BULLETGAUGE_SIZE_Y / 2, 0.0f) + g_posBulletGauge[3];
-			}
+				pVtx[1].vtx = D3DXVECTOR3(-nCntPlace * BULLETGAUGE_SIZE_X - BULLETGAUGE_SIZE_X, -BULLETGAUGE_SIZE_Y/2, 0.0f) + pos;
+				pVtx[0].vtx = D3DXVECTOR3(-nCntPlace * BULLETGAUGE_SIZE_X - BULLETGAUGE_SIZE_X *2, -BULLETGAUGE_SIZE_Y/2, 0.0f) + pos;
+				pVtx[3].vtx = D3DXVECTOR3(-nCntPlace * BULLETGAUGE_SIZE_X - BULLETGAUGE_SIZE_X, BULLETGAUGE_SIZE_Y/2, 0.0f) + pos;
+				pVtx[2].vtx = D3DXVECTOR3(-nCntPlace * BULLETGAUGE_SIZE_X - BULLETGAUGE_SIZE_X *2, BULLETGAUGE_SIZE_Y/2, 0.0f) + pos;
 
 			// rhwの設定
 			pVtx[0].rhw =
@@ -211,7 +174,10 @@ HRESULT MakeVertexBulletGauge(LPDIRECT3DDEVICE9 pDevice, int CntPlayer)
 
 
 		// 頂点データをアンロックする
-		g_pD3DVtxBuffBulletGauge[CntPlayer]->Unlock();
+		VtxBuffBulletGauge->Unlock();
+
+		//---------------------------オブジェクト値書き込み
+		this[CntBulletGauge].tex2DVB.SetpD3DVtxBuff(VtxBuffBulletGauge);
 	}
 
 	return S_OK;

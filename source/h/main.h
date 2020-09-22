@@ -92,7 +92,7 @@
 #define PLAYER_AMMOPOWER_NORMAL				(10)																		//!< プレイヤー弾薬中
 #define PLAYER_AMMOPOWER_WEAK				(5)																			//!< プレイヤー弾薬弱
 
-#define	BULLETPREDICTION_MAX			(1000)							// エフェクト最大数
+#define	BULLETPREDICTION_MAX			(100)							// エフェクト最大数
 #define DAMEGE_MAX			(4)
 
 /**
@@ -124,7 +124,7 @@ enum OBJECT_MAX
 	OBJECT_STATUS_MAX = OBJECT_PLAYER_MAX * STATUSTYPE_MAX,
 	OBJECT_BULLETPREDICTION_MAX = OBJECT_PLAYER_MAX * BULLETPREDICTION_MAX,
 	OBJECT_VITAL_MAX = OBJECT_PLAYER_MAX * PLAYER_VITAL,
-	OBJECT_BULLETGAUGE_MAX = OBJECT_PLAYER_MAX * PLAYER_AMMOPOWER_STRONG,
+	OBJECT_BULLETGAUGE_MAX = OBJECT_PLAYER_MAX,
 	OBJECT_DAMEGE_MAX = 4,
 	OBJECT_EFFECT_MAX = 4096,
 	OBJECT_EXPLOSION_MAX = 128,
@@ -160,6 +160,11 @@ enum OBJECT_MAX
 #define	WALL_SIZE_X							(WALL_INIT_POSX*2)															//!< 壁のサイズX
 #define	WALL_SIZE_Y							(800.0f)																	//!< 壁のサイズY
 #define	EXPLOSION_SIZE						(5.0f)																		//!< 
+#define	BULLET_SIZE_X						(50.0f)							// ビルボードの幅
+#define	BULLET_SIZE_Y						(50.0f)							// ビルボードの高さ
+#define	BULLETPREDICTION_SIZE_X			(5.0f)							// ビルボードの幅
+#define	BULLETPREDICTION_SIZE_Y			(5.0f)							// ビルボードの高さ
+
 
 
 //移動量マクロ

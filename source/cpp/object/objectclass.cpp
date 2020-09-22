@@ -7,7 +7,8 @@
 
 #include "../../h/main.h"
 #include "../../h/object/player.h"
-
+#include "../../h/effect/effect.h"
+#include "../../h/object/bullet/bullet.h"
 #include "../../h/object/objectclass.h"
 
 

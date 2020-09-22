@@ -422,9 +422,7 @@ void ITEM::GettingItem(int nIdxItem)
 		rot.y += VALUE_ROTATE_ITEM*10;
 		
 		//プレイヤーとアイテムの距離を計算し/5分づつ近づける
-		this[nIdxItem].p = GetpPlayer();
-
-//		PLAYER_HONTAI *p = GetpPlayer();
+		PLAYER_HONTAI *p = this[nIdxItem].GetPlayer();
 
 		D3DXVECTOR3 PlayerPos = this[nIdxItem].p[this[nIdxItem].GetPlayerType].GetPos();
 

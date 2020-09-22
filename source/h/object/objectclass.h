@@ -15,16 +15,28 @@ class GAME_OBJECT
 {
 public:
 	GAME_OBJECT() { cnt++; };
-	~GAME_OBJECT() { cnt--; };
-	PLAYER_HONTAI *GetpPlayer() {};
-	virtual void Init() = 0;			//!< 初期化
+	~GAME_OBJECT() { cnt--, player = NULL, effect = NULL, bullet = NULL; };
+	virtual void Init() = 0;		//!< 初期化
 	virtual void Reinit() = 0;		//!< 再初期化
 	virtual void Uninit() = 0;		//!< デリート
 	virtual void Update() = 0;		//!< 更新
-	virtual void Draw() = 0;			//!< 描画
-	int GetCnt() { return cnt; };	//!< 描画
+	virtual void Draw() = 0;		//!< 描画
+	int GetCnt() { return cnt; };	//!< オブジェクト番号取得
+
+	PLAYER_HONTAI *GetPlayer() { return &player[0]; };	//!< プレイヤー先頭アドレス取得
+	void *SetPlayer(int cnt) { player[cnt]; };	//!< オブジェクト番号取得
+
+	EFFECT *GetEffect() { return &effect[0]; };	//!< プレイヤー先頭アドレス取得
+	void *SetEffect(int cnt) { effect[cnt]; };	//!< オブジェクト番号取得
+
+	BULLET *GetBullet() { return &bullet[0]; };	//!< プレイヤー先頭アドレス取得
+	void *SetBullet(int cnt) { bullet[cnt]; };	//!< オブジェクト番号取得
+
 private:
 	static int cnt;
+	PLAYER_HONTAI *player = NULL;
+	EFFECT *effect = NULL;
+	BULLET *bullet = NULL;
 };
 
 /**
@@ -269,6 +281,8 @@ public:
 	float GetQrot();			//!< Upベクトルから地形法線への回転角度
 	D3DXCOLOR GetCol();
 	bool GetUse();
+	//------------------------先頭アドレスget
+//	PLAYER_HONTAI* GetPlayer() { return PLAYER_HONTAI(this[0]); };
 
 	//------------------------set関数
 	void SetMatrix(D3DXMATRIX mtxWorld);

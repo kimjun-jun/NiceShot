@@ -17,15 +17,10 @@ public:
 	void						Uninit(void);				//!< 終了
 	void						Update(void);				//!< 更新
 	void						Draw(void);					//!< 描画
-} ;
+	HRESULT						MakeVertexBulletprediction(LPDIRECT3DDEVICE9 pDevice);
+	void						SetVertexBulletprediction(int PlayerType, int nIdxBulletprediction, float fSizeX, float fSizeY);
+	void						SetColorBulletprediction(int PlayerType, int nIdxBulletprediction, D3DXCOLOR col);
+	int							SetBulletprediction(D3DXVECTOR3 pos, int PlayerType, D3DXCOLOR col, float fSizeX, float fSizeY);
+};
 
-//*****************************************************************************
-// プロトタイプ宣言
-//*****************************************************************************
-HRESULT InitBulletprediction(int type);
-void UninitBulletprediction(void);
-void UpdateBulletprediction(void);
-void DrawBulletprediction(int CntPlayer);
-
-int SetBulletprediction(D3DXVECTOR3 pos, int PlayerType, D3DXCOLOR col, float fSizeX, float fSizeY);
 

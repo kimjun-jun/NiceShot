@@ -118,23 +118,23 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	};
 	HWND hWnd;
 	MSG msg;
-	
+
 	// ウィンドウクラスの登録
 	RegisterClassEx(&wcex);
 
 	// ウィンドウの作成
 	hWnd = CreateWindowEx(0,
-						CLASS_NAME,
-						WINDOW_NAME,
-						WS_OVERLAPPEDWINDOW,
-						CW_USEDEFAULT,
-						CW_USEDEFAULT,
-						SCREEN_W + GetSystemMetrics(SM_CXDLGFRAME) * 2,
-						SCREEN_H + GetSystemMetrics(SM_CXDLGFRAME) * 2 + GetSystemMetrics(SM_CYCAPTION),
-						NULL,
-						NULL,
-						hInstance,
-						NULL);
+		CLASS_NAME,
+		WINDOW_NAME,
+		WS_OVERLAPPEDWINDOW,
+		CW_USEDEFAULT,
+		CW_USEDEFAULT,
+		SCREEN_W + GetSystemMetrics(SM_CXDLGFRAME) * 2,
+		SCREEN_H + GetSystemMetrics(SM_CXDLGFRAME) * 2 + GetSystemMetrics(SM_CYCAPTION),
+		NULL,
+		NULL,
+		hInstance,
+		NULL);
 
 	// DirectXの初期化(ウィンドウを作成してから行う)
 	bool mode;
@@ -162,25 +162,32 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	}
 
 	//-----------------------------------------------------オブジェクト生成
-	GAME_OBJECT* ObjectAll[OBJECT_ALL_MAX] =
-	{
-		ObjectAll[0] = new PLAYER_HONTAI[OBJECT_PLAYER_MAX],
-		ObjectAll[ObjectAll[0]->GetCnt()] = new TUTO[OBJECT_TUTORIAL_MAX],
-		ObjectAll[ObjectAll[0]->GetCnt()] = new STATUS[OBJECT_STATUS_MAX],
-		ObjectAll[ObjectAll[0]->GetCnt()] = new BULLETPREDICTION[OBJECT_BULLETPREDICTION_MAX],
-		ObjectAll[ObjectAll[0]->GetCnt()] = new VITALGAUGE[OBJECT_VITAL_MAX],
-		ObjectAll[ObjectAll[0]->GetCnt()] = new BULLETGAUGE[OBJECT_BULLETGAUGE_MAX],
-		ObjectAll[ObjectAll[0]->GetCnt()] = new DAMEGE[OBJECT_DAMEGE_MAX],
-		ObjectAll[ObjectAll[0]->GetCnt()] = new EFFECT[OBJECT_EFFECT_MAX],
-		ObjectAll[ObjectAll[0]->GetCnt()] = new EXPLOSION[OBJECT_EXPLOSION_MAX],
-		ObjectAll[ObjectAll[0]->GetCnt()] = new BULLET[OBJECT_BULLET_MAX],
-		ObjectAll[ObjectAll[0]->GetCnt()] = new ITEM[OBJECT_ITEM_MAX],
-		ObjectAll[ObjectAll[0]->GetCnt()] = new SHADOW[OBJECT_SHADOW_MAX],
-		ObjectAll[ObjectAll[0]->GetCnt()] = new COUNTDOWN[OBJECT_COUNTDOWN_MAX],
-		ObjectAll[ObjectAll[0]->GetCnt()] = new RANK[OBJECT_RANK_MAX],
-		ObjectAll[ObjectAll[0]->GetCnt()] = new RESULT[OBJECT_RESULT_MAX],
-		ObjectAll[ObjectAll[0]->GetCnt()] = new TITLE[OBJECT_TITLE_MAX],
-	};
+	GAME_OBJECT* ObjectAll[OBJECT_ALL_MAX];
+
+	ObjectAll[0] = new PLAYER_HONTAI[OBJECT_PLAYER_MAX];
+	ObjectAll[0]->SetPlayer(ObjectAll[0]->GetCnt());
+
+	ObjectAll[ObjectAll[0]->GetCnt()] = new TUTO[OBJECT_TUTORIAL_MAX];
+	ObjectAll[ObjectAll[0]->GetCnt()] = new STATUS[OBJECT_STATUS_MAX];
+	ObjectAll[ObjectAll[0]->GetCnt()] = new BULLETPREDICTION[OBJECT_BULLETPREDICTION_MAX];
+	ObjectAll[ObjectAll[0]->GetCnt()] = new VITALGAUGE[OBJECT_VITAL_MAX];
+	ObjectAll[ObjectAll[0]->GetCnt()] = new BULLETGAUGE[OBJECT_BULLETGAUGE_MAX];
+	ObjectAll[ObjectAll[0]->GetCnt()] = new DAMEGE[OBJECT_DAMEGE_MAX];
+
+	ObjectAll[ObjectAll[0]->GetCnt()] = new EFFECT[OBJECT_EFFECT_MAX];
+	ObjectAll[0]->SetEffect(ObjectAll[0]->GetCnt());
+
+	ObjectAll[ObjectAll[0]->GetCnt()] = new EXPLOSION[OBJECT_EXPLOSION_MAX];
+
+	ObjectAll[ObjectAll[0]->GetCnt()] = new BULLET[OBJECT_BULLET_MAX];
+	ObjectAll[0]->SetBullet(ObjectAll[0]->GetCnt());
+
+	ObjectAll[ObjectAll[0]->GetCnt()] = new ITEM[OBJECT_ITEM_MAX];
+	ObjectAll[ObjectAll[0]->GetCnt()] = new SHADOW[OBJECT_SHADOW_MAX];
+	ObjectAll[ObjectAll[0]->GetCnt()] = new COUNTDOWN[OBJECT_COUNTDOWN_MAX];
+	ObjectAll[ObjectAll[0]->GetCnt()] = new RANK[OBJECT_RANK_MAX];
+	ObjectAll[ObjectAll[0]->GetCnt()] = new RESULT[OBJECT_RESULT_MAX];
+	ObjectAll[ObjectAll[0]->GetCnt()] = new TITLE[OBJECT_TITLE_MAX];
 
 	if (FAILED(Init(hInstance, hWnd, mode)))
 	{
@@ -199,10 +206,10 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 	//フレームカウント初期化
 	timeBeginPeriod(1);				// 分解能を設定
-	dwExecLastTime = 
-	dwFPSLastTime = timeGetTime();
+	dwExecLastTime =
+		dwFPSLastTime = timeGetTime();
 	dwCurrentTime =
-	dwFrameCount = 0;
+		dwFrameCount = 0;
 
 
 	// ウインドウの表示(初期化処理の後に呼ばないと駄目)
@@ -211,11 +218,11 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	PlaySound(SOUND_LABEL_BGM_title01);
 
 	// メッセージループ
-	while(1)
+	while (1)
 	{
-        if(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
-			if(msg.message == WM_QUIT)
+			if (msg.message == WM_QUIT)
 			{// PostQuitMessage()が呼ばれたらループ終了
 				break;
 			}
@@ -226,11 +233,11 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 				DispatchMessage(&msg);
 			}
 
-        }
+		}
 		else
 		{
 			dwCurrentTime = timeGetTime();
-			if((dwCurrentTime - dwFPSLastTime) >= 500)	// 0.5秒ごとに実行
+			if ((dwCurrentTime - dwFPSLastTime) >= 500)	// 0.5秒ごとに実行
 			{
 #ifdef _DEBUG
 				g_nCountFPS = dwFrameCount * 1000 / (dwCurrentTime - dwFPSLastTime);
@@ -239,7 +246,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 				dwFrameCount = 0;
 			}
 
-			if((dwCurrentTime - dwExecLastTime) >= (1000 / 60))
+			if ((dwCurrentTime - dwExecLastTime) >= (1000 / 60))
 			{
 #ifdef _DEBUG
 				// FPS表示
@@ -257,7 +264,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 			}
 		}
 	}
-	
+
 	// ウィンドウクラスの登録を解除
 	UnregisterClass(CLASS_NAME, wcex.hInstance);
 

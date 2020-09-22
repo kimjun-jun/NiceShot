@@ -5,8 +5,8 @@
 * @date 2020/01/15
 */
 #include "../../h/main.h"
+#include "../../h/library.h"
 #include "../../h/other/input.h"
-#include "../../h/object/player.h"
 #include "../../h/object/bullet/bullet.h"
 #include "../../h/scene/fade.h"
 #include "../../h/object/camera.h"
@@ -14,8 +14,8 @@
 #include "../../h/map/field.h"
 #include "../../h/other/sound.h"
 #include "../../h/effect/effect.h"
-#include "../../h/library.h"
 #include "../../h/object/objectclass.h"
+#include "../../h/object/player.h"
 
 static D3DXCOLOR PLAYER_COLOR[] = {
 	D3DXCOLOR(1.0f, 1.0f, 0.1f, 1.0f),//p1カラー
@@ -48,11 +48,11 @@ void PLAYER_HONTAI::Init(void)
 		this[CntPlayer].MorphingSignal = NoMorphing;
 
 		// Xファイルの読み込み
-		if (LoadMesh(MODEL_HOUDAI, &this[CntPlayer].model.pD3DXBuffMat,
+		LoadMesh(MODEL_HOUDAI, &this[CntPlayer].model.pD3DXBuffMat,
 			&this[CntPlayer].model.nNumMat, &this[CntPlayer].model.pD3DXMesh,
 			&this[CntPlayer].model.pD3DVtxBuff, &this[CntPlayer].model.pD3DIdxBuff,
 			&this[CntPlayer].model.nNumVertex, &this[CntPlayer].model.nNumPolygon,
-			&this[CntPlayer].model.nNumVertexIndex, &this[CntPlayer].model.pD3DTexture));
+			&this[CntPlayer].model.nNumVertexIndex, &this[CntPlayer].model.pD3DTexture);
 
 		//頂点カラーをプレイヤー色に変更
 		this[CntPlayer].SetPlayerMeshColor(this[CntPlayer].model.pD3DVtxBuff,
@@ -68,11 +68,11 @@ void PLAYER_HONTAI::Init(void)
 		this[CntPlayer].parts[PARTSTYPE_HOUTOU].ParentHontai = &this[CntPlayer];
 
 		// Xファイルの読み込み
-		if (LoadMesh(MODEL_HOUTOU, &this[CntPlayer].parts[PARTSTYPE_HOUTOU].model.pD3DXBuffMat,
+		LoadMesh(MODEL_HOUTOU, &this[CntPlayer].parts[PARTSTYPE_HOUTOU].model.pD3DXBuffMat,
 			&this[CntPlayer].parts[PARTSTYPE_HOUTOU].model.nNumMat, &this[CntPlayer].parts[PARTSTYPE_HOUTOU].model.pD3DXMesh,
 			&this[CntPlayer].parts[PARTSTYPE_HOUTOU].model.pD3DVtxBuff, &this[CntPlayer].parts[PARTSTYPE_HOUTOU].model.pD3DIdxBuff,
 			&this[CntPlayer].parts[PARTSTYPE_HOUTOU].model.nNumVertex, &this[CntPlayer].parts[PARTSTYPE_HOUTOU].model.nNumPolygon,
-			&this[CntPlayer].parts[PARTSTYPE_HOUTOU].model.nNumVertexIndex, &this[CntPlayer].parts[PARTSTYPE_HOUTOU].model.pD3DTexture));
+			&this[CntPlayer].parts[PARTSTYPE_HOUTOU].model.nNumVertexIndex, &this[CntPlayer].parts[PARTSTYPE_HOUTOU].model.pD3DTexture);
 
 		//頂点カラーをプレイヤー色に変更
 		this[CntPlayer].SetPlayerMeshColor(this[CntPlayer].parts[PARTSTYPE_HOUTOU].model.pD3DVtxBuff,
@@ -87,11 +87,11 @@ void PLAYER_HONTAI::Init(void)
 		this[CntPlayer].parts[PARTSTYPE_HOUSIN].ParentParts = &this[CntPlayer].parts[PARTSTYPE_HOUTOU];
 
 		// Xファイルの読み込み
-		if (LoadMesh(MODEL_HOUSIN, &this[CntPlayer].parts[PARTSTYPE_HOUSIN].model.pD3DXBuffMat,
+		LoadMesh(MODEL_HOUSIN, &this[CntPlayer].parts[PARTSTYPE_HOUSIN].model.pD3DXBuffMat,
 			&this[CntPlayer].parts[PARTSTYPE_HOUSIN].model.nNumMat, &this[CntPlayer].parts[PARTSTYPE_HOUSIN].model.pD3DXMesh,
 			&this[CntPlayer].parts[PARTSTYPE_HOUSIN].model.pD3DVtxBuff, &this[CntPlayer].parts[PARTSTYPE_HOUSIN].model.pD3DIdxBuff,
 			&this[CntPlayer].parts[PARTSTYPE_HOUSIN].model.nNumVertex, &this[CntPlayer].parts[PARTSTYPE_HOUSIN].model.nNumPolygon,
-			&this[CntPlayer].parts[PARTSTYPE_HOUSIN].model.nNumVertexIndex, &this[CntPlayer].parts[PARTSTYPE_HOUSIN].model.pD3DTexture));
+			&this[CntPlayer].parts[PARTSTYPE_HOUSIN].model.nNumVertexIndex, &this[CntPlayer].parts[PARTSTYPE_HOUSIN].model.pD3DTexture);
 
 			//頂点カラーをプレイヤー色に変更
 		this[CntPlayer].SetPlayerMeshColor(this[CntPlayer].parts[PARTSTYPE_HOUSIN].model.pD3DVtxBuff,
@@ -758,7 +758,8 @@ void PLAYER_HONTAI::SetMoveABL(int CntPlayer)
 
 		// エフェクトスピードアップの生成
 		D3DXVECTOR3 EffctSpeedupPos = D3DXVECTOR3(pos.x, pos.y, pos.z);
-		SetEffect(EffctSpeedupPos, D3DXVECTOR3(0.0f, 0.0f, 0.0f), PLAYER_COLOR[CntPlayer], EFFECT_SPEEDUP_SIZE_X, EFFECT_SPEEDUP_SIZE_Y, EFFECT_SPEEDUP_TIME);
+		EFFECT *effect = this[0].GetEffect();
+		effect->SetEffect(EffctSpeedupPos, D3DXVECTOR3(0.0f, 0.0f, 0.0f), PLAYER_COLOR[CntPlayer], EFFECT_SPEEDUP_SIZE_X, EFFECT_SPEEDUP_SIZE_Y, EFFECT_SPEEDUP_TIME);
 
 		if (this[CntPlayer].speedbufftime <= 0.0f)
 		{
@@ -888,7 +889,8 @@ void PLAYER_HONTAI::SetMoveL(int CntPlayer)
 
 		// エフェクトスピードアップの生成
 		D3DXVECTOR3 EffctSpeedupPos = pos;
-		SetEffect(EffctSpeedupPos, D3DXVECTOR3(0.0f, 0.0f, 0.0f), PLAYER_COLOR[CntPlayer], EFFECT_SPEEDUP_SIZE_X, EFFECT_SPEEDUP_SIZE_Y, EFFECT_SPEEDUP_TIME);
+		EFFECT *effect = this[0].GetEffect();
+		effect->SetEffect(EffctSpeedupPos, D3DXVECTOR3(0.0f, 0.0f, 0.0f), PLAYER_COLOR[CntPlayer], EFFECT_SPEEDUP_SIZE_X, EFFECT_SPEEDUP_SIZE_Y, EFFECT_SPEEDUP_TIME);
 
 		if (this[CntPlayer].speedbufftime <= 0.0f)
 		{
@@ -896,6 +898,7 @@ void PLAYER_HONTAI::SetMoveL(int CntPlayer)
 			this[CntPlayer].speedbuffsignal = false;
 		}
 	}
+
 
 	if (this[CntPlayer].dashFlag == true)
 	{
@@ -1037,7 +1040,8 @@ void PLAYER_HONTAI::SetMoveL2R2(int CntPlayer)
 
 		// エフェクトスピードアップの生成
 		D3DXVECTOR3 EffctSpeedupPos = pos;
-		SetEffect(EffctSpeedupPos, D3DXVECTOR3(0.0f, 0.0f, 0.0f), PLAYER_COLOR[CntPlayer], EFFECT_SPEEDUP_SIZE_X, EFFECT_SPEEDUP_SIZE_Y, EFFECT_SPEEDUP_TIME);
+		EFFECT *effect = this[0].GetEffect();
+		effect->SetEffect(EffctSpeedupPos, D3DXVECTOR3(0.0f, 0.0f, 0.0f), PLAYER_COLOR[CntPlayer], EFFECT_SPEEDUP_SIZE_X, EFFECT_SPEEDUP_SIZE_Y, EFFECT_SPEEDUP_TIME);
 
 		if (this[CntPlayer].speedbufftime <= 0.0f)
 		{
@@ -1212,8 +1216,8 @@ void PLAYER_HONTAI::SetBulletALL(int CntPlayer)
 		//{
 		if (IsButtonTriggered(CntPlayer, BUTTON_R1))
 		{
-
-			SetBullet(BposStart, bulletmove, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer);
+			BULLET *bullet = this[0].GetBullet();
+			bullet->SetBullet(BposStart, bulletmove, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer);
 
 			//拡散弾処理
 			if (this[CntPlayer].ModelType == PLAYER_MODEL_ATTACK)
@@ -1225,8 +1229,8 @@ void PLAYER_HONTAI::SetBulletALL(int CntPlayer)
 				rightB = D3DXVECTOR3(-sinf(HoutouRot.y + HoudaiRot.y - 0.3f)*VALUE_MOVE_BULLET,
 					bulletmove.y,
 					-cosf(HoutouRot.y + HoudaiRot.y - 0.3f) *VALUE_MOVE_BULLET);
-				SetBullet(BposStart, leftB, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer);
-				SetBullet(BposStart, rightB, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer);
+				bullet->SetBullet(BposStart, leftB, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer);
+				bullet->SetBullet(BposStart, rightB, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer);
 
 			}
 			//残弾を減らす
@@ -1319,7 +1323,8 @@ void PLAYER_HONTAI::SetBulletALLMoveL2R2Ver(int CntPlayer)
 			IsButtonTriggered(CntPlayer, BUTTON_DIGITAL_LEFT) || IsButtonTriggered(CntPlayer, BUTTON_DIGITAL_LEFTUP))
 		{
 
-			SetBullet(BposStart, bulletmove, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer);
+			BULLET *bullet = this[0].GetBullet();
+			bullet->SetBullet(BposStart, bulletmove, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer);
 
 			//拡散弾処理
 			if (this[CntPlayer].ModelType == PLAYER_MODEL_ATTACK)
@@ -1331,8 +1336,8 @@ void PLAYER_HONTAI::SetBulletALLMoveL2R2Ver(int CntPlayer)
 				rightB = D3DXVECTOR3(-sinf(HoutouRot.y + HoudaiRot.y - 0.3f)*VALUE_MOVE_BULLET,
 					bulletmove.y,
 					-cosf(HoutouRot.y + HoudaiRot.y - 0.3f) *VALUE_MOVE_BULLET);
-				SetBullet(BposStart, leftB, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer);
-				SetBullet(BposStart, rightB, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer);
+				bullet->SetBullet(BposStart, leftB, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer);
+				bullet->SetBullet(BposStart, rightB, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer);
 
 			}
 			//残弾を減らす
