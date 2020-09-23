@@ -13,15 +13,6 @@
 // マクロ定義
 //*****************************************************************************
 #define	TEXTURE_SHADOW		"../data/TEXTURE/shadow000.jpg"	// 読み込むテクスチャファイル名
-#define	SHADOW_SIZE_X		(25.0f)							// 影の幅
-#define	SHADOW_SIZE_Z		(25.0f)							// 影の高さ
-
-
-
-//*****************************************************************************
-// プロトタイプ宣言
-//*****************************************************************************
-HRESULT MakeVertexShadow(LPDIRECT3DDEVICE9 pDevice);
 
 //*****************************************************************************
 // グローバル変数
@@ -29,12 +20,10 @@ HRESULT MakeVertexShadow(LPDIRECT3DDEVICE9 pDevice);
 static LPDIRECT3DTEXTURE9		g_pD3DTextureShadow = NULL;		// テクスチャへのポインタ
 static LPDIRECT3DVERTEXBUFFER9	g_pD3DVtxBuffShadow = NULL;		// 頂点バッファインターフェースへのポインタ
 
-static SHADOW					g_aShadow[MAX_SHADOW];			// 影ワーク
-
 //=============================================================================
 // 初期化処理
 //=============================================================================
-HRESULT InitShadow(int type)
+void SHADOW::Init(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 
@@ -42,27 +31,29 @@ HRESULT InitShadow(int type)
 	MakeVertexShadow(pDevice);
 
 	// テクスチャの読み込み
-	if (type == 0)
-	{
 		D3DXCreateTextureFromFile(pDevice,						// デバイスへのポインタ
 			TEXTURE_SHADOW,				// ファイルの名前
 			&g_pD3DTextureShadow);		// 読み込むメモリー
-	}
-	for(int nCntShadow = 0; nCntShadow < MAX_SHADOW; nCntShadow++)
-	{
-		g_aShadow[nCntShadow].pos = D3DXVECTOR3(0.0f, 0.1f, 0.0f);
-		g_aShadow[nCntShadow].rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-		g_aShadow[nCntShadow].scl = D3DXVECTOR3(1.0f, 1.0f, 1.0f);
-		g_aShadow[nCntShadow].bUse = false;
-	}
+}
 
-	return S_OK;
+//=============================================================================
+// 再初期化処理
+//=============================================================================
+void SHADOW::Reinit(void)
+{
+	for (int nCntShadow = 0; nCntShadow < OBJECT_SHADOW_MAX; nCntShadow++)
+	{
+		this[nCntShadow].SetPos(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+		this[nCntShadow].SetRot(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+		this[nCntShadow].SetScl(D3DXVECTOR3(1.0f, 1.0f, 1.0f));
+		this[nCntShadow].SetUse(false);
+	}
 }
 
 //=============================================================================
 // 終了処理
 //=============================================================================
-void UninitShadow(void)
+void SHADOW::Uninit(void)
 {
 	if(g_pD3DTextureShadow != NULL)
 	{// テクスチャの開放
@@ -80,7 +71,7 @@ void UninitShadow(void)
 //=============================================================================
 // 更新処理
 //=============================================================================
-void UpdateShadow(void)
+void SHADOW::Update(void)
 {
 
 }
@@ -88,40 +79,44 @@ void UpdateShadow(void)
 //=============================================================================
 // 描画処理
 //=============================================================================
-void DrawShadow(void)
+void SHADOW::Draw(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
-	D3DXMATRIX mtxScl, mtxRot, mtxTranslate;
 
 	// 減算合成
 	pDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_REVSUBTRACT);	// 結果 = 転送先(DEST) - 転送元(SRC)
 	pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
 	pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
 
-	// Z比較なし
-	//pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS);
-
-	for(int nCntShadow = 0; nCntShadow < MAX_SHADOW; nCntShadow++)
+	for(int nCntShadow = 0; nCntShadow < OBJECT_SHADOW_MAX; nCntShadow++)
 	{
-		if(g_aShadow[nCntShadow].bUse)
+		bool use = this[nCntShadow].GetUse();
+		if(use)
 		{
+			D3DXMATRIX mtxScl, mtxRot, mtxTranslate;
+
+			//-----------------------------------------------オブジェクト値読み込み
+			D3DXVECTOR3 pos = this[nCntShadow].GetPos();
+			D3DXVECTOR3 rot = this[nCntShadow].GetRot();
+			D3DXVECTOR3 scl = this[nCntShadow].GetScl();
+			D3DXMATRIX mtxWorld = this[nCntShadow].GetMatrix();
 			// ワールドマトリックスの初期化
-			D3DXMatrixIdentity(&g_aShadow[nCntShadow].mtxWorld);
+			D3DXMatrixIdentity(&mtxWorld);
 
 			// スケールを反映
-			D3DXMatrixScaling(&mtxScl, g_aShadow[nCntShadow].scl.x, g_aShadow[nCntShadow].scl.y, g_aShadow[nCntShadow].scl.z);
-			D3DXMatrixMultiply(&g_aShadow[nCntShadow].mtxWorld, &g_aShadow[nCntShadow].mtxWorld, &mtxScl);
+			D3DXMatrixScaling(&mtxScl, scl.x, scl.y, scl.z);
+			D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxScl);
 
 			// 回転を反映
-			D3DXMatrixRotationYawPitchRoll(&mtxRot, g_aShadow[nCntShadow].rot.y, g_aShadow[nCntShadow].rot.x, g_aShadow[nCntShadow].rot.z);
-			D3DXMatrixMultiply(&g_aShadow[nCntShadow].mtxWorld, &g_aShadow[nCntShadow].mtxWorld, &mtxRot);
+			D3DXMatrixRotationYawPitchRoll(&mtxRot, rot.y, rot.x, rot.z);
+			D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxRot);
 
 			// 移動を反映
-			D3DXMatrixTranslation(&mtxTranslate, g_aShadow[nCntShadow].pos.x, g_aShadow[nCntShadow].pos.y, g_aShadow[nCntShadow].pos.z);
-			D3DXMatrixMultiply(&g_aShadow[nCntShadow].mtxWorld, &g_aShadow[nCntShadow].mtxWorld, &mtxTranslate);
+			D3DXMatrixTranslation(&mtxTranslate, pos.x, pos.y, pos.z);
+			D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxTranslate);
 
 			// ワールドマトリックスの設定
-			pDevice->SetTransform(D3DTS_WORLD, &g_aShadow[nCntShadow].mtxWorld);
+			pDevice->SetTransform(D3DTS_WORLD, &mtxWorld);
 
 			// 頂点バッファをレンダリングパイプラインに設定
 			pDevice->SetStreamSource(0, g_pD3DVtxBuffShadow, 0, sizeof(VERTEX_3D));
@@ -142,17 +137,14 @@ void DrawShadow(void)
 	pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
 	pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 
-	// Z比較あり
-	//pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
-
 }
 
 //=============================================================================
 // 頂点情報の作成
 //=============================================================================
-HRESULT MakeVertexShadow(LPDIRECT3DDEVICE9 pDevice)
+HRESULT SHADOW::MakeVertexShadow(LPDIRECT3DDEVICE9 pDevice)
 {
-	int max_shadow = 1;		// MAX_SHADOW
+	int max_shadow = OBJECT_SHADOW_MAX;		// OBJECT_SHADOW_MAX
 
 	// オブジェクトの頂点バッファを生成
     if(FAILED(pDevice->CreateVertexBuffer(sizeof(VERTEX_3D) * POLYGON_2D_VERTEX * max_shadow,	// 頂点データ用に確保するバッファサイズ(バイト単位)
@@ -208,23 +200,19 @@ HRESULT MakeVertexShadow(LPDIRECT3DDEVICE9 pDevice)
 //=============================================================================
 // 頂点座標の設定
 //=============================================================================
-void SetVertexShadow(int nIdxShadow, float fSizeX, float fSizeZ)
+void SHADOW::SetVertexShadow(int nIdxShadow, float fSizeX, float fSizeZ)
 {
 	//if (nIdxShadow < 0) return;	// 不正ならリターンする
-								//{//頂点バッファの中身を埋める
+	//{//頂点バッファの中身を埋める
 	//	VERTEX_3D *pVtx;
-
 	//	// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
 	//	g_pD3DVtxBuffShadow->Lock(0, 0, (void**)&pVtx, 0);
-
 	//	pVtx += (nIdxShadow * 4);
-
 	//	// 頂点座標の設定
 	//	pVtx[0].vtx = D3DXVECTOR3(-fSizeX / 2, 0.0f, fSizeZ / 2);
 	//	pVtx[1].vtx = D3DXVECTOR3(fSizeX / 2, 0.0f, fSizeZ / 2);
 	//	pVtx[2].vtx = D3DXVECTOR3(-fSizeX / 2, 0.0f, -fSizeZ / 2);
 	//	pVtx[3].vtx = D3DXVECTOR3(fSizeX / 2, 0.0f, -fSizeZ / 2);
-
 	//	// 頂点データをアンロックする
 	//	g_pD3DVtxBuffShadow->Unlock();
 	//}
@@ -233,23 +221,19 @@ void SetVertexShadow(int nIdxShadow, float fSizeX, float fSizeZ)
 //=============================================================================
 // 頂点カラーの設定
 //=============================================================================
-void SetColorShadow(int nIdxShadow, D3DXCOLOR col)
+void SHADOW::SetColorShadow(int nIdxShadow, D3DXCOLOR col)
 {
 	//if (nIdxShadow < 0) return;	// 不正ならリターンする
 	//							{//頂点バッファの中身を埋める
 	//	VERTEX_3D *pVtx;
-
 	//	// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
 	//	g_pD3DVtxBuffShadow->Lock(0, 0, (void**)&pVtx, 0);
-
 	//	pVtx += (nIdxShadow * 4);
-
 	//	// 頂点座標の設定
 	//	pVtx[0].diffuse =
 	//	pVtx[1].diffuse =
 	//	pVtx[2].diffuse =
 	//	pVtx[3].diffuse = col;
-
 	//	// 頂点データをアンロックする
 	//	g_pD3DVtxBuffShadow->Unlock();
 	//}
@@ -258,18 +242,19 @@ void SetColorShadow(int nIdxShadow, D3DXCOLOR col)
 //=============================================================================
 // 影の作成
 //=============================================================================
-int CreateShadow(D3DXVECTOR3 pos, D3DXVECTOR3 scl)
+int SHADOW::CreateShadow(D3DXVECTOR3 pos, D3DXVECTOR3 scl)
 {
 	int nIdxShadow = -1;
 
-	for(int nCntShadow = 0; nCntShadow < MAX_SHADOW; nCntShadow++)
+	for(int nCntShadow = 0; nCntShadow < OBJECT_SHADOW_MAX; nCntShadow++)
 	{
-		if(!g_aShadow[nCntShadow].bUse)
+		bool use = this[nCntShadow].GetUse();
+		if(use != true)
 		{
-			g_aShadow[nCntShadow].pos = pos;
-			g_aShadow[nCntShadow].rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-			g_aShadow[nCntShadow].scl = scl;
-			g_aShadow[nCntShadow].bUse = true;
+			this[nCntShadow].SetPos(pos);
+			this[nCntShadow].SetRot(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+			this[nCntShadow].SetScl(scl);
+			this[nCntShadow].SetUse(true);
 
 			nIdxShadow = nCntShadow;
 			break;
@@ -282,11 +267,11 @@ int CreateShadow(D3DXVECTOR3 pos, D3DXVECTOR3 scl)
 //=============================================================================
 // 影の破棄
 //=============================================================================
-void ReleaseShadow(int nIdxShadow)
+void SHADOW::ReleaseShadow(int nIdxShadow)
 {
-	if(nIdxShadow >= 0 && nIdxShadow < MAX_SHADOW)
+	if(nIdxShadow >= 0 && nIdxShadow < OBJECT_SHADOW_MAX)
 	{
-		g_aShadow[nIdxShadow].bUse = false;
+		this[nIdxShadow].SetUse(false);
 	}
 
 }
@@ -294,19 +279,19 @@ void ReleaseShadow(int nIdxShadow)
 //=============================================================================
 // 位置の設定
 //=============================================================================
-void SetPositionShadow(int nIdxShadow, D3DXVECTOR3 pos, D3DXVECTOR3 scl)
+void SHADOW::SetPositionShadow(int nIdxShadow, D3DXVECTOR3 pos, D3DXVECTOR3 scl)
 {
 	if (nIdxShadow < 0) return;	// 不正ならリターンする
 
-	g_aShadow[nIdxShadow].pos = pos;
-	g_aShadow[nIdxShadow].scl = scl;
+	this[nIdxShadow].SetPos(pos);
+	this[nIdxShadow].SetScl(scl);
 }
 
 //=============================================================================
 // 影情報を取得
 //=============================================================================
-SHADOW *GetShadow(void)
+SHADOW* SHADOW::GetShadow(void)
 {
-	return &g_aShadow[0];	// 不正ならリターンする
+	return &this[0];	// 不正ならリターンする
 }
 

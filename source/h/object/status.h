@@ -25,12 +25,5 @@ public:
 	void						Uninit(void);				//!< 終了
 	void						Update(void);				//!< 更新
 	void						Draw(void);					//!< 描画
+	HRESULT						MakeVertexStatus(void);
 };
-
-//*****************************************************************************
-// プロトタイプ宣言
-//*****************************************************************************
-HRESULT InitStatus(int type);
-void UninitStatus(void);
-void UpdateStatus(void);
-void DrawStatus(void);

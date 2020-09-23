@@ -103,7 +103,7 @@ void BULLETGAUGE::Draw(void)
 	for (int CntBulletGauge = 0; CntBulletGauge < OBJECT_BULLETGAUGE_MAX; CntBulletGauge++)
 	{
 		// 頂点バッファをデバイスのデータストリームにバインド
-		pDevice->SetStreamSource(0, this[CntBulletGauge].tex2DVB.GetpD3DVtxBuff, 0, sizeof(VERTEX_2D));
+		pDevice->SetStreamSource(0, this[CntBulletGauge].tex2DVB.GetpD3DVtxBuff(), 0, sizeof(VERTEX_2D));
 
 		// 頂点フォーマットの設定
 		pDevice->SetFVF(FVF_VERTEX_2D);

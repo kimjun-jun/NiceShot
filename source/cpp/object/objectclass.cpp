@@ -9,6 +9,7 @@
 #include "../../h/object/player.h"
 #include "../../h/effect/effect.h"
 #include "../../h/object/bullet/bullet.h"
+#include "../../h/object/shadow.h"
 #include "../../h/object/objectclass.h"
 
 
@@ -24,11 +25,12 @@ void TEXTURE2D_VERTEXBUFFER::SetpD3DVtxBuff(LPDIRECT3DVERTEXBUFFER9 pD3DVtxBuff)
 
 //-------------------------------------------------------------------2Dテクスチャゲット関数
 LPDIRECT3DTEXTURE9 TEXTURE_2D::GetpD3DTexture() { return this->pD3DTexture; };
-VERTEX_2D TEXTURE_2D::GettextureVTX() { return this->textureVTX[0]; };
+VERTEX_2D* TEXTURE_2D::GettextureVTX() { return &this->textureVTX[0]; };
 
 //-------------------------------------------------------------------2Dテクスチャセット関数
 void TEXTURE_2D::SetpD3DTexture(LPDIRECT3DTEXTURE9 pD3DTexture) {this->pD3DTexture = pD3DTexture;};
-void TEXTURE_2D::SettextureVTX(VERTEX_2D *textureVTX) { this->SettextureVTX = textureVTX; };
+void TEXTURE_2D::SettextureVTX(VERTEX_2D *textureVTX) { this->textureVTX[0] = textureVTX[0], 
+this->textureVTX[1] = textureVTX[1], this->textureVTX[2] = textureVTX[2], this->textureVTX[3] = textureVTX[3]; };
 
 
 //-------------------------------------------------------------------2DオブジェクトVBテクスチャゲット関数

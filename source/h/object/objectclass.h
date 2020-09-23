@@ -23,20 +23,21 @@ public:
 	virtual void Draw() = 0;		//!< 描画
 	int GetCnt() { return cnt; };	//!< オブジェクト番号取得
 
-	PLAYER_HONTAI *GetPlayer() { return &player[0]; };	//!< プレイヤー先頭アドレス取得
-	void *SetPlayer(int cnt) { player[cnt]; };	//!< オブジェクト番号取得
-
-	EFFECT *GetEffect() { return &effect[0]; };	//!< プレイヤー先頭アドレス取得
-	void *SetEffect(int cnt) { effect[cnt]; };	//!< オブジェクト番号取得
-
-	BULLET *GetBullet() { return &bullet[0]; };	//!< プレイヤー先頭アドレス取得
-	void *SetBullet(int cnt) { bullet[cnt]; };	//!< オブジェクト番号取得
+	PLAYER_HONTAI *GetPlayer() { return &player[0]; };	//!< 先頭アドレス取得
+	void *SetPlayer(int cnt) { player[cnt]; };			//!< アドレスセット
+	EFFECT *GetEffect() { return &effect[0]; };			//!< 先頭アドレス取得
+	void *SetEffect(int cnt) { effect[cnt]; };			//!< アドレスセット
+	BULLET *GetBullet() { return &bullet[0]; };			//!< 先頭アドレス取得
+	void *SetBullet(int cnt) { bullet[cnt]; };			//!< アドレスセット
+	SHADOW *GetShadow() { return &shadow[0]; };			//!< 先頭アドレス取得
+	void *SetShadow(int cnt) { shadow[cnt]; };			//!< アドレスセット
 
 private:
 	static int cnt;
 	PLAYER_HONTAI *player = NULL;
 	EFFECT *effect = NULL;
 	BULLET *bullet = NULL;
+	SHADOW *shadow = NULL;
 };
 
 /**
@@ -165,7 +166,7 @@ public:
 
 	//------------------------get関数
 	LPDIRECT3DTEXTURE9 GetpD3DTexture();
-	VERTEX_2D GettextureVTX();
+	VERTEX_2D* GettextureVTX();
 
 	//------------------------set関数
 	void SetpD3DTexture(LPDIRECT3DTEXTURE9 pD3DTexture);
