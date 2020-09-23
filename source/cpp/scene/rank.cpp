@@ -9,69 +9,51 @@
 #include "../../h/object/objectclass.h"
 
 //*****************************************************************************
-// プロトタイプ宣言
+// マクロ定義
 //*****************************************************************************
-/**
-* @brief 頂点生成関数 MakeVertexRank
-* @return HRESULT
-*/
-HRESULT MakeVertexRank(void);
-
-//*****************************************************************************
-// グローバル変数
-//*****************************************************************************
-RANK rank[RANK_GOUKEI];			//!< ランクのクラス変数
+#define	TEXTURE_RANK2		("../data/TEXTURE/2i.png")							//!< 読み込むテクスチャファイル名
+#define	TEXTURE_RANK3		("../data/TEXTURE/3i.png")							//!< 読み込むテクスチャファイル名
+#define	TEXTURE_RANK4		("../data/TEXTURE/4i.png")							//!< 読み込むテクスチャファイル名
+#define	RANK_SIZE_X			(SCREEN_W/4)									//!< やられた順位テクスチャの幅
+#define	RANK_SIZE_Y			(SCREEN_H/4)									//!< やられた順位テクスチャの高さ
+#define	RANK_POS_X			(SCREEN_W)										//!< やられた順位テクスチャの表示位置
+#define	RANK_POS_Y			(SCREEN_H)										//!< やられた順位テクスチャの表示位置
 
 //=============================================================================
 // 初期化処理
 //=============================================================================
-HRESULT InitRank(int type)
+void RANK::Init(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
+	LPDIRECT3DTEXTURE9 pD3DTexture[OBJECT_RANK_MAX];
+	D3DXCreateTextureFromFile(pDevice,
+		TEXTURE_RANK4,
+		&pD3DTexture[0]);
+	D3DXCreateTextureFromFile(pDevice,
+		TEXTURE_RANK3,
+		&pD3DTexture[1]);
+	D3DXCreateTextureFromFile(pDevice,
+		TEXTURE_RANK2,
+		&pD3DTexture[2]);
 
-	for (int CntRank = 0; CntRank < RANK_GOUKEI; CntRank++)
-	{
-		rank[CntRank].use = false;
-	}
-
-	if (type == 0)
-	{
-		D3DXCreateTextureFromFile(pDevice,
-			TEXTURE_RANK4,
-			&rank[0].pD3DTexture);
-		D3DXCreateTextureFromFile(pDevice,
-			TEXTURE_RANK3,
-			&rank[1].pD3DTexture);
-		D3DXCreateTextureFromFile(pDevice,
-			TEXTURE_RANK2,
-			&rank[2].pD3DTexture);
-	}
-
+	this[0].tex2D.SetpD3DTexture(pD3DTexture[0]);
+	this[1].tex2D.SetpD3DTexture(pD3DTexture[1]);
+	this[2].tex2D.SetpD3DTexture(pD3DTexture[2]);
 	// 頂点情報の作成
 	MakeVertexRank();
-
-	return S_OK;
 }
 
 //=============================================================================
 // 終了処理
 //=============================================================================
-void UninitRank(void)
+void RANK::Uninit(void)
 {
-	for (int CntRank = 0; CntRank < RANK_GOUKEI; CntRank++)
-	{
-		if (rank[CntRank].pD3DTexture != NULL)
-		{// テクスチャの開放
-			rank[CntRank].pD3DTexture->Release();
-			rank[CntRank].pD3DTexture = NULL;
-		}
-	}
 }
 
 //=============================================================================
 // 更新処理
 //=============================================================================
-void UpdateRank(void)
+void RANK::Update(void)
 {
 
 }
@@ -79,17 +61,18 @@ void UpdateRank(void)
 //=============================================================================
 // 描画処理
 //=============================================================================
-void DrawRank(void)
+void RANK::Draw(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 
-	for (int CntRank = 0; CntRank < RANK_GOUKEI; CntRank++)
+	for (int CntRank = 0; CntRank < OBJECT_RANK_MAX; CntRank++)
 	{
-		if (rank[CntRank].use == true)
+		bool use = this[CntRank].GetUse();
+		if (use == true)
 		{
 			pDevice->SetFVF(FVF_VERTEX_2D);
-			pDevice->SetTexture(0, rank[CntRank].pD3DTexture);
-			pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, POLYGON_2D_NUM, rank[CntRank].vertexWk, sizeof(VERTEX_2D));
+			pDevice->SetTexture(0, this[CntRank].tex2D.GetpD3DTexture());
+			pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, POLYGON_2D_NUM, this[CntRank].tex2D.GettextureVTX(), sizeof(VERTEX_2D));
 		}
 	}
 }
@@ -97,78 +80,75 @@ void DrawRank(void)
 //=============================================================================
 // 頂点の作成
 //=============================================================================
-HRESULT MakeVertexRank(void)
+HRESULT RANK::MakeVertexRank(void)
 {
-	for (int CntRank = 0; CntRank < RANK_GOUKEI; CntRank++)
+	for (int CntRank = 0; CntRank < OBJECT_RANK_MAX; CntRank++)
 	{
+		VERTEX_2D vtx2d[POLYGON_2D_VERTEX];
 		// テクスチャのパースペクティブコレクト用
-		rank[CntRank].vertexWk[0].rhw =
-			rank[CntRank].vertexWk[1].rhw =
-			rank[CntRank].vertexWk[2].rhw =
-			rank[CntRank].vertexWk[3].rhw = 1.0f;
+		vtx2d[0].rhw =
+			vtx2d[1].rhw =
+			vtx2d[2].rhw =
+			vtx2d[3].rhw = 1.0f;
 
 		// 反射光の設定
-		rank[CntRank].vertexWk[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-		rank[CntRank].vertexWk[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-		rank[CntRank].vertexWk[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-		rank[CntRank].vertexWk[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+		vtx2d[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+		vtx2d[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+		vtx2d[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+		vtx2d[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
 
 		// テクスチャ座標の設定
-		rank[CntRank].vertexWk[0].tex = D3DXVECTOR2(0.0f, 0.0f);
-		rank[CntRank].vertexWk[1].tex = D3DXVECTOR2(1.0f, 0.0f);
-		rank[CntRank].vertexWk[2].tex = D3DXVECTOR2(0.0f, 1.0f);
-		rank[CntRank].vertexWk[3].tex = D3DXVECTOR2(1.0f, 1.0f);
+		vtx2d[0].tex = D3DXVECTOR2(0.0f, 0.0f);
+		vtx2d[1].tex = D3DXVECTOR2(1.0f, 0.0f);
+		vtx2d[2].tex = D3DXVECTOR2(0.0f, 1.0f);
+		vtx2d[3].tex = D3DXVECTOR2(1.0f, 1.0f);
+		this[CntRank].tex2D.SettextureVTX(vtx2d);
 	}
 	return S_OK;
 }
 
 //=============================================================================
-// ランク情報を取得
-//=============================================================================
-RANK *GetRank(void)
-{
-	return &rank[0];
-}
-
-//=============================================================================
 // ランクをセット
 //=============================================================================
-void SetRank(int PlayerNum)
+void RANK::SetRank(int PlayerNum)
 {
-	for (int CntRank = 0; CntRank < RANK_GOUKEI; CntRank++)
+	for (int CntRank = 0; CntRank < OBJECT_RANK_MAX; CntRank++)
 	{
-		if (rank[CntRank].use == false)
+		bool use = this[CntRank].GetUse();
+		if (use != true)
 		{
+			VERTEX_2D vtx2d[POLYGON_2D_VERTEX];
 			switch(PlayerNum)
 			{
 			case 0:
-				rank[CntRank].vertexWk[0].vtx = D3DXVECTOR3(RANK_POS_X*(1.0f / 4.0f) - RANK_SIZE_X, RANK_POS_Y *(1.0f / 4.0f) - RANK_SIZE_Y, 0.0f);
-				rank[CntRank].vertexWk[1].vtx = D3DXVECTOR3(RANK_POS_X*(1.0f / 4.0f) + RANK_SIZE_X, RANK_POS_Y *(1.0f / 4.0f) - RANK_SIZE_Y, 0.0f);
-				rank[CntRank].vertexWk[2].vtx = D3DXVECTOR3(RANK_POS_X*(1.0f / 4.0f) - RANK_SIZE_X, RANK_POS_Y *(1.0f / 4.0f) + RANK_SIZE_Y, 0.0f);
-				rank[CntRank].vertexWk[3].vtx = D3DXVECTOR3(RANK_POS_X*(1.0f / 4.0f) + RANK_SIZE_X, RANK_POS_Y *(1.0f / 4.0f) + RANK_SIZE_Y, 0.0f);
+				vtx2d[0].vtx = D3DXVECTOR3(RANK_POS_X*(1.0f / 4.0f) - RANK_SIZE_X, RANK_POS_Y *(1.0f / 4.0f) - RANK_SIZE_Y, 0.0f);
+				vtx2d[1].vtx = D3DXVECTOR3(RANK_POS_X*(1.0f / 4.0f) + RANK_SIZE_X, RANK_POS_Y *(1.0f / 4.0f) - RANK_SIZE_Y, 0.0f);
+				vtx2d[2].vtx = D3DXVECTOR3(RANK_POS_X*(1.0f / 4.0f) - RANK_SIZE_X, RANK_POS_Y *(1.0f / 4.0f) + RANK_SIZE_Y, 0.0f);
+				vtx2d[3].vtx = D3DXVECTOR3(RANK_POS_X*(1.0f / 4.0f) + RANK_SIZE_X, RANK_POS_Y *(1.0f / 4.0f) + RANK_SIZE_Y, 0.0f);
 				break;
 			case 1:
-				rank[CntRank].vertexWk[0].vtx = D3DXVECTOR3(RANK_POS_X*(3.0f / 4.0f) - RANK_SIZE_X, RANK_POS_Y *(1.0f / 4.0f) - RANK_SIZE_Y, 0.0f);
-				rank[CntRank].vertexWk[1].vtx = D3DXVECTOR3(RANK_POS_X*(3.0f / 4.0f) + RANK_SIZE_X, RANK_POS_Y *(1.0f / 4.0f) - RANK_SIZE_Y, 0.0f);
-				rank[CntRank].vertexWk[2].vtx = D3DXVECTOR3(RANK_POS_X*(3.0f / 4.0f) - RANK_SIZE_X, RANK_POS_Y *(1.0f / 4.0f) + RANK_SIZE_Y, 0.0f);
-				rank[CntRank].vertexWk[3].vtx = D3DXVECTOR3(RANK_POS_X*(3.0f / 4.0f) + RANK_SIZE_X, RANK_POS_Y *(1.0f / 4.0f) + RANK_SIZE_Y, 0.0f);
+				vtx2d[0].vtx = D3DXVECTOR3(RANK_POS_X*(3.0f / 4.0f) - RANK_SIZE_X, RANK_POS_Y *(1.0f / 4.0f) - RANK_SIZE_Y, 0.0f);
+				vtx2d[1].vtx = D3DXVECTOR3(RANK_POS_X*(3.0f / 4.0f) + RANK_SIZE_X, RANK_POS_Y *(1.0f / 4.0f) - RANK_SIZE_Y, 0.0f);
+				vtx2d[2].vtx = D3DXVECTOR3(RANK_POS_X*(3.0f / 4.0f) - RANK_SIZE_X, RANK_POS_Y *(1.0f / 4.0f) + RANK_SIZE_Y, 0.0f);
+				vtx2d[3].vtx = D3DXVECTOR3(RANK_POS_X*(3.0f / 4.0f) + RANK_SIZE_X, RANK_POS_Y *(1.0f / 4.0f) + RANK_SIZE_Y, 0.0f);
 				break;
 			case 2:
-				rank[CntRank].vertexWk[0].vtx = D3DXVECTOR3(RANK_POS_X*(1.0f / 4.0f) - RANK_SIZE_X, RANK_POS_Y *(3.0f / 4.0f) - RANK_SIZE_Y, 0.0f);
-				rank[CntRank].vertexWk[1].vtx = D3DXVECTOR3(RANK_POS_X*(1.0f / 4.0f) + RANK_SIZE_X, RANK_POS_Y *(3.0f / 4.0f) - RANK_SIZE_Y, 0.0f);
-				rank[CntRank].vertexWk[2].vtx = D3DXVECTOR3(RANK_POS_X*(1.0f / 4.0f) - RANK_SIZE_X, RANK_POS_Y *(3.0f / 4.0f) + RANK_SIZE_Y, 0.0f);
-				rank[CntRank].vertexWk[3].vtx = D3DXVECTOR3(RANK_POS_X*(1.0f / 4.0f) + RANK_SIZE_X, RANK_POS_Y *(3.0f / 4.0f) + RANK_SIZE_Y, 0.0f);
+				vtx2d[0].vtx = D3DXVECTOR3(RANK_POS_X*(1.0f / 4.0f) - RANK_SIZE_X, RANK_POS_Y *(3.0f / 4.0f) - RANK_SIZE_Y, 0.0f);
+				vtx2d[1].vtx = D3DXVECTOR3(RANK_POS_X*(1.0f / 4.0f) + RANK_SIZE_X, RANK_POS_Y *(3.0f / 4.0f) - RANK_SIZE_Y, 0.0f);
+				vtx2d[2].vtx = D3DXVECTOR3(RANK_POS_X*(1.0f / 4.0f) - RANK_SIZE_X, RANK_POS_Y *(3.0f / 4.0f) + RANK_SIZE_Y, 0.0f);
+				vtx2d[3].vtx = D3DXVECTOR3(RANK_POS_X*(1.0f / 4.0f) + RANK_SIZE_X, RANK_POS_Y *(3.0f / 4.0f) + RANK_SIZE_Y, 0.0f);
 				break;
 			case 3:
-				rank[CntRank].vertexWk[0].vtx = D3DXVECTOR3(RANK_POS_X*(3.0f / 4.0f) - RANK_SIZE_X, RANK_POS_Y *(3.0f / 4.0f) - RANK_SIZE_Y, 0.0f);
-				rank[CntRank].vertexWk[1].vtx = D3DXVECTOR3(RANK_POS_X*(3.0f / 4.0f) + RANK_SIZE_X, RANK_POS_Y *(3.0f / 4.0f) - RANK_SIZE_Y, 0.0f);
-				rank[CntRank].vertexWk[2].vtx = D3DXVECTOR3(RANK_POS_X*(3.0f / 4.0f) - RANK_SIZE_X, RANK_POS_Y *(3.0f / 4.0f) + RANK_SIZE_Y, 0.0f);
-				rank[CntRank].vertexWk[3].vtx = D3DXVECTOR3(RANK_POS_X*(3.0f / 4.0f) + RANK_SIZE_X, RANK_POS_Y *(3.0f / 4.0f) + RANK_SIZE_Y, 0.0f);
+				vtx2d[0].vtx = D3DXVECTOR3(RANK_POS_X*(3.0f / 4.0f) - RANK_SIZE_X, RANK_POS_Y *(3.0f / 4.0f) - RANK_SIZE_Y, 0.0f);
+				vtx2d[1].vtx = D3DXVECTOR3(RANK_POS_X*(3.0f / 4.0f) + RANK_SIZE_X, RANK_POS_Y *(3.0f / 4.0f) - RANK_SIZE_Y, 0.0f);
+				vtx2d[2].vtx = D3DXVECTOR3(RANK_POS_X*(3.0f / 4.0f) - RANK_SIZE_X, RANK_POS_Y *(3.0f / 4.0f) + RANK_SIZE_Y, 0.0f);
+				vtx2d[3].vtx = D3DXVECTOR3(RANK_POS_X*(3.0f / 4.0f) + RANK_SIZE_X, RANK_POS_Y *(3.0f / 4.0f) + RANK_SIZE_Y, 0.0f);
 				break;
 			default:
 				break;
 			}
-			rank[CntRank].use = true;
+			this[CntRank].tex2D.SettextureVTX(vtx2d);
+			this[CntRank].SetUse(true);
 			break;
 		}
 	}

@@ -6,6 +6,11 @@
 */
 #pragma once
 
+class PLAYER_HONTAI;
+class EFFECT;
+class BULLET;
+class SHADOW;
+class COUNTDOWN;
 
 /**
  * @class GAMEOBJECT
@@ -14,23 +19,29 @@
 class GAME_OBJECT
 {
 public:
-	GAME_OBJECT() { cnt++; };
-	~GAME_OBJECT() { cnt--, player = NULL, effect = NULL, bullet = NULL; };
+	GAME_OBJECT() { cnt++; }
+	~GAME_OBJECT() { cnt--; player = NULL; effect = NULL; bullet = NULL; }
 	virtual void Init() = 0;		//!< 初期化
 	virtual void Reinit() = 0;		//!< 再初期化
 	virtual void Uninit() = 0;		//!< デリート
 	virtual void Update() = 0;		//!< 更新
 	virtual void Draw() = 0;		//!< 描画
-	int GetCnt() { return cnt; };	//!< オブジェクト番号取得
+	int GetCnt() { return cnt; }	//!< オブジェクト番号取得
 
-	PLAYER_HONTAI *GetPlayer() { return &player[0]; };	//!< 先頭アドレス取得
-	void *SetPlayer(int cnt) { player[cnt]; };			//!< アドレスセット
-	EFFECT *GetEffect() { return &effect[0]; };			//!< 先頭アドレス取得
-	void *SetEffect(int cnt) { effect[cnt]; };			//!< アドレスセット
-	BULLET *GetBullet() { return &bullet[0]; };			//!< 先頭アドレス取得
-	void *SetBullet(int cnt) { bullet[cnt]; };			//!< アドレスセット
-	SHADOW *GetShadow() { return &shadow[0]; };			//!< 先頭アドレス取得
-	void *SetShadow(int cnt) { shadow[cnt]; };			//!< アドレスセット
+	PLAYER_HONTAI *GetPlayer() { return &player[0]; }	//!< 先頭アドレス取得
+	void *SetPlayer(int cnt) { (PLAYER_HONTAI*&)player[cnt]; }			//!< アドレスセット
+
+	EFFECT *GetEffect() { return &effect[0]; }			//!< 先頭アドレス取得
+	void *SetEffect(int cnt) { effect[cnt]; }			//!< アドレスセット
+
+	BULLET *GetBullet() { return &bullet[0]; }			//!< 先頭アドレス取得
+	void *SetBullet(int cnt) { bullet[cnt]; }			//!< アドレスセット
+
+	SHADOW *GetShadow() { return &shadow[0]; }			//!< 先頭アドレス取得
+	void *SetShadow(int cnt) { shadow[cnt]; }			//!< アドレスセット
+
+	COUNTDOWN *GetCountdown() { return &countdown[0]; }			//!< 先頭アドレス取得
+	void *SetCountdown(int cnt) { countdown[cnt]; }			//!< アドレスセット
 
 private:
 	static int cnt;
@@ -38,6 +49,7 @@ private:
 	EFFECT *effect = NULL;
 	BULLET *bullet = NULL;
 	SHADOW *shadow = NULL;
+	COUNTDOWN *countdown = NULL;
 };
 
 /**
@@ -46,7 +58,7 @@ private:
  */
 struct VERTEX_2D
 {
-	VERTEX_2D() { vtx = D3DXVECTOR3(0.0f, 0.0f, 0.0f), rhw = 0.0f, diffuse = D3DCOLOR(0), tex = D3DXVECTOR2(0.0f, 0.0f); };
+	VERTEX_2D() { vtx = D3DXVECTOR3(0.0f, 0.0f, 0.0f); rhw = 0.0f; diffuse = D3DCOLOR(0); tex = D3DXVECTOR2(0.0f, 0.0f); }
 	D3DXVECTOR3 vtx;		//!< 頂点座標
 	float		rhw;		//!< テクスチャのパースペクティブコレクト用
 	D3DCOLOR	diffuse;	//!< 反射光
@@ -59,7 +71,7 @@ struct VERTEX_2D
  */
 struct VERTEX_3D
 {
-	VERTEX_3D() { vtx = D3DXVECTOR3(0.0f, 0.0f, 0.0f), nor = D3DXVECTOR3(0.0f, 0.0f, 0.0f), diffuse = D3DCOLOR(0), tex = D3DXVECTOR2(0.0f, 0.0f); };
+	VERTEX_3D() { vtx = D3DXVECTOR3(0.0f, 0.0f, 0.0f); nor = D3DXVECTOR3(0.0f, 0.0f, 0.0f); diffuse = D3DCOLOR(0); tex = D3DXVECTOR2(0.0f, 0.0f); }
 	D3DXVECTOR3 vtx;		//!< 頂点座標
 	D3DXVECTOR3 nor;		//!< 法線ベクトル
 	D3DCOLOR	diffuse;	//!< 反射光
@@ -72,7 +84,7 @@ struct VERTEX_3D
  */
 struct INTERPOLATION_DATA
 {
-	INTERPOLATION_DATA() { pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f), rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f), scl = D3DXVECTOR3(0.0f, 0.0f, 0.0f), frame = 0.0f; };
+	INTERPOLATION_DATA() { pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f); rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f); scl = D3DXVECTOR3(0.0f, 0.0f, 0.0f); frame = 0.0f; }
 	D3DXVECTOR3 pos;		//!< 頂点座標
 	D3DXVECTOR3 rot;		//!< 回転
 	D3DXVECTOR3 scl;		//!< 拡大縮小
@@ -86,12 +98,12 @@ struct INTERPOLATION_DATA
 struct ALL_OBJECT_PARAMETER
 {
 	ALL_OBJECT_PARAMETER() {
-		D3DXMatrixIdentity(&mtxWorld),
-			pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f), oldpos = D3DXVECTOR3(0.0f, 0.0f, 0.0f),
-			rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f), scl = D3DXVECTOR3(1.0f, 1.0f, 1.0f),
-			move = D3DXVECTOR3(0.0f, 0.0f, 0.0f), FieldNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f),
-			FieldNorUpNorCross = D3DXVECTOR3(0.0f, 0.0f, 0.0f), Qrot = 0.0f, col = D3DXCOLOR(DWORD(0)), use = false;
-	};
+		D3DXMatrixIdentity(&mtxWorld);
+		pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f); oldpos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f); scl = D3DXVECTOR3(1.0f, 1.0f, 1.0f);
+		move = D3DXVECTOR3(0.0f, 0.0f, 0.0f); FieldNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		FieldNorUpNorCross = D3DXVECTOR3(0.0f, 0.0f, 0.0f); Qrot = 0.0f; col = D3DXCOLOR(DWORD(0)); use = false;
+	}
 
 	D3DXMATRIX					mtxWorld;			//!< ワールドマトリックス
 	D3DXVECTOR3					pos;				//!< 位置
@@ -113,11 +125,12 @@ struct ALL_OBJECT_PARAMETER
 struct GPUMODEL
 {
 	GPUMODEL() {
-		pD3DTexture = NULL, pD3DXMesh = NULL, pD3DXBuffMat = NULL, nNumMat = NULL, pD3DVtxBuff = NULL, pD3DIdxBuff = NULL, nNumVertex = NULL, nNumVertexIndex = NULL, nNumPolygon = NULL;
-	};
+		pD3DTexture = NULL; pD3DXMesh = NULL; pD3DXBuffMat = NULL; nNumMat = NULL; pD3DVtxBuff = NULL;
+		pD3DIdxBuff = NULL; nNumVertex = NULL; nNumVertexIndex = NULL; nNumPolygon = NULL;
+	}
 	~GPUMODEL() {
 		SAFE_RELEASE(pD3DTexture); SAFE_RELEASE(pD3DXMesh); SAFE_RELEASE(pD3DXBuffMat); SAFE_RELEASE(pD3DVtxBuff); SAFE_RELEASE(pD3DIdxBuff);
-	};
+	}
 
 	LPDIRECT3DTEXTURE9			pD3DTexture;			//!< テクスチャへのポインタ
 	LPD3DXMESH					pD3DXMesh;				//!< メッシュ情報へのポインタ
@@ -138,8 +151,8 @@ struct GPUMODEL
 class TEXTURE2D_VERTEXBUFFER
 {
 public:
-	TEXTURE2D_VERTEXBUFFER() { pD3DTexture = NULL, pD3DVtxBuff = NULL; };
-	~TEXTURE2D_VERTEXBUFFER() { SAFE_RELEASE(pD3DTexture); SAFE_RELEASE(pD3DVtxBuff); };
+	TEXTURE2D_VERTEXBUFFER() { pD3DTexture = NULL; pD3DVtxBuff = NULL; }
+	~TEXTURE2D_VERTEXBUFFER() { SAFE_RELEASE(pD3DTexture); SAFE_RELEASE(pD3DVtxBuff); }
 
 	//------------------------get関数
 	LPDIRECT3DTEXTURE9 GetpD3DTexture();
@@ -161,8 +174,8 @@ private:
 class TEXTURE_2D
 {
 public:
-	TEXTURE_2D() { pD3DTexture = NULL; };
-	~TEXTURE_2D() { SAFE_RELEASE(pD3DTexture); };
+	TEXTURE_2D() { pD3DTexture = NULL; }
+	~TEXTURE_2D() { SAFE_RELEASE(pD3DTexture); }
 
 	//------------------------get関数
 	LPDIRECT3DTEXTURE9 GetpD3DTexture();
@@ -185,8 +198,8 @@ private:
 class OBJECT_2D_VERTEXBUFFER :public GAME_OBJECT
 {
 public:
-	OBJECT_2D_VERTEXBUFFER() { Num++; };
-	~OBJECT_2D_VERTEXBUFFER() { Num--; };
+	OBJECT_2D_VERTEXBUFFER() { Num++; }
+	~OBJECT_2D_VERTEXBUFFER() { Num--; }
 	virtual void Init() {};
 	virtual void Reinit() {};
 	virtual void Uninit() {};
@@ -223,13 +236,13 @@ private:
 class OBJECT_2D :public GAME_OBJECT
 {
 public:
-	OBJECT_2D() { Num++; };
-	~OBJECT_2D() { Num--; };
-	virtual void Init() {};
-	virtual void Reinit() {};
-	virtual void Uninit() {};
-	virtual void Update() {};
-	virtual void Draw() {};
+	OBJECT_2D() { Num++; }
+	~OBJECT_2D() { Num--; }
+	virtual void Init() {}
+	virtual void Reinit() {}
+	virtual void Uninit() {}
+	virtual void Update() {}
+	virtual void Draw() {}
 	//------------------------get関数
 	D3DXVECTOR3 GetPos();
 	D3DXVECTOR3 GetOldPos();
@@ -261,13 +274,13 @@ private:
 class OBJECT_3D :public GAME_OBJECT
 {
 public:
-	OBJECT_3D() { Num++; };
-	~OBJECT_3D() { Num--; };
-	virtual void Init() {};
-	virtual void Reinit() {};
-	virtual void Uninit() {};
-	virtual void Update() {};
-	virtual void Draw() {};
+	OBJECT_3D() { Num++; }
+	~OBJECT_3D() { Num--; }
+	virtual void Init() {}
+	virtual void Reinit() {}
+	virtual void Uninit() {}
+	virtual void Update() {}
+	virtual void Draw() {}
 	GPUMODEL model;
 
 	//------------------------get関数

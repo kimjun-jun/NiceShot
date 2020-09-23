@@ -90,9 +90,6 @@
     <ClCompile Include="..\cpp\scene\countdown.cpp">
       <Filter>cpp\scene</Filter>
     </ClCompile>
-    <ClCompile Include="..\cpp\scene\fade.cpp">
-      <Filter>cpp\scene</Filter>
-    </ClCompile>
     <ClCompile Include="..\cpp\scene\rank.cpp">
       <Filter>cpp\scene</Filter>
     </ClCompile>
@@ -165,6 +162,9 @@
     <ClCompile Include="..\cpp\object\objectclass.cpp">
       <Filter>cpp\object</Filter>
     </ClCompile>
+    <ClCompile Include="..\cpp\other\fade.cpp">
+      <Filter>cpp\other</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\h\collision.h">
@@ -227,9 +227,6 @@
     <ClInclude Include="..\h\scene\countdown.h">
       <Filter>h\scene</Filter>
     </ClInclude>
-    <ClInclude Include="..\h\scene\fade.h">
-      <Filter>h\scene</Filter>
-    </ClInclude>
     <ClInclude Include="..\h\scene\rank.h">
       <Filter>h\scene</Filter>
     </ClInclude>
@@ -268,6 +265,9 @@
     </ClInclude>
     <ClInclude Include="..\h\object\objectclass.h">
       <Filter>h\object</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\other\fade.h">
+      <Filter>h\other</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

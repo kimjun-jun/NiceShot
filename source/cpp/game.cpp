@@ -9,7 +9,6 @@
 #include "../h/other/debugproc.h"
 #include "../h/other/input.h"
 #include "../h/object/camera.h"
-#include "../h/other/light.h"
 #include "../h/object/player.h"
 #include "../h/map/field.h"
 #include "../h/map/wall.h"
@@ -18,7 +17,7 @@
 #include "../h/collision.h"
 #include "../h/scene/title.h"
 #include "../h/scene/result.h"
-#include "../h/scene/fade.h"
+#include "../h/other/fade.h"
 #include "../h/scene/tutorial.h"
 #include "../h/effect/effect.h"
 #include "../h/object/bullet/bullet.h"
@@ -32,8 +31,8 @@
 #include "../h/object/bullet/bulletprediction.h"
 #include "../h/object/bullet/bulletgauge.h"
 #include "../h/object/vitalgauge.h"
-#include "../h/game.h"
 #include "../h/object/objectclass.h"
+#include "../h/game.h"
 
 int					g_nScene = SCENE_TITLE;		//!< ステージ番号
 int					stop = 0;					//!< デバッグ時の一時停止用変数

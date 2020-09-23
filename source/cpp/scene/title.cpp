@@ -5,11 +5,11 @@
 * @date 2020/01/15
 */
 #include "../../h/main.h"
-#include "../../h/scene/title.h"
 #include "../../h/other/input.h"
-#include "../../h/scene/fade.h"
+#include "../../h/other/fade.h"
 #include "../../h/other/sound.h"
 #include "../../h/object/objectclass.h"
+#include "../../h/scene/title.h"
 
 //*****************************************************************************
 // マクロ定義
@@ -39,149 +39,76 @@
 #define	INTERVAL_DISP_START		(30)						// スタートボタン点滅の時間
 #define	COUNT_WAIT_DEMO			(60 * 5)					// デモまでの待ち時間
 
-//*****************************************************************************
-// プロトタイプ宣言
-//*****************************************************************************
-HRESULT MakeVertexTitle(LPDIRECT3DDEVICE9 pDevice);
-void SetColorTitle(TITLECLASS *SetTitle);
 
-//*****************************************************************************
-// グローバル変数
-//*****************************************************************************
-TITLECLASS g_TitleBG;
-TITLECLASS g_TitleStartLogo;
-TITLECLASS g_TitleSelectScene[TITLE_SELECT_SCENE_MAX];
-
-int			TitleSelectSceneNum = TITLE_SELECT_SCENE_TUTORIAL;	//!<
-bool		TitleSelectTime = false;								//!< true=タイトルシーンでセレクト画面になっている　false=タイトルシーンで点滅画面になっている
-bool		TitleSelectTimeCHK = false;								//!< true=次のシーンへ行って良い　false=タイトルシーンで点滅画面になっている　これをgamescneでシーンチェックの時に判定している
 //=============================================================================
 // 初期化処理
 //=============================================================================
-HRESULT InitTitle(void)
+void TITLE::Init(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 
-
-	TitleSelectSceneNum = TITLE_SELECT_SCENE_TUTORIAL;
-	TitleSelectTime = false;
-	TitleSelectTimeCHK = false;
-
-	g_TitleStartLogo.nCountAppearStart = 0;
-	g_TitleStartLogo.fAlpha = 0.0f;
-	g_TitleStartLogo.nCountDisp = 0;
-	g_TitleStartLogo.bDisp = false;
-	g_TitleStartLogo.nConutDemo = 0;
-
-	for (int CntTitleSelectScene = 0; CntTitleSelectScene < TITLE_SELECT_SCENE_MAX; CntTitleSelectScene++)
-	{
-		g_TitleSelectScene[CntTitleSelectScene].bDisp = false;
-		g_TitleSelectScene[CntTitleSelectScene].fAlpha = 0.0f;
-	}
 	// 頂点情報の作成
-	MakeVertexTitle(pDevice);
+	MakeVertexTitle();
 
 	// テクスチャの読み込み
-	D3DXCreateTextureFromFile(pDevice,						// デバイスへのポインタ
-		TEXTURE_TITLE_BG,			// ファイルの名前
-		&g_TitleBG.pD3DTexture);	// 読み込むメモリー
+	LPDIRECT3DTEXTURE9 pD3DTexture[OBJECT_TITLE_MAX];
+	D3DXCreateTextureFromFile(pDevice,TEXTURE_TITLE_BG,&pD3DTexture[0]);	
 
+	D3DXCreateTextureFromFile(pDevice,TEXTURE_LOGO_START,&pD3DTexture[1]);
 
-	D3DXCreateTextureFromFile(pDevice,						// デバイスへのポインタ
-		TEXTURE_LOGO_START,			// ファイルの名前
-		&g_TitleStartLogo.pD3DTexture);		// 読み込むメモリー
+	D3DXCreateTextureFromFile(pDevice,TEXTURE_TITLE_SELECT_TUTORIAL,&pD3DTexture[2]);
 
+	D3DXCreateTextureFromFile(pDevice,TEXTURE_TITLE_SELECT_GAME,&pD3DTexture[3]);
 
-	D3DXCreateTextureFromFile(pDevice,						// デバイスへのポインタ
-		TEXTURE_TITLE_SELECT_TUTORIAL,			// ファイルの名前
-		&g_TitleSelectScene[TITLE_SELECT_SCENE_TUTORIAL].pD3DTexture);		// 読み込むメモリー
+	this[0].tex2DVB.SetpD3DTexture(pD3DTexture[0]);
+	this[1].tex2DVB.SetpD3DTexture(pD3DTexture[1]);
+	this[2].tex2DVB.SetpD3DTexture(pD3DTexture[2]);
+	this[3].tex2DVB.SetpD3DTexture(pD3DTexture[3]);
 
-	D3DXCreateTextureFromFile(pDevice,						// デバイスへのポインタ
-		TEXTURE_TITLE_SELECT_GAME,			// ファイルの名前
-		&g_TitleSelectScene[TITLE_SELECT_SCENE_GAME].pD3DTexture);		// 読み込むメモリー
-
-	return S_OK;
+	pD3DTexture[0]->Release();
+	pD3DTexture[1]->Release();
+	pD3DTexture[2]->Release();
+	pD3DTexture[3]->Release();
 }
 
 //=============================================================================
 // 再初期化処理
 //=============================================================================
-HRESULT ReInitTitle(void)
+void TITLE::Reinit(void)
 {
-	TitleSelectSceneNum = TITLE_SELECT_SCENE_TUTORIAL;
-	TitleSelectTime = false;
-	TitleSelectTimeCHK = false;
-	g_TitleBG.fAlpha = 1.0f;
+	this[0].TitleSelectSceneNum = TITLE_SELECT_SCENE_TUTORIAL;
+	this[0].fAlpha = 1.0f;
+	this[0].TitleSelectTime = false;
 
-	g_TitleStartLogo.nCountAppearStart = 0;
-	g_TitleStartLogo.fAlpha = 0.0f;
-	g_TitleStartLogo.nCountDisp = 0;
-	g_TitleStartLogo.bDisp = false;
-	g_TitleStartLogo.nConutDemo = 0;
+	this[1].nCountAppearStart = 0;
+	this[1].fAlpha = 0.0f;
+	this[1].nCountDisp = 0;
+	this[1].bDisp = false;
+	this[1].nConutDemo = 0;
 
 	for (int CntTitleSelectScene = 0; CntTitleSelectScene < TITLE_SELECT_SCENE_MAX; CntTitleSelectScene++)
 	{
-		g_TitleSelectScene[CntTitleSelectScene].bDisp = false;
-		g_TitleSelectScene[CntTitleSelectScene].fAlpha = 0.0f;
+		this[CntTitleSelectScene].bDisp = false;
+		this[CntTitleSelectScene].fAlpha = 0.0f;
 	}
-	SetColorTitle(&g_TitleBG);
-	SetColorTitle(&g_TitleStartLogo);
-
-	return S_OK;
+	this[0].SetColorTitle(0, this[0].fAlpha);
+	this[0].SetColorTitle(1, this[0].fAlpha);
 }
 
 //=============================================================================
 // 終了処理
 //=============================================================================
-void UninitTitle(void)
+void TITLE::Uninit(void)
 {
-	if (g_TitleBG.pD3DTexture != NULL)
-	{// テクスチャの開放
-		g_TitleBG.pD3DTexture->Release();
-		g_TitleBG.pD3DTexture = NULL;
-	}
-
-	if (g_TitleBG.pD3DVtxBuff != NULL)
-	{// 頂点バッファの開放
-		g_TitleBG.pD3DVtxBuff->Release();
-		g_TitleBG.pD3DVtxBuff = NULL;
-	}
-
-	if (g_TitleStartLogo.pD3DTexture != NULL)
-	{// テクスチャの開放
-		g_TitleStartLogo.pD3DTexture->Release();
-		g_TitleStartLogo.pD3DTexture = NULL;
-	}
-
-	if (g_TitleStartLogo.pD3DVtxBuff != NULL)
-	{// 頂点バッファの開放
-		g_TitleStartLogo.pD3DVtxBuff->Release();
-		g_TitleStartLogo.pD3DVtxBuff = NULL;
-	}
-
-	for (int CntTitleSelectScene = 0; CntTitleSelectScene < TITLE_SELECT_SCENE_MAX; CntTitleSelectScene++)
-	{
-		if (g_TitleSelectScene[CntTitleSelectScene].pD3DTexture != NULL)
-		{// テクスチャの開放
-			g_TitleSelectScene[CntTitleSelectScene].pD3DTexture->Release();
-			g_TitleSelectScene[CntTitleSelectScene].pD3DTexture = NULL;
-		}
-
-		if (g_TitleSelectScene[CntTitleSelectScene].pD3DVtxBuff != NULL)
-		{// 頂点バッファの開放
-			g_TitleSelectScene[CntTitleSelectScene].pD3DVtxBuff->Release();
-			g_TitleSelectScene[CntTitleSelectScene].pD3DVtxBuff = NULL;
-		}
-	}
 }
 
 //=============================================================================
 // 更新処理
 //=============================================================================
-void UpdateTitle(void)
+void TITLE::Update(void)
 {
 	//タイトル画面(セレクト中)
-	if (TitleSelectTime == true)
+	if (this[0].TitleSelectTime == true)
 	{
 		//決定処理
 		if (GetKeyboardTrigger(DIK_RETURN) || IsButtonTriggered(0, BUTTON_A))
@@ -194,13 +121,13 @@ void UpdateTitle(void)
 		else if (GetKeyboardTrigger(DIK_BACK) || IsButtonTriggered(0, BUTTON_B))
 		{
 			PlaySound(SOUND_LABEL_SE_enter01);
-			g_TitleBG.fAlpha = 1.0f;
-			SetColorTitle(&g_TitleBG);
-			g_TitleStartLogo.fAlpha = 0.0f;
-			SetColorTitle(&g_TitleStartLogo);
-			TitleSelectTime = false;
-			g_TitleSelectScene[0].bDisp = false;
-			g_TitleSelectScene[1].bDisp = false;
+			this[0].fAlpha = 1.0f;
+			SetColorTitle(0, this[0].fAlpha);
+			this[1].fAlpha = 0.0f;
+			SetColorTitle(1, this[1].fAlpha);
+			this[0].TitleSelectTime = false;
+			this[2].bDisp = false;
+			this[3].bDisp = false;
 		}
 		else if (GetKeyboardTrigger(DIK_DOWN) || IsButtonTriggered(0, BUTTON_DIGITAL_DOWN))
 		{
@@ -210,9 +137,9 @@ void UpdateTitle(void)
 			//}
 			//3つ以上選択肢があるとこっち使う
 			{
-				if (TitleSelectSceneNum != TITLE_SELECT_SCENE_GAME) PlaySound(SOUND_LABEL_SE_enter02);
-				TitleSelectSceneNum++;
-				if (TitleSelectSceneNum > TITLE_SELECT_SCENE_GAME) TitleSelectSceneNum = TITLE_SELECT_SCENE_GAME;
+				if (this[0].TitleSelectSceneNum != TITLE_SELECT_SCENE_GAME) PlaySound(SOUND_LABEL_SE_enter02);
+				this[0].TitleSelectSceneNum++;
+				if (this[0].TitleSelectSceneNum > TITLE_SELECT_SCENE_GAME) this[0].TitleSelectSceneNum = TITLE_SELECT_SCENE_GAME;
 			}
 		}
 		else if (GetKeyboardTrigger(DIK_UP) || IsButtonTriggered(0, BUTTON_DIGITAL_UP))
@@ -223,64 +150,65 @@ void UpdateTitle(void)
 			//}
 			//3つ以上選択肢があるとこっち使う
 			{
-				if (TitleSelectSceneNum != TITLE_SELECT_SCENE_TUTORIAL) PlaySound(SOUND_LABEL_SE_enter02);
-				TitleSelectSceneNum--;
-				if (TitleSelectSceneNum <= TITLE_SELECT_SCENE_TUTORIAL) TitleSelectSceneNum = TITLE_SELECT_SCENE_TUTORIAL;
+				if (this[0].TitleSelectSceneNum != TITLE_SELECT_SCENE_TUTORIAL) PlaySound(SOUND_LABEL_SE_enter02);
+				this[0].TitleSelectSceneNum--;
+				if (this[0].TitleSelectSceneNum <= TITLE_SELECT_SCENE_TUTORIAL) this[0].TitleSelectSceneNum = TITLE_SELECT_SCENE_TUTORIAL;
 			}
 		}
 		for (int CntTitleSelectScene = 0; CntTitleSelectScene < TITLE_SELECT_SCENE_MAX; CntTitleSelectScene++)
 		{
-			if (TitleSelectSceneNum == CntTitleSelectScene)
+			if (this[0].TitleSelectSceneNum == CntTitleSelectScene)
 			{
-				g_TitleSelectScene[CntTitleSelectScene].fAlpha = 1.0f;
+				this[2].fAlpha = 1.0f;
 			}
 			else
 			{
-				g_TitleSelectScene[CntTitleSelectScene].fAlpha = 0.2f;
+				this[3].fAlpha = 0.2f;
 			}
-			SetColorTitle(&g_TitleSelectScene[CntTitleSelectScene]);
+			SetColorTitle(2, this[2].fAlpha);
+			SetColorTitle(3, this[3].fAlpha);
 		}
 	}
 
 	//タイトル画面(ロゴ点滅)
-	else if (TitleSelectTime == false)
+	else if (this[0].TitleSelectTime == false)
 	{
 		//セレクト切り替え
 		if (GetKeyboardTrigger(DIK_RETURN) || IsButtonTriggered(0, BUTTON_A))
 		{
 			PlaySound(SOUND_LABEL_SE_enter01);
-			g_TitleBG.fAlpha = 0.4f;
-			SetColorTitle(&g_TitleBG);
-			g_TitleStartLogo.fAlpha = 0.0f;
-			SetColorTitle(&g_TitleStartLogo);
-			TitleSelectTime = true;
-			g_TitleSelectScene[0].bDisp = true;
-			g_TitleSelectScene[1].bDisp = true;
+			this[0].fAlpha = 0.4f;
+			SetColorTitle(0, this[0].fAlpha);
+			this[1].fAlpha = 0.0f;
+			SetColorTitle(1,this[1].fAlpha);
+			this[0].TitleSelectTime = true;
+			this[2].bDisp = true;
+			this[3].bDisp = true;
 		}
 		//初めは透明テクスチャのアルファ値を上げていき見えるようにする
-		if (g_TitleStartLogo.fAlpha < 1.0f)
+		if (this[1].fAlpha < 1.0f)
 		{
-			g_TitleStartLogo.fAlpha += 0.05f;
-			if (g_TitleStartLogo.fAlpha >= 1.0f)
+			this[1].fAlpha += 0.05f;
+			if (this[1].fAlpha >= 1.0f)
 			{
-				g_TitleStartLogo.fAlpha = 1.0f;
+				this[1].fAlpha = 1.0f;
 			}
-			SetColorTitle(&g_TitleStartLogo);
+			SetColorTitle(1, this[1].fAlpha);
 		}
 		//アルファ値が最大まで来たらカウントをとり、点滅を繰り返す
 		else
 		{
-			g_TitleStartLogo.nCountAppearStart++;
-			if (g_TitleStartLogo.nCountAppearStart > COUNT_APPERA_START)
+			this[1].nCountAppearStart++;
+			if (this[1].nCountAppearStart > COUNT_APPERA_START)
 			{
-				g_TitleStartLogo.nCountDisp = (g_TitleStartLogo.nCountDisp + 1) % 80;
-				if (g_TitleStartLogo.nCountDisp > INTERVAL_DISP_START)
+				this[1].nCountDisp = (this[1].nCountDisp + 1) % 80;
+				if (this[1].nCountDisp > INTERVAL_DISP_START)
 				{
-					g_TitleStartLogo.bDisp = false;
+					this[1].bDisp = false;
 				}
 				else
 				{
-					g_TitleStartLogo.bDisp = true;
+					this[1].bDisp = true;
 				}
 			}
 		}
@@ -291,33 +219,32 @@ void UpdateTitle(void)
 //=============================================================================
 // 描画処理
 //=============================================================================
-void DrawTitle(void)
+void TITLE::Draw(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 
-
 	// 頂点バッファをデバイスのデータストリームにバインド
-	pDevice->SetStreamSource(0, g_TitleBG.pD3DVtxBuff, 0, sizeof(VERTEX_2D));
+	pDevice->SetStreamSource(0, this[0].tex2DVB.GetpD3DVtxBuff(), 0, sizeof(VERTEX_2D));
 
 	// 頂点フォーマットの設定
 	pDevice->SetFVF(FVF_VERTEX_2D);
 
 	// テクスチャの設定
-	pDevice->SetTexture(0, g_TitleBG.pD3DTexture);
+	pDevice->SetTexture(0, this[0].tex2DVB.GetpD3DTexture());
 
 	// ポリゴンの描画
 	pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, POLYGON_2D_NUM);
 
-	if (g_TitleStartLogo.bDisp == true)
+	if (this[1].bDisp == true)
 	{
 		// 頂点バッファをデバイスのデータストリームにバインド
-		pDevice->SetStreamSource(0, g_TitleStartLogo.pD3DVtxBuff, 0, sizeof(VERTEX_2D));
+		pDevice->SetStreamSource(0, this[1].tex2DVB.GetpD3DVtxBuff(), 0, sizeof(VERTEX_2D));
 
 		// 頂点フォーマットの設定
 		pDevice->SetFVF(FVF_VERTEX_2D);
 
 		// テクスチャの設定
-		pDevice->SetTexture(0, g_TitleStartLogo.pD3DTexture);
+		pDevice->SetTexture(0, this[1].tex2DVB.GetpD3DTexture());
 
 		// ポリゴンの描画
 		pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, POLYGON_2D_NUM);
@@ -326,17 +253,17 @@ void DrawTitle(void)
 
 	for (int CntTitleSelectScene = 0; CntTitleSelectScene < TITLE_SELECT_SCENE_MAX; CntTitleSelectScene++)
 	{
-		if (g_TitleSelectScene[CntTitleSelectScene].bDisp == true)
+		if (this[CntTitleSelectScene].bDisp == true)
 		{
 
 			// 頂点バッファをデバイスのデータストリームにバインド
-			pDevice->SetStreamSource(0, g_TitleSelectScene[CntTitleSelectScene].pD3DVtxBuff, 0, sizeof(VERTEX_2D));
+			pDevice->SetStreamSource(0, this[CntTitleSelectScene].tex2DVB.GetpD3DVtxBuff(), 0, sizeof(VERTEX_2D));
 
 			// 頂点フォーマットの設定
 			pDevice->SetFVF(FVF_VERTEX_2D);
 
 			// テクスチャの設定
-			pDevice->SetTexture(0, g_TitleSelectScene[CntTitleSelectScene].pD3DTexture);
+			pDevice->SetTexture(0, this[CntTitleSelectScene].tex2DVB.GetpD3DTexture());
 
 			// ポリゴンの描画
 			pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, POLYGON_2D_NUM);
@@ -347,16 +274,19 @@ void DrawTitle(void)
 //=============================================================================
 // 頂点の作成
 //=============================================================================
-HRESULT MakeVertexTitle(LPDIRECT3DDEVICE9 pDevice)
+HRESULT TITLE::MakeVertexTitle(void)
 {
+	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 	//タイトルBG生成
 	{
+		LPDIRECT3DVERTEXBUFFER9 pD3DVtxBuff;
+
 		// オブジェクトの頂点バッファを生成
 		if (FAILED(pDevice->CreateVertexBuffer(sizeof(VERTEX_2D) * POLYGON_2D_VERTEX,	// 頂点データ用に確保するバッファサイズ(バイト単位)
 			D3DUSAGE_WRITEONLY,			// 頂点バッファの使用法　
 			FVF_VERTEX_2D,				// 使用する頂点フォーマット
 			D3DPOOL_MANAGED,			// リソースのバッファを保持するメモリクラスを指定
-			&g_TitleBG.pD3DVtxBuff,		// 頂点バッファインターフェースへのポインタ
+			&pD3DVtxBuff,		// 頂点バッファインターフェースへのポインタ
 			NULL)))						// NULLに設定
 		{
 			return E_FAIL;
@@ -366,7 +296,7 @@ HRESULT MakeVertexTitle(LPDIRECT3DDEVICE9 pDevice)
 			VERTEX_2D *pVtx;
 
 			// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
-			g_TitleBG.pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+			pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
 
 			// 頂点座標の設定
 			pVtx[0].vtx = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
@@ -393,18 +323,22 @@ HRESULT MakeVertexTitle(LPDIRECT3DDEVICE9 pDevice)
 			pVtx[3].tex = D3DXVECTOR2(1.0f, 1.0f);
 
 			// 頂点データをアンロックする
-			g_TitleBG.pD3DVtxBuff->Unlock();
+			pD3DVtxBuff->Unlock();
+
+			this[0].tex2DVB.SetpD3DVtxBuff(pD3DVtxBuff);
 		}
 	}
 
 	//タイトルスタートロゴ生成
 	{
+		LPDIRECT3DVERTEXBUFFER9 pD3DVtxBuff;
+
 		// オブジェクトの頂点バッファを生成
 		if (FAILED(pDevice->CreateVertexBuffer(sizeof(VERTEX_2D) * POLYGON_2D_VERTEX,	// 頂点データ用に確保するバッファサイズ(バイト単位)
 			D3DUSAGE_WRITEONLY,			// 頂点バッファの使用法　
 			FVF_VERTEX_2D,				// 使用する頂点フォーマット
 			D3DPOOL_MANAGED,			// リソースのバッファを保持するメモリクラスを指定
-			&g_TitleStartLogo.pD3DVtxBuff,	// 頂点バッファインターフェースへのポインタ
+			&pD3DVtxBuff,	// 頂点バッファインターフェースへのポインタ
 			NULL)))						// NULLに設定
 		{
 			return E_FAIL;
@@ -414,7 +348,7 @@ HRESULT MakeVertexTitle(LPDIRECT3DDEVICE9 pDevice)
 			VERTEX_2D *pVtx;
 
 			// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
-			g_TitleStartLogo.pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+			pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
 
 			// 頂点座標の設定
 			pVtx[0].vtx = D3DXVECTOR3(TITLE_START_LOGO_POS_X - TITLE_START_LOGO_WIDTH, TITLE_START_LOGO_POS_Y - TITLE_START_LOGO_HEIGHT, 0.0f);
@@ -429,10 +363,10 @@ HRESULT MakeVertexTitle(LPDIRECT3DDEVICE9 pDevice)
 				pVtx[3].rhw = 1.0f;
 
 			// 反射光の設定
-			pVtx[0].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, g_TitleStartLogo.fAlpha);
-			pVtx[1].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, g_TitleStartLogo.fAlpha);
-			pVtx[2].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, g_TitleStartLogo.fAlpha);
-			pVtx[3].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, g_TitleStartLogo.fAlpha);
+			pVtx[0].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, this[1].fAlpha);
+			pVtx[1].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, this[1].fAlpha);
+			pVtx[2].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, this[1].fAlpha);
+			pVtx[3].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, this[1].fAlpha);
 
 			// テクスチャ座標の設定
 			pVtx[0].tex = D3DXVECTOR2(0.0f, 0.0f);
@@ -441,7 +375,8 @@ HRESULT MakeVertexTitle(LPDIRECT3DDEVICE9 pDevice)
 			pVtx[3].tex = D3DXVECTOR2(1.0f, 1.0f);
 
 			// 頂点データをアンロックする
-			g_TitleStartLogo.pD3DVtxBuff->Unlock();
+			pD3DVtxBuff->Unlock();
+			this[1].tex2DVB.SetpD3DVtxBuff(pD3DVtxBuff);
 		}
 	}
 
@@ -449,12 +384,14 @@ HRESULT MakeVertexTitle(LPDIRECT3DDEVICE9 pDevice)
 	{
 		for (int CntTitleSelectScene = 0; CntTitleSelectScene < TITLE_SELECT_SCENE_MAX; CntTitleSelectScene++)
 		{
+			LPDIRECT3DVERTEXBUFFER9 pD3DVtxBuff;
+
 			// オブジェクトの頂点バッファを生成
 			if (FAILED(pDevice->CreateVertexBuffer(sizeof(VERTEX_2D) * POLYGON_2D_VERTEX,	// 頂点データ用に確保するバッファサイズ(バイト単位)
 				D3DUSAGE_WRITEONLY,			// 頂点バッファの使用法　
 				FVF_VERTEX_2D,				// 使用する頂点フォーマット
 				D3DPOOL_MANAGED,			// リソースのバッファを保持するメモリクラスを指定
-				&g_TitleSelectScene[CntTitleSelectScene].pD3DVtxBuff,	// 頂点バッファインターフェースへのポインタ
+				&pD3DVtxBuff,	// 頂点バッファインターフェースへのポインタ
 				NULL)))						// NULLに設定
 			{
 				return E_FAIL;
@@ -464,7 +401,7 @@ HRESULT MakeVertexTitle(LPDIRECT3DDEVICE9 pDevice)
 				VERTEX_2D *pVtx;
 
 				// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
-				g_TitleSelectScene[CntTitleSelectScene].pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+				pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
 
 				// 頂点座標の設定
 				pVtx[0].vtx = D3DXVECTOR3(TITLE_SELECT_POS_X - TITLE_SELECT_WIDTH, TITLE_SELECT_POS_Y - TITLE_SELECT_HEIGHT + (CntTitleSelectScene*TITLE_SELECT_HEIGHT * 2), 0.0f);
@@ -479,10 +416,10 @@ HRESULT MakeVertexTitle(LPDIRECT3DDEVICE9 pDevice)
 					pVtx[3].rhw = 1.0f;
 
 				// 反射光の設定
-				pVtx[0].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, g_TitleSelectScene[CntTitleSelectScene].fAlpha);
-				pVtx[1].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, g_TitleSelectScene[CntTitleSelectScene].fAlpha);
-				pVtx[2].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, g_TitleSelectScene[CntTitleSelectScene].fAlpha);
-				pVtx[3].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, g_TitleSelectScene[CntTitleSelectScene].fAlpha);
+				pVtx[0].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, this[CntTitleSelectScene].fAlpha);
+				pVtx[1].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, this[CntTitleSelectScene].fAlpha);
+				pVtx[2].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, this[CntTitleSelectScene].fAlpha);
+				pVtx[3].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, this[CntTitleSelectScene].fAlpha);
 
 				// テクスチャ座標の設定
 				pVtx[0].tex = D3DXVECTOR2(0.0f, 0.0f);
@@ -491,7 +428,8 @@ HRESULT MakeVertexTitle(LPDIRECT3DDEVICE9 pDevice)
 				pVtx[3].tex = D3DXVECTOR2(1.0f, 1.0f);
 
 				// 頂点データをアンロックする
-				g_TitleSelectScene[CntTitleSelectScene].pD3DVtxBuff->Unlock();
+				pD3DVtxBuff->Unlock();
+				this[CntTitleSelectScene].tex2DVB.SetpD3DVtxBuff(pD3DVtxBuff);
 			}
 		}
 	}
@@ -503,38 +441,25 @@ HRESULT MakeVertexTitle(LPDIRECT3DDEVICE9 pDevice)
 //=============================================================================
 // 頂点色変更
 //=============================================================================
-void SetColorTitle(TITLECLASS *SetTitle)
+void TITLE::SetColorTitle(int CntTitle, float alpha)
 {
 	{//頂点バッファの中身を埋める
 		VERTEX_2D *pVtx;
-
+		LPDIRECT3DVERTEXBUFFER9 pD3DVtxBuff = this[CntTitle].tex2DVB.GetpD3DVtxBuff();
 		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
-		SetTitle->pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+		pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
 
 		// 反射光の設定
-		pVtx[0].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, SetTitle->fAlpha);
-		pVtx[1].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, SetTitle->fAlpha);
-		pVtx[2].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, SetTitle->fAlpha);
-		pVtx[3].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, SetTitle->fAlpha);
+		pVtx[0].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, fAlpha);
+		pVtx[1].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, fAlpha);
+		pVtx[2].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, fAlpha);
+		pVtx[3].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, fAlpha);
 
 		// 頂点データをアンロックする
-		SetTitle->pD3DVtxBuff->Unlock();
+		pD3DVtxBuff->Unlock();
+
+		this[CntTitle].tex2DVB.SetpD3DVtxBuff(pD3DVtxBuff);
 	}
 
 }
 
-
-void SetTitleSelectTimeCHK(bool b)
-{
-	TitleSelectTimeCHK = b;
-}
-
-bool GetTitleSelectTimeCHK(void)
-{
-	return TitleSelectTimeCHK;
-}
-
-int GetSelectTitleScene(void)
-{
-	return TitleSelectSceneNum;
-}

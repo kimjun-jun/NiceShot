@@ -4,14 +4,15 @@
 * @author キムラジュン
 * @date 2020/01/15
 */
+using namespace std;
 
 #include "../../h/main.h"
 #include "../../h/object/player.h"
 #include "../../h/effect/effect.h"
 #include "../../h/object/bullet/bullet.h"
 #include "../../h/object/shadow.h"
+#include "../../h/scene/countdown.h"
 #include "../../h/object/objectclass.h"
-
 
 
 //-------------------------------------------------------------------2DVBテクスチャゲット関数

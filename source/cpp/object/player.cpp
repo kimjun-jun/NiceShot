@@ -8,7 +8,7 @@
 #include "../../h/library.h"
 #include "../../h/other/input.h"
 #include "../../h/object/bullet/bullet.h"
-#include "../../h/scene/fade.h"
+#include "../../h/other/fade.h"
 #include "../../h/object/camera.h"
 #include "../../h/object/shadow.h"
 #include "../../h/map/field.h"
@@ -116,7 +116,7 @@ void PLAYER_HONTAI::Init(void)
 		this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL].nNumVertexIndex = 0;
 
 		// Xファイルの読み込み
-		if (LoadMesh(MODEL_HOUSIN, &this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL].pD3DXBuffMat,
+		LoadMesh(MODEL_HOUSIN, &this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL].pD3DXBuffMat,
 			&this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL].nNumMat, &this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL].pD3DXMesh,
 			&this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL].pD3DVtxBuff, &this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL].pD3DIdxBuff,
 			&this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL].nNumVertex, &this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL].nNumPolygon,
@@ -135,7 +135,7 @@ void PLAYER_HONTAI::Init(void)
 		///////////////////////////////////////////////////////////////////////////////////////////////////////砲身攻撃データ
 
 		// Xファイルの読み込み
-		if (LoadMesh(MODEL_HOUSINMO, &this[CntPlayer].ModelDate[PLAYER_MODEL_ATTACK].pD3DXBuffMat,
+		LoadMesh(MODEL_HOUSINMO, &this[CntPlayer].ModelDate[PLAYER_MODEL_ATTACK].pD3DXBuffMat,
 			&this[CntPlayer].ModelDate[PLAYER_MODEL_ATTACK].nNumMat, &this[CntPlayer].ModelDate[PLAYER_MODEL_ATTACK].pD3DXMesh,
 			&this[CntPlayer].ModelDate[PLAYER_MODEL_ATTACK].pD3DVtxBuff, &this[CntPlayer].ModelDate[PLAYER_MODEL_ATTACK].pD3DIdxBuff,
 			&this[CntPlayer].ModelDate[PLAYER_MODEL_ATTACK].nNumVertex, &this[CntPlayer].ModelDate[PLAYER_MODEL_ATTACK].nNumPolygon,
@@ -655,14 +655,6 @@ void PLAYER_HONTAI::Draw(void)
 			pDevice->SetMaterial(&matDef);
 		}
 	}
-}
-
-//=============================================================================
-// 先頭アドレス取得
-//=============================================================================
-PLAYER_HONTAI* PLAYER_HONTAI::GetpPlayer(void)
-{
-	return &this[0];
 }
 
 //=============================================================================

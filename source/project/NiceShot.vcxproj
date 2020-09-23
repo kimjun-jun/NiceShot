@@ -44,11 +44,11 @@
     <ClCompile Include="..\cpp\old\life.cpp" />
     <ClCompile Include="..\cpp\old\time.cpp" />
     <ClCompile Include="..\cpp\other\debugproc.cpp" />
+    <ClCompile Include="..\cpp\other\fade.cpp" />
     <ClCompile Include="..\cpp\other\input.cpp" />
     <ClCompile Include="..\cpp\other\light.cpp" />
     <ClCompile Include="..\cpp\other\sound.cpp" />
     <ClCompile Include="..\cpp\scene\countdown.cpp" />
-    <ClCompile Include="..\cpp\scene\fade.cpp" />
     <ClCompile Include="..\cpp\scene\rank.cpp" />
     <ClCompile Include="..\cpp\scene\result.cpp" />
     <ClCompile Include="..\cpp\scene\title.cpp" />
@@ -80,11 +80,11 @@
     <ClInclude Include="..\h\old\life.h" />
     <ClInclude Include="..\h\old\time.h" />
     <ClInclude Include="..\h\other\debugproc.h" />
+    <ClInclude Include="..\h\other\fade.h" />
     <ClInclude Include="..\h\other\input.h" />
     <ClInclude Include="..\h\other\light.h" />
     <ClInclude Include="..\h\other\sound.h" />
     <ClInclude Include="..\h\scene\countdown.h" />
-    <ClInclude Include="..\h\scene\fade.h" />
     <ClInclude Include="..\h\scene\rank.h" />
     <ClInclude Include="..\h\scene\result.h" />
     <ClInclude Include="..\h\scene\title.h" />

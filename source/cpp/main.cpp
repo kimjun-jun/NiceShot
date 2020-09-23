@@ -17,7 +17,7 @@
 #include "../h/collision.h"
 #include "../h/scene/title.h"
 #include "../h/scene/result.h"
-#include "../h/scene/fade.h"
+#include "../h/other/fade.h"
 #include "../h/scene/tutorial.h"
 #include "../h/effect/effect.h"
 #include "../h/object/bullet/bullet.h"
@@ -164,8 +164,9 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	//-----------------------------------------------------オブジェクト生成
 	GAME_OBJECT* ObjectAll[OBJECT_ALL_MAX];
 
-	ObjectAll[0] = new PLAYER_HONTAI[OBJECT_PLAYER_MAX];
+	//-------------プレイヤー確保、アドレスセット
 	ObjectAll[0]->SetPlayer(ObjectAll[0]->GetCnt());
+	ObjectAll[0] = new PLAYER_HONTAI[OBJECT_PLAYER_MAX];
 
 	ObjectAll[ObjectAll[0]->GetCnt()] = new TUTO[OBJECT_TUTORIAL_MAX];
 	ObjectAll[ObjectAll[0]->GetCnt()] = new STATUS[OBJECT_STATUS_MAX];
@@ -174,17 +175,26 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	ObjectAll[ObjectAll[0]->GetCnt()] = new BULLETGAUGE[OBJECT_BULLETGAUGE_MAX];
 	ObjectAll[ObjectAll[0]->GetCnt()] = new DAMEGE[OBJECT_DAMEGE_MAX];
 
-	ObjectAll[ObjectAll[0]->GetCnt()] = new EFFECT[OBJECT_EFFECT_MAX];
+	//-------------エフェクト確保、アドレスセット
 	ObjectAll[0]->SetEffect(ObjectAll[0]->GetCnt());
+	ObjectAll[ObjectAll[0]->GetCnt()] = new EFFECT[OBJECT_EFFECT_MAX];
 
 	ObjectAll[ObjectAll[0]->GetCnt()] = new EXPLOSION[OBJECT_EXPLOSION_MAX];
 
-	ObjectAll[ObjectAll[0]->GetCnt()] = new BULLET[OBJECT_BULLET_MAX];
+	//-------------バレット確保、アドレスセット
 	ObjectAll[0]->SetBullet(ObjectAll[0]->GetCnt());
+	ObjectAll[ObjectAll[0]->GetCnt()] = new BULLET[OBJECT_BULLET_MAX];
 
 	ObjectAll[ObjectAll[0]->GetCnt()] = new ITEM[OBJECT_ITEM_MAX];
+
+	//-------------影確保、アドレスセット
+	ObjectAll[0]->SetShadow(ObjectAll[0]->GetCnt());
 	ObjectAll[ObjectAll[0]->GetCnt()] = new SHADOW[OBJECT_SHADOW_MAX];
+
+	//-------------カウントダウン確保、アドレスセット
+	ObjectAll[0]->SetCountdown(ObjectAll[0]->GetCnt());
 	ObjectAll[ObjectAll[0]->GetCnt()] = new COUNTDOWN[OBJECT_COUNTDOWN_MAX];
+
 	ObjectAll[ObjectAll[0]->GetCnt()] = new RANK[OBJECT_RANK_MAX];
 	ObjectAll[ObjectAll[0]->GetCnt()] = new RESULT[OBJECT_RESULT_MAX];
 	ObjectAll[ObjectAll[0]->GetCnt()] = new TITLE[OBJECT_TITLE_MAX];
@@ -277,7 +287,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		ObjectAll[ObjCnt]->Uninit();
 	}
 
-
+	delete [] ObjectAll;
 
 	timeEndPeriod(1);				// 分解能を戻す
 

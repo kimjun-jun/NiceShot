@@ -6,6 +6,10 @@
 */
 #pragma once
 
+class OBJECT_3D;
+class PLAYER_PRATS;
+struct GPUMODEL;
+
 /**
  * @enum ITEMTYPE
  * アイテム定数
@@ -16,37 +20,40 @@ enum PARTSTYPE
 	PARTSTYPE_HOUSIN,			//!< 砲身
 };
 
-//*****************************************************************************
-// マクロ定義
-//*****************************************************************************
-
 
 class PLAYER_HONTAI : public OBJECT_3D
 {
 public:
 	PLAYER_HONTAI()
 	{
-		FrontRotTOaxis = D3DXVECTOR3(0.0f, 0.0f, 0.0f), Brot = 0.0f,
-			speed = 0.0f,
-			speedbuff = 0.0f,
-			speedbufftime = 0.0f,
-			MorphingTime = 0.0f,
-			BackCameraItemTime = 0.0f,
-			KiriItemTime = 0.0f,
-			AmmoBornTime = 0.0f,
-			time = 0.0f,
-			MorphingSignal = 0,
-			vital = 0,
-			AmmoCnt = 0,
-			ModelType = 0,
-			shadowIdx = 0,
-			Morphing = false,
-			MorphingEnd = false,
-			speedbuffsignal = false,
-			BackCameraItemSignal = false,
-			KiriSignal = false,
-			dashFlag = false;
+		FrontRotTOaxis = D3DXVECTOR3(0.0f, 0.0f, 0.0f), Brot = 0.0f;
+		speed = 0.0f;
+		speedbuff = 0.0f;
+		speedbufftime = 0.0f;
+		MorphingTime = 0.0f;
+		BackCameraItemTime = 0.0f;
+		KiriItemTime = 0.0f;
+		AmmoBornTime = 0.0f;
+		time = 0.0f;
+		MorphingSignal = 0;
+		vital = 0;
+		AmmoCnt = 0;
+		ModelType = 0;
+		shadowIdx = 0;
+		Morphing = false;
+		MorphingEnd = false;
+		speedbuffsignal = false;
+		BackCameraItemSignal = false;
+		KiriSignal = false;
+		dashFlag = false;
 	}
+
+
+	//PLAYER_HONTAI *GetPlayerPointer() { return &this[0]; }	//!< 先頭アドレス取得
+	//void *SetPlayerPointer(int cnt) { this[cnt]; }			//!< アドレスセット
+
+
+
 	PLAYER_PRATS				parts[2];					//!< モデルのパーツ階層　親本体(砲台)、子パーツ[0](砲塔)、孫パーツ[1](砲身)
 	PLAYER_HONTAI				*Parent;					//!< 親子判定
 	GPUMODEL					ModelDate[2];				//!< モデルデータ　0ノーマル、1攻撃、2スピード
@@ -55,7 +62,6 @@ public:
 	void						Uninit(void);				//!< 終了
 	void						Update(void);				//!< 更新
 	void						Draw(void);					//!< 描画
-	PLAYER_HONTAI*				GetpPlayer(void);			//!< 先頭アドレスを返す
 	void						SetPlayerMeshColor(LPDIRECT3DVERTEXBUFFER9 pD3DVtxBuff, LPDIRECT3DINDEXBUFFER9 pD3DIdxBuff,DWORD nNumPolygon, int CntPlayer);
 	void						SetMoveABL(int CntPlayer);				//!< 移動制御(ABボタンLスティックで移動制御)
 	void						SetCamera(int CntPlayer);				//!< カメラ更新
