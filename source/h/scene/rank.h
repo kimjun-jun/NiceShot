@@ -6,6 +6,9 @@
 */
 #pragma once
 
+
+#include "../../h/object/objectclass.h"
+
 class RANK : public OBJECT_2D
 {
 public:

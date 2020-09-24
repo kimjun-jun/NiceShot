@@ -5,16 +5,14 @@
 * @date 2020/01/15
 */
 #pragma once
-class GAME_OBJECT{};
+#include "../h/object/objectclass.h"
 
 //*****************************************************************************
 // プロトタイプ宣言
 //*****************************************************************************
-HRESULT InitGame(void);
-void ReinitGame(void);
-void UninitGame(void);
-void UpdateGame(GAME_OBJECT* GameObj);
-void DrawGame(GAME_OBJECT* GameObj);
+void ReinitGame(GAME_OBJECT *GameObj);
+void UpdateGame(GAME_OBJECT *GameObj);
+void DrawGame(GAME_OBJECT *GameObj);
 void SetScene(int Scene);
 int GetScene(void);
 

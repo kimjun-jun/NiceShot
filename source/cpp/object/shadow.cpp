@@ -5,9 +5,8 @@
 * @date 2020/01/15
 */
 #include "../../h/main.h"
-#include "../../h/object/shadow.h"
 #include "../../h/other/input.h"
-#include "../../h/object/objectclass.h"
+#include "../../h/object/shadow.h"
 
 //*****************************************************************************
 // É}ÉNÉçíËã`

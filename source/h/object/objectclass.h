@@ -6,11 +6,23 @@
 */
 #pragma once
 
-class PLAYER_HONTAI;
-class EFFECT;
-class BULLET;
-class SHADOW;
-class COUNTDOWN;
+#include "../../h/object/player.h"
+#include "../../h/object/shadow.h"
+#include "../../h/scene/title.h"
+#include "../../h/scene/result.h"
+#include "../../h/scene/tutorial.h"
+#include "../../h/effect/effect.h"
+#include "../../h/object/bullet/bullet.h"
+#include "../../h/effect/explosion.h"
+#include "../../h/scene/rank.h"
+#include "../../h/scene/countdown.h"
+#include "../../h/object/item.h"
+#include "../../h/effect/damege.h"
+#include "../../h/object/status.h"
+#include "../../h/object/bullet/bulletprediction.h"
+#include "../../h/object/bullet/bulletgauge.h"
+#include "../../h/object/vitalgauge.h"
+
 
 /**
  * @class GAMEOBJECT
@@ -19,37 +31,117 @@ class COUNTDOWN;
 class GAME_OBJECT
 {
 public:
-	GAME_OBJECT() { cnt++; }
-	~GAME_OBJECT() { cnt--; player = NULL; effect = NULL; bullet = NULL; }
-	virtual void Init() = 0;		//!< 初期化
-	virtual void Reinit() = 0;		//!< 再初期化
-	virtual void Uninit() = 0;		//!< デリート
-	virtual void Update() = 0;		//!< 更新
-	virtual void Draw() = 0;		//!< 描画
+	GAME_OBJECT() { cnt++;		
+	player = NULL;
+	effect = NULL;
+	bullet = NULL;
+	shadow = NULL;
+	countdown = NULL;
+	tuto = NULL;
+	status = NULL;
+	bulletprediction = NULL;
+	vitalgauge = NULL;
+	bulletgauge = NULL;
+	damege = NULL;
+	explosion = NULL;
+	item = NULL;
+	rank = NULL;
+	result = NULL;
+	title = NULL;
+	}
+	~GAME_OBJECT() {
+		cnt--;
+		player = NULL;
+		effect = NULL;
+		bullet = NULL;
+		shadow = NULL;
+		countdown = NULL;
+		tuto = NULL;
+		status = NULL;
+		bulletprediction = NULL;
+		vitalgauge = NULL;
+		bulletgauge = NULL;
+		damege = NULL;
+		explosion = NULL;
+		item = NULL;
+		rank = NULL;
+		result = NULL;
+		title = NULL;
+	}
+
+	virtual void Init() {}		//!< 初期化
+	virtual void Reinit() {};		//!< 再初期化
+	virtual void Uninit() {}		//!< デリート
+	virtual void Update() {}		//!< 更新
+	virtual void Draw() {}		//!< 描画
 	int GetCnt() { return cnt; }	//!< オブジェクト番号取得
 
-	PLAYER_HONTAI *GetPlayer() { return &player[0]; }	//!< 先頭アドレス取得
-	void *SetPlayer(int cnt) { (PLAYER_HONTAI*&)player[cnt]; }			//!< アドレスセット
+	PLAYER_HONTAI *GetPointerPlayer() { return (PLAYER_HONTAI*)&player; }	//!< 先頭アドレス取得
+	void SetPointerPlayer(int cnt) { sizeof(player[cnt]); }	//!< アドレスセット
 
-	EFFECT *GetEffect() { return &effect[0]; }			//!< 先頭アドレス取得
-	void *SetEffect(int cnt) { effect[cnt]; }			//!< アドレスセット
+	EFFECT *GetPointerEffect() { return (EFFECT*)&effect; }
+	void SetPointerEffect(int cnt) { sizeof(effect[cnt]); }
 
-	BULLET *GetBullet() { return &bullet[0]; }			//!< 先頭アドレス取得
-	void *SetBullet(int cnt) { bullet[cnt]; }			//!< アドレスセット
+	BULLET *GetPointerBullet() { return (BULLET*)&bullet; }
+	void SetPointerBullet(int cnt) { sizeof(bullet[cnt]); }
 
-	SHADOW *GetShadow() { return &shadow[0]; }			//!< 先頭アドレス取得
-	void *SetShadow(int cnt) { shadow[cnt]; }			//!< アドレスセット
+	SHADOW *GetPointerShadow() { return (SHADOW*)&shadow; }
+	void SetPointerShadow(int cnt) { sizeof(shadow[cnt]); }
 
-	COUNTDOWN *GetCountdown() { return &countdown[0]; }			//!< 先頭アドレス取得
-	void *SetCountdown(int cnt) { countdown[cnt]; }			//!< アドレスセット
+	COUNTDOWN *GetPointerCountdown() { return (COUNTDOWN*)&countdown; }
+	void SetPointerCountdown(int cnt) { sizeof(countdown[cnt]); }
 
-private:
-	static int cnt;
+	TUTO *GetPointerTuto() { return (TUTO*)&tuto; }
+	void SetPointerTuto(int cnt) { sizeof(tuto[cnt]); }
+
+	STATUS *GetPointerStatus() { return (STATUS*)&status; }
+	void SetPointerStatus(int cnt) { sizeof(status[cnt]); }
+
+	BULLETPREDICTION *GetPointerBulletprediction() { return (BULLETPREDICTION*)&bulletprediction; }
+	void SetPointerBulletprediction(int cnt) { sizeof(bulletprediction[cnt]); }
+
+	VITALGAUGE *GetPointerVitalgauge() { return (VITALGAUGE*)&vitalgauge; }
+	void SetPointerVitalgauge(int cnt) { sizeof(vitalgauge[cnt]); }
+
+	BULLETGAUGE *GetPointerBulletgauge() { return (BULLETGAUGE*)&bulletgauge; }
+	void SetPointerBulletgauge(int cnt) { sizeof(bulletgauge[cnt]); }
+
+	DAMEGE *GetPointerDamege() { return (DAMEGE*)&damege; }
+	void SetPointerDamege(int cnt) { sizeof(damege[cnt]); }
+
+	EXPLOSION *GetPointerExplosion() { return (EXPLOSION*)&explosion; }
+	void SetPointerExplosion(int cnt) { sizeof(explosion[cnt]); }
+
+	ITEM *GetPointerItem() { return (ITEM*)&item; }
+	void SetPointerItem(int cnt) { sizeof(item[cnt]); }
+
+	RANK *GetPointerRank() { return (RANK*)&rank; }
+	void SetPointerRank(int cnt) { sizeof(rank[cnt]); }
+
+	RESULT *GetPointerResult() { return (RESULT*)&result; }
+	void SetPointerResult(int cnt) { sizeof(result[cnt]); }
+
+	TITLE *GetPointerTitle() { return (TITLE*)&title; }
+	void SetPointerTitle(int cnt) { sizeof(title[cnt]); }
+
 	PLAYER_HONTAI *player = NULL;
 	EFFECT *effect = NULL;
 	BULLET *bullet = NULL;
 	SHADOW *shadow = NULL;
 	COUNTDOWN *countdown = NULL;
+	TUTO *tuto = NULL;
+	STATUS *status = NULL;
+	BULLETPREDICTION *bulletprediction = NULL;
+	VITALGAUGE *vitalgauge = NULL;
+	BULLETGAUGE *bulletgauge = NULL;
+	DAMEGE *damege = NULL;
+	EXPLOSION *explosion = NULL;
+	ITEM *item = NULL;
+	RANK *rank = NULL;
+	RESULT *result = NULL;
+	TITLE *title = NULL;
+private:
+	static int cnt;
 };
 
 /**

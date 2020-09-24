@@ -24,14 +24,14 @@
 //*****************************************************************************
 // グローバル変数
 //*****************************************************************************
-CAMERA			g_Camera[PLAYER_MAX];				// カメラデータ
+CAMERA			g_Camera[OBJECT_CAMERA_MAX];				// カメラデータ
 
 //=============================================================================
 // 初期化処理
 //=============================================================================
 void InitCamera(void)
 {
-	for (int CntCam = 0; CntCam < PLAYER_MAX; CntCam++)
+	for (int CntCam = 0; CntCam < OBJECT_CAMERA_MAX; CntCam++)
 	{
 		g_Camera[CntCam].pos = D3DXVECTOR3(0.0f, POS_H_CAM, -POS_W_CAM);
 		g_Camera[CntCam].at = D3DXVECTOR3(0.0f, 0.0f, 0.0f);

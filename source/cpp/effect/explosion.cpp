@@ -5,11 +5,9 @@
 * @date 2020/01/15
 */
 #include "../../h/main.h"
-#include "../../h/effect/explosion.h"
 #include "../../h/other/input.h"
 #include "../../h/object/camera.h"
-#include "../../h/object/shadow.h"
-#include "../../h/object/objectclass.h"
+#include "../../h/effect/explosion.h"
 
 //*****************************************************************************
 // É}ÉNÉçíËã`

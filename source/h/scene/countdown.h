@@ -7,6 +7,9 @@
 #pragma once
 
 
+#include "../../h/object/objectclass.h"
+
+
 /**
 *　@struct COUNTDOWN
 *　@brief 2Dポリゴンを定義する構造体
@@ -14,7 +17,7 @@
 class COUNTDOWN : public OBJECT_2D
 {
 public:
-	COUNTDOWN() { nCountAnim = 0, nPatternAnim = 0, changeval = 0, color = 0, time_maneger = 0, fps_maneger = 0, signal = false; };
+	COUNTDOWN() { nCountAnim = 0, nPatternAnim = 0, changeval = 0, color = 0, time_maneger = 0, fps_maneger = 0, signal = false; }
 	void						Init(void);					//!< 初期化
 	void						Reinit(void);				//!< 再初期化
 	void						Uninit(void);				//!< 終了

@@ -5,6 +5,8 @@
 */
 #pragma once
 
+#include "../h/object/objectclass.h"
+
 /**
 * ＊重要＊{読み込むXファイルは必ず三角面化してください]
 * @brief Xファイル読み込み関数	LoadMesh

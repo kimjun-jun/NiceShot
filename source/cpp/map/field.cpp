@@ -415,7 +415,7 @@ void UpdateMeshField(void)
 
 	//プレイヤーと地面の当たり判定
 	PLAYER_HONTAI *player = GetPlayerHoudai();
-	for (int CntPlayer = 0; CntPlayer < PLAYER_MAX; CntPlayer++)
+	for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
 	{
 		FieldHitGetSphereVec(D3DXVECTOR3(player[CntPlayer].pos.x, player[CntPlayer].pos.y + 1000.0f, player[CntPlayer].pos.z),
 			D3DXVECTOR3(player[CntPlayer].pos.x, player[CntPlayer].pos.y - 1000.0f, player[CntPlayer].pos.z),
@@ -814,7 +814,7 @@ void SetFieldType03(void)
 		g_pD3DIdxBuffFieldDraw->Lock(0, 0, (void**)&pIdx, 0);
 
 		PLAYER_HONTAI *p = GetPlayerHoudai();
-		for (int CntPlayer = 0; CntPlayer < PLAYER_MAX; CntPlayer++)
+		for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
 		{
 			if (CntPlayer != InterPolationFieldPlayerNum)
 			{

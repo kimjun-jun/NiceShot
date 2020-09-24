@@ -9,80 +9,36 @@
 #include "../h/other/debugproc.h"
 #include "../h/other/input.h"
 #include "../h/object/camera.h"
-#include "../h/object/player.h"
 #include "../h/map/field.h"
 #include "../h/map/wall.h"
 #include "../h/map/sky.h"
-#include "../h/object/shadow.h"
 #include "../h/collision.h"
-#include "../h/scene/title.h"
-#include "../h/scene/result.h"
 #include "../h/other/fade.h"
-#include "../h/scene/tutorial.h"
-#include "../h/effect/effect.h"
-#include "../h/object/bullet/bullet.h"
-#include "../h/effect/explosion.h"
-#include "../h/scene/rank.h"
-#include "../h/scene/countdown.h"
-#include "../h/object/item.h"
-#include "../h/effect/damege.h"
-#include "../h/object/status.h"
 #include "../h/other/sound.h"
-#include "../h/object/bullet/bulletprediction.h"
-#include "../h/object/bullet/bulletgauge.h"
-#include "../h/object/vitalgauge.h"
-#include "../h/object/objectclass.h"
 #include "../h/game.h"
 
 int					g_nScene = SCENE_TITLE;		//!< ステージ番号
 int					stop = 0;					//!< デバッグ時の一時停止用変数
 
-//=============================================================================
-// 初期化処理
-//=============================================================================
-HRESULT InitGame(void)
-{
-	return S_OK;
-}
 
 //=============================================================================
 // ゲームループ時の再初期化処理処理
 // 戻り値：無し
 //=============================================================================
-void ReinitGame(void)
+void ReinitGame(GAME_OBJECT *obj)
 {
-	//再初期化
-	InitTutorial(1);
-	InitCountdown(1);
-	InitBullet(1);
-	InitEffect(1);
-	InitExplosion(1);
-	InitDamege(1);
-	InitStatus(1);
-	InitRank(1);
 	InitCamera();
-	InitLight();
-	InitShadow(1);
-	ReInitTitle();
-	ReInitPlayer();
-	ReInitItem();
-	ReInitVitalGauge();
-	ReInitBulletGauge();
-}
 
-
-//=============================================================================
-// 終了処理
-//=============================================================================
-void UninitGame(void)
-{
-
+	for (int CntOBJ = 0; CntOBJ < OBJECT_ALL_MAX; CntOBJ++,obj++)
+	{
+		obj[CntOBJ].Reinit();
+	}
 }
 
 //=============================================================================
 // 更新処理
 //=============================================================================
-void UpdateGame(GAME_OBJECT* GameObj)
+void UpdateGame(GAME_OBJECT *GameObj)
 {
 	// 入力更新
 	UpdateInput();
@@ -92,7 +48,7 @@ void UpdateGame(GAME_OBJECT* GameObj)
 	if (GetKeyboardTrigger(DIK_F11) || IsButtonTriggered(0, BUTTON_L3))
 	{
 		MasterVolumeChange(1);
-		InitGame();
+		ReinitGame(&GameObj[0]);
 		SetFade(FADE_OUT, SCENE_TITLE, SOUND_LABEL_BGM_title01);
 	}
 #endif
@@ -105,62 +61,61 @@ void UpdateGame(GAME_OBJECT* GameObj)
 		switch (g_nScene)
 		{
 		case SCENE_TITLE:
-			UpdateTitle();
+			GameObj->title->Update();
 			break;
 		case SCENE_TUTORIAL:
-			UpdateTutorial();
+
+			//コントローラーのテクスチャ
+			GameObj->tuto->Update();
+
+			//3D空間
 			UpdateMeshField();
 			UpdateMeshSky();
-			UpdatePlayer();
-			UpdateBullet();
-			UpdateBulletprediction();
-			UpdateEffect();
-			UpdateExplosion();
-			UpdateItem();
-			UpdateShadow();
-			CheakHit(0);
-			//UpdateBulletTex();
-			UpdateBulletGauge();
-			UpdateDamege();
-			UpdateStatus();
+			GameObj->player->Update();
+			GameObj->bullet->Update();
+			GameObj->bulletprediction->Update();
+			GameObj->effect->Update();
+			GameObj->explosion->Update();
+			GameObj->item->Update();
+			GameObj->shadow->Update();
+
+			CheakHit(0, &GameObj[0]);
+
+			//2D空間
+			GameObj->bulletgauge->Update();
+			GameObj->damege->Update();
+			GameObj->status->Update();
 			break;
 		case SCENE_GAMECOUNTDOWN:
-			UpdateCountdown();
-			AddCountdown(-1);
+			GameObj->countdown->Update();
+			GameObj->countdown->AddCountdown(-1);
 			break;
 		case SCENE_GAME:
-			// 地面処理の更新
+
+			// map処理の更新
 			UpdateMeshField();
 			UpdateMeshSky();
-
-			// 壁処理の更新
 			UpdateMeshWall();
 
-			// キャラ周りの更新処理
-			UpdatePlayer();
-			UpdateBullet();
-			UpdateBulletprediction();
-			UpdateEffect();
-			UpdateExplosion();
-			UpdateItem();
+			//3D空間
+			GameObj->player->Update();
+			GameObj->bullet->Update();
+			GameObj->bulletprediction->Update();
+			GameObj->effect->Update();
+			GameObj->explosion->Update();
+			GameObj->item->Update();
+			GameObj->shadow->Update();
 
-			// 影の更新処理
-			UpdateShadow();
+			CheakHit(1, &GameObj[0]);
 
-			// 当たり判定
-			CheakHit(1);
-
-			//2Dの更新処理
-			UpdateBulletGauge();
-			UpdateDamege();
-			UpdateStatus();
-			UpdateVitalGauge();
-
-			//時間制限用
-			//AddTime(-1);
+			//2D空間
+			GameObj->bulletgauge->Update();
+			GameObj->damege->Update();
+			GameObj->status->Update();
+			GameObj->vitalgauge->Update();
 			break;
 		case SCENE_RESULT:
-			UpdateResult();
+			GameObj->result->Update();
 			break;
 		}
 		// フェード処理
@@ -171,7 +126,7 @@ void UpdateGame(GAME_OBJECT* GameObj)
 //=============================================================================
 // 描画処理
 //=============================================================================
-void DrawGame(GAME_OBJECT* GameObj)
+void DrawGame(GAME_OBJECT *GameObj)
 {
 	//四人分の画面分割設定
 	D3DVIEWPORT9 vp[]
@@ -194,179 +149,136 @@ void DrawGame(GAME_OBJECT* GameObj)
 		switch (g_nScene)
 		{
 		case SCENE_TITLE:
-			DrawTitle();
+			GameObj->title->Draw();
 			break;
 		case SCENE_TUTORIAL:
-			for (int i = 0, vpCnt = sizeof(vp) / sizeof(vp[0]); i < vpCnt; i++)
+			for (int CntPlayer = 0, vpCnt = sizeof(vp) / sizeof(vp[0]); CntPlayer < vpCnt; CntPlayer++)
 			{
-				pD3DDevice->SetViewport(&vp[i]);
+				pD3DDevice->SetViewport(&vp[CntPlayer]);
 				pD3DDevice->Clear(0, NULL, (D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER), D3DCOLOR_RGBA(0, 0, 0, 0), 1.0f, 0);
-				PLAYER_HONTAI *p = GetPlayerHoudai();
-				if (p[i].use == false) continue;
-				if (p[i].KiriSignal == true) pD3DDevice->SetRenderState(D3DRS_FOGENABLE, TRUE); //フォグ：ON
+				if (GameObj->player[CntPlayer].KiriSignal == true) pD3DDevice->SetRenderState(D3DRS_FOGENABLE, TRUE); //フォグ：ON
 				else pD3DDevice->SetRenderState(D3DRS_FOGENABLE, FALSE); //フォグ：OFF
 
 				// カメラの設定
-				SetCamera(i);
+				SetCamera(CntPlayer);
 
-				//DrawBullet();
-				//DrawBulletPoint(i);
-
-				//フィールド
+				//map
 				DrawMeshSky();
 				DrawMeshField();
 				DrawMeshWall();
 
-				// 3dモデルの描画処理
-				DrawPlayer();
-				DrawItem();
-
-				DrawBulletprediction(i);
-				DrawExplosion(i);
-				DrawEffect(i);
-
-				//影
-				DrawShadow();
+				//3D空間
+				GameObj->player->Draw();
+				GameObj->item->Draw();
+				GameObj->bulletprediction->Draw();
+				GameObj->explosion->Draw();
+				GameObj->effect->Draw();
+				GameObj->shadow->Draw();
 
 				//2d画面上
-				DrawDamege();
-				DrawStatus();
-				//DrawLifeTex();
-				DrawVitalGauge();
-				//DrawBulletTex();
-				DrawBulletGauge();
-				DrawTutorial();
+				GameObj->damege->Draw();
+				GameObj->status->Draw();
+				GameObj->vitalgauge->Draw();
+				GameObj->bulletgauge->Draw();
+				GameObj->tuto->Draw();
 			}
 			pD3DDevice->SetViewport(&VpMaster);
 			break;
 		case SCENE_GAMECOUNTDOWN:
-			for (int i = 0, vpCnt = sizeof(vp) / sizeof(vp[0]); i < vpCnt; i++)
+			for (int CntPlayer = 0, vpCnt = sizeof(vp) / sizeof(vp[0]); CntPlayer < vpCnt; CntPlayer++)
 			{
-				pD3DDevice->SetViewport(&vp[i]);
+				pD3DDevice->SetViewport(&vp[CntPlayer]);
 				pD3DDevice->Clear(0, NULL, (D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER), D3DCOLOR_RGBA(0, 0, 0, 0), 1.0f, 0);
-				PLAYER_HONTAI *p = GetPlayerHoudai();
-				if (p[i].use == true)
-				{
 					// カメラの設定
-					SetCamera(i);
+					SetCamera(CntPlayer);
 
-					//DrawBullet();
-					//DrawBulletPoint(i);
-
-					//フィールド
+					//map
 					DrawMeshSky();
 					DrawMeshField();
 					DrawMeshWall();
 
-					// 3dモデルの描画処理
-					DrawPlayer();
-					DrawItem();
-
-					DrawBulletprediction(i);
-					DrawExplosion(i);
-					DrawEffect(i);
-
-					//影
-					DrawShadow();
+					//3D空間
+					GameObj->player->Draw();
+					GameObj->item->Draw();
+					GameObj->bulletprediction->Draw();
+					GameObj->explosion->Draw();
+					GameObj->effect->Draw();
+					GameObj->shadow->Draw();
 
 					//2d画面上
-					DrawDamege();
-					DrawStatus();
-					//DrawLifeTex();
-					DrawVitalGauge();
-					//DrawBulletTex();
-					DrawBulletGauge();
-				}
+					GameObj->damege->Draw();
+					GameObj->status->Draw();
+					GameObj->vitalgauge->Draw();
+					GameObj->bulletgauge->Draw();
 			}
 			pD3DDevice->SetViewport(&VpMaster);
-			//DrawTime();
-			DrawCountdown();
+			GameObj->countdown->Draw();
 			break;
 		case SCENE_GAME:
-			for (int i = 0, vpCnt = sizeof(vp) / sizeof(vp[0]); i < vpCnt; i++)
+			for (int CntPlayer = 0, vpCnt = sizeof(vp) / sizeof(vp[0]); CntPlayer < vpCnt; CntPlayer++)
 			{
-				pD3DDevice->SetViewport(&vp[i]);
+				pD3DDevice->SetViewport(&vp[CntPlayer]);
 				pD3DDevice->Clear(0, NULL, (D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER), D3DCOLOR_RGBA(0, 0, 0, 0), 1.0f, 0);
-				PLAYER_HONTAI *p = GetPlayerHoudai();
-
-				if (p[i].use == true)
+				bool puse = GameObj->player[CntPlayer].GetUse();
+				if (puse == true)
 				{
-
-					if (p[i].KiriSignal == true) pD3DDevice->SetRenderState(D3DRS_FOGENABLE, TRUE); //フォグ：ON
+					if (GameObj->player[CntPlayer].KiriSignal == true) pD3DDevice->SetRenderState(D3DRS_FOGENABLE, TRUE); //フォグ：ON
 					else pD3DDevice->SetRenderState(D3DRS_FOGENABLE, FALSE); //フォグ：OFF
 
 					// カメラの設定
-					SetCamera(i);
+					SetCamera(CntPlayer);
 
-					//DrawBullet();
-					//DrawBulletPoint(i);
-
-					//フィールド
+					//map
 					DrawMeshSky();
 					DrawMeshField();
 					DrawMeshWall();
 
-					// 3dモデルの描画処理
-					DrawPlayer();
-					DrawItem();
-
-					DrawBulletprediction(i);
-					DrawExplosion(i);
-					DrawEffect(i);
-					//影
-					DrawShadow();
+					//3D空間
+					GameObj->player->Draw();
+					GameObj->item->Draw();
+					GameObj->bulletprediction->Draw();
+					GameObj->explosion->Draw();
+					GameObj->effect->Draw();
+					GameObj->shadow->Draw();
 
 					//2d画面上
-					DrawDamege();
-					DrawStatus();
-					//DrawLifeTex();
-					DrawVitalGauge();
-					//DrawBulletTex();
-					DrawBulletGauge();
+					GameObj->damege->Draw();
+					GameObj->status->Draw();
+					GameObj->vitalgauge->Draw();
+					GameObj->bulletgauge->Draw();
 				}
 				else
 				{
 					pD3DDevice->SetRenderState(D3DRS_FOGENABLE, FALSE); //フォグ：OFF
 
 					// カメラの設定
-					SetCamera(i);
+					SetCamera(CntPlayer);
 
-					//影
-					DrawShadow();
-
-
-					// 3dモデルの描画処理
-					//DrawBullet();
-					//DrawBulletPoint(i);
-
-					DrawPlayer();
-					DrawItem();
-
-					//フィールド
+					//map
 					DrawMeshSky();
 					DrawMeshField();
 					DrawMeshWall();
 
-					DrawEffect(i);
-					DrawExplosion(i);
-
+					//3D空間
+					GameObj->player->Draw();
+					GameObj->item->Draw();
+					GameObj->bulletprediction->Draw();
+					GameObj->explosion->Draw();
+					GameObj->effect->Draw();
+					GameObj->shadow->Draw();
 
 					//2d画面上
-					DrawDamege();
-					DrawStatus();
-					//DrawLifeTex();
-					DrawVitalGauge();
-					//DrawBulletTex();
-					DrawBulletGauge();
-					DrawRank();
+					GameObj->damege->Draw();
+					GameObj->status->Draw();
+					GameObj->vitalgauge->Draw();
+					GameObj->bulletgauge->Draw();
+					GameObj->rank->Draw();
 				}
 			}
-
 			pD3DDevice->SetViewport(&VpMaster);
-			//DrawTime();
 			break;
 		case SCENE_RESULT:
-			DrawResult();
+			GameObj->result->Draw();
 			break;
 		}
 		// フェード描画

@@ -5,20 +5,11 @@
 * @date 2020/01/15
 */
 #include "../h/main.h"
-#include "../h/object/player.h"
-#include "../h/object/bullet/bullet.h"
-#include "../h/object/bullet/bullettex.h"
 #include "../h/map/wall.h"
 #include "../h/map/field.h"
-#include "../h/scene/fade.h"
-#include "../h/effect/effect.h"
-#include "../h/object/life.h"
-#include "../h/object/item.h"
-#include "../h/scene/time.h"
+#include "../h/other/fade.h"
 #include "../h/other/sound.h"
-#include "../h/effect/explosion.h"
-#include "../h/effect/damege.h"
-#include "../h/object/status.h"
+#include "../h/object/objectclass.h"
 #include "../h/collision.h"
 
 
@@ -29,7 +20,7 @@ static D3DXCOLOR PLAYER_COLOR[] = {
 	D3DXCOLOR(0.2f, 1.0f, 0.2f, 1.0f),//p4カラー
 };
 
-void SetOjama(int type, int UsePlayer);
+void SetOjama(int type, int UsePlayer, PLAYER_HONTAI *p);
 
 //=============================================================================
 // 当たり判定BB2D　xz軸
@@ -95,125 +86,134 @@ bool CollisionBC(D3DXVECTOR3 pos1, float r1, D3DXVECTOR3 pos2, float r2)
 //=============================================================================
 //衝突判定
 //=============================================================================
-void CheakHit(int scene)
+void CheakHit(int scene, GAME_OBJECT* GameObj)
 {
-	PLAYER_HONTAI *p =GetPlayerHoudai();			//playerhoudai
-	PLAYER_PRATS *ps = GetPlayerHousin();			//playerhousin
-	BULLET *b =GetBullet();							//playerbullet
-	ITEM *i = GetItem();							//item
-	WALL *Wall = GetWall();							//wall
-	int WallNum = GetWallNum();						//wall総数
-	DAMEGE *damede =GetDamege();					//screendamege
-	EFFECT *e = GetEffect();
+	//各オブジェクトの先頭アドレスを取得
+	PLAYER_HONTAI *p = GameObj->player->GetPointerPlayer();
+	BULLET *b = GameObj->player->GetPointerBullet();
+	ITEM *i = GameObj->player->GetPointerItem();
+	DAMEGE *damede = GameObj->player->GetPointerDamege();
+	EFFECT *e = GameObj->player->GetPointerEffect();
+	WALL *Wall = GetWall();
+	int WallNum = GetWallNum();
 
 	//プレイヤーに対する当たり判定
-	for (int CntPlayer = 0; CntPlayer < PLAYER_MAX; CntPlayer++)
+	for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
 	{
-		if (p[CntPlayer].use == true)
+		bool puse = p[CntPlayer].GetUse();
+		if (puse == true)
 		{
+			//オブジェクト値読み込み
+			D3DXVECTOR3 ppos = p[CntPlayer].GetPos();
+			D3DXVECTOR3 poldpos = p[CntPlayer].GetOldPos();
+
 			//プレイヤー対壁
 			for (int CntWall = 0; CntWall < 4; CntWall++)
 			{
 				switch (CntWall)
 				{
 				case 0:
-					if (p[CntPlayer].pos.z + PLAYER_MODEL_SIZE >= Wall[CntWall].pos.z) p[CntPlayer].pos.z = p[CntPlayer].oldpos.z;
+					if (ppos.z + PLAYER_MODEL_SIZE >= Wall[CntWall].pos.z) ppos.z = poldpos.z;
 					break;
 				case 1:
-					if (p[CntPlayer].pos.x - PLAYER_MODEL_SIZE <= Wall[CntWall].pos.x) p[CntPlayer].pos.x = p[CntPlayer].oldpos.x;
+					if (ppos.x - PLAYER_MODEL_SIZE <= Wall[CntWall].pos.x) ppos.x = poldpos.x;
 					break;
 				case 2:
-					if (p[CntPlayer].pos.x + PLAYER_MODEL_SIZE >= Wall[CntWall].pos.x) p[CntPlayer].pos.x = p[CntPlayer].oldpos.x;
+					if (ppos.x + PLAYER_MODEL_SIZE >= Wall[CntWall].pos.x) ppos.x = poldpos.x;
 					break;
 				case 3:
-					if (p[CntPlayer].pos.z - PLAYER_MODEL_SIZE <= Wall[CntWall].pos.z) p[CntPlayer].pos.z = p[CntPlayer].oldpos.z;
+					if (ppos.z - PLAYER_MODEL_SIZE <= Wall[CntWall].pos.z) ppos.z = poldpos.z;
 					break;
 				default:
 					break;
 				}
+				//オブジェクト値書き込み
+				p[CntPlayer].SetPos(ppos);
 			}
 
 			//プレイヤーバレット対プレイヤー、壁、床
-			for (int CntPlayerBullet = 0; CntPlayerBullet < BULLET_MAX; CntPlayerBullet++)
+			for (int CntPlayerBullet = 0; CntPlayerBullet < OBJECT_BULLET_MAX; CntPlayerBullet++)
 			{
-				if (b[CntPlayerBullet].use == true)
+				//オブジェクト値読み込み
+				D3DXVECTOR3 bpos = b[CntPlayerBullet].GetPos();
+				bool buse = b[CntPlayerBullet].GetUse();
+
+				if (buse == true)
 				{
-						//対プレイヤー
-						if (b[CntPlayerBullet].UsePlayerType != CntPlayer)
+					//対プレイヤー
+					if (b[CntPlayerBullet].UsePlayerType != CntPlayer)
+					{
+						if (CollisionBC(ppos, PLAYER_MODEL_SIZE, bpos, BULLET_MODEL_SIZE))
 						{
-							if (CollisionBC(p[CntPlayer].pos, PLAYER_MODEL_SIZE, b[CntPlayerBullet].pos, BULLET_MODEL_SIZE))
+							// エフェクト爆発の生成
+							GameObj->effect->SetEffect(bpos, D3DXVECTOR3(0.0f, 0.0f, 0.0f),
+								PLAYER_COLOR[b[CntPlayerBullet].UsePlayerType], 150.0f, 150.0f, 40);
+							if (scene == 1)
 							{
-								// エフェクト爆発の生成
-								SetEffect(b[CntPlayerBullet].pos, D3DXVECTOR3(0.0f, 0.0f, 0.0f),
-									PLAYER_COLOR[b[CntPlayerBullet].UsePlayerType], 150.0f, 150.0f, 40);
-								if (scene == 1)
-								{
-									//switch()
-									p[CntPlayer].vital -= PLAYER_ATTACK_NORMAL;
-									ChangeLife(-1, CntPlayer);
-								}
-								//画面ダメージエフェクト
-								damede[CntPlayer].use = true;
-								damede[CntPlayer].time = 0.0f;
-								damede[CntPlayer].alpha = 0;
-
-								// バレット破棄
-								ReleaseBullet(CntPlayerBullet);
-
-								// SE再生
-								PlaySound(SOUND_LABEL_SE_attack02);
-								break;
+								p[CntPlayer].vital -= PLAYER_ATTACK_NORMAL;
 							}
+							//画面ダメージエフェクト
+							GameObj->damege[CntPlayer].SetUse(true);
+							GameObj->damege[CntPlayer].time = 0.0f;
+							GameObj->damege[CntPlayer].alpha = 0;
+
+							// バレット破棄
+							b[CntPlayerBullet].ReleaseBullet(CntPlayerBullet);
+
+							// SE再生
+							PlaySound(SOUND_LABEL_SE_attack02);
+							break;
 						}
+					}
 					//対壁
 					for (int CntWall = 0; CntWall < WallNum; CntWall++)
 					{
 						switch (CntWall)
 						{
 						case 0:
-							if (b[CntPlayerBullet].pos.z >= Wall[CntWall].pos.z)
+							if (bpos.z >= Wall[CntWall].pos.z)
 							{
 								// 爆発の生成
-								//D3DXVECTOR3 ExploPos = D3DXVECTOR3(b[CntPlayerBullet].pos.x, b[CntPlayerBullet].pos.y, b[CntPlayerBullet].pos.z- EXPLOSION_COLLISIONPOS_BUFFSIZE);
+								//D3DXVECTOR3 ExploPos = D3DXVECTOR3(bpos.x, bpos.y, bpos.z- EXPLOSION_COLLISIONPOS_BUFFSIZE);
 								//SetExplosion(ExploPos, 40.0f, 40.0f, EXPLOSIONTYPE_BULLET_PLAYER, PLAYER_COLOR[b[CntPlayerBullet].UsePlayerType]);
 								// バレット破棄
-								ReleaseBullet(CntPlayerBullet);
+								b[CntPlayerBullet].ReleaseBullet(CntPlayerBullet);
 								// SE再生
 								//PlaySound(SOUND_LABEL_SE_damage);
 							}
 							break;
 						case 1:
-							if (b[CntPlayerBullet].pos.x <= Wall[CntWall].pos.x)
+							if (bpos.x <= Wall[CntWall].pos.x)
 							{
 								// 爆発の生成
-								//D3DXVECTOR3 ExploPos = D3DXVECTOR3(b[CntPlayerBullet].pos.x + EXPLOSION_COLLISIONPOS_BUFFSIZE, b[CntPlayerBullet].pos.y, b[CntPlayerBullet].pos.z);
+								//D3DXVECTOR3 ExploPos = D3DXVECTOR3(bpos.x + EXPLOSION_COLLISIONPOS_BUFFSIZE, bpos.y, bpos.z);
 								//SetExplosion(ExploPos, 40.0f, 40.0f, EXPLOSIONTYPE_BULLET_PLAYER, PLAYER_COLOR[b[CntPlayerBullet].UsePlayerType]);
 								// バレット破棄
-								ReleaseBullet(CntPlayerBullet);
+								b[CntPlayerBullet].ReleaseBullet(CntPlayerBullet);
 								// SE再生
 								//PlaySound(SOUND_LABEL_SE_damage);
 							}
 							break;
 						case 2:
-							if (b[CntPlayerBullet].pos.x >= Wall[CntWall].pos.x)
+							if (bpos.x >= Wall[CntWall].pos.x)
 							{
 								// 爆発の生成
-								//D3DXVECTOR3 ExploPos = D3DXVECTOR3(b[CntPlayerBullet].pos.x - EXPLOSION_COLLISIONPOS_BUFFSIZE, b[CntPlayerBullet].pos.y, b[CntPlayerBullet].pos.z);
+								//D3DXVECTOR3 ExploPos = D3DXVECTOR3(bpos.x - EXPLOSION_COLLISIONPOS_BUFFSIZE, bpos.y, bpos.z);
 								//SetExplosion(ExploPos, 40.0f, 40.0f, EXPLOSIONTYPE_BULLET_PLAYER, PLAYER_COLOR[b[CntPlayerBullet].UsePlayerType]);
 								// バレット破棄
-								ReleaseBullet(CntPlayerBullet);
+								b[CntPlayerBullet].ReleaseBullet(CntPlayerBullet);
 								// SE再生
 								//PlaySound(SOUND_LABEL_SE_damage);
 							}
 							break;
 						case 3:
-							if (b[CntPlayerBullet].pos.z <= Wall[CntWall].pos.z)
+							if (bpos.z <= Wall[CntWall].pos.z)
 							{
 								// 爆発の生成
-								//D3DXVECTOR3 ExploPos = D3DXVECTOR3(b[CntPlayerBullet].pos.x, b[CntPlayerBullet].pos.y, b[CntPlayerBullet].pos.z + EXPLOSION_COLLISIONPOS_BUFFSIZE);
+								//D3DXVECTOR3 ExploPos = D3DXVECTOR3(bpos.x, bpos.y, bpos.z + EXPLOSION_COLLISIONPOS_BUFFSIZE);
 								//SetExplosion(ExploPos, 40.0f, 40.0f, EXPLOSIONTYPE_BULLET_PLAYER, PLAYER_COLOR[b[CntPlayerBullet].UsePlayerType]);
 								// バレット破棄
-								ReleaseBullet(CntPlayerBullet);
+								b[CntPlayerBullet].ReleaseBullet(CntPlayerBullet);
 								// SE再生
 								//PlaySound(SOUND_LABEL_SE_damage);
 							}
@@ -221,16 +221,19 @@ void CheakHit(int scene)
 						default:
 							break;
 						}
-						if (b[CntPlayerBullet].use == false) break;
+						if (buse == false) break;
 					}
 				}
 			}
 
 			//プレイヤー対アイテム
-			for (int CntItem = 0; CntItem < MAX_ITEM; CntItem++)
+			for (int CntItem = 0; CntItem < OBJECT_ITEM_MAX; CntItem++)
 			{
-				if (i[CntItem].bUse == false || i[CntItem].GettingSignal == true || i[CntItem].GettingSignalEnd == true) continue;
-				if (CollisionBC(p[CntPlayer].pos, PLAYER_MODEL_SIZE, i[CntItem].pos, ITEM_MODEL_SIZE))
+				//オブジェクト値読み込み
+				D3DXVECTOR3 ipos = i[CntItem].GetPos();
+				bool iuse = i[CntItem].GetUse();
+				if (iuse == false || i[CntItem].GettingSignal == true || i[CntItem].GettingSignalEnd == true) continue;
+				if (CollisionBC(ppos, PLAYER_MODEL_SIZE, ipos, ITEM_MODEL_SIZE))
 				{
 					switch (i[CntItem].nType)
 					{
@@ -242,7 +245,6 @@ void CheakHit(int scene)
 						break;
 					case ITEMTYPE_LIFE:
 						p[CntPlayer].vital += PLAYER_ATTACK_NORMAL;
-						ChangeLife(1, CntPlayer);
 						PlaySound(SOUND_LABEL_SE_enter03);
 						break;
 					case ITEMTYPE_SENSYA:
@@ -250,16 +252,16 @@ void CheakHit(int scene)
 						{
 							p[CntPlayer].Morphing = true;
 							p[CntPlayer].ModelType = PLAYER_MODEL_ATTACK;
-							ps[CntPlayer].MorphingSignal = NowMorphing;
-							ps[CntPlayer].time = 0.0f;
+							p[CntPlayer].MorphingSignal = NowMorphing;
+							p[CntPlayer].time = 0.0f;
 							p[CntPlayer].MorphingTime = MORPHING_TIME;
 						}
 						else if (p[CntPlayer].Morphing == false && p[CntPlayer].MorphingTime <= 0.0f)
 						{
 							p[CntPlayer].Morphing = true;
 							p[CntPlayer].ModelType = PLAYER_MODEL_ATTACK;
-							ps[CntPlayer].MorphingSignal = NowMorphing;
-							ps[CntPlayer].time = 0.0f;
+							p[CntPlayer].MorphingSignal = NowMorphing;
+							p[CntPlayer].time = 0.0f;
 							p[CntPlayer].MorphingTime = MORPHING_TIME;
 						}
 						else
@@ -269,9 +271,7 @@ void CheakHit(int scene)
 						PlaySound(SOUND_LABEL_SE_rap1);
 						break;
 					case ITEMTYPE_BULLET:
-						//switch()
 						p[CntPlayer].AmmoCnt = PLAYER_AMMOPOWER_NORMAL;
-						//ChangeBulletTex(MAX_AMMO, CntPlayer);
 						p[CntPlayer].AmmoBornTime = 0.0f;
 						PlaySound(SOUND_LABEL_SE_enter03);
 						break;
@@ -282,11 +282,11 @@ void CheakHit(int scene)
 						PlaySound(SOUND_LABEL_SE_speed);
 						break;
 					case ITEMTYPE_CAMERA:
-						SetOjama(ITEMTYPE_CAMERA,CntPlayer);
+						SetOjama(ITEMTYPE_CAMERA, CntPlayer, &p[0]);
 						PlaySound(SOUND_LABEL_SE_enter03);
 						break;
 					case ITEMTYPE_KIRI:
-						SetOjama(ITEMTYPE_KIRI, CntPlayer);
+						SetOjama(ITEMTYPE_KIRI, CntPlayer, &p[0]);
 						PlaySound(SOUND_LABEL_SE_kiri);
 						break;
 					default:
@@ -302,9 +302,8 @@ void CheakHit(int scene)
 	}
 }
 
-void SetOjama(int type, int UsePlayer)
+void SetOjama(int type, int UsePlayer, PLAYER_HONTAI *p)
 {
-	PLAYER_HONTAI *p = GetPlayerHoudai();			//playerhoudai
 	if (type == ITEMTYPE_CAMERA)
 	{
 		switch (UsePlayer)

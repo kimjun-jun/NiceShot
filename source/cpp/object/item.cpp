@@ -5,12 +5,9 @@
 * @date 2020/01/15
 */
 #include "../../h/main.h"
-#include "../../h/object/item.h"
 #include "../../h/map/field.h"
-#include "../../h/object/player.h"
-#include "../../h/object/shadow.h"
 #include "../../h/other/sound.h"
-#include "../../h/object/objectclass.h"
+#include "../../h/object/item.h"
 
 //*****************************************************************************
 // É}ÉNÉçíËã`
@@ -133,12 +130,12 @@ void ITEM::Reinit(void)
 
 	for (int nCntItem = 0; nCntItem < OBJECT_ITEM_MAX; nCntItem++)
 	{
-		this[nCntItem].SetPos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-		this[nCntItem].SetScl = D3DXVECTOR3(2.0f, 2.0f, 2.0f);
-		this[nCntItem].SetRot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-		this[nCntItem].SetFieldNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-		this[nCntItem].SetFieldNorUpNorCross = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-		this[nCntItem].SetQrot = 0.0f;
+		this[nCntItem].SetPos(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+		this[nCntItem].SetScl(D3DXVECTOR3(2.0f, 2.0f, 2.0f));
+		this[nCntItem].SetRot(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+		this[nCntItem].SetFieldNorVec(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+		this[nCntItem].SetFieldNorUpNorCross(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+		this[nCntItem].SetQrot(0.0f);
 		this[nCntItem].SetUse(false);
 		this[nCntItem].Droptime = 0.0f;
 		this[nCntItem].nIdxShadow = -1;

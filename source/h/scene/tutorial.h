@@ -6,6 +6,8 @@
 */
 #pragma once
 
+#include "../../h/object/objectclass.h"
+
 /**
 *　@class TUTO
 *　@brief 2Dポリゴンを定義する構造体
@@ -13,7 +15,7 @@
 class TUTO : public OBJECT_2D
 {
 public:
-	TUTO() { cnt = 0; };
+	TUTO() { cnt = 0; }
 	void						Init(void);					//!< 初期化
 	void						Reinit(void);				//!< 再初期化
 	void						Uninit(void);				//!< 終了

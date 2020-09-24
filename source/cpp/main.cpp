@@ -162,42 +162,56 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	}
 
 	//-----------------------------------------------------オブジェクト生成
-	GAME_OBJECT* ObjectAll[OBJECT_ALL_MAX];
+	GAME_OBJECT* ObjectAll;
 
-	//-------------プレイヤー確保、アドレスセット
-	ObjectAll[0]->SetPlayer(ObjectAll[0]->GetCnt());
-	ObjectAll[0] = new PLAYER_HONTAI[OBJECT_PLAYER_MAX];
+	//-------------確保、アドレスセット
+	ObjectAll->SetPointerPlayer(ObjectAll->GetCnt);
+	ObjectAll->player = new PLAYER_HONTAI[OBJECT_PLAYER_MAX];
 
-	ObjectAll[ObjectAll[0]->GetCnt()] = new TUTO[OBJECT_TUTORIAL_MAX];
-	ObjectAll[ObjectAll[0]->GetCnt()] = new STATUS[OBJECT_STATUS_MAX];
-	ObjectAll[ObjectAll[0]->GetCnt()] = new BULLETPREDICTION[OBJECT_BULLETPREDICTION_MAX];
-	ObjectAll[ObjectAll[0]->GetCnt()] = new VITALGAUGE[OBJECT_VITAL_MAX];
-	ObjectAll[ObjectAll[0]->GetCnt()] = new BULLETGAUGE[OBJECT_BULLETGAUGE_MAX];
-	ObjectAll[ObjectAll[0]->GetCnt()] = new DAMEGE[OBJECT_DAMEGE_MAX];
+	ObjectAll->SetPointerTuto(ObjectAll->GetCnt);
+	ObjectAll->tuto = new TUTO[OBJECT_TUTORIAL_MAX];
 
-	//-------------エフェクト確保、アドレスセット
-	ObjectAll[0]->SetEffect(ObjectAll[0]->GetCnt());
-	ObjectAll[ObjectAll[0]->GetCnt()] = new EFFECT[OBJECT_EFFECT_MAX];
+	ObjectAll->SetPointerStatus(ObjectAll->GetCnt);
+	ObjectAll->status = new STATUS[OBJECT_STATUS_MAX];
 
-	ObjectAll[ObjectAll[0]->GetCnt()] = new EXPLOSION[OBJECT_EXPLOSION_MAX];
+	ObjectAll->SetPointerBulletprediction(ObjectAll->GetCnt);
+	ObjectAll->bulletprediction = new BULLETPREDICTION[OBJECT_BULLETPREDICTION_MAX];
 
-	//-------------バレット確保、アドレスセット
-	ObjectAll[0]->SetBullet(ObjectAll[0]->GetCnt());
-	ObjectAll[ObjectAll[0]->GetCnt()] = new BULLET[OBJECT_BULLET_MAX];
+	ObjectAll->SetPointerVitalgauge(ObjectAll->GetCnt);
+	ObjectAll->vitalgauge = new VITALGAUGE[OBJECT_VITAL_MAX];
 
-	ObjectAll[ObjectAll[0]->GetCnt()] = new ITEM[OBJECT_ITEM_MAX];
+	ObjectAll->SetPointerBulletgauge(ObjectAll->GetCnt);
+	ObjectAll->bulletgauge = new BULLETGAUGE[OBJECT_BULLETGAUGE_MAX];
 
-	//-------------影確保、アドレスセット
-	ObjectAll[0]->SetShadow(ObjectAll[0]->GetCnt());
-	ObjectAll[ObjectAll[0]->GetCnt()] = new SHADOW[OBJECT_SHADOW_MAX];
+	ObjectAll->SetPointerDamege(ObjectAll->GetCnt);
+	ObjectAll->damege = new DAMEGE[OBJECT_DAMEGE_MAX];
 
-	//-------------カウントダウン確保、アドレスセット
-	ObjectAll[0]->SetCountdown(ObjectAll[0]->GetCnt());
-	ObjectAll[ObjectAll[0]->GetCnt()] = new COUNTDOWN[OBJECT_COUNTDOWN_MAX];
+	ObjectAll->SetPointerEffect(ObjectAll->GetCnt());
+	ObjectAll->effect = new EFFECT[OBJECT_EFFECT_MAX];
 
-	ObjectAll[ObjectAll[0]->GetCnt()] = new RANK[OBJECT_RANK_MAX];
-	ObjectAll[ObjectAll[0]->GetCnt()] = new RESULT[OBJECT_RESULT_MAX];
-	ObjectAll[ObjectAll[0]->GetCnt()] = new TITLE[OBJECT_TITLE_MAX];
+	ObjectAll->SetPointerExplosion(ObjectAll->GetCnt);
+	ObjectAll->explosion = new EXPLOSION[OBJECT_EXPLOSION_MAX];
+
+	ObjectAll->SetPointerBullet(ObjectAll->GetCnt());
+	ObjectAll->bullet = new BULLET[OBJECT_BULLET_MAX];
+
+	ObjectAll->SetPointerItem(ObjectAll->GetCnt);
+	ObjectAll->item = new ITEM[OBJECT_ITEM_MAX];
+
+	ObjectAll->SetPointerShadow(ObjectAll->GetCnt());
+	ObjectAll->shadow = new SHADOW[OBJECT_SHADOW_MAX];
+
+	ObjectAll->SetPointerCountdown(ObjectAll->GetCnt());
+	ObjectAll->countdown = new COUNTDOWN[OBJECT_COUNTDOWN_MAX];
+
+	ObjectAll->SetPointerRank(ObjectAll->GetCnt);
+	ObjectAll->rank = new RANK[OBJECT_RANK_MAX];
+
+	ObjectAll->SetPointerResult(ObjectAll->GetCnt);
+	ObjectAll->result = new RESULT[OBJECT_RESULT_MAX];
+
+	ObjectAll->SetPointerTitle(ObjectAll->GetCnt);
+	ObjectAll->title = new TITLE[OBJECT_TITLE_MAX];
 
 	if (FAILED(Init(hInstance, hWnd, mode)))
 	{
@@ -206,9 +220,9 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 
 	//-----------------------------------------------------オブジェクト初期化
-	for (int ObjCnt = 0; ObjCnt < OBJECT_ALL_MAX; ObjCnt++)
+	for (int CntOBJ = 0; CntOBJ < OBJECT_ALL_MAX; CntOBJ++)
 	{
-		ObjectAll[ObjCnt]->Init();
+		ObjectAll[CntOBJ].Init();
 	}
 
 	// 入力処理の初期化
@@ -265,10 +279,10 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 				dwExecLastTime = dwCurrentTime;
 
 				// 更新処理
-				UpdateGame(ObjectAll[0]);
+				UpdateGame(&ObjectAll[0]);
 
 				// 描画処理
-				DrawGame(ObjectAll[0]);
+				DrawGame(&ObjectAll[0]);
 
 				dwFrameCount++;
 			}
@@ -282,9 +296,9 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	Uninit();
 
 	//-----------------------------------------------------オブジェクト終了
-	for (int ObjCnt = 0; ObjCnt < OBJECT_ALL_MAX; ObjCnt++)
+	for (int CntOBJ = 0; CntOBJ < OBJECT_ALL_MAX; CntOBJ++)
 	{
-		ObjectAll[ObjCnt]->Uninit();
+		ObjectAll[CntOBJ].Uninit();
 	}
 
 	delete [] ObjectAll;

@@ -4,7 +4,6 @@
 * @author ƒLƒ€ƒ‰ƒWƒ…ƒ“
 */
 #include "../h/main.h"
-#include "../h/object/objectclass.h"
 #include "../h/library.h"
 
 

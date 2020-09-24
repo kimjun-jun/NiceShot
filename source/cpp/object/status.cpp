@@ -5,9 +5,7 @@
 * @date 2020/01/15
 */
 #include "../../h/main.h"
-#include "../../h/object/player.h"
 #include "../../h/object/status.h"
-#include "../../h/object/objectclass.h"
 
 //=============================================================================
 // èâä˙âªèàóù
@@ -36,10 +34,10 @@ void STATUS::Init(void)
 	this[STATUSTYPE_CAMERA].tex2D.SetpD3DTexture(pD3DTexture[0]);
 	this[STATUSTYPE_KIRI].tex2D.SetpD3DTexture(pD3DTexture[0]);
 
-	this[STATUSTYPE_SPEED].SetPos = D3DXVECTOR3(STATUS_POS_X - STATUS_POS_X_OFFSET, STATUS_POS_Y - STATUS_POS_Y_OFFSET, 0.0f);
-	this[STATUSTYPE_SENSYA].SetPos = D3DXVECTOR3(STATUS_POS_X * 2 - STATUS_POS_X_OFFSET, STATUS_POS_Y - STATUS_POS_Y_OFFSET, 0.0f);
-	this[STATUSTYPE_CAMERA].SetPos = D3DXVECTOR3(STATUS_POS_X - STATUS_POS_X_OFFSET, STATUS_POS_Y * 2 - STATUS_POS_Y_OFFSET, 0.0f);
-	this[STATUSTYPE_KIRI].SetPos = D3DXVECTOR3(STATUS_POS_X * 2 - STATUS_POS_X_OFFSET, STATUS_POS_Y * 2 - STATUS_POS_Y_OFFSET, 0.0f);
+	this[STATUSTYPE_SPEED].SetPos(D3DXVECTOR3(STATUS_POS_X - STATUS_POS_X_OFFSET, STATUS_POS_Y - STATUS_POS_Y_OFFSET, 0.0f));
+	this[STATUSTYPE_SENSYA].SetPos(D3DXVECTOR3(STATUS_POS_X * 2 - STATUS_POS_X_OFFSET, STATUS_POS_Y - STATUS_POS_Y_OFFSET, 0.0f));
+	this[STATUSTYPE_CAMERA].SetPos(D3DXVECTOR3(STATUS_POS_X - STATUS_POS_X_OFFSET, STATUS_POS_Y * 2 - STATUS_POS_Y_OFFSET, 0.0f));
+	this[STATUSTYPE_KIRI].SetPos(D3DXVECTOR3(STATUS_POS_X * 2 - STATUS_POS_X_OFFSET, STATUS_POS_Y * 2 - STATUS_POS_Y_OFFSET, 0.0f));
 
 	// í∏ì_èÓïÒÇÃçÏê¨
 	MakeVertexStatus();

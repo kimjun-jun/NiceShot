@@ -7,14 +7,9 @@
 #include "../../h/main.h"
 #include "../../h/library.h"
 #include "../../h/other/input.h"
-#include "../../h/object/bullet/bullet.h"
-#include "../../h/other/fade.h"
 #include "../../h/object/camera.h"
-#include "../../h/object/shadow.h"
 #include "../../h/map/field.h"
 #include "../../h/other/sound.h"
-#include "../../h/effect/effect.h"
-#include "../../h/object/objectclass.h"
 #include "../../h/object/player.h"
 
 static D3DXCOLOR PLAYER_COLOR[] = {
@@ -36,7 +31,7 @@ void PLAYER_HONTAI::Init(void)
 	{
 		////////////////////////////////////////////////////////////////////////////////////////////////砲台
 		this[CntPlayer].SetRot(D3DXVECTOR3(0.0f, 3.14f, 0.0f));
-		this[CntPlayer].SetUse = true;
+		this[CntPlayer].SetUse(true);
 
 		this[CntPlayer].speedbuff = 1.0f;
 		this[CntPlayer].MorphingTime = MORPHING_TIME;
@@ -61,7 +56,7 @@ void PLAYER_HONTAI::Init(void)
 		// テクスチャの読み込み
 		D3DXCreateTextureFromFile(pDevice,					// デバイスへのポインタ
 			TEXTURE_MEISAI,									// ファイルの名前
-			&this[CntPlayer].model.pD3DTexture);	// 読み込むメモリー
+			&player->model.pD3DTexture);	// 読み込むメモリー
 
 
 		/////////////////////////////////////////////////////////////////////////////////////////砲塔
@@ -218,12 +213,12 @@ void PLAYER_HONTAI::Reinit(void)
 		this[CntPlayer].SetFieldNorUpNorCross(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
 		this[CntPlayer].SetFieldNorVec(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
 		this[CntPlayer].SetUse(true);
+		this[CntPlayer].SetQrot(0.0f);
 
 		this[CntPlayer].FrontRotTOaxis = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 		this[CntPlayer].speed = 0.0f;
 		this[CntPlayer].speedbuff = 1.0f;
 		this[CntPlayer].speedbufftime = 0.0f;
-		this[CntPlayer].SetQrot = 0.0f;
 		this[CntPlayer].Brot = 0.0f;
 		this[CntPlayer].Morphing = false;
 		this[CntPlayer].MorphingTime = MORPHING_TIME;

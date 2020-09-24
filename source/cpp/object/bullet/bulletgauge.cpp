@@ -5,9 +5,7 @@
 * @date 2020/01/15
 */
 #include "../../../h/main.h"
-#include "../../../h/object/player.h"
 #include "../../../h/object/bullet/bulletgauge.h"
-#include "../../../h/object/objectclass.h"
 
 //*****************************************************************************
 // É}ÉNÉçíËã`

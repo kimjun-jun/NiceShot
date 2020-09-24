@@ -6,9 +6,7 @@
 */
 #pragma once
 
-class OBJECT_3D;
-class PLAYER_PRATS;
-struct GPUMODEL;
+#include "../../h/object/objectclass.h"
 
 /**
  * @enum ITEMTYPE
@@ -20,6 +18,12 @@ enum PARTSTYPE
 	PARTSTYPE_HOUSIN,			//!< 砲身
 };
 
+class PLAYER_PRATS : public OBJECT_3D
+{
+public:
+	PLAYER_HONTAI				*ParentHontai;		// 親子判定
+	PLAYER_PRATS				*ParentParts;		// 親子判定
+};
 
 class PLAYER_HONTAI : public OBJECT_3D
 {
@@ -54,9 +58,9 @@ public:
 
 
 
-	PLAYER_PRATS				parts[2];					//!< モデルのパーツ階層　親本体(砲台)、子パーツ[0](砲塔)、孫パーツ[1](砲身)
+	PLAYER_PRATS				*parts[2];					//!< モデルのパーツ階層　親本体(砲台)、子パーツ[0](砲塔)、孫パーツ[1](砲身)
 	PLAYER_HONTAI				*Parent;					//!< 親子判定
-	GPUMODEL					ModelDate[2];				//!< モデルデータ　0ノーマル、1攻撃、2スピード
+	GPUMODEL					*ModelDate[2];				//!< モデルデータ　0ノーマル、1攻撃、2スピード
 	void						Init(void);					//!< 初期化
 	void						Reinit(void);				//!< 再初期化
 	void						Uninit(void);				//!< 終了
@@ -99,9 +103,3 @@ public:
 
 };
 
-class PLAYER_PRATS : public OBJECT_3D
-{
-public:
-	PLAYER_HONTAI				*ParentHontai;		// 親子判定
-	PLAYER_PRATS				*ParentParts;		// 親子判定
-};

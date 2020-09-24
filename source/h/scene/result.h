@@ -6,6 +6,8 @@
 */
 #pragma once
 
+#include "../../h/object/objectclass.h"
+
 /**
 *　@class RESULT
 *　@brief 2Dポリゴンを定義するクラス

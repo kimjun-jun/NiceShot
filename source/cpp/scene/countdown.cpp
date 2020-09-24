@@ -7,7 +7,6 @@
 #include "../../h/main.h"
 #include "../../h/other/fade.h"
 #include "../../h/other/sound.h"
-#include "../../h/object/objectclass.h"
 #include "../../h/game.h"
 #include "../../h/scene/countdown.h"
 

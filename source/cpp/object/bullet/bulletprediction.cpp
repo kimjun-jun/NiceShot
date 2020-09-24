@@ -6,10 +6,8 @@
 */
 #include "../../../h/main.h"
 #include "../../../h/other/input.h"
-#include "../../../h/object/player.h"
 #include "../../../h/object/camera.h"
 #include "../../../h/object/bullet/bulletprediction.h"
-#include "../../../h/object/objectclass.h"
 
 //*****************************************************************************
 // É}ÉNÉçíËã`

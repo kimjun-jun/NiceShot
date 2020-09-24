@@ -5,10 +5,9 @@
 * @date 2020/01/15
 */
 #include "../../h/main.h"
-#include "../../h/effect/effect.h"
 #include "../../h/other/input.h"
 #include "../../h/object/camera.h"
-#include "../../h/object/objectclass.h"
+#include "../../h/effect/effect.h"
 
 //*****************************************************************************
 // É}ÉNÉçíËã`
@@ -46,10 +45,10 @@ void EFFECT::Reinit(void)
 	for (int nCntEffect = 0; nCntEffect < OBJECT_EFFECT_MAX; nCntEffect++)
 	{
 		this[nCntEffect].SetPos(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
-		this[nCntEffect].SetRot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-		this[nCntEffect].SetScl = D3DXVECTOR3(1.0f, 1.0f, 1.0f);
-		this[nCntEffect].SetMove = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-		this[nCntEffect].SetCol = D3DXCOLOR(DWORD(0));
+		this[nCntEffect].SetRot(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+		this[nCntEffect].SetScl(D3DXVECTOR3(1.0f, 1.0f, 1.0f));
+		this[nCntEffect].SetMove(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+		this[nCntEffect].SetCol(D3DXCOLOR(DWORD(0)));
 		this[nCntEffect].nTimer = 0;
 		this[nCntEffect].nDecAlpha = 0.0f;
 		this[nCntEffect].SetUse(false);

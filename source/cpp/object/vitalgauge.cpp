@@ -5,10 +5,7 @@
 * @date 2020/01/15
 */
 #include "../../h/main.h"
-#include "../../h/object/player.h"
-#include "../../h/scene/rank.h"
 #include "../../h/object/vitalgauge.h"
-#include "../../h/object/objectclass.h"
 
 //*****************************************************************************
 // É}ÉNÉçíËã`

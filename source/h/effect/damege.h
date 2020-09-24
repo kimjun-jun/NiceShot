@@ -6,6 +6,8 @@
 */
 #pragma once
 
+#include "../../h/object/objectclass.h"
+
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
@@ -16,10 +18,11 @@
 #define	DAMEGE_POS_Y			(SCREEN_CENTER_Y)									// チュートリアルの表示位置
 
 
+
 class DAMEGE : public OBJECT_2D
 {
 public:
-	DAMEGE() { alpha = 0, time = 0.0f; };
+	DAMEGE() { alpha = 0, time = 0.0f; }
 	void						Init(void);					//!< 初期化
 	void						Reinit(void);				//!< 再初期化
 	void						Uninit(void);				//!< 終了

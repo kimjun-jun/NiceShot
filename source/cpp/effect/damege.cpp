@@ -6,7 +6,6 @@
 */
 #include "../../h/main.h"
 #include "../../h/effect/damege.h"
-#include "../../h/object/objectclass.h"
 
 //=============================================================================
 // ‰Šú‰»ˆ—

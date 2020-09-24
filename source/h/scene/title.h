@@ -6,6 +6,7 @@
 */
 #pragma once
 
+#include "../../h/object/objectclass.h"
 
 /**
  * @enum E_STAGE
