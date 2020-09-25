@@ -6,23 +6,6 @@
 */
 #pragma once
 
-#include "../../h/object/player.h"
-#include "../../h/object/shadow.h"
-#include "../../h/scene/title.h"
-#include "../../h/scene/result.h"
-#include "../../h/scene/tutorial.h"
-#include "../../h/effect/effect.h"
-#include "../../h/object/bullet/bullet.h"
-#include "../../h/effect/explosion.h"
-#include "../../h/scene/rank.h"
-#include "../../h/scene/countdown.h"
-#include "../../h/object/item.h"
-#include "../../h/effect/damege.h"
-#include "../../h/object/status.h"
-#include "../../h/object/bullet/bulletprediction.h"
-#include "../../h/object/bullet/bulletgauge.h"
-#include "../../h/object/vitalgauge.h"
-
 
 /**
  * @class GAMEOBJECT
@@ -70,78 +53,79 @@ public:
 	}
 
 	virtual void Init() {}		//!< 初期化
-	virtual void Reinit() {};		//!< 再初期化
+	virtual void Reinit() {}		//!< 再初期化
 	virtual void Uninit() {}		//!< デリート
-	virtual void Update() {}		//!< 更新
+	virtual void Update() {};		//!< 更新
 	virtual void Draw() {}		//!< 描画
 	int GetCnt() { return cnt; }	//!< オブジェクト番号取得
 
-	PLAYER_HONTAI *GetPointerPlayer() { return (PLAYER_HONTAI*)&player; }	//!< 先頭アドレス取得
-	void SetPointerPlayer(int cnt) { sizeof(player[cnt]); }	//!< アドレスセット
+	GAME_OBJECT *GetPointerPlayer() { return player; }	//!< 先頭アドレス取得
+	void SetPointerPlayer(int cnt) { player[cnt]; }	//!< アドレスセット
 
-	EFFECT *GetPointerEffect() { return (EFFECT*)&effect; }
-	void SetPointerEffect(int cnt) { sizeof(effect[cnt]); }
+	GAME_OBJECT *GetPointerEffect() { return effect; }
+	void SetPointerEffect(int cnt) { effect[cnt]; }
 
-	BULLET *GetPointerBullet() { return (BULLET*)&bullet; }
-	void SetPointerBullet(int cnt) { sizeof(bullet[cnt]); }
+	GAME_OBJECT *GetPointerBullet() { return bullet; }
+	void SetPointerBullet(int cnt) { bullet[cnt]; }
 
-	SHADOW *GetPointerShadow() { return (SHADOW*)&shadow; }
-	void SetPointerShadow(int cnt) { sizeof(shadow[cnt]); }
+	GAME_OBJECT *GetPointerShadow() { return shadow; }
+	void SetPointerShadow(int cnt) { shadow[cnt]; }
 
-	COUNTDOWN *GetPointerCountdown() { return (COUNTDOWN*)&countdown; }
-	void SetPointerCountdown(int cnt) { sizeof(countdown[cnt]); }
+	GAME_OBJECT *GetPointerCountdown() { return countdown; }
+	void SetPointerCountdown(int cnt) { countdown[cnt]; }
 
-	TUTO *GetPointerTuto() { return (TUTO*)&tuto; }
-	void SetPointerTuto(int cnt) { sizeof(tuto[cnt]); }
+	GAME_OBJECT *GetPointerTuto() { return tuto; }
+	void SetPointerTuto(int cnt) { tuto[cnt]; }
 
-	STATUS *GetPointerStatus() { return (STATUS*)&status; }
-	void SetPointerStatus(int cnt) { sizeof(status[cnt]); }
+	GAME_OBJECT *GetPointerStatus() { return status; }
+	void SetPointerStatus(int cnt) { status[cnt]; }
 
-	BULLETPREDICTION *GetPointerBulletprediction() { return (BULLETPREDICTION*)&bulletprediction; }
-	void SetPointerBulletprediction(int cnt) { sizeof(bulletprediction[cnt]); }
+	GAME_OBJECT *GetPointerBulletprediction() { return bulletprediction; }
+	void SetPointerBulletprediction(int cnt) { bulletprediction[cnt]; }
 
-	VITALGAUGE *GetPointerVitalgauge() { return (VITALGAUGE*)&vitalgauge; }
-	void SetPointerVitalgauge(int cnt) { sizeof(vitalgauge[cnt]); }
+	GAME_OBJECT *GetPointerVitalgauge() { return vitalgauge; }
+	void SetPointerVitalgauge(int cnt) { vitalgauge[cnt]; }
 
-	BULLETGAUGE *GetPointerBulletgauge() { return (BULLETGAUGE*)&bulletgauge; }
-	void SetPointerBulletgauge(int cnt) { sizeof(bulletgauge[cnt]); }
+	GAME_OBJECT *GetPointerBulletgauge() { return bulletgauge; }
+	void SetPointerBulletgauge(int cnt) { bulletgauge[cnt]; }
 
-	DAMEGE *GetPointerDamege() { return (DAMEGE*)&damege; }
-	void SetPointerDamege(int cnt) { sizeof(damege[cnt]); }
+	GAME_OBJECT *GetPointerDamege() { return damege; }
+	void SetPointerDamege(int cnt) { damege[cnt]; }
 
-	EXPLOSION *GetPointerExplosion() { return (EXPLOSION*)&explosion; }
-	void SetPointerExplosion(int cnt) { sizeof(explosion[cnt]); }
+	GAME_OBJECT *GetPointerExplosion() { return explosion; }
+	void SetPointerExplosion(int cnt) { explosion[cnt]; }
 
-	ITEM *GetPointerItem() { return (ITEM*)&item; }
-	void SetPointerItem(int cnt) { sizeof(item[cnt]); }
+	GAME_OBJECT *GetPointerItem() { return item; }
+	void SetPointerItem(int cnt) { item[cnt]; }
 
-	RANK *GetPointerRank() { return (RANK*)&rank; }
-	void SetPointerRank(int cnt) { sizeof(rank[cnt]); }
+	GAME_OBJECT *GetPointerRank() { return rank; }
+	void SetPointerRank(int cnt) { rank[cnt]; }
 
-	RESULT *GetPointerResult() { return (RESULT*)&result; }
-	void SetPointerResult(int cnt) { sizeof(result[cnt]); }
+	GAME_OBJECT *GetPointerResult() { return result; }
+	void SetPointerResult(int cnt) { result[cnt]; }
 
-	TITLE *GetPointerTitle() { return (TITLE*)&title; }
-	void SetPointerTitle(int cnt) { sizeof(title[cnt]); }
+	GAME_OBJECT *GetPointerTitle() { return title; }
+	void SetPointerTitle(int cnt) { title[cnt]; }
 
-	PLAYER_HONTAI *player = NULL;
-	EFFECT *effect = NULL;
-	BULLET *bullet = NULL;
-	SHADOW *shadow = NULL;
-	COUNTDOWN *countdown = NULL;
-	TUTO *tuto = NULL;
-	STATUS *status = NULL;
-	BULLETPREDICTION *bulletprediction = NULL;
-	VITALGAUGE *vitalgauge = NULL;
-	BULLETGAUGE *bulletgauge = NULL;
-	DAMEGE *damege = NULL;
-	EXPLOSION *explosion = NULL;
-	ITEM *item = NULL;
-	RANK *rank = NULL;
-	RESULT *result = NULL;
-	TITLE *title = NULL;
+	GAME_OBJECT *obj;
 private:
 	static int cnt;
+	GAME_OBJECT *player;
+	GAME_OBJECT *effect;
+	GAME_OBJECT *bullet;
+	GAME_OBJECT *shadow;
+	GAME_OBJECT *countdown;
+	GAME_OBJECT *tuto;
+	GAME_OBJECT *status;
+	GAME_OBJECT *bulletprediction;
+	GAME_OBJECT *vitalgauge;
+	GAME_OBJECT *bulletgauge;
+	GAME_OBJECT *damege;
+	GAME_OBJECT *explosion;
+	GAME_OBJECT *item;
+	GAME_OBJECT *rank;
+	GAME_OBJECT *result;
+	GAME_OBJECT *title;
 };
 
 /**
@@ -220,7 +204,7 @@ struct GPUMODEL
 		pD3DTexture = NULL; pD3DXMesh = NULL; pD3DXBuffMat = NULL; nNumMat = NULL; pD3DVtxBuff = NULL;
 		pD3DIdxBuff = NULL; nNumVertex = NULL; nNumVertexIndex = NULL; nNumPolygon = NULL;
 	}
-	~GPUMODEL() {
+	virtual ~GPUMODEL() {
 		SAFE_RELEASE(pD3DTexture); SAFE_RELEASE(pD3DXMesh); SAFE_RELEASE(pD3DXBuffMat); SAFE_RELEASE(pD3DVtxBuff); SAFE_RELEASE(pD3DIdxBuff);
 	}
 
@@ -244,7 +228,7 @@ class TEXTURE2D_VERTEXBUFFER
 {
 public:
 	TEXTURE2D_VERTEXBUFFER() { pD3DTexture = NULL; pD3DVtxBuff = NULL; }
-	~TEXTURE2D_VERTEXBUFFER() { SAFE_RELEASE(pD3DTexture); SAFE_RELEASE(pD3DVtxBuff); }
+	virtual ~TEXTURE2D_VERTEXBUFFER() { SAFE_RELEASE(pD3DTexture); SAFE_RELEASE(pD3DVtxBuff); }
 
 	//------------------------get関数
 	LPDIRECT3DTEXTURE9 GetpD3DTexture();
@@ -267,7 +251,7 @@ class TEXTURE_2D
 {
 public:
 	TEXTURE_2D() { pD3DTexture = NULL; }
-	~TEXTURE_2D() { SAFE_RELEASE(pD3DTexture); }
+	virtual ~TEXTURE_2D() { SAFE_RELEASE(pD3DTexture); }
 
 	//------------------------get関数
 	LPDIRECT3DTEXTURE9 GetpD3DTexture();
@@ -291,7 +275,7 @@ class OBJECT_2D_VERTEXBUFFER :public GAME_OBJECT
 {
 public:
 	OBJECT_2D_VERTEXBUFFER() { Num++; }
-	~OBJECT_2D_VERTEXBUFFER() { Num--; }
+	virtual ~OBJECT_2D_VERTEXBUFFER() { Num--; }
 	virtual void Init() {};
 	virtual void Reinit() {};
 	virtual void Uninit() {};
@@ -329,7 +313,7 @@ class OBJECT_2D :public GAME_OBJECT
 {
 public:
 	OBJECT_2D() { Num++; }
-	~OBJECT_2D() { Num--; }
+	virtual ~OBJECT_2D() { Num--; }
 	virtual void Init() {}
 	virtual void Reinit() {}
 	virtual void Uninit() {}
@@ -367,7 +351,7 @@ class OBJECT_3D :public GAME_OBJECT
 {
 public:
 	OBJECT_3D() { Num++; }
-	~OBJECT_3D() { Num--; }
+	virtual ~OBJECT_3D() { Num--; }
 	virtual void Init() {}
 	virtual void Reinit() {}
 	virtual void Uninit() {}

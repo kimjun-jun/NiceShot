@@ -414,7 +414,9 @@ void UpdateMeshField(void)
 	}
 
 	//プレイヤーと地面の当たり判定
-	PLAYER_HONTAI *player = GetPlayerHoudai();
+	//-----------------------------------オブジェクト先頭アドレスを読み込み
+	GAME_OBJECT *playerobj = this->GetPointerPlayer();
+	PLAYER_HONTAI *player = dynamic_cast<PLAYER_HONTAI*>(&playerobj[0]);
 	for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
 	{
 		FieldHitGetSphereVec(D3DXVECTOR3(player[CntPlayer].pos.x, player[CntPlayer].pos.y + 1000.0f, player[CntPlayer].pos.z),

@@ -10,6 +10,14 @@
 #include "../h/other/fade.h"
 #include "../h/other/sound.h"
 #include "../h/object/objectclass.h"
+#include "../h/object/player.h"
+#include "../h/object/shadow.h"
+#include "../h/effect/effect.h"
+#include "../h/object/bullet/bullet.h"
+#include "../h/effect/explosion.h"
+#include "../h/object/item.h"
+#include "../h/effect/damege.h"
+#include "../h/object/status.h"
 #include "../h/collision.h"
 
 
@@ -88,12 +96,18 @@ bool CollisionBC(D3DXVECTOR3 pos1, float r1, D3DXVECTOR3 pos2, float r2)
 //=============================================================================
 void CheakHit(int scene, GAME_OBJECT* GameObj)
 {
-	//各オブジェクトの先頭アドレスを取得
-	PLAYER_HONTAI *p = GameObj->player->GetPointerPlayer();
-	BULLET *b = GameObj->player->GetPointerBullet();
-	ITEM *i = GameObj->player->GetPointerItem();
-	DAMEGE *damede = GameObj->player->GetPointerDamege();
-	EFFECT *e = GameObj->player->GetPointerEffect();
+	//-----------------------------------オブジェクト先頭アドレスを読み込み
+	GAME_OBJECT *pobj = GameObj->GetPointerPlayer();
+	PLAYER_HONTAI *p = dynamic_cast<PLAYER_HONTAI*>(&pobj[0]);
+	GAME_OBJECT *bobj = GameObj->GetPointerBullet();
+	BULLET *b = dynamic_cast<BULLET*>(&bobj[0]);
+	GAME_OBJECT *iobj = GameObj->GetPointerItem();
+	ITEM *i = dynamic_cast<ITEM*>(&iobj[0]);
+	GAME_OBJECT *dobj = GameObj->GetPointerDamege();
+	DAMEGE *d = dynamic_cast<DAMEGE*>(&dobj[0]);
+	GAME_OBJECT *eobj = GameObj->GetPointerEffect();
+	EFFECT *e = dynamic_cast<EFFECT*>(&eobj[0]);
+
 	WALL *Wall = GetWall();
 	int WallNum = GetWallNum();
 
@@ -146,16 +160,16 @@ void CheakHit(int scene, GAME_OBJECT* GameObj)
 						if (CollisionBC(ppos, PLAYER_MODEL_SIZE, bpos, BULLET_MODEL_SIZE))
 						{
 							// エフェクト爆発の生成
-							GameObj->effect->SetEffect(bpos, D3DXVECTOR3(0.0f, 0.0f, 0.0f),
+							e->SetEffect(bpos, D3DXVECTOR3(0.0f, 0.0f, 0.0f),
 								PLAYER_COLOR[b[CntPlayerBullet].UsePlayerType], 150.0f, 150.0f, 40);
 							if (scene == 1)
 							{
 								p[CntPlayer].vital -= PLAYER_ATTACK_NORMAL;
 							}
 							//画面ダメージエフェクト
-							GameObj->damege[CntPlayer].SetUse(true);
-							GameObj->damege[CntPlayer].time = 0.0f;
-							GameObj->damege[CntPlayer].alpha = 0;
+							d[CntPlayer].SetUse(true);
+							d[CntPlayer].time = 0.0f;
+							d[CntPlayer].alpha = 0;
 
 							// バレット破棄
 							b[CntPlayerBullet].ReleaseBullet(CntPlayerBullet);

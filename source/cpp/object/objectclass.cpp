@@ -10,7 +10,15 @@ using namespace std;
 #include "../../h/object/objectclass.h"
 
 
-
+//void GAME_OBJECT::Update(int snece)
+//{
+//	switch (snece)
+//	{
+//	case 0:
+//		this->title->Update();
+//		break;
+//	}
+//}
 
 //-------------------------------------------------------------------2DVBテクスチャゲット関数
 LPDIRECT3DTEXTURE9 TEXTURE2D_VERTEXBUFFER::GetpD3DTexture() { return this->pD3DTexture; };

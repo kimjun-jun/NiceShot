@@ -5,6 +5,9 @@
 * @date 2020/01/15
 */
 #include "../../h/main.h"
+#include "../../../h/object/objectclass.h"
+#include "../../../h/object/player.h"
+#include "../../../h/scene/rank.h"
 #include "../../h/object/vitalgauge.h"
 
 //*****************************************************************************
@@ -94,7 +97,9 @@ void VITALGAUGE::Uninit(void)
 //=============================================================================
 void VITALGAUGE::Update(void)
 {
-	PLAYER_HONTAI *p = this[0].GetPlayer();
+	//-----------------------------------オブジェクト先頭アドレスを読み込み
+	GAME_OBJECT *playerobj = this->GetPointerPlayer();
+	PLAYER_HONTAI *p = dynamic_cast<PLAYER_HONTAI*>(&playerobj[0]);
 	for (int CntPlayer = 0; CntPlayer < OBJECT_VITAL_MAX; CntPlayer++)
 	{
 		bool puse = p[CntPlayer].GetUse();
@@ -103,7 +108,10 @@ void VITALGAUGE::Update(void)
 			if (this[CntPlayer].VitalPower <= 0)
 			{
 				p[CntPlayer].SetUse(false);
-				SetRank(CntPlayer);
+				//-----------------------------------オブジェクト先頭アドレスを読み込み
+				GAME_OBJECT *rankobj = this->GetPointerRank();
+				RANK *rank = dynamic_cast<RANK*>(&rankobj[0]);
+				rank->SetRank(CntPlayer);
 			}
 		}
 		this[CntPlayer].VitalPower = p[CntPlayer].vital;

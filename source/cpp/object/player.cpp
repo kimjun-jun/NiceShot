@@ -10,6 +10,7 @@
 #include "../../h/object/camera.h"
 #include "../../h/map/field.h"
 #include "../../h/other/sound.h"
+#include "../../h/object/bullet/bullet.h"
 #include "../../h/object/player.h"
 
 static D3DXCOLOR PLAYER_COLOR[] = {
@@ -56,7 +57,7 @@ void PLAYER_HONTAI::Init(void)
 		// テクスチャの読み込み
 		D3DXCreateTextureFromFile(pDevice,					// デバイスへのポインタ
 			TEXTURE_MEISAI,									// ファイルの名前
-			&player->model.pD3DTexture);	// 読み込むメモリー
+			&this[CntPlayer].model.pD3DTexture());	// 読み込むメモリー
 
 
 		/////////////////////////////////////////////////////////////////////////////////////////砲塔
@@ -115,7 +116,7 @@ void PLAYER_HONTAI::Init(void)
 			&this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL].nNumMat, &this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL].pD3DXMesh,
 			&this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL].pD3DVtxBuff, &this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL].pD3DIdxBuff,
 			&this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL].nNumVertex, &this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL].nNumPolygon,
-			&this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL].nNumVertexIndex, &this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL].pD3DTexture));
+			&this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL].nNumVertexIndex, &this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL].pD3DTexture);
 
 		//頂点カラーをプレイヤー色に変更
 		this[CntPlayer].SetPlayerMeshColor(this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL].pD3DVtxBuff,
@@ -303,30 +304,7 @@ void PLAYER_HONTAI::Reinit(void)
 //=============================================================================
 void PLAYER_HONTAI::Uninit(void)
 {
-	for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
-	{
-		if (this[CntPlayer].ModelDate[PLAYER_MODEL_ATTACK].pD3DTexture != NULL)
-		{// テクスチャの開放
-			this[CntPlayer].ModelDate[PLAYER_MODEL_ATTACK].pD3DTexture->Release();
-			this[CntPlayer].ModelDate[PLAYER_MODEL_ATTACK].pD3DTexture = NULL;
-		}
-		if (this[CntPlayer].ModelDate[PLAYER_MODEL_ATTACK].pD3DXBuffMat != NULL)
-		{// マテリアルの開放
-			this[CntPlayer].ModelDate[PLAYER_MODEL_ATTACK].pD3DXBuffMat->Release();
-			this[CntPlayer].ModelDate[PLAYER_MODEL_ATTACK].pD3DXBuffMat = NULL;
-		}
 
-		if (this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL].pD3DTexture != NULL)
-		{// テクスチャの開放
-			this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL].pD3DTexture->Release();
-			this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL].pD3DTexture = NULL;
-		}
-		if (this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL].pD3DXBuffMat != NULL)
-		{// マテリアルの開放
-			this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL].pD3DXBuffMat->Release();
-			this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL].pD3DXBuffMat = NULL;
-		}
-	}
 }
 
 //=============================================================================
@@ -1203,8 +1181,10 @@ void PLAYER_HONTAI::SetBulletALL(int CntPlayer)
 		//{
 		if (IsButtonTriggered(CntPlayer, BUTTON_R1))
 		{
-			BULLET *bullet = this[0].GetBullet();
-			bullet->SetBullet(BposStart, bulletmove, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer);
+			//-----------------------------------オブジェクト先頭アドレスを読み込み
+			GAME_OBJECT *bobj = this->GetPointerBullet();
+			BULLET *b = dynamic_cast<BULLET*>(&bobj[0]);
+			b->SetBullet(BposStart, bulletmove, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer);
 
 			//拡散弾処理
 			if (this[CntPlayer].ModelType == PLAYER_MODEL_ATTACK)
@@ -1216,8 +1196,8 @@ void PLAYER_HONTAI::SetBulletALL(int CntPlayer)
 				rightB = D3DXVECTOR3(-sinf(HoutouRot.y + HoudaiRot.y - 0.3f)*VALUE_MOVE_BULLET,
 					bulletmove.y,
 					-cosf(HoutouRot.y + HoudaiRot.y - 0.3f) *VALUE_MOVE_BULLET);
-				bullet->SetBullet(BposStart, leftB, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer);
-				bullet->SetBullet(BposStart, rightB, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer);
+				b->SetBullet(BposStart, leftB, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer);
+				b->SetBullet(BposStart, rightB, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer);
 
 			}
 			//残弾を減らす

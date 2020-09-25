@@ -7,6 +7,7 @@
 #include "../../h/main.h"
 #include "../../h/map/field.h"
 #include "../../h/other/sound.h"
+#include "../../h/object/player.h"
 #include "../../h/object/item.h"
 
 //*****************************************************************************
@@ -419,8 +420,11 @@ void ITEM::GettingItem(int nIdxItem)
 		rot.y += VALUE_ROTATE_ITEM*10;
 		
 		//プレイヤーとアイテムの距離を計算し/5分づつ近づける
-		//PLAYER_HONTAI *p = this[nIdxItem].GetPlayer();
-		PLAYER_HONTAI *p = p->GetPlayerPointer();
+		//-----------------------------------オブジェクト先頭アドレスを読み込み
+		GAME_OBJECT *pobj = this[nIdxItem].GetPointerPlayer();
+		PLAYER_HONTAI *p = dynamic_cast<PLAYER_HONTAI*>(&pobj[0]);
+
+		D3DXVECTOR3 ppos = p[0].GetPos();
 		D3DXVECTOR3 PlayerPos = this[nIdxItem].p[this[nIdxItem].GetPlayerType].GetPos();
 
 		D3DXVECTOR3 distance = PlayerPos - pos;

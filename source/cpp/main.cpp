@@ -81,6 +81,7 @@ DWORD				dwFrameCount;				//!< 時間計測用
 #endif
 
 //-----------------------------------------------------------------オブジェクトの数を0で初期化
+int GAME_OBJECT::cnt = 0;
 int OBJECT_3D::Num = 0;
 int OBJECT_2D::Num = 0;
 int OBJECT_2D_VERTEXBUFFER::Num = 0;
@@ -162,56 +163,57 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	}
 
 	//-----------------------------------------------------オブジェクト生成
-	GAME_OBJECT* ObjectAll;
+	GAME_OBJECT* ObjectAll = NULL;
 
 	//-------------確保、アドレスセット
-	ObjectAll->SetPointerPlayer(ObjectAll->GetCnt);
-	ObjectAll->player = new PLAYER_HONTAI[OBJECT_PLAYER_MAX];
+	ObjectAll->SetPointerPlayer(ObjectAll->GetCnt());
+	ObjectAll->obj = new PLAYER_HONTAI[OBJECT_PLAYER_MAX];
+	//PLAYER_HONTAI *p = dynamic_cast<PLAYER_HONTAI*>(&ObjectAll[0]);
 
-	ObjectAll->SetPointerTuto(ObjectAll->GetCnt);
-	ObjectAll->tuto = new TUTO[OBJECT_TUTORIAL_MAX];
+	ObjectAll->SetPointerTuto(ObjectAll->GetCnt());
+	ObjectAll->obj = new TUTO[OBJECT_TUTORIAL_MAX];
 
-	ObjectAll->SetPointerStatus(ObjectAll->GetCnt);
-	ObjectAll->status = new STATUS[OBJECT_STATUS_MAX];
+	ObjectAll->SetPointerStatus(ObjectAll->GetCnt());
+	ObjectAll->obj = new STATUS[OBJECT_STATUS_MAX];
 
-	ObjectAll->SetPointerBulletprediction(ObjectAll->GetCnt);
-	ObjectAll->bulletprediction = new BULLETPREDICTION[OBJECT_BULLETPREDICTION_MAX];
+	ObjectAll->SetPointerBulletprediction(ObjectAll->GetCnt());
+	ObjectAll->obj = new BULLETPREDICTION[OBJECT_BULLETPREDICTION_MAX];
 
-	ObjectAll->SetPointerVitalgauge(ObjectAll->GetCnt);
-	ObjectAll->vitalgauge = new VITALGAUGE[OBJECT_VITAL_MAX];
+	ObjectAll->SetPointerVitalgauge(ObjectAll->GetCnt());
+	ObjectAll->obj = new VITALGAUGE[OBJECT_VITAL_MAX];
 
-	ObjectAll->SetPointerBulletgauge(ObjectAll->GetCnt);
-	ObjectAll->bulletgauge = new BULLETGAUGE[OBJECT_BULLETGAUGE_MAX];
+	ObjectAll->SetPointerBulletgauge(ObjectAll->GetCnt());
+	ObjectAll->obj = new BULLETGAUGE[OBJECT_BULLETGAUGE_MAX];
 
-	ObjectAll->SetPointerDamege(ObjectAll->GetCnt);
-	ObjectAll->damege = new DAMEGE[OBJECT_DAMEGE_MAX];
+	ObjectAll->SetPointerDamege(ObjectAll->GetCnt());
+	ObjectAll->obj = new DAMEGE[OBJECT_DAMEGE_MAX];
 
 	ObjectAll->SetPointerEffect(ObjectAll->GetCnt());
-	ObjectAll->effect = new EFFECT[OBJECT_EFFECT_MAX];
+	ObjectAll->obj = new EFFECT[OBJECT_EFFECT_MAX];
 
-	ObjectAll->SetPointerExplosion(ObjectAll->GetCnt);
-	ObjectAll->explosion = new EXPLOSION[OBJECT_EXPLOSION_MAX];
+	ObjectAll->SetPointerExplosion(ObjectAll->GetCnt());
+	ObjectAll->obj = new EXPLOSION[OBJECT_EXPLOSION_MAX];
 
 	ObjectAll->SetPointerBullet(ObjectAll->GetCnt());
-	ObjectAll->bullet = new BULLET[OBJECT_BULLET_MAX];
+	ObjectAll->obj = new BULLET[OBJECT_BULLET_MAX];
 
-	ObjectAll->SetPointerItem(ObjectAll->GetCnt);
-	ObjectAll->item = new ITEM[OBJECT_ITEM_MAX];
+	ObjectAll->SetPointerItem(ObjectAll->GetCnt());
+	ObjectAll->obj = new ITEM[OBJECT_ITEM_MAX];
 
 	ObjectAll->SetPointerShadow(ObjectAll->GetCnt());
-	ObjectAll->shadow = new SHADOW[OBJECT_SHADOW_MAX];
+	ObjectAll->obj = new SHADOW[OBJECT_SHADOW_MAX];
 
 	ObjectAll->SetPointerCountdown(ObjectAll->GetCnt());
-	ObjectAll->countdown = new COUNTDOWN[OBJECT_COUNTDOWN_MAX];
+	ObjectAll->obj = new COUNTDOWN[OBJECT_COUNTDOWN_MAX];
 
-	ObjectAll->SetPointerRank(ObjectAll->GetCnt);
-	ObjectAll->rank = new RANK[OBJECT_RANK_MAX];
+	ObjectAll->SetPointerRank(ObjectAll->GetCnt());
+	ObjectAll->obj = new RANK[OBJECT_RANK_MAX];
 
-	ObjectAll->SetPointerResult(ObjectAll->GetCnt);
-	ObjectAll->result = new RESULT[OBJECT_RESULT_MAX];
+	ObjectAll->SetPointerResult(ObjectAll->GetCnt());
+	ObjectAll->obj = new RESULT[OBJECT_RESULT_MAX];
 
-	ObjectAll->SetPointerTitle(ObjectAll->GetCnt);
-	ObjectAll->title = new TITLE[OBJECT_TITLE_MAX];
+	ObjectAll->SetPointerTitle(ObjectAll->GetCnt());
+	ObjectAll->obj = new TITLE[OBJECT_TITLE_MAX];
 
 	if (FAILED(Init(hInstance, hWnd, mode)))
 	{

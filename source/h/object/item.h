@@ -7,6 +7,7 @@
 #pragma once
 
 #include "../../h/object/objectclass.h"
+class PLAYER_HONTAI;
 
 //*****************************************************************************
 // É}ÉNÉçíËã`

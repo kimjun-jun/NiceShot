@@ -5,7 +5,10 @@
 * @date 2020/01/15
 */
 #include "../../../h/main.h"
+#include "../../../h/object/objectclass.h"
+#include "../../../h/object/player.h"
 #include "../../../h/object/bullet/bulletgauge.h"
+
 
 //*****************************************************************************
 // マクロ定義
@@ -84,7 +87,9 @@ void BULLETGAUGE::Uninit(void)
 //=============================================================================
 void BULLETGAUGE::Update(void)
 {
-	PLAYER_HONTAI *p =this[0].GetPlayer();
+	//-----------------------------------オブジェクト先頭アドレスを読み込み
+	GAME_OBJECT *playerobj = this->GetPointerPlayer();
+	PLAYER_HONTAI *p = dynamic_cast<PLAYER_HONTAI*>(&playerobj[0]);
 	for (int CntBulletGauge = 0; CntBulletGauge < OBJECT_BULLETGAUGE_MAX; CntBulletGauge++)
 	{
 		this[CntBulletGauge].AmmoPower = p[CntBulletGauge].AmmoCnt;

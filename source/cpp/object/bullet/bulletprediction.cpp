@@ -7,6 +7,8 @@
 #include "../../../h/main.h"
 #include "../../../h/other/input.h"
 #include "../../../h/object/camera.h"
+#include "../../../h/object/player.h"
+#include "../../../h/object/objectclass.h"
 #include "../../../h/object/bullet/bulletprediction.h"
 
 //*****************************************************************************
@@ -93,7 +95,9 @@ void BULLETPREDICTION::Update(void)
 			this[nCntBulletprediction].SetUse(false);
 		}
 	}
-	PLAYER_HONTAI *player = this[0].GetPlayer();
+	//-----------------------------------オブジェクト先頭アドレスを読み込み
+	GAME_OBJECT *playerobj = this->GetPointerPlayer();
+	PLAYER_HONTAI *player = dynamic_cast<PLAYER_HONTAI*>(&playerobj[0]);
 
 	//プレイヤーの情報から発射位置角度移動量を利用してバレットの着弾点を算出する
 	for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
@@ -149,7 +153,9 @@ void BULLETPREDICTION::Update(void)
 //=============================================================================
 void BULLETPREDICTION::Draw(void)
 {
-	PLAYER_HONTAI *p = this[0].GetPlayer();
+	//-----------------------------------オブジェクト先頭アドレスを読み込み
+	GAME_OBJECT *playerobj = this->GetPointerPlayer();
+	PLAYER_HONTAI *p = dynamic_cast<PLAYER_HONTAI*>(&playerobj[0]);
 	for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
 	{
 		bool puse = p[CntPlayer].GetUse();

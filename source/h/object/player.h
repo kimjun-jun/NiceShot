@@ -7,6 +7,7 @@
 #pragma once
 
 #include "../../h/object/objectclass.h"
+class PLAYER_HONTAI;
 
 /**
  * @enum ITEMTYPE
@@ -57,15 +58,14 @@ public:
 	//void *SetPlayerPointer(int cnt) { this[cnt]; }			//!< アドレスセット
 
 
-
 	PLAYER_PRATS				*parts[2];					//!< モデルのパーツ階層　親本体(砲台)、子パーツ[0](砲塔)、孫パーツ[1](砲身)
 	PLAYER_HONTAI				*Parent;					//!< 親子判定
 	GPUMODEL					*ModelDate[2];				//!< モデルデータ　0ノーマル、1攻撃、2スピード
-	void						Init(void);					//!< 初期化
-	void						Reinit(void);				//!< 再初期化
-	void						Uninit(void);				//!< 終了
-	void						Update(void);				//!< 更新
-	void						Draw(void);					//!< 描画
+	virtual void				Init(void);					//!< 初期化
+	virtual void				Reinit(void);				//!< 再初期化
+	virtual void				Uninit(void);				//!< 終了
+	virtual void				Update(void);				//!< 更新
+	virtual void				Draw(void);					//!< 描画
 	void						SetPlayerMeshColor(LPDIRECT3DVERTEXBUFFER9 pD3DVtxBuff, LPDIRECT3DINDEXBUFFER9 pD3DIdxBuff,DWORD nNumPolygon, int CntPlayer);
 	void						SetMoveABL(int CntPlayer);				//!< 移動制御(ABボタンLスティックで移動制御)
 	void						SetCamera(int CntPlayer);				//!< カメラ更新
@@ -102,4 +102,5 @@ public:
 	bool						dashFlag;								//!< ダッシュ判定　入力がある間true.それ以外はfalse
 
 };
+
 
