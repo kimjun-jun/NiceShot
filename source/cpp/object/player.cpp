@@ -163,8 +163,9 @@ void PLAYER_HONTAI::Init(void)
 		float ReturnPosY = 0.0f;
 		D3DXVECTOR3 FieldNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 
-		GAME_OBJECT *fobj = this[CntPlayer].GetPointerField();
-		FIELD *f = dynamic_cast<FIELD*>(&fobj[0]);//°
+		FIELD *f = new FIELD;//°
+		D3DXVECTOR3 posff = f[0].GetPos();
+
 		f->FieldHitGetSphereVec(RayStart, RayEnd, &FieldNorVec, &ReturnPosY);
 
 		D3DXVECTOR3 SetPos = RayStart;

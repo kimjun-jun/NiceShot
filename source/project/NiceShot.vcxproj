@@ -23,7 +23,6 @@
     <ClCompile Include="..\cpp\effect\damege.cpp" />
     <ClCompile Include="..\cpp\effect\effect.cpp" />
     <ClCompile Include="..\cpp\effect\explosion.cpp" />
-    <ClCompile Include="..\cpp\game.cpp" />
     <ClCompile Include="..\cpp\library.cpp" />
     <ClCompile Include="..\cpp\main.cpp" />
     <ClCompile Include="..\cpp\map\field.cpp" />
@@ -59,7 +58,6 @@
     <ClInclude Include="..\h\effect\damege.h" />
     <ClInclude Include="..\h\effect\effect.h" />
     <ClInclude Include="..\h\effect\explosion.h" />
-    <ClInclude Include="..\h\game.h" />
     <ClInclude Include="..\h\library.h" />
     <ClInclude Include="..\h\main.h" />
     <ClInclude Include="..\h\map\field.h" />

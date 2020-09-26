@@ -6,8 +6,8 @@
 */
 #include "../../h/main.h"
 #include "../../h/other/sound.h"
-#include "../../h/game.h"
 #include "../../h/other/fade.h"
+#include "../../h/object/objectclass.h"
 
 //*****************************************************************************
 // É}ÉNÉçíËã`

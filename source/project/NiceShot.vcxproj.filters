@@ -141,9 +141,6 @@
     <ClCompile Include="..\cpp\object\vitalgauge.cpp">
       <Filter>cpp\object</Filter>
     </ClCompile>
-    <ClCompile Include="..\cpp\game.cpp">
-      <Filter>cpp</Filter>
-    </ClCompile>
     <ClCompile Include="..\cpp\old\bullettex.cpp">
       <Filter>cpp\old</Filter>
     </ClCompile>
@@ -244,9 +241,6 @@
     </ClInclude>
     <ClInclude Include="..\h\object\vitalgauge.h">
       <Filter>h\object</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\game.h">
-      <Filter>h</Filter>
     </ClInclude>
     <ClInclude Include="..\h\old\bulletpoint.h">
       <Filter>h\old</Filter>

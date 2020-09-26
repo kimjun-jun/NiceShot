@@ -40,6 +40,7 @@ public:
 		InterPolationFieldPlayerNum = 0;
 		InterPolationFieldSignal = false;
 		InterPolationFieldSignalEnd = false;
+		Next = &this[0];
 	}
 	~FIELD() { cnt--; SAFE_RELEASE(pD3DVtxBuffFieldDraw); SAFE_RELEASE(pD3DVtxBuffFieldEnd); SAFE_RELEASE(pD3DVtxBuffFieldStart);}
 	virtual void Init(void);
@@ -77,5 +78,7 @@ private:
 	int InterPolationFieldPlayerNum;					// 地形変形アイテムを取得したプレイヤーナンバー
 	bool InterPolationFieldSignal;						// 地形変形信号
 	bool InterPolationFieldSignalEnd;					// 地形変形信号終了したかどうか
+	FIELD *Next;
 
 };
+

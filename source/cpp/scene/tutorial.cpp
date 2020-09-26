@@ -8,7 +8,6 @@
 #include "../../h/other/input.h"
 #include "../../h/other/fade.h"
 #include "../../h/other/sound.h"
-#include "../../h/game.h"
 #include "../../h/scene/tutorial.h"
 
 //*****************************************************************************

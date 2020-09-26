@@ -5,7 +5,25 @@
 * @date 2020/01/15
 */
 #pragma once
-
+class PLAYER_HONTAI;
+class EFFECT;
+class BULLET;
+class SHADOW;
+class COUNTDOWN;
+class TUTO;
+class STATUS;
+class BULLETPREDICTION;
+class VITALGAUGE;
+class BULLETGAUGE;
+class DAMEGE;
+class EXPLOSION;
+class ITEM;
+class RANK;
+class RESULT;
+class TITLE;
+class FIELD;
+class SKY;
+class WALL;
 
 /**
  * @class GAMEOBJECT
@@ -14,7 +32,7 @@
 class GAME_OBJECT
 {
 public:
-	GAME_OBJECT() { cnt++;		
+	GAME_OBJECT() {	
 	player = NULL;
 	effect = NULL;
 	bullet = NULL;
@@ -31,9 +49,10 @@ public:
 	rank = NULL;
 	result = NULL;
 	title = NULL;
+	nScene = SCENE_TITLE;
+	stop = 0;
 	}
 	~GAME_OBJECT() {
-		cnt--;
 		player = NULL;
 		effect = NULL;
 		bullet = NULL;
@@ -50,94 +69,49 @@ public:
 		rank = NULL;
 		result = NULL;
 		title = NULL;
+		field = NULL;
+		sky = NULL;
+		wall = NULL;
+	}
+	void Create();
+	void Init();
+	void Reinit();
+	void Uninit();
+	void Update();
+	void Draw();
+	void SetScene(int Scene)
+	{
+		nScene = Scene;
 	}
 
-	virtual void Init() {}		//!< 初期化
-	virtual void Reinit() {}		//!< 再初期化
-	virtual void Uninit() {}		//!< デリート
-	virtual void Update() {};		//!< 更新
-	virtual void Draw() {}		//!< 描画
-	int GetCnt() { return cnt; }	//!< オブジェクト番号取得
+	int GetScene(void)
+	{
+		return nScene;
+	}
 
-	GAME_OBJECT *GetPointerPlayer() { return player; }	//!< 先頭アドレス取得
-	void SetPointerPlayer(int cnt) { player[cnt]; }	//!< アドレスセット
-
-	GAME_OBJECT *GetPointerEffect() { return effect; }
-	void SetPointerEffect(int cnt) { effect[cnt]; }
-
-	GAME_OBJECT *GetPointerBullet() { return bullet; }
-	void SetPointerBullet(int cnt) { bullet[cnt]; }
-
-	GAME_OBJECT *GetPointerShadow() { return shadow; }
-	void SetPointerShadow(int cnt) { shadow[cnt]; }
-
-	GAME_OBJECT *GetPointerCountdown() { return countdown; }
-	void SetPointerCountdown(int cnt) { countdown[cnt]; }
-
-	GAME_OBJECT *GetPointerTuto() { return tuto; }
-	void SetPointerTuto(int cnt) { tuto[cnt]; }
-
-	GAME_OBJECT *GetPointerStatus() { return status; }
-	void SetPointerStatus(int cnt) { status[cnt]; }
-
-	GAME_OBJECT *GetPointerBulletprediction() { return bulletprediction; }
-	void SetPointerBulletprediction(int cnt) { bulletprediction[cnt]; }
-
-	GAME_OBJECT *GetPointerVitalgauge() { return vitalgauge; }
-	void SetPointerVitalgauge(int cnt) { vitalgauge[cnt]; }
-
-	GAME_OBJECT *GetPointerBulletgauge() { return bulletgauge; }
-	void SetPointerBulletgauge(int cnt) { bulletgauge[cnt]; }
-
-	GAME_OBJECT *GetPointerDamege() { return damege; }
-	void SetPointerDamege(int cnt) { damege[cnt]; }
-
-	GAME_OBJECT *GetPointerExplosion() { return explosion; }
-	void SetPointerExplosion(int cnt) { explosion[cnt]; }
-
-	GAME_OBJECT *GetPointerItem() { return item; }
-	void SetPointerItem(int cnt) { item[cnt]; }
-
-	GAME_OBJECT *GetPointerRank() { return rank; }
-	void SetPointerRank(int cnt) { rank[cnt]; }
-
-	GAME_OBJECT *GetPointerResult() { return result; }
-	void SetPointerResult(int cnt) { result[cnt]; }
-
-	GAME_OBJECT *GetPointerTitle() { return title; }
-	void SetPointerTitle(int cnt) { title[cnt]; }
-
-	GAME_OBJECT *GetPointerField() { return field; }
-	void SetPointerField(int cnt) { field[cnt]; }
-
-	GAME_OBJECT *GetPointerSky() { return sky; }
-	void SetPointerSky(int cnt) { sky[cnt]; }
-
-	GAME_OBJECT *GetPointerWall() { return wall; }
-	void SetPointerWall(int cnt) { wall[cnt]; }
-
-	GAME_OBJECT *obj;
 private:
-	static int cnt;
-	GAME_OBJECT *player;
-	GAME_OBJECT *effect;
-	GAME_OBJECT *bullet;
-	GAME_OBJECT *shadow;
-	GAME_OBJECT *countdown;
-	GAME_OBJECT *tuto;
-	GAME_OBJECT *status;
-	GAME_OBJECT *bulletprediction;
-	GAME_OBJECT *vitalgauge;
-	GAME_OBJECT *bulletgauge;
-	GAME_OBJECT *damege;
-	GAME_OBJECT *explosion;
-	GAME_OBJECT *item;
-	GAME_OBJECT *rank;
-	GAME_OBJECT *result;
-	GAME_OBJECT *title;
-	GAME_OBJECT *field;
-	GAME_OBJECT *sky;
-	GAME_OBJECT *wall;
+	void CheakHit(int scene);
+	PLAYER_HONTAI *player;
+	EFFECT *effect;
+	BULLET *bullet;
+	SHADOW *shadow;
+	COUNTDOWN *countdown;
+	TUTO *tuto;
+	STATUS *status;
+	BULLETPREDICTION *bulletprediction;
+	VITALGAUGE *vitalgauge;
+	BULLETGAUGE *bulletgauge;
+	DAMEGE *damege;
+	EXPLOSION *explosion;
+	ITEM *item;
+	RANK *rank;
+	RESULT *result;
+	TITLE *title;
+	FIELD *field;
+	SKY *sky;
+	WALL *wall;
+	int	nScene = SCENE_TITLE;		//!< ステージ番号
+	int	stop = 0;					//!< デバッグ時の一時停止用変数
 };
 
 /**
@@ -283,7 +257,7 @@ private:
  * @class OBJECT_2D_VERTEXBUFFER
  * 2DオブジェクトCLASSを定義　
  */
-class OBJECT_2D_VERTEXBUFFER :public GAME_OBJECT
+class OBJECT_2D_VERTEXBUFFER
 {
 public:
 	OBJECT_2D_VERTEXBUFFER() { Num++; }
@@ -321,7 +295,7 @@ private:
  * @class OBJECT_2D
  * 2DオブジェクトCLASSを定義　
  */
-class OBJECT_2D :public GAME_OBJECT
+class OBJECT_2D
 {
 public:
 	OBJECT_2D() { Num++; }
@@ -359,7 +333,7 @@ private:
  * @class OBJECT_3D
  * 3DオブジェクトCLASSを定義　プレイヤーで使用
  */
-class OBJECT_3D :public GAME_OBJECT
+class OBJECT_3D
 {
 public:
 	OBJECT_3D() { Num++; }
@@ -383,8 +357,6 @@ public:
 	float GetQrot();			//!< Upベクトルから地形法線への回転角度
 	D3DXCOLOR GetCol();
 	bool GetUse();
-	//------------------------先頭アドレスget
-//	PLAYER_HONTAI* GetPlayer() { return PLAYER_HONTAI(this[0]); };
 
 	//------------------------set関数
 	void SetMatrix(D3DXMATRIX mtxWorld);
