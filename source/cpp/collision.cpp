@@ -98,18 +98,19 @@ void CheakHit(int scene, GAME_OBJECT* GameObj)
 {
 	//-----------------------------------オブジェクト先頭アドレスを読み込み
 	GAME_OBJECT *pobj = GameObj->GetPointerPlayer();
-	PLAYER_HONTAI *p = dynamic_cast<PLAYER_HONTAI*>(&pobj[0]);
+	PLAYER_HONTAI *p = dynamic_cast<PLAYER_HONTAI*>(&pobj[0]);//プレイヤー
 	GAME_OBJECT *bobj = GameObj->GetPointerBullet();
-	BULLET *b = dynamic_cast<BULLET*>(&bobj[0]);
+	BULLET *b = dynamic_cast<BULLET*>(&bobj[0]);//バレット
 	GAME_OBJECT *iobj = GameObj->GetPointerItem();
-	ITEM *i = dynamic_cast<ITEM*>(&iobj[0]);
+	ITEM *i = dynamic_cast<ITEM*>(&iobj[0]);//アイテム
 	GAME_OBJECT *dobj = GameObj->GetPointerDamege();
-	DAMEGE *d = dynamic_cast<DAMEGE*>(&dobj[0]);
+	DAMEGE *d = dynamic_cast<DAMEGE*>(&dobj[0]);//エフェクト(2dスクリーン)
 	GAME_OBJECT *eobj = GameObj->GetPointerEffect();
-	EFFECT *e = dynamic_cast<EFFECT*>(&eobj[0]);
-
-	WALL *Wall = GetWall();
-	int WallNum = GetWallNum();
+	EFFECT *e = dynamic_cast<EFFECT*>(&eobj[0]);//エフェクト(3dビルボード)
+	GAME_OBJECT *wobj = GameObj->GetPointerWall();
+	WALL *w = dynamic_cast<WALL*>(&wobj[0]);//壁
+	GAME_OBJECT *fobj = GameObj->GetPointerField();
+	FIELD *f = dynamic_cast<FIELD*>(&fobj[0]);//床
 
 	//プレイヤーに対する当たり判定
 	for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
@@ -124,19 +125,21 @@ void CheakHit(int scene, GAME_OBJECT* GameObj)
 			//プレイヤー対壁
 			for (int CntWall = 0; CntWall < 4; CntWall++)
 			{
+
+				D3DXVECTOR3 wpos = w[CntWall].GetPos();
 				switch (CntWall)
 				{
 				case 0:
-					if (ppos.z + PLAYER_MODEL_SIZE >= Wall[CntWall].pos.z) ppos.z = poldpos.z;
+					if (ppos.z + PLAYER_MODEL_SIZE >= wpos.z) ppos.z = poldpos.z;
 					break;
 				case 1:
-					if (ppos.x - PLAYER_MODEL_SIZE <= Wall[CntWall].pos.x) ppos.x = poldpos.x;
+					if (ppos.x - PLAYER_MODEL_SIZE <= wpos.x) ppos.x = poldpos.x;
 					break;
 				case 2:
-					if (ppos.x + PLAYER_MODEL_SIZE >= Wall[CntWall].pos.x) ppos.x = poldpos.x;
+					if (ppos.x + PLAYER_MODEL_SIZE >= wpos.x) ppos.x = poldpos.x;
 					break;
 				case 3:
-					if (ppos.z - PLAYER_MODEL_SIZE <= Wall[CntWall].pos.z) ppos.z = poldpos.z;
+					if (ppos.z - PLAYER_MODEL_SIZE <= wpos.z) ppos.z = poldpos.z;
 					break;
 				default:
 					break;
@@ -180,12 +183,13 @@ void CheakHit(int scene, GAME_OBJECT* GameObj)
 						}
 					}
 					//対壁
-					for (int CntWall = 0; CntWall < WallNum; CntWall++)
+					for (int CntWall = 0; CntWall < OBJECT_WALL_MAX; CntWall++)
 					{
+						D3DXVECTOR3 wpos = w[CntWall].GetPos();
 						switch (CntWall)
 						{
 						case 0:
-							if (bpos.z >= Wall[CntWall].pos.z)
+							if (bpos.z >= wpos.z)
 							{
 								// 爆発の生成
 								//D3DXVECTOR3 ExploPos = D3DXVECTOR3(bpos.x, bpos.y, bpos.z- EXPLOSION_COLLISIONPOS_BUFFSIZE);
@@ -197,7 +201,7 @@ void CheakHit(int scene, GAME_OBJECT* GameObj)
 							}
 							break;
 						case 1:
-							if (bpos.x <= Wall[CntWall].pos.x)
+							if (bpos.x <= wpos.x)
 							{
 								// 爆発の生成
 								//D3DXVECTOR3 ExploPos = D3DXVECTOR3(bpos.x + EXPLOSION_COLLISIONPOS_BUFFSIZE, bpos.y, bpos.z);
@@ -209,7 +213,7 @@ void CheakHit(int scene, GAME_OBJECT* GameObj)
 							}
 							break;
 						case 2:
-							if (bpos.x >= Wall[CntWall].pos.x)
+							if (bpos.x >= wpos.x)
 							{
 								// 爆発の生成
 								//D3DXVECTOR3 ExploPos = D3DXVECTOR3(bpos.x - EXPLOSION_COLLISIONPOS_BUFFSIZE, bpos.y, bpos.z);
@@ -221,7 +225,7 @@ void CheakHit(int scene, GAME_OBJECT* GameObj)
 							}
 							break;
 						case 3:
-							if (bpos.z <= Wall[CntWall].pos.z)
+							if (bpos.z <= wpos.z)
 							{
 								// 爆発の生成
 								//D3DXVECTOR3 ExploPos = D3DXVECTOR3(bpos.x, bpos.y, bpos.z + EXPLOSION_COLLISIONPOS_BUFFSIZE);
@@ -252,7 +256,7 @@ void CheakHit(int scene, GAME_OBJECT* GameObj)
 					switch (i[CntItem].nType)
 					{
 					case ITEMTYPE_TIKEI:
-						SetFieldInterPolationFieldType(FIELD_TYPE_PLAYERADVANTAGE, CntPlayer);
+						f->SetFieldInterPolationFieldType(FIELD_TYPE_PLAYERADVANTAGE, CntPlayer);
 						//SetFieldInterPolationFieldType(0);
 						PlaySound(SOUND_LABEL_SE_enter03);
 						PlaySound(SOUND_LABEL_SE_quake);

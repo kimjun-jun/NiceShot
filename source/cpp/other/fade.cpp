@@ -5,8 +5,9 @@
 * @date 2020/01/15
 */
 #include "../../h/main.h"
-#include "../../h/other/fade.h"
 #include "../../h/other/sound.h"
+#include "../../h/game.h"
+#include "../../h/other/fade.h"
 
 //*****************************************************************************
 // ƒ}ƒNƒ’è‹`

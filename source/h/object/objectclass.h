@@ -107,6 +107,15 @@ public:
 	GAME_OBJECT *GetPointerTitle() { return title; }
 	void SetPointerTitle(int cnt) { title[cnt]; }
 
+	GAME_OBJECT *GetPointerField() { return field; }
+	void SetPointerField(int cnt) { field[cnt]; }
+
+	GAME_OBJECT *GetPointerSky() { return sky; }
+	void SetPointerSky(int cnt) { sky[cnt]; }
+
+	GAME_OBJECT *GetPointerWall() { return wall; }
+	void SetPointerWall(int cnt) { wall[cnt]; }
+
 	GAME_OBJECT *obj;
 private:
 	static int cnt;
@@ -126,6 +135,9 @@ private:
 	GAME_OBJECT *rank;
 	GAME_OBJECT *result;
 	GAME_OBJECT *title;
+	GAME_OBJECT *field;
+	GAME_OBJECT *sky;
+	GAME_OBJECT *wall;
 };
 
 /**

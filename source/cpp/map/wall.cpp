@@ -11,265 +11,206 @@
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define	MAX_MESH_WALL		(10)							// 壁の総数
 #define	TEXTURE_FILENAME	"../data/TEXTURE/interior_fence01_01.png"		// 読み込むテクスチャファイル名
 #define	VALUE_MOVE_WALL		(5.0f)							// 移動速度
-#define	VALUE_ROTATE_WALL	(D3DX_PI * 0.001f)				// 回転速度
+#define	VALUE_ROTATE_WALL	(D3DX_PI * 0.002f)				// 回転速度
 
-//*****************************************************************************
-// グローバル変数
-//*****************************************************************************
-LPDIRECT3DTEXTURE9 g_pD3DTexture = NULL;		// テクスチャ読み込み場所
-
-
-WALL g_aMeshWall[MAX_MESH_WALL];			// メッシュ壁ワーク
-int g_nNumMeshWall = 0;						// メッシュ壁の数
+int WALL::cnt = 0;
 
 //=============================================================================
 // 初期化処理
 //=============================================================================
-HRESULT InitMeshWall(D3DXVECTOR3 pos, D3DXVECTOR3 rot, D3DXCOLOR col,
-						int nNumBlockX, int nNumBlockY, float fBlockSizeX, float fBlockSizeZ)
+void WALL::Init(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
-	WALL *pMesh;
 
-	if(g_nNumMeshWall >= MAX_MESH_WALL)
+	//座標と角度を設定
+	D3DXVECTOR3 pos[OBJECT_WALL_MAX];
+	D3DXVECTOR3 rot[OBJECT_WALL_MAX];
+	pos[0] = D3DXVECTOR3(0.0f, 0.0f, WALL_INIT_POSZ);
+	pos[1] = D3DXVECTOR3(-WALL_INIT_POSX, 0.0f, 0.0f);
+	pos[2] = D3DXVECTOR3(WALL_INIT_POSX, 0.0f, 0.0f);
+	pos[3] = D3DXVECTOR3(0.0f, 0.0f, -WALL_INIT_POSZ);
+
+	rot[0] = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	rot[1] = D3DXVECTOR3(0.0f, -D3DX_PI * 0.50f, 0.0f);
+	rot[2] = D3DXVECTOR3(0.0f, D3DX_PI * 0.50f, 0.0f);
+	rot[3] = D3DXVECTOR3(0.0f, D3DX_PI, 0.0f);
+
+	this[0].SetPos(pos[0]);
+	this[1].SetPos(pos[1]);
+	this[2].SetPos(pos[2]);
+	this[3].SetPos(pos[3]);
+	this[0].SetRot(rot[0]);
+	this[1].SetRot(rot[1]);
+	this[2].SetRot(rot[2]);
+	this[3].SetRot(rot[3]);
+
+	int nNumBlockX = 1;
+	int nNumBlockY = 1;
+
+	for (int nCntMeshField = 0; nCntMeshField < OBJECT_WALL_MAX; nCntMeshField++)
 	{
-		return E_FAIL;
-	}
+		// テクスチャの読み込み
+		D3DXCreateTextureFromFile(pDevice, TEXTURE_FILENAME, &this[nCntMeshField].model.pD3DTexture);
 
-	// テクスチャの読み込み
-	if(!g_pD3DTexture)
-	{
-		D3DXCreateTextureFromFile(pDevice,					// デバイスへのポインタ
-									TEXTURE_FILENAME,		// ファイルの名前
-									&g_pD3DTexture);		// 読み込むメモリー
-	}
+		// 頂点数の設定
+		this[nCntMeshField].model.nNumVertex = (nNumBlockX + 1) * (nNumBlockY + 1);
 
-	pMesh = &g_aMeshWall[g_nNumMeshWall];
-	g_nNumMeshWall++;
+		// インデックス数の設定
+		this[nCntMeshField].model.nNumVertexIndex = (nNumBlockX + 1) * 2 * nNumBlockY + (nNumBlockY - 1) * 2;
 
-	// ポリゴン表示位置の中心座標を設定
-	pMesh->pos = pos;
+		// ポリゴン数の設定
+		this[nCntMeshField].model.nNumPolygon = nNumBlockX * nNumBlockY * 2 + (nNumBlockY - 1) * 4;
 
-	pMesh->rot = rot;
+		// オブジェクトの頂点バッファを生成
+		pDevice->CreateVertexBuffer(sizeof(VERTEX_3D) * this[nCntMeshField].model.nNumVertex,	// 頂点データ用に確保するバッファサイズ(バイト単位)
+			D3DUSAGE_WRITEONLY,					// 頂点バッファの使用法　
+			FVF_VERTEX_3D,						// 使用する頂点フォーマット
+			D3DPOOL_MANAGED,					// リソースのバッファを保持するメモリクラスを指定
+			&this[nCntMeshField].model.pD3DVtxBuff,				// 頂点バッファインターフェースへのポインタ
+			NULL);								// NULLに設定
 
-	// ブロック数の設定
-	pMesh->nNumBlockX = nNumBlockX;
-	pMesh->nNumBlockY = nNumBlockY;
+		// オブジェクトのインデックスバッファを生成
+		pDevice->CreateIndexBuffer(sizeof(WORD) * this[nCntMeshField].model.nNumVertexIndex,	// 頂点データ用に確保するバッファサイズ(バイト単位)
+			D3DUSAGE_WRITEONLY,					// 頂点バッファの使用法　
+			D3DFMT_INDEX16,						// 使用するインデックスフォーマット
+			D3DPOOL_MANAGED,					// リソースのバッファを保持するメモリクラスを指定
+			&this[nCntMeshField].model.pD3DIdxBuff,				// インデックスバッファインターフェースへのポインタ
+			NULL);				// NULLに設定
 
-	// 頂点数の設定
-	pMesh->nNumVertex = (nNumBlockX + 1) * (nNumBlockY + 1);
+		{//頂点バッファの中身を埋める
+			VERTEX_3D *pVtx;
 
-	// インデックス数の設定
-	pMesh->nNumVertexIndex = (nNumBlockX + 1) * 2 * nNumBlockY + (nNumBlockY - 1) * 2;
+			// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
+			this[nCntMeshField].model.pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
 
-	// ポリゴン数の設定
-	pMesh->nNumPolygon = nNumBlockX * nNumBlockY * 2 + (nNumBlockY - 1) * 4;
-
-	// ブロックサイズの設定
-	pMesh->fBlockSizeX = fBlockSizeX;
-	pMesh->fBlockSizeY = fBlockSizeZ;
-
-	// オブジェクトの頂点バッファを生成
-    if(FAILED( pDevice->CreateVertexBuffer(sizeof(VERTEX_3D) * pMesh->nNumVertex,	// 頂点データ用に確保するバッファサイズ(バイト単位)
-												D3DUSAGE_WRITEONLY,					// 頂点バッファの使用法　
-												FVF_VERTEX_3D,						// 使用する頂点フォーマット
-												D3DPOOL_MANAGED,					// リソースのバッファを保持するメモリクラスを指定
-												&pMesh->pD3DVtxBuff,				// 頂点バッファインターフェースへのポインタ
-												NULL)))								// NULLに設定
-	{
-        return E_FAIL;
-	}
-
-	// オブジェクトのインデックスバッファを生成
-    if(FAILED( pDevice->CreateIndexBuffer(sizeof(WORD) * pMesh->nNumVertexIndex,	// 頂点データ用に確保するバッファサイズ(バイト単位)
-												D3DUSAGE_WRITEONLY,					// 頂点バッファの使用法　
-												D3DFMT_INDEX16,						// 使用するインデックスフォーマット
-												D3DPOOL_MANAGED,					// リソースのバッファを保持するメモリクラスを指定
-												&pMesh->pD3DIdxBuff,				// インデックスバッファインターフェースへのポインタ
-												NULL)))								// NULLに設定
-	{
-        return E_FAIL;
-	}
-
-	{//頂点バッファの中身を埋める
-		VERTEX_3D *pVtx;
-#if 0
-		const float texSizeX = 1.0f / g_nNumBlockX;
-		const float texSizeZ = 1.0f / g_nNumBlockY;
-#else
-		const float texSizeX = 1.0f;
-		const float texSizeZ = 1.0f;
-#endif
-
-		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
-		pMesh->pD3DVtxBuff->Lock( 0, 0, (void**)&pVtx, 0 );
-
-		for(int nCntVtxY = 0; nCntVtxY < (pMesh->nNumBlockY + 1); nCntVtxY++)
-		{
-			for(int nCntVtxX = 0; nCntVtxX < (pMesh->nNumBlockX + 1); nCntVtxX++)
+			for (int nCntVtxY = 0; nCntVtxY < (nNumBlockY + 1); nCntVtxY++)
 			{
-				// 頂点座標の設定
-				pVtx[nCntVtxY * (pMesh->nNumBlockX + 1) + nCntVtxX].vtx.x = -(pMesh->nNumBlockX / 2.0f) * pMesh->fBlockSizeX + nCntVtxX * pMesh->fBlockSizeX;
-				pVtx[nCntVtxY * (pMesh->nNumBlockX + 1) + nCntVtxX].vtx.y = pMesh->nNumBlockY * pMesh->fBlockSizeY - nCntVtxY * pMesh->fBlockSizeY;
-				pVtx[nCntVtxY * (pMesh->nNumBlockX + 1) + nCntVtxX].vtx.z = 0.0f;
+				for (int nCntVtxX = 0; nCntVtxX < (nNumBlockX + 1); nCntVtxX++)
+				{
+					// 頂点座標の設定
+					pVtx[nCntVtxY * (nNumBlockX + 1) + nCntVtxX].vtx.x = -(nNumBlockX / 2.0f) * WALL_SIZE_X + nCntVtxX * WALL_SIZE_X;
+					pVtx[nCntVtxY * (nNumBlockX + 1) + nCntVtxX].vtx.y = nNumBlockY * WALL_SIZE_Y - nCntVtxY * WALL_SIZE_Y;
+					pVtx[nCntVtxY * (nNumBlockX + 1) + nCntVtxX].vtx.z = 0.0f;
 
-				// 法線の設定
-				pVtx[nCntVtxY * (pMesh->nNumBlockX + 1) + nCntVtxX].nor = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
+					// 法線の設定
+					pVtx[nCntVtxY * (nNumBlockX + 1) + nCntVtxX].nor = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
 
-				// 反射光の設定
-				pVtx[nCntVtxY * (pMesh->nNumBlockX + 1) + nCntVtxX].diffuse = col;
+					// 反射光の設定
+					pVtx[nCntVtxY * (nNumBlockX + 1) + nCntVtxX].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
 
-				// テクスチャ座標の設定
-				pVtx[nCntVtxY * (pMesh->nNumBlockX + 1) + nCntVtxX].tex.x = texSizeX * nCntVtxX;
-				pVtx[nCntVtxY * (pMesh->nNumBlockX + 1) + nCntVtxX].tex.y = texSizeZ * nCntVtxY;
+					// テクスチャ座標の設定
+					pVtx[nCntVtxY * (nNumBlockX + 1) + nCntVtxX].tex.x = 1.0;
+					pVtx[nCntVtxY * (nNumBlockX + 1) + nCntVtxX].tex.y = 1.0;
+				}
 			}
+
+			// 頂点データをアンロックする
+			this[nCntMeshField].model.pD3DVtxBuff->Unlock();
 		}
 
-		// 頂点データをアンロックする
-		pMesh->pD3DVtxBuff->Unlock();
-	}
+		{//インデックスバッファの中身を埋める
+			WORD *pIdx;
 
-	{//インデックスバッファの中身を埋める
-		WORD *pIdx;
+			// インデックスデータの範囲をロックし、頂点バッファへのポインタを取得
+			this[nCntMeshField].model.pD3DIdxBuff->Lock(0, 0, (void**)&pIdx, 0);
 
-		// インデックスデータの範囲をロックし、頂点バッファへのポインタを取得
-		pMesh->pD3DIdxBuff->Lock( 0, 0, (void**)&pIdx, 0 );
-
-		int nCntIdx = 0;
-		for(int nCntVtxY = 0; nCntVtxY < pMesh->nNumBlockY; nCntVtxY++)
-		{
-			if(nCntVtxY > 0)
-			{// 縮退ポリゴンのためのダブりの設定
-				pIdx[nCntIdx] = (nCntVtxY + 1) * (pMesh->nNumBlockX + 1);
-				nCntIdx++;
-			}
-
-			for(int nCntVtxX = 0; nCntVtxX < (pMesh->nNumBlockX + 1); nCntVtxX++)
+			int nCntIdx = 0;
+			for (int nCntVtxY = 0; nCntVtxY < nNumBlockY; nCntVtxY++)
 			{
-				pIdx[nCntIdx] = (nCntVtxY + 1) * (pMesh->nNumBlockX + 1) + nCntVtxX;
-				nCntIdx++;
-				pIdx[nCntIdx] = nCntVtxY * (pMesh->nNumBlockX + 1) + nCntVtxX;
-				nCntIdx++;
+				if (nCntVtxY > 0)
+				{// 縮退ポリゴンのためのダブりの設定
+					pIdx[nCntIdx] = (nCntVtxY + 1) * (nNumBlockX + 1);
+					nCntIdx++;
+				}
+
+				for (int nCntVtxX = 0; nCntVtxX < (nNumBlockX + 1); nCntVtxX++)
+				{
+					pIdx[nCntIdx] = (nCntVtxY + 1) * (nNumBlockX + 1) + nCntVtxX;
+					nCntIdx++;
+					pIdx[nCntIdx] = nCntVtxY * (nNumBlockX + 1) + nCntVtxX;
+					nCntIdx++;
+				}
+
+				if (nCntVtxY < (nNumBlockY - 1))
+				{// 縮退ポリゴンのためのダブりの設定
+					pIdx[nCntIdx] = nCntVtxY * (nNumBlockX + 1) + nNumBlockX;
+					nCntIdx++;
+				}
 			}
 
-			if(nCntVtxY < (pMesh->nNumBlockY - 1))
-			{// 縮退ポリゴンのためのダブりの設定
-				pIdx[nCntIdx] = nCntVtxY * (pMesh->nNumBlockX + 1) + pMesh->nNumBlockX;
-				nCntIdx++;
-			}
+			// インデックスデータをアンロックする
+			this[nCntMeshField].model.pD3DIdxBuff->Unlock();
 		}
-
-		// インデックスデータをアンロックする
-		pMesh->pD3DIdxBuff->Unlock();
 	}
+}
 
-
-
-	return S_OK;
+//=============================================================================
+// 再初期化処理
+//=============================================================================
+void WALL::Reinit(void)
+{
 }
 
 //=============================================================================
 // 終了処理
 //=============================================================================
-void UninitMeshWall(void)
+void WALL::Uninit(void)
 {
-	WALL *pMesh;
-	int nCntMeshField;
-
-	for(nCntMeshField = 0; nCntMeshField < g_nNumMeshWall; nCntMeshField++)
-	{
-		pMesh = &g_aMeshWall[nCntMeshField];
-
-		if(pMesh->pD3DVtxBuff)
-		{// 頂点バッファの開放
-			pMesh->pD3DVtxBuff->Release();
-			pMesh->pD3DVtxBuff = NULL;
-		}
-
-		if(pMesh->pD3DIdxBuff)
-		{// インデックスバッファの開放
-			pMesh->pD3DIdxBuff->Release();
-			pMesh->pD3DIdxBuff = NULL;
-		}
-	}
-
-	if(g_pD3DTexture)
-	{// テクスチャの開放
-		g_pD3DTexture->Release();
-		g_pD3DTexture = NULL;
-	}
 }
 
 //=============================================================================
 // 更新処理
 //=============================================================================
-void UpdateMeshWall(void)
+void WALL::Update(void)
 {
 }
 
 //=============================================================================
 // 描画処理
 //=============================================================================
-void DrawMeshWall(void)
+void WALL::Draw(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
-
-	D3DXMATRIX mtxRot, mtxTranslate;
-
-	WALL *pMesh;
-	int nCntMeshField;
 	
-	for(nCntMeshField = 0; nCntMeshField < g_nNumMeshWall; nCntMeshField++)
+	for(int nCntMeshField = 0; nCntMeshField < OBJECT_WALL_MAX; nCntMeshField++)
 	{
-		pMesh = &g_aMeshWall[nCntMeshField];
+		D3DXMATRIX mtxRot, mtxTranslate, mtxWorld;
+		//-----------------------------オブジェクト読み込み
+		mtxWorld = this[nCntMeshField].GetMatrix();
+		D3DXVECTOR3 rot = this[nCntMeshField].GetRot();
+		D3DXVECTOR3 pos = this[nCntMeshField].GetPos();
 
 		// ワールドマトリックスの初期化
-		D3DXMatrixIdentity(&pMesh->mtxWorld);
+		D3DXMatrixIdentity(&mtxWorld);
 
 		// 回転を反映
-		D3DXMatrixRotationYawPitchRoll(&mtxRot, pMesh->rot.y, pMesh->rot.x, pMesh->rot.z);
-		D3DXMatrixMultiply(&pMesh->mtxWorld, &pMesh->mtxWorld, &mtxRot);
+		D3DXMatrixRotationYawPitchRoll(&mtxRot, rot.y, rot.x, rot.z);
+		D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxRot);
 
 		// 移動を反映
-		D3DXMatrixTranslation(&mtxTranslate, pMesh->pos.x, pMesh->pos.y, pMesh->pos.z);
-		D3DXMatrixMultiply(&pMesh->mtxWorld, &pMesh->mtxWorld, &mtxTranslate);
+		D3DXMatrixTranslation(&mtxTranslate, pos.x, pos.y, pos.z);
+		D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxTranslate);
 
 		// ワールドマトリックスの設定
-		pDevice->SetTransform(D3DTS_WORLD, &pMesh->mtxWorld);
+		pDevice->SetTransform(D3DTS_WORLD, &mtxWorld);
 
 		// 頂点バッファをレンダリングパイプラインに設定
-		pDevice->SetStreamSource(0, pMesh->pD3DVtxBuff, 0, sizeof(VERTEX_3D));
+		pDevice->SetStreamSource(0, this[nCntMeshField].model.pD3DVtxBuff, 0, sizeof(VERTEX_3D));
 
 		// インデックスバッファをレンダリングパイプラインに設定
-		pDevice->SetIndices(pMesh->pD3DIdxBuff);
+		pDevice->SetIndices(this[nCntMeshField].model.pD3DIdxBuff);
 
 		// 頂点フォーマットの設定
 		pDevice->SetFVF(FVF_VERTEX_3D);
 
 		// テクスチャの設定
-		pDevice->SetTexture(0, g_pD3DTexture);
+		pDevice->SetTexture(0, this[nCntMeshField].model.pD3DTexture);
 
 		// ポリゴンの描画
-		pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLESTRIP, 0, 0, pMesh->nNumVertex, 0, pMesh->nNumPolygon);
+		pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLESTRIP, 0, 0, this[nCntMeshField].model.nNumVertex, 0, this[nCntMeshField].model.nNumPolygon);
 	}
 
 }
 
-//=============================================================================
-// WALLのアドレスを渡す
-//=============================================================================
-WALL *GetWall(void)
-{
-	return &g_aMeshWall[0];
-}
-
-//=============================================================================
-// WALLの数を渡す
-//=============================================================================
-int GetWallNum(void)
-{
-	return g_nNumMeshWall;
-}

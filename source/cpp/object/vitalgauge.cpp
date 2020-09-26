@@ -176,7 +176,7 @@ void VITALGAUGE::Draw(void)
 		pDevice->SetFVF(FVF_VERTEX_2D);
 
 		// テクスチャの設定
-		LPDIRECT3DTEXTURE9 pD3DTexture = this[CntPlayer].tex2DVB.GetpD3DTexture;
+		LPDIRECT3DTEXTURE9 pD3DTexture = this[CntPlayer].tex2DVB.GetpD3DTexture();
 		pDevice->SetTexture(0, pD3DTexture);
 
 		// ポリゴンの描画

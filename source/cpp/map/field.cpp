@@ -24,48 +24,6 @@
 #define FIELD_Y_HIGH					(120.0f)						//!< フィールドの高さで色を変える。高い
 #define FIELD_Y_LOW						(20.0f)							//!< フィールドの高さで色を変える。低い
 
-//*****************************************************************************
-// プロトタイプ宣言
-//*****************************************************************************
-void ClearField(void);				//初期化
-void SetFieldType01(void);			//オリジナル1 
-void SetFieldType02(void);			//オリジナル2 
-void SetFieldType03(void);			//オリジナル3 
-bool InterPolationField(void);		//地形を徐々に変化させる
-void SetDegenerationPoly(void);		//縮退ポリゴンの座標を再計算する関数　地形変形後、縮退ポリゴンの座標を設定する
-
-//*****************************************************************************
-// グローバル変数
-//*****************************************************************************
-
-//フィールド生成用
-LPDIRECT3DTEXTURE9 g_pD3DTextureField;				// テクスチャ読み込み場所
-LPDIRECT3DVERTEXBUFFER9 g_pD3DVtxBuffFieldDraw;		// 頂点バッファインターフェースへのポインタ描画用
-LPDIRECT3DVERTEXBUFFER9 g_pD3DVtxBuffFieldEnd;		// 頂点バッファインターフェースへのポインタ補間データエンドバッファ
-LPDIRECT3DVERTEXBUFFER9 g_pD3DVtxBuffFieldStart;	// 頂点バッファインターフェースへのポインタ補間データスタートバッファ
-LPDIRECT3DINDEXBUFFER9 g_pD3DIdxBuffFieldDraw;		// インデックスバッファインターフェースへのポインタ
-D3DXMATRIX g_mtxWorldField;							// ワールドマトリックス
-D3DXVECTOR3 g_posField;								// ポリゴン表示位置の中心座標
-D3DXVECTOR3 g_rotField;								// ポリゴンの回転角
-int g_nNumBlockXField, g_nNumBlockZField;			// ブロック数
-int g_nNumVertexField;								// 総頂点数	
-int g_nNumVertexIndexField;							// 総インデックス数
-int g_nNumPolygonField;								// 総ポリゴン数
-float g_fBlockSizeXField, g_fBlockSizeZField;		// ブロックサイズ
-
-float g_fSideSizeXMax, g_fSideSizeZMax;				// 辺サイズ最大 1920
-float g_fSideSizeXHalf, g_fSideSizeZHalf;			// 辺サイズ1/2   960
-float g_fSideSizeXQuarter, g_fSideSizeZQuarter;		// 辺サイズ1/4   480
-float g_fSideSizeXEighth, g_fSideSizeZEighth;		// 辺サイズ1/8   240
-
-//フィールド変形用
-static float g_time = 0.0f;						// 地形の変形時間
-bool InterPolationFieldSignal;					// 地形変形信号
-bool InterPolationFieldSignalEnd;				// 地形変形信号終了したかどうか
-static int InterPolationFieldType;				// 地形変形タイプ
-static int InterPolationFieldPlayerNum;			// 地形変形アイテムを取得したプレイヤーナンバー
-
-
 static D3DXCOLOR PLAYER_COLOR[] = {
 	D3DXCOLOR(1.0f, 1.0f, 0.1f, 1.0f),//p1カラー
 	D3DXCOLOR(0.2f, 0.2f, 1.0f, 1.0f),//p2カラー
@@ -73,176 +31,160 @@ static D3DXCOLOR PLAYER_COLOR[] = {
 	D3DXCOLOR(0.2f, 1.0f, 0.2f, 1.0f),//p4カラー
 };
 
+int FIELD::cnt = 0;
+
 
 //=============================================================================
 // 初期化処理
 //=============================================================================
-HRESULT InitMeshField(D3DXVECTOR3 pos, D3DXVECTOR3 rot,
-	int nNumBlockX, int nNumBlockZ, float fBlockSizeX, float fBlockSizeZ)
+void FIELD::Init()
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 
-	InterPolationFieldSignal = true;
-	InterPolationFieldSignalEnd = false;
+	this[0].InterPolationFieldSignal = true;
+	this[0].InterPolationFieldSignalEnd = false;
 
-	InterPolationFieldType = -1;
-	InterPolationFieldPlayerNum = -1;
-	// ポリゴン表示位置の中心座標を設定
-	g_posField = pos;
-
-	g_rotField = rot;
+	this[0].InterPolationFieldType = -1;
+	this[0].InterPolationFieldPlayerNum = -1;
 
 	// テクスチャの読み込み
 	D3DXCreateTextureFromFile(pDevice,					// デバイスへのポインタ
 		TEXTURE_FILENAME,								// ファイルの名前
-		&g_pD3DTextureField);							// 読み込むメモリー
+		&this[0].model.pD3DTexture);							// 読み込むメモリー
 
 	// ブロック数の設定
-	g_nNumBlockXField = nNumBlockX;
-	g_nNumBlockZField = nNumBlockZ;
+	this[0].nNumBlockXField = 32;
+	this[0].nNumBlockZField = 32;
 
 	// 頂点数の設定
-	g_nNumVertexField = (nNumBlockX + 1) * (nNumBlockZ + 1);
+	this[0].model.nNumVertex = (nNumBlockXField + 1) * (nNumBlockZField + 1);
 
 
 	// インデックス数の設定
-	g_nNumVertexIndexField = (nNumBlockX + 1) * 2 * nNumBlockZ + (nNumBlockZ - 1) * 2;
+	this[0].model.nNumVertexIndex = (nNumBlockXField + 1) * 2 * nNumBlockZField + (nNumBlockZField - 1) * 2;
 
 	// ポリゴン数の設定
-	g_nNumPolygonField = nNumBlockX * nNumBlockZ * 2 + (nNumBlockZ - 1) * 4;
+	this[0].model.nNumPolygon = nNumBlockXField * nNumBlockZField * 2 + (nNumBlockZField - 1) * 4;
 
 	// ブロックサイズの設定
-	g_fBlockSizeXField = fBlockSizeX;
-	g_fBlockSizeZField = fBlockSizeZ;
+	this[0].fBlockSizeXField = 250.0f;
+	this[0].fBlockSizeZField = 250.0f;
 
 	//　辺サイズの設定
-	g_fSideSizeXMax = nNumBlockX * fBlockSizeX;
-	g_fSideSizeZMax = nNumBlockZ * fBlockSizeZ;
-	g_fSideSizeXHalf = g_fSideSizeXMax / 2.0f;
-	g_fSideSizeZHalf = g_fSideSizeZMax / 2.0f;
-	g_fSideSizeXQuarter = g_fSideSizeXHalf / 2.0f;
-	g_fSideSizeZQuarter = g_fSideSizeZHalf / 2.0f;
-	g_fSideSizeXEighth = g_fSideSizeXQuarter / 2.0f;
-	g_fSideSizeZEighth = g_fSideSizeZQuarter / 2.0f;
+	fSideSizeXMax = nNumBlockXField * fBlockSizeXField;
+	fSideSizeZMax = nNumBlockZField * fBlockSizeZField;
+	fSideSizeXHalf = fSideSizeXMax / 2.0f;
+	fSideSizeZHalf = fSideSizeZMax / 2.0f;
+	fSideSizeXQuarter = fSideSizeXHalf / 2.0f;
+	fSideSizeZQuarter = fSideSizeZHalf / 2.0f;
+	fSideSizeXEighth = fSideSizeXQuarter / 2.0f;
+	fSideSizeZEighth = fSideSizeZQuarter / 2.0f;
 
 	// オブジェクトの頂点バッファを生成
-	if (FAILED(pDevice->CreateVertexBuffer(sizeof(VERTEX_3D) * g_nNumVertexField,	// 頂点データ用に確保するバッファサイズ(バイト単位)
+	pDevice->CreateVertexBuffer(sizeof(VERTEX_3D) * this[0].model.nNumVertex,	// 頂点データ用に確保するバッファサイズ(バイト単位)
 		D3DUSAGE_WRITEONLY,					// 頂点バッファの使用法　
 		FVF_VERTEX_3D,						// 使用する頂点フォーマット
 		D3DPOOL_MANAGED,					// リソースのバッファを保持するメモリクラスを指定
-		&g_pD3DVtxBuffFieldDraw,				// 頂点バッファインターフェースへのポインタ
-		NULL)))								// NULLに設定
-	{
-		return E_FAIL;
-	}
-
+		&pD3DVtxBuffFieldDraw,				// 頂点バッファインターフェースへのポインタ
+		NULL);								// NULLに設定
 	// オブジェクトの頂点バッファを生成
-	if (FAILED(pDevice->CreateVertexBuffer(sizeof(VERTEX_3D) * g_nNumVertexField,	// 頂点データ用に確保するバッファサイズ(バイト単位)
+	pDevice->CreateVertexBuffer(sizeof(VERTEX_3D) * this[0].model.nNumVertex,	// 頂点データ用に確保するバッファサイズ(バイト単位)
 		D3DUSAGE_WRITEONLY,					// 頂点バッファの使用法　
 		FVF_VERTEX_3D,						// 使用する頂点フォーマット
 		D3DPOOL_MANAGED,					// リソースのバッファを保持するメモリクラスを指定
-		&g_pD3DVtxBuffFieldEnd,				// 頂点バッファインターフェースへのポインタ
-		NULL)))								// NULLに設定
-	{
-		return E_FAIL;
-	}
+		&pD3DVtxBuffFieldEnd,				// 頂点バッファインターフェースへのポインタ
+		NULL);								// NULLに設定
 
 	// オブジェクトの頂点バッファを生成
-	if (FAILED(pDevice->CreateVertexBuffer(sizeof(VERTEX_3D) * g_nNumVertexField,	// 頂点データ用に確保するバッファサイズ(バイト単位)
+	pDevice->CreateVertexBuffer(sizeof(VERTEX_3D) * this[0].model.nNumVertex,	// 頂点データ用に確保するバッファサイズ(バイト単位)
 		D3DUSAGE_WRITEONLY,					// 頂点バッファの使用法　
 		FVF_VERTEX_3D,						// 使用する頂点フォーマット
 		D3DPOOL_MANAGED,					// リソースのバッファを保持するメモリクラスを指定
-		&g_pD3DVtxBuffFieldStart,				// 頂点バッファインターフェースへのポインタ
-		NULL)))								// NULLに設定
-	{
-		return E_FAIL;
-	}
+		&pD3DVtxBuffFieldStart,				// 頂点バッファインターフェースへのポインタ
+		NULL);							// NULLに設定
 
 	// オブジェクトのインデックスバッファを生成
-	if (FAILED(pDevice->CreateIndexBuffer(sizeof(WORD) * g_nNumVertexIndexField,	// 頂点データ用に確保するバッファサイズ(バイト単位)
+	pDevice->CreateIndexBuffer(sizeof(WORD) * this[0].model.nNumVertexIndex,	// 頂点データ用に確保するバッファサイズ(バイト単位)
 		D3DUSAGE_WRITEONLY,					// 頂点バッファの使用法　
 		D3DFMT_INDEX16,						// 使用するインデックスフォーマット
 		D3DPOOL_MANAGED,					// リソースのバッファを保持するメモリクラスを指定
-		&g_pD3DIdxBuffFieldDraw,				// インデックスバッファインターフェースへのポインタ
-		NULL)))								// NULLに設定
-	{
-		return E_FAIL;
-	}
+		&this[0].model.pD3DIdxBuff,				// インデックスバッファインターフェースへのポインタ
+		NULL);								// NULLに設定
 
 	//描画用
 	{//頂点バッファの中身を埋める
 		VERTEX_3D *pVtx;
 		VERTEX_3D *pVtxS;
 #if 0
-		const float texSizeX = 1.0f / g_nNumBlockX;
-		const float texSizeZ = 1.0f / g_nNumBlockZ;
+		const float texSizeX = 1.0f / nNumBlockXField;
+		const float texSizeZ = 1.0f / nNumBlockZField;
 #else
 		const float texSizeX = 1.0f;
 		const float texSizeZ = 1.0f;
 #endif
 
 		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
-		g_pD3DVtxBuffFieldDraw->Lock(0, 0, (void**)&pVtx, 0);
-		g_pD3DVtxBuffFieldStart->Lock(0, 0, (void**)&pVtxS, 0);
+		this[0].pD3DVtxBuffFieldDraw->Lock(0, 0, (void**)&pVtx, 0);
+		this[0].pD3DVtxBuffFieldStart->Lock(0, 0, (void**)&pVtxS, 0);
 
-		for (int nCntVtxZ = 0; nCntVtxZ < (g_nNumBlockZField + 1); nCntVtxZ++)
+		for (int nCntVtxZ = 0; nCntVtxZ < (this[0].nNumBlockZField + 1); nCntVtxZ++)
 		{
-			for (int nCntVtxX = 0; nCntVtxX < (g_nNumBlockXField + 1); nCntVtxX++)
+			for (int nCntVtxX = 0; nCntVtxX < (this[0].nNumBlockZField + 1); nCntVtxX++)
 			{
 				// 頂点座標の設定
-				pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx.x = -(g_nNumBlockXField / 2.0f) * g_fBlockSizeXField + nCntVtxX * g_fBlockSizeXField;
-				pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx.y = 0.0f;
-				pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx.z = (g_nNumBlockZField / 2.0f) * g_fBlockSizeZField - nCntVtxZ * g_fBlockSizeZField;
+				pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.x = -(this[0].nNumBlockZField / 2.0f) * fBlockSizeXField + nCntVtxX * fBlockSizeXField;
+				pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = 0.0f;
+				pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.z = (this[0].nNumBlockZField / 2.0f) * fBlockSizeZField - nCntVtxZ * fBlockSizeZField;
 
-				pVtxS[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx.x = -(g_nNumBlockXField / 2.0f) * g_fBlockSizeXField + nCntVtxX * g_fBlockSizeXField;
-				pVtxS[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx.z = (g_nNumBlockZField / 2.0f) * g_fBlockSizeZField - nCntVtxZ * g_fBlockSizeZField;
+				pVtxS[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.x = -(this[0].nNumBlockZField / 2.0f) * fBlockSizeXField + nCntVtxX * fBlockSizeXField;
+				pVtxS[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.z = (this[0].nNumBlockZField / 2.0f) * fBlockSizeZField - nCntVtxZ * fBlockSizeZField;
 
 				// 法線の設定
-				pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].nor = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
+				pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].nor = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
 
 				// テクスチャ座標の設定
-				pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].tex.x = texSizeX * nCntVtxX;
-				pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].tex.y = texSizeZ * nCntVtxZ;
+				pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].tex.x = texSizeX * nCntVtxX;
+				pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].tex.y = texSizeZ * nCntVtxZ;
 			}
 		}
 
 		// 頂点データをアンロックする
-		g_pD3DVtxBuffFieldDraw->Unlock();
-		g_pD3DVtxBuffFieldStart->Unlock();
+		this[0].pD3DVtxBuffFieldDraw->Unlock();
+		this[0].pD3DVtxBuffFieldStart->Unlock();
 	}
 
 	{//インデックスバッファの中身を埋める
 		WORD *pIdx;
 
 		// インデックスデータの範囲をロックし、頂点バッファへのポインタを取得
-		g_pD3DIdxBuffFieldDraw->Lock(0, 0, (void**)&pIdx, 0);
+		this[0].model.pD3DIdxBuff->Lock(0, 0, (void**)&pIdx, 0);
 
 		int nCntIdx = 0;
-		for (int nCntVtxZ = 0; nCntVtxZ < g_nNumBlockZField; nCntVtxZ++)
+		for (int nCntVtxZ = 0; nCntVtxZ < this[0].nNumBlockZField; nCntVtxZ++)
 		{
 			if (nCntVtxZ > 0)
 			{// 縮退ポリゴンのためのダブりの設定
-				pIdx[nCntIdx] = (nCntVtxZ + 1) * (g_nNumBlockXField + 1);
+				pIdx[nCntIdx] = (nCntVtxZ + 1) * (this[0].nNumBlockZField + 1);
 				nCntIdx++;
 			}
 
-			for (int nCntVtxX = 0; nCntVtxX < (g_nNumBlockXField + 1); nCntVtxX++)
+			for (int nCntVtxX = 0; nCntVtxX < (this[0].nNumBlockZField + 1); nCntVtxX++)
 			{
-				pIdx[nCntIdx] = (nCntVtxZ + 1) * (g_nNumBlockXField + 1) + nCntVtxX;
+				pIdx[nCntIdx] = (nCntVtxZ + 1) * (this[0].nNumBlockZField + 1) + nCntVtxX;
 				nCntIdx++;
-				pIdx[nCntIdx] = nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX;
+				pIdx[nCntIdx] = nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX;
 				nCntIdx++;
 			}
 
-			if (nCntVtxZ < (g_nNumBlockZField - 1))
+			if (nCntVtxZ < (this[0].nNumBlockZField - 1))
 			{// 縮退ポリゴンのためのダブりの設定
-				pIdx[nCntIdx] = nCntVtxZ * (g_nNumBlockXField + 1) + g_nNumBlockXField;
+				pIdx[nCntIdx] = nCntVtxZ * (this[0].nNumBlockZField + 1) + this[0].nNumBlockZField;
 				nCntIdx++;
 			}
 		}
 
 		// インデックスデータをアンロックする
-		g_pD3DIdxBuffFieldDraw->Unlock();
+		this[0].model.pD3DIdxBuff->Unlock();
 	}
 
 	//描画用
@@ -250,71 +192,71 @@ HRESULT InitMeshField(D3DXVECTOR3 pos, D3DXVECTOR3 rot,
 		VERTEX_3D *pVtx;
 		VERTEX_3D *pVtxS;
 #if 0
-		const float texSizeX = 1.0f / g_nNumBlockX;
-		const float texSizeZ = 1.0f / g_nNumBlockZ;
+		const float texSizeX = 1.0f / nNumBlockXField;
+		const float texSizeZ = 1.0f / nNumBlockZField;
 #else
 		const float texSizeX = 1.0f;
 		const float texSizeZ = 1.0f;
 #endif
 
 		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
-		g_pD3DVtxBuffFieldDraw->Lock(0, 0, (void**)&pVtx, 0);
-		g_pD3DVtxBuffFieldStart->Lock(0, 0, (void**)&pVtxS, 0);
+		this[0].pD3DVtxBuffFieldDraw->Lock(0, 0, (void**)&pVtx, 0);
+		this[0].pD3DVtxBuffFieldStart->Lock(0, 0, (void**)&pVtxS, 0);
 
 		//上限
-		for (int nCntVtxZ = 0; nCntVtxZ < (g_nNumBlockZField + 1)/2; nCntVtxZ++)
+		for (int nCntVtxZ = 0; nCntVtxZ < (this[0].nNumBlockZField + 1)/2; nCntVtxZ++)
 		{
-			for (int nCntVtxX = 0; nCntVtxX < (g_nNumBlockXField + 1)/2; nCntVtxX++)
+			for (int nCntVtxX = 0; nCntVtxX < (this[0].nNumBlockZField + 1)/2; nCntVtxX++)
 			{
 				//縮退ポリゴンよけなさい
-				if (pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx == pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX + 1].vtx)	continue;
-				else if (pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX + 1].vtx == pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX + 2].vtx) continue;
-				pVtx[(rand() % g_nNumVertexField)].vtx.y = float((rand() % 200));
+				if (pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx == pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX + 1].vtx)	continue;
+				else if (pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX + 1].vtx == pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX + 2].vtx) continue;
+				pVtx[(rand() % this[0].model.nNumVertex)].vtx.y = float((rand() % 200));
 			}
 		}
 
 		//縮退ポリゴンの座標を調整
 		SetDegenerationPoly();
 
-		for (int nCntVtxZ = 0; nCntVtxZ < (g_nNumBlockZField + 1); nCntVtxZ++)
+		for (int nCntVtxZ = 0; nCntVtxZ < (this[0].nNumBlockZField + 1); nCntVtxZ++)
 		{
-			for (int nCntVtxX = 0; nCntVtxX < (g_nNumBlockXField + 1); nCntVtxX++)
+			for (int nCntVtxX = 0; nCntVtxX < (this[0].nNumBlockZField + 1); nCntVtxX++)
 			{
 				//縮退ポリゴンよけなさい
-				if (pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx == pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX + 1].vtx)	continue;
-				else if (pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX + 1].vtx == pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX + 2].vtx) continue;
+				if (pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx == pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX + 1].vtx)	continue;
+				else if (pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX + 1].vtx == pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX + 2].vtx) continue;
 
 				// 頂点座標の設定
 				//上側
-				if (nCntVtxZ == 0 || nCntVtxX == 0 || nCntVtxZ == g_nNumBlockZField || nCntVtxX == g_nNumBlockXField)
-					pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx.y = pVtxS[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx.y = 50.0f;
+				if (nCntVtxZ == 0 || nCntVtxX == 0 || nCntVtxZ == this[0].nNumBlockZField || nCntVtxX == this[0].nNumBlockZField)
+					pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = pVtxS[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = 50.0f;
 				//中側
 				else
 				{
-					float y = (pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX - 1].vtx.y + pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX + 1].vtx.y +
-						pVtx[(nCntVtxZ - 1) * (g_nNumBlockXField + 1) + nCntVtxX].vtx.y + pVtx[(nCntVtxZ + 1) * (g_nNumBlockXField + 1) + nCntVtxX].vtx.y) / 4;
-					pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx.y = pVtxS[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx.y = y;
+					float y = (pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX - 1].vtx.y + pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX + 1].vtx.y +
+						pVtx[(nCntVtxZ - 1) * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y + pVtx[(nCntVtxZ + 1) * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y) / 4;
+					pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = pVtxS[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = y;
 				}
 
 				// 反射光の設定
-				if (pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx.y >= 60.0f)
+				if (pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y >= 60.0f)
 				{
-					pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].diffuse = D3DXCOLOR(0.4f, 0.4f, 0.4f, 1.0f);//山
+					pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].diffuse = D3DXCOLOR(0.4f, 0.4f, 0.4f, 1.0f);//山
 				}
-				else if (pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx.y <= 59.9f && pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx.y > 20.0f)
+				else if (pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y <= 59.9f && pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y > 20.0f)
 				{
-					pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].diffuse = D3DXCOLOR(0.3f, 1.0f, 0.3f, 1.0f);//緑
+					pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].diffuse = D3DXCOLOR(0.3f, 1.0f, 0.3f, 1.0f);//緑
 				}
 				else
 				{
-					pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].diffuse = D3DXCOLOR(0.78f, 0.76f, 0.63f, 1.0f);//砂
+					pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].diffuse = D3DXCOLOR(0.78f, 0.76f, 0.63f, 1.0f);//砂
 				}
 			}
 		}
 
 		// 頂点データをアンロックする
-		g_pD3DVtxBuffFieldDraw->Unlock(); 
-		g_pD3DVtxBuffFieldStart->Unlock();
+		this[0].pD3DVtxBuffFieldDraw->Unlock();
+		this[0].pD3DVtxBuffFieldStart->Unlock();
 	}
 
 
@@ -323,94 +265,168 @@ HRESULT InitMeshField(D3DXVECTOR3 pos, D3DXVECTOR3 rot,
 	{//頂点バッファの中身を埋める
 		VERTEX_3D *pVtx;
 #if 0
-		const float texSizeX = 1.0f / g_nNumBlockX;
-		const float texSizeZ = 1.0f / g_nNumBlockZ;
+		const float texSizeX = 1.0f / nNumBlockXField;
+		const float texSizeZ = 1.0f / nNumBlockZField;
 #else
 		const float texSizeX = 1.0f;
 		const float texSizeZ = 1.0f;
 #endif
 
 		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
-		g_pD3DVtxBuffFieldEnd->Lock(0, 0, (void**)&pVtx, 0);
+		this[0].pD3DVtxBuffFieldEnd->Lock(0, 0, (void**)&pVtx, 0);
 
-		for (int nCntVtxZ = 0; nCntVtxZ < (g_nNumBlockZField + 1); nCntVtxZ++)
+		for (int nCntVtxZ = 0; nCntVtxZ < (this[0].nNumBlockZField + 1); nCntVtxZ++)
 		{
-			for (int nCntVtxX = 0; nCntVtxX < (g_nNumBlockXField + 1); nCntVtxX++)
+			for (int nCntVtxX = 0; nCntVtxX < (this[0].nNumBlockZField + 1); nCntVtxX++)
 			{
 				// 頂点座標の設定
-				pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx.x = -(g_nNumBlockXField / 2.0f) * g_fBlockSizeXField + nCntVtxX * g_fBlockSizeXField;
-				pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx.y = 0.0f;
-				pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx.z = (g_nNumBlockZField / 2.0f) * g_fBlockSizeZField - nCntVtxZ * g_fBlockSizeZField;
+				pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.x = -(this[0].nNumBlockZField / 2.0f) * fBlockSizeXField + nCntVtxX * fBlockSizeXField;
+				pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = 0.0f;
+				pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.z = (this[0].nNumBlockZField / 2.0f) * fBlockSizeZField - nCntVtxZ * fBlockSizeZField;
 
 				// 法線の設定
-				pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].nor = D3DXVECTOR3(0.0f, 1.0, 0.0f);
+				pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].nor = D3DXVECTOR3(0.0f, 1.0, 0.0f);
 
 				// テクスチャ座標の設定
-				pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].tex.x = texSizeX * nCntVtxX;
-				pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].tex.y = texSizeZ * nCntVtxZ;
+				pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].tex.x = texSizeX * nCntVtxX;
+				pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].tex.y = texSizeZ * nCntVtxZ;
 			}
 		}
 		// 頂点データをアンロックする
-		g_pD3DVtxBuffFieldEnd->Unlock();
+		this[0].pD3DVtxBuffFieldEnd->Unlock();
 	}
 
 
 	//当たり判定高速化用。一応親子関係も登録
 	InitCntPartition();
 
-	return S_OK;
 }
 
+//=============================================================================
+// 再初期化処理
+//=============================================================================
+void FIELD::Reinit(void)
+{
+	this[0].InterPolationFieldSignal = true;
+	this[0].InterPolationFieldSignalEnd = false;
+	this[0].InterPolationFieldType = -1;
+	this[0].InterPolationFieldPlayerNum = -1;
+
+	//--------------------------------DRAWとSTARTのセット
+	//描画用
+	{//頂点バッファの中身を埋める
+		VERTEX_3D *pVtx;
+		VERTEX_3D *pVtxS;
+#if 0
+		const float texSizeX = 1.0f / nNumBlockXField;
+		const float texSizeZ = 1.0f / nNumBlockZField;
+#else
+		const float texSizeX = 1.0f;
+		const float texSizeZ = 1.0f;
+#endif
+
+		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
+		this[0].pD3DVtxBuffFieldDraw->Lock(0, 0, (void**)&pVtx, 0);
+		this[0].pD3DVtxBuffFieldStart->Lock(0, 0, (void**)&pVtxS, 0);
+
+		for (int nCntVtxZ = 0; nCntVtxZ < (this[0].nNumBlockZField + 1); nCntVtxZ++)
+		{
+			for (int nCntVtxX = 0; nCntVtxX < (this[0].nNumBlockZField + 1); nCntVtxX++)
+			{
+				// 頂点座標の設定
+				pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.x = -(this[0].nNumBlockZField / 2.0f) * fBlockSizeXField + nCntVtxX * fBlockSizeXField;
+				pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = 0.0f;
+				pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.z = (this[0].nNumBlockZField / 2.0f) * fBlockSizeZField - nCntVtxZ * fBlockSizeZField;
+
+				pVtxS[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.x = -(this[0].nNumBlockZField / 2.0f) * fBlockSizeXField + nCntVtxX * fBlockSizeXField;
+				pVtxS[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.z = (this[0].nNumBlockZField / 2.0f) * fBlockSizeZField - nCntVtxZ * fBlockSizeZField;
+
+				// 法線の設定
+				pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].nor = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
+
+				// テクスチャ座標の設定
+				pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].tex.x = texSizeX * nCntVtxX;
+				pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].tex.y = texSizeZ * nCntVtxZ;
+			}
+		}
+
+		// 頂点データをアンロックする
+		this[0].pD3DVtxBuffFieldDraw->Unlock();
+		this[0].pD3DVtxBuffFieldStart->Unlock();
+	}
+
+	//----------------------------ENDのセット
+	//自動生成のバッファ。地形変更するときにこの形に変形	F
+	{//頂点バッファの中身を埋める
+		VERTEX_3D *pVtx;
+#if 0
+		const float texSizeX = 1.0f / nNumBlockXField;
+		const float texSizeZ = 1.0f / nNumBlockZField;
+#else
+		const float texSizeX = 1.0f;
+		const float texSizeZ = 1.0f;
+#endif
+
+		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
+		this[0].pD3DVtxBuffFieldEnd->Lock(0, 0, (void**)&pVtx, 0);
+
+		for (int nCntVtxZ = 0; nCntVtxZ < (this[0].nNumBlockZField + 1); nCntVtxZ++)
+		{
+			for (int nCntVtxX = 0; nCntVtxX < (this[0].nNumBlockZField + 1); nCntVtxX++)
+			{
+				// 頂点座標の設定
+				pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.x = -(this[0].nNumBlockZField / 2.0f) * fBlockSizeXField + nCntVtxX * fBlockSizeXField;
+				pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = 0.0f;
+				pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.z = (this[0].nNumBlockZField / 2.0f) * fBlockSizeZField - nCntVtxZ * fBlockSizeZField;
+
+				// 法線の設定
+				pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].nor = D3DXVECTOR3(0.0f, 1.0, 0.0f);
+
+				// テクスチャ座標の設定
+				pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].tex.x = texSizeX * nCntVtxX;
+				pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].tex.y = texSizeZ * nCntVtxZ;
+			}
+		}
+		// 頂点データをアンロックする
+		this[0].pD3DVtxBuffFieldEnd->Unlock();
+	}
+}
 
 //=============================================================================
 // 終了処理
 //=============================================================================
-void UninitMeshField(void)
+void FIELD::Uninit(void)
 {
-	if (g_pD3DVtxBuffFieldDraw)
-	{// 頂点バッファの開放
-		g_pD3DVtxBuffFieldDraw->Release();
-		g_pD3DVtxBuffFieldDraw = NULL;
-	}
-
-	if (g_pD3DIdxBuffFieldDraw)
-	{// インデックスバッファの開放
-		g_pD3DIdxBuffFieldDraw->Release();
-		g_pD3DIdxBuffFieldDraw = NULL;
-	}
-
-	if (g_pD3DTextureField)
-	{// テクスチャの開放
-		g_pD3DTextureField->Release();
-		g_pD3DTextureField = NULL;
-	}
+	this[0].pD3DVtxBuffFieldStart->Release();
+	this[0].pD3DVtxBuffFieldEnd->Release();
+	this[0].pD3DVtxBuffFieldDraw->Release();
 }
 
 //=============================================================================
 // 更新処理
 //=============================================================================
-void UpdateMeshField(void)
+void FIELD::Update(void)
 {
 	//アイテムを拾うとInterPolationFieldTypeが変わる。このスイッチ文SetFieldType関数最後に-1を入れる
-	switch (InterPolationFieldType)
+	switch (this[0].InterPolationFieldType)
 	{
-		ClearField();
+		this[0].ClearField();
 	case FIELD_TYPE_BOKOBOKO:
-		SetFieldType01();
+		this[0].SetFieldType01();
 		break;
 	case FIELD_TYPE_NADARAKA:
-		SetFieldType02();
+		this[0].SetFieldType02();
 		break;
 	case FIELD_TYPE_PLAYERADVANTAGE:
-		SetFieldType03();
+		this[0].SetFieldType03();
 		break;
 	default:
 		break;
 	}
 	//SetFieldTypeでInterPolationFieldSignalをfalseにしている。InterPolationField()の返り値で地形の補間が終わったか判定
-	if (InterPolationFieldSignal == false)
+	if (this[0].InterPolationFieldSignal == false)
 	{
-		InterPolationFieldSignal = InterPolationField();
+		this[0].InterPolationFieldSignal = this[0].InterPolationField();
 	}
 
 	//プレイヤーと地面の当たり判定
@@ -419,49 +435,100 @@ void UpdateMeshField(void)
 	PLAYER_HONTAI *player = dynamic_cast<PLAYER_HONTAI*>(&playerobj[0]);
 	for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
 	{
-		FieldHitGetSphereVec(D3DXVECTOR3(player[CntPlayer].pos.x, player[CntPlayer].pos.y + 1000.0f, player[CntPlayer].pos.z),
-			D3DXVECTOR3(player[CntPlayer].pos.x, player[CntPlayer].pos.y - 1000.0f, player[CntPlayer].pos.z),
-			&player[CntPlayer].RotVecAxis, &player[CntPlayer].pos.y);
+		//-------------------オブジェクト値読み込み
+		D3DXVECTOR3 rayS = player[CntPlayer].GetPos();
+		rayS.y += 1000.0f;
+		D3DXVECTOR3 rayG = player[CntPlayer].GetPos();
+		rayG.y -= 1000.0f;
+		D3DXVECTOR3 FieldNor = player[CntPlayer].GetFieldNorVec();
+		D3DXVECTOR3 ReturnPos = player[CntPlayer].GetPos();
+
+		//判定
+		this[0].FieldHitGetSphereVec(rayS, rayG, &FieldNor, &ReturnPos.y);
+
+		//-------------------オブジェクト値書き込み
+		player[CntPlayer].SetPos(ReturnPos);
+		player[CntPlayer].SetFieldNorVec(FieldNor);
 	}
 
 	//アイテムと地面の当たり判定
-	ITEM *item = GetItem();
-	for (int CntItem = 0; CntItem < MAX_ITEM; CntItem++)
+	//-----------------------------------オブジェクト先頭アドレスを読み込み
+	GAME_OBJECT *itemobj = this->GetPointerItem();
+	ITEM *item = dynamic_cast<ITEM*>(&itemobj[0]);
+	for (int CntItem = 0; CntItem < OBJECT_ITEM_MAX; CntItem++)
 	{
-		if (item[CntItem].bUse == true)
+		bool use = item[CntItem].GetUse();
+		if (use == true)
 		{
 			if (item[CntItem].CollisionFieldEnd != true || InterPolationFieldSignal == false)
 			{
-				item[CntItem].CollisionFieldEnd = FieldHitItem(D3DXVECTOR3(item[CntItem].pos.x, item[CntItem].pos.y + 10.0f, item[CntItem].pos.z),
-					D3DXVECTOR3(item[CntItem].pos.x, item[CntItem].pos.y - 10.0f, item[CntItem].pos.z),
-					&item[CntItem].rotVecAxis, &item[CntItem].pos.y);
+				//-------------------オブジェクト値読み込み
+				D3DXVECTOR3 rayS = item[CntItem].GetPos();
+				rayS.y += 10.0f;
+				D3DXVECTOR3 rayG = item[CntItem].GetPos();
+				rayG.y -= 10.0f;
+				D3DXVECTOR3 FieldNor = item[CntItem].GetFieldNorVec();
+				D3DXVECTOR3 ReturnPos = item[CntItem].GetPos();
+
+				//判定
+				item[CntItem].CollisionFieldEnd = this[0].FieldHitItem(rayS, rayG, &FieldNor, &ReturnPos.y);
+
+				//-------------------オブジェクト値書き込み
+				item[CntItem].SetPos(ReturnPos);
+				item[CntItem].SetFieldNorVec(FieldNor);
+
 			}
 			else if (InterPolationFieldSignal == true && item[CntItem].CollisionFieldEnd == true)
 			{
-				FieldHit(D3DXVECTOR3(item[CntItem].pos.x, item[CntItem].pos.y - 1000.0f, item[CntItem].pos.z),
-					D3DXVECTOR3(item[CntItem].pos.x, item[CntItem].pos.y + 1000.0f, item[CntItem].pos.z),
-					&item[CntItem].rotVecAxis, &item[CntItem].pos.y);
+				//-------------------オブジェクト値読み込み
+				D3DXVECTOR3 rayS = item[CntItem].GetPos();
+				rayS.y -= 1000.0f;
+				D3DXVECTOR3 rayG = item[CntItem].GetPos();
+				rayG.y += 1000.0f;
+				D3DXVECTOR3 FieldNor = item[CntItem].GetFieldNorVec();
+				D3DXVECTOR3 ReturnPos = item[CntItem].GetPos();
+
+				//判定
+				this[0].FieldHit(rayS, rayG, &FieldNor, &ReturnPos.y);
+
+				//-------------------オブジェクト値書き込み
+				item[CntItem].SetPos(ReturnPos);
+				item[CntItem].SetFieldNorVec(FieldNor);
 			}
 		}
 	}
 
 	//バレットと地面の当たり判定
-	BULLET *bullet = GetBullet();
-	for (int Cntbullet = 0; Cntbullet < BULLET_MAX; Cntbullet++)
+	//-----------------------------------オブジェクト先頭アドレスを読み込み
+	GAME_OBJECT *bulletobj = this->GetPointerBullet();
+	BULLET *bullet = dynamic_cast<BULLET*>(&bulletobj[0]);
+	for (int Cntbullet = 0; Cntbullet < OBJECT_BULLET_MAX; Cntbullet++)
 	{
-		if (bullet[Cntbullet].use == true)
+		bool use = bullet[Cntbullet].GetUse();
+		if (use == true)
 		{
 			D3DXVECTOR3 kari;
-			FieldHit(D3DXVECTOR3(bullet[Cntbullet].pos.x, bullet[Cntbullet].pos.y + 1000.0f, bullet[Cntbullet].pos.z),
-				D3DXVECTOR3(bullet[Cntbullet].pos.x, bullet[Cntbullet].pos.y - 1000.0f, bullet[Cntbullet].pos.z),
-				&kari, &bullet[Cntbullet].FieldPosY);
-			if (bullet[Cntbullet].FieldPosY - 3.0f > bullet[Cntbullet].pos.y)//地形との当たり判定を緩く(調整)するためのbullet[Cntbullet].FieldPosY-3.0f
+			//-------------------オブジェクト値読み込み
+			D3DXVECTOR3 rayS = bullet[Cntbullet].GetPos();
+			rayS.y += 1000.0f;
+			D3DXVECTOR3 rayG = bullet[Cntbullet].GetPos();
+			rayG.y -= 1000.0f;
+
+			//判定
+			this[0].FieldHit(rayS, rayG, &kari, &bullet[Cntbullet].FieldPosY);
+
+			//地形との当たり判定を緩く(調整)するためのbullet[Cntbullet].FieldPosY-3.0f
+			D3DXVECTOR3 bpos = bullet[Cntbullet].GetPos();
+			if (bullet[Cntbullet].FieldPosY - 3.0f > bpos.y)
 			{
+				GAME_OBJECT *explosionobj = this->GetPointerExplosion();
+				EXPLOSION *explosion = dynamic_cast<EXPLOSION*>(&explosionobj[0]);
+
 				// 爆発の生成
-				D3DXVECTOR3 ExploPos = D3DXVECTOR3(bullet[Cntbullet].pos.x, bullet[Cntbullet].FieldPosY, bullet[Cntbullet].pos.z);
-				SetExplosion(ExploPos, 40.0f, 40.0f, EXPLOSIONTYPE_BULLET_PLAYER, PLAYER_COLOR[bullet[Cntbullet].UsePlayerType]);
+				D3DXVECTOR3 ExploPos = D3DXVECTOR3(bpos.x, bullet[Cntbullet].FieldPosY, bpos.z);
+				explosion->SetExplosion(ExploPos, 40.0f, 40.0f, EXPLOSIONTYPE_BULLET_PLAYER, PLAYER_COLOR[bullet[Cntbullet].UsePlayerType]);
 				// バレット破棄
-				ReleaseBullet(Cntbullet);
+				bullet[Cntbullet].ReleaseBullet(Cntbullet);
 				// SE再生
 				PlaySound(SOUND_LABEL_SE_damage);
 			}
@@ -472,92 +539,57 @@ void UpdateMeshField(void)
 //=============================================================================
 // 描画処理
 //=============================================================================
-void DrawMeshField(void)
+void FIELD::Draw(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 
-	D3DXMATRIX mtxRot, mtxTranslate;
+	D3DXMATRIX mtxRot, mtxTranslate,mtxWorld;
+	mtxWorld = this[0].GetMatrix();
+	D3DXVECTOR3 pos = this[0].GetPos();
+	D3DXVECTOR3 rot = this[0].GetRot();
 
 	// ワールドマトリックスの初期化
-	D3DXMatrixIdentity(&g_mtxWorldField);
+	D3DXMatrixIdentity(&mtxWorld);
 
 	// 回転を反映
-	D3DXMatrixRotationYawPitchRoll(&mtxRot, g_rotField.y, g_rotField.x, g_rotField.z);
-	D3DXMatrixMultiply(&g_mtxWorldField, &g_mtxWorldField, &mtxRot);
+	D3DXMatrixRotationYawPitchRoll(&mtxRot, rot.y, rot.x, rot.z);
+	D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxRot);
 
 	// 移動を反映
-	D3DXMatrixTranslation(&mtxTranslate, g_posField.x, g_posField.y, g_posField.z);
-	D3DXMatrixMultiply(&g_mtxWorldField, &g_mtxWorldField, &mtxTranslate);
+	D3DXMatrixTranslation(&mtxTranslate, pos.x, pos.y, pos.z);
+	D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxTranslate);
 
 	// ワールドマトリックスの設定
-	pDevice->SetTransform(D3DTS_WORLD, &g_mtxWorldField);
+	pDevice->SetTransform(D3DTS_WORLD, &mtxWorld);
 
 	// 頂点バッファをレンダリングパイプラインに設定
-	pDevice->SetStreamSource(0, g_pD3DVtxBuffFieldDraw, 0, sizeof(VERTEX_3D));
+	pDevice->SetStreamSource(0, pD3DVtxBuffFieldDraw, 0, sizeof(VERTEX_3D));
 
 	// インデックスバッファをレンダリングパイプラインに設定
-	pDevice->SetIndices(g_pD3DIdxBuffFieldDraw);
+	pDevice->SetIndices(this[0].model.pD3DIdxBuff);
 
 	// 頂点フォーマットの設定
 	pDevice->SetFVF(FVF_VERTEX_3D);
 
 	// テクスチャの設定
-	pDevice->SetTexture(0, g_pD3DTextureField);
+	pDevice->SetTexture(0, this[0].model.pD3DTexture);
 
 	// ポリゴンの描画
-	pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLESTRIP, 0, 0, g_nNumVertexField, 0, g_nNumPolygonField);
-}
-
-//=============================================================================
-// 頂点データのアドレスを渡す
-//=============================================================================
-LPDIRECT3DVERTEXBUFFER9 *GetFieldBuff(void)
-{
-	return &g_pD3DVtxBuffFieldDraw;
-}
-
-//=============================================================================
-// 頂点データのアドレスを渡す
-//=============================================================================
-int GetFieldBlockXNum(void)
-{
-	return g_nNumBlockXField;
-}
-
-//=============================================================================
-// 頂点データのアドレスを渡す
-//=============================================================================
-int GetFieldBlockZNum(void)
-{
-	return g_nNumBlockZField;
-}
-
-//=============================================================================
-// 頂点データのアドレスを渡す
-//=============================================================================
-float GetFieldBlockXSize(void)
-{
-	return g_fBlockSizeXField;
-}
-
-//=============================================================================
-// 頂点データのアドレスを渡す
-//=============================================================================
-float GetFieldBlockZSize(void)
-{
-	return g_fBlockSizeZField;
+	pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLESTRIP, 0, 0, this[0].model.nNumVertex, 0, this[0].model.nNumPolygon);
 }
 
 //=============================================================================
 // 地形変形タイプ
 //=============================================================================
-void SetFieldInterPolationFieldType(int type,int CntPlayer)
+void FIELD::SetFieldInterPolationFieldType(int type,int CntPlayer)
 {
 	//フラグセット
-	InterPolationFieldType = type;
-	InterPolationFieldPlayerNum = CntPlayer;
-	ITEM *item = GetItem();
-	for (int CntItem = 0; CntItem < MAX_ITEM; CntItem++)
+	this[0].InterPolationFieldType = type;
+	this[0].InterPolationFieldPlayerNum = CntPlayer;
+	//-----------------------------------オブジェクト先頭アドレスを読み込み
+	GAME_OBJECT *itemobj = this->GetPointerItem();
+	ITEM *item = dynamic_cast<ITEM*>(&itemobj[0]);
+	for (int CntItem = 0; CntItem < OBJECT_ITEM_MAX; CntItem++)
 	{
 		item[CntItem].CollisionFieldEnd = false;
 	}
@@ -566,39 +598,39 @@ void SetFieldInterPolationFieldType(int type,int CntPlayer)
 //=============================================================================
 // 地形のクリア
 //=============================================================================
-void ClearField(void)
+void FIELD::ClearField(void)
 {
 	VERTEX_3D *pVtx;
 	// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
-	g_pD3DVtxBuffFieldEnd->Lock(0, 0, (void**)&pVtx, 0);
+	this[0].pD3DVtxBuffFieldEnd->Lock(0, 0, (void**)&pVtx, 0);
 
-	for (int nCntVtxZ = 0; nCntVtxZ < (g_nNumBlockZField + 1); nCntVtxZ++)
+	for (int nCntVtxZ = 0; nCntVtxZ < (this[0].nNumBlockZField + 1); nCntVtxZ++)
 	{
-		for (int nCntVtxX = 0; nCntVtxX < (g_nNumBlockXField + 1); nCntVtxX++)
+		for (int nCntVtxX = 0; nCntVtxX < (this[0].nNumBlockZField + 1); nCntVtxX++)
 		{
 			// 頂点座標の設定
-			pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx.y = 0.0f;
+			pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = 0.0f;
 		}
 	}
 	// 頂点データをアンロックする
-	g_pD3DVtxBuffFieldEnd->Unlock();
+	this[0].pD3DVtxBuffFieldEnd->Unlock();
 }
 
 //=============================================================================
 // 地形の自動生成01 ぼこぼこぎみ地形　ブロック数32*32　ブロックサイズ60*60～100*100
 //=============================================================================
-void SetFieldType01(void)
+void FIELD::SetFieldType01(void)
 {
 	{
 		VERTEX_3D *pVtx;
 		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
-		g_pD3DVtxBuffFieldEnd->Lock(0, 0, (void**)&pVtx, 0);
+		this[0].pD3DVtxBuffFieldEnd->Lock(0, 0, (void**)&pVtx, 0);
 
 		//上限　高さを設定
-		for (int nCntVtx = 0; nCntVtx < g_nNumVertexField/4; nCntVtx++)
+		for (int nCntVtx = 0; nCntVtx < int(this[0].model.nNumVertex/4); nCntVtx++)
 		{
 				//高さを決める頂点を決定
-				int YTXrandNum(rand() % g_nNumVertexField);
+				int YTXrandNum(rand() % this[0].model.nNumVertex);
 
 				//高さを決め代入 縮退ポリゴンも同時に動かす
 				int VTXrandY(rand() % 200);
@@ -618,51 +650,51 @@ void SetFieldType01(void)
 		//縮退ポリゴンの座標を調整
 		//SetDegenerationPoly();
 
-		for (int nCntVtxZ = 0; nCntVtxZ < (g_nNumBlockZField + 1); nCntVtxZ++)
+		for (int nCntVtxZ = 0; nCntVtxZ < (this[0].nNumBlockZField + 1); nCntVtxZ++)
 		{
-			for (int nCntVtxX = 0; nCntVtxX < (g_nNumBlockXField + 1); nCntVtxX++)
+			for (int nCntVtxX = 0; nCntVtxX < (this[0].nNumBlockZField + 1); nCntVtxX++)
 			{
 				//縮退ポリゴンよけなさい
-				if (nCntVtxZ*nCntVtxX == g_nNumVertexIndexField - 2) break;
-				else if (pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx == pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX + 1].vtx)	continue;
-				else if (pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX + 1].vtx == pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX + 2].vtx) continue;
+				if (nCntVtxZ*nCntVtxX == this[0].model.nNumVertexIndex - 2) break;
+				else if (pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx == pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX + 1].vtx)	continue;
+				else if (pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX + 1].vtx == pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX + 2].vtx) continue;
 
 				// 頂点座標の設定
 				//頂点最端の高さは固定。壁際の頂点のこと。
-				if (nCntVtxZ == 0 || nCntVtxX == 0 || nCntVtxZ == g_nNumBlockZField || nCntVtxX == g_nNumBlockXField)
-					pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx.y = 50.0f;
+				if (nCntVtxZ == 0 || nCntVtxX == 0 || nCntVtxZ == this[0].nNumBlockZField || nCntVtxX == this[0].nNumBlockZField)
+					pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = 50.0f;
 				//中側
 				//隣接頂点の高さの平均値を求め、中心の頂点の高さとする。
 				else
 				{
-					float y = (pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX - 1].vtx.y + pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX + 1].vtx.y +
-						pVtx[(nCntVtxZ - 1) * (g_nNumBlockXField + 1) + nCntVtxX].vtx.y + pVtx[(nCntVtxZ + 1) * (g_nNumBlockXField + 1) + nCntVtxX].vtx.y) / 4;
-					pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx.y = y;
+					float y = (pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX - 1].vtx.y + pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX + 1].vtx.y +
+						pVtx[(nCntVtxZ - 1) * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y + pVtx[(nCntVtxZ + 1) * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y) / 4;
+					pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = y;
 				}
 			}
 		}
 		// 頂点データをアンロックする
-		g_pD3DVtxBuffFieldEnd->Unlock();
+		this[0].pD3DVtxBuffFieldEnd->Unlock();
 	}
-	InterPolationFieldType = -1;
-	InterPolationFieldSignal = false;
+	this[0].InterPolationFieldType = -1;
+	this[0].InterPolationFieldSignal = false;
 }
 
 //=============================================================================
 // 地形の自動生成02　見通しのいい地形　ブロック数32*32　ブロックサイズ60*60～100*100
 //=============================================================================
-void SetFieldType02(void)
+void FIELD::SetFieldType02(void)
 {
 	{
 		VERTEX_3D *pVtx;
 		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
-		g_pD3DVtxBuffFieldEnd->Lock(0, 0, (void**)&pVtx, 0);
+		this[0].pD3DVtxBuffFieldEnd->Lock(0, 0, (void**)&pVtx, 0);
 
 		//上限　高さを設定
-		for (int nCntVtx = 0; nCntVtx < g_nNumVertexField / 4; nCntVtx++)
+		for (int nCntVtx = 0; nCntVtx < int(this[0].model.nNumVertex / 4); nCntVtx++)
 		{
 			//高さを決める頂点を決定
-			int YTXrandNum(rand() % g_nNumVertexField);
+			int YTXrandNum(rand() % this[0].model.nNumVertex);
 
 			//高さを決め代入 縮退ポリゴンも同時に動かす
 			int VTXrandY(rand() % 200);
@@ -682,55 +714,55 @@ void SetFieldType02(void)
 		//縮退ポリゴンの座標を調整
 		//SetDegenerationPoly();
 
-		for (int nCntVtxZ = 0; nCntVtxZ < (g_nNumBlockZField + 1); nCntVtxZ++)
+		for (int nCntVtxZ = 0; nCntVtxZ < (this[0].nNumBlockZField + 1); nCntVtxZ++)
 		{
-			for (int nCntVtxX = 0; nCntVtxX < (g_nNumBlockXField + 1); nCntVtxX++)
+			for (int nCntVtxX = 0; nCntVtxX < (this[0].nNumBlockZField + 1); nCntVtxX++)
 			{
 				//縮退ポリゴンよけなさい
-				if (nCntVtxZ*nCntVtxX == g_nNumVertexIndexField - 2) break;
-				else if (pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx == pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX + 1].vtx)	continue;
-				else if (pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX + 1].vtx == pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX + 2].vtx) continue;
+				if (nCntVtxZ*nCntVtxX == this[0].model.nNumVertexIndex - 2) break;
+				else if (pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx == pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX + 1].vtx)	continue;
+				else if (pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX + 1].vtx == pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX + 2].vtx) continue;
 
 				// 頂点座標の設定
 				//頂点最端の高さは固定。壁際の頂点のこと。
 				//上側
-				if (nCntVtxZ == 0 || nCntVtxX == 0 || nCntVtxZ == g_nNumBlockZField || nCntVtxX == g_nNumBlockXField)
-					pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx.y = 100.0f;
+				if (nCntVtxZ == 0 || nCntVtxX == 0 || nCntVtxZ == this[0].nNumBlockZField || nCntVtxX == this[0].nNumBlockZField)
+					pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = 100.0f;
 				//中側　上下左右の平均値を算出
 				//隣接頂点の高さの平均値を求め、中心の頂点の高さとする。
 				else
 				{
-					float y = (pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX - 1].vtx.y + pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX + 1].vtx.y +
-						pVtx[(nCntVtxZ - 1) * (g_nNumBlockXField + 1) + nCntVtxX].vtx.y + pVtx[(nCntVtxZ + 1) * (g_nNumBlockXField + 1) + nCntVtxX].vtx.y) / 4;
-					pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx.y = float(fabs(y));
+					float y = (pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX - 1].vtx.y + pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX + 1].vtx.y +
+						pVtx[(nCntVtxZ - 1) * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y + pVtx[(nCntVtxZ + 1) * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y) / 4;
+					pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = float(fabs(y));
 				}
 			}
 		}
 		// 頂点データをアンロックする
-		g_pD3DVtxBuffFieldEnd->Unlock();
+		this[0].pD3DVtxBuffFieldEnd->Unlock();
 	}
-	InterPolationFieldType = -1;
-	InterPolationFieldSignal = false;
+	this[0].InterPolationFieldType = -1;
+	this[0].InterPolationFieldSignal = false;
 }
 
 //=============================================================================
 // 地形の自動生成03　取得プレイヤーが有利になる地形(相手プレイヤー付近を盆地)　　ブロック数32*32　ブロックサイズ250*250
 //=============================================================================
-void SetFieldType03(void)
+void FIELD::SetFieldType03(void)
 {
 	//高さを決める
 	{
 		VERTEX_3D *pVtx;
 		WORD *pIdx;
 		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
-		g_pD3DVtxBuffFieldEnd->Lock(0, 0, (void**)&pVtx, 0);
-		g_pD3DIdxBuffFieldDraw->Lock(0, 0, (void**)&pIdx, 0);
+		this[0].pD3DVtxBuffFieldEnd->Lock(0, 0, (void**)&pVtx, 0);
+		this[0].model.pD3DIdxBuff->Lock(0, 0, (void**)&pIdx, 0);
 
 		//上限　高さを設定
-		for (int nCntVtx = 0; nCntVtx < g_nNumVertexField; nCntVtx++)
+		for (int nCntVtx = 0; nCntVtx < int(this[0].model.nNumVertex); nCntVtx++)
 		{
 			//高さを決める頂点を決定
-			int YTXrandNum(rand() % g_nNumVertexField);
+			int YTXrandNum(rand() % this[0].model.nNumVertex);
 
 			//高さを決め代入
 			int VTXrandY(rand() % 200);
@@ -753,56 +785,56 @@ void SetFieldType03(void)
 
 		//隣接頂点の高さ平均値を(ダイアモンドスクエア、フラクタルを参考)
 
-		//for (int nCntVtx = 0; nCntVtx < g_nNumVertexIndexField/2; nCntVtx++)
+		//for (int nCntVtx = 0; nCntVtx < this[0].model.nNumVertexIndex/2; nCntVtx++)
 		//{
 		//	//高さを決める頂点を決定
-		//	int YTXrandNum(rand() % g_nNumVertexField);
+		//	int YTXrandNum(rand() % this[0].model.nNumVertex);
 		//	//縮退ポリゴンのときはコンティニュー。最終ポリゴンの時はbreak;
-		//	if (YTXrandNum == g_nNumVertexIndexField - 2) break;
+		//	if (YTXrandNum == this[0].model.nNumVertexIndex - 2) break;
 		//	else if (pIdx[YTXrandNum] == pIdx[YTXrandNum + 1]) continue;
 		//	else if (pIdx[YTXrandNum + 1] == pIdx[YTXrandNum + 2]) continue;
 		//	// 頂点座標の設定
 		//	//頂点最端の高さは固定。壁際の頂点のこと。
 		//	//上側
-		//	//if (nCntVtx == 0 || nCntVtxX == 0 || nCntVtxZ == g_nNumBlockZField || nCntVtxX == g_nNumBlockXField)
-		//	//	pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx.y = 200.0f;
+		//	//if (nCntVtx == 0 || nCntVtxX == 0 || nCntVtxZ == this[0].nNumBlockZField || nCntVtxX == this[0].nNumBlockZField)
+		//	//	pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = 200.0f;
 		//	//中側　上下左右の平均値を算出
 		//	//隣接頂点の高さの平均値を求め、中心の頂点の高さとする。
 		//	else
 		//	{
 		//		float y = (pVtx[YTXrandNum - 1].vtx.y + pVtx[YTXrandNum + 1].vtx.y +
-		//			pVtx[(g_nNumBlockXField + 1) + YTXrandNum].vtx.y + pVtx[(g_nNumBlockXField - 1) + YTXrandNum].vtx.y) / 4.0f;
+		//			pVtx[(this[0].nNumBlockZField + 1) + YTXrandNum].vtx.y + pVtx[(this[0].nNumBlockZField - 1) + YTXrandNum].vtx.y) / 4.0f;
 		//		pVtx[YTXrandNum].vtx.y = fabsf(y);
 		//	}
 		//}
 
 
-		for (int nCntVtxZ = 0; nCntVtxZ < (g_nNumBlockZField + 1); nCntVtxZ++)
+		for (int nCntVtxZ = 0; nCntVtxZ < (this[0].nNumBlockZField + 1); nCntVtxZ++)
 		{
-			for (int nCntVtxX = 0; nCntVtxX < (g_nNumBlockXField + 1); nCntVtxX++)
+			for (int nCntVtxX = 0; nCntVtxX < (this[0].nNumBlockZField + 1); nCntVtxX++)
 			{
 				//縮退ポリゴンよけなさい
-				if (nCntVtxZ*nCntVtxX == g_nNumVertexIndexField - 2) break;
-				else if (pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx == pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX + 1].vtx)	continue;
-				else if (pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX + 1].vtx == pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX + 2].vtx) continue;
+				if (nCntVtxZ*nCntVtxX == this[0].model.nNumVertexIndex - 2) break;
+				else if (pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx == pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX + 1].vtx)	continue;
+				else if (pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX + 1].vtx == pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX + 2].vtx) continue;
 				// 頂点座標の設定
 				//頂点最端の高さは固定。壁際の頂点のこと。
 				//上側
-				if (nCntVtxZ == 0 || nCntVtxX == 0 || nCntVtxZ == g_nNumBlockZField || nCntVtxX == g_nNumBlockXField)
-					pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx.y = 200.0f;
+				if (nCntVtxZ == 0 || nCntVtxX == 0 || nCntVtxZ == this[0].nNumBlockZField || nCntVtxX == this[0].nNumBlockZField)
+					pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = 200.0f;
 				//中側　上下左右の平均値を算出
 				//隣接頂点の高さの平均値を求め、中心の頂点の高さとする。
 				else
 				{
-					float y = (pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX - 1].vtx.y + pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX + 1].vtx.y +
-						pVtx[(nCntVtxZ - 1) * (g_nNumBlockXField + 1) + nCntVtxX].vtx.y + pVtx[(nCntVtxZ + 1) * (g_nNumBlockXField + 1) + nCntVtxX].vtx.y) / 4.0f;
-					pVtx[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx.y = fabsf(y);
+					float y = (pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX - 1].vtx.y + pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX + 1].vtx.y +
+						pVtx[(nCntVtxZ - 1) * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y + pVtx[(nCntVtxZ + 1) * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y) / 4.0f;
+					pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = fabsf(y);
 				}
 			}
 		}
 		// 頂点データをアンロックする
-		g_pD3DVtxBuffFieldEnd->Unlock();
-		g_pD3DIdxBuffFieldDraw->Unlock();
+		this[0].pD3DVtxBuffFieldEnd->Unlock();
+		this[0].model.pD3DIdxBuff->Unlock();
 
 	}
 
@@ -811,11 +843,13 @@ void SetFieldType03(void)
 	{
 		VERTEX_3D *pVtx;
 		WORD *pIdx;
-		g_pD3DVtxBuffFieldEnd->Lock(0, 0, (void**)&pVtx, 0);
+		this[0].pD3DVtxBuffFieldEnd->Lock(0, 0, (void**)&pVtx, 0);
 		//頂点インデックスバッファは共通で1つしかないのでDrawのやつを使っている
-		g_pD3DIdxBuffFieldDraw->Lock(0, 0, (void**)&pIdx, 0);
+		this[0].model.pD3DIdxBuff->Lock(0, 0, (void**)&pIdx, 0);
 
-		PLAYER_HONTAI *p = GetPlayerHoudai();
+		//-----------------------------------オブジェクト先頭アドレスを読み込み
+		GAME_OBJECT *playerobj = this->GetPointerPlayer();
+		PLAYER_HONTAI *player = dynamic_cast<PLAYER_HONTAI*>(&playerobj[0]);
 		for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
 		{
 			if (CntPlayer != InterPolationFieldPlayerNum)
@@ -825,14 +859,17 @@ void SetFieldType03(void)
 				float HitPosLeft;
 				float HitPosRight;
 				HitPosUp = HitPosDown = HitPosLeft = HitPosRight = 0.0f;
-				//プレイヤーの乗っているエリアを特定。4分木で範囲を絞る。
-				SpeedUpFieldHitPoly(p[CntPlayer].pos, &HitPosUp, &HitPosDown, &HitPosLeft, &HitPosRight,
-					g_fSideSizeXEighth, g_fSideSizeZEighth, g_fSideSizeXEighth/2, g_fSideSizeZEighth/2);
 
-				for (int nCntVtx = 0; nCntVtx < g_nNumVertexIndexField; nCntVtx++)
+				//プレイヤーの乗っているエリアを特定。4分木で範囲を絞る。
+				//-------------------オブジェクト値読み込み
+				D3DXVECTOR3 pos = player[CntPlayer].GetPos();
+				SpeedUpFieldHitPoly(pos, &HitPosUp, &HitPosDown, &HitPosLeft, &HitPosRight,
+					fSideSizeXEighth, fSideSizeZEighth, fSideSizeXEighth/2, fSideSizeZEighth/2);
+
+				for (int nCntVtx = 0; nCntVtx < int(this[0].model.nNumVertexIndex); nCntVtx++)
 				{
 					//縮退ポリゴンのときはコンティニュー。最終ポリゴンの時はbreak;
-					if (nCntVtx == g_nNumVertexIndexField - 2)
+					if (nCntVtx == this[0].model.nNumVertexIndex - 2)
 					{
 						break;
 					}
@@ -858,18 +895,18 @@ void SetFieldType03(void)
 		}
 
 		// 頂点データをアンロックする
-		g_pD3DVtxBuffFieldEnd->Unlock();
+		this[0].pD3DVtxBuffFieldEnd->Unlock();
 		// インデックスデータをアンロックする
-		g_pD3DIdxBuffFieldDraw->Unlock();
+		this[0].model.pD3DIdxBuff->Unlock();
 	}
-	InterPolationFieldType = -1;
-	InterPolationFieldSignal = false;
+	this[0].InterPolationFieldType = -1;
+	this[0].InterPolationFieldSignal = false;
 }
 
 //=============================================================================
 // 地形の変形処理　生成されたフィールドに変形する
 //=============================================================================
-bool InterPolationField(void)
+bool FIELD::InterPolationField(void)
 {
 	{
 		VERTEX_3D *pVtxStart;
@@ -877,64 +914,64 @@ bool InterPolationField(void)
 		VERTEX_3D *pVtxDraw;
 
 		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
-		g_pD3DVtxBuffFieldStart->Lock(0, 0, (void**)&pVtxStart, 0);
-		g_pD3DVtxBuffFieldEnd->Lock(0, 0, (void**)&pVtxEnd, 0);
-		g_pD3DVtxBuffFieldDraw->Lock(0, 0, (void**)&pVtxDraw, 0);
+		this[0].pD3DVtxBuffFieldStart->Lock(0, 0, (void**)&pVtxStart, 0);
+		this[0].pD3DVtxBuffFieldEnd->Lock(0, 0, (void**)&pVtxEnd, 0);
+		this[0].pD3DVtxBuffFieldDraw->Lock(0, 0, (void**)&pVtxDraw, 0);
 
 		float dt = 1.0f / 60.0f;	// 1フレームで進める時間
-		g_time += dt;
+		time += dt;
 
-		for (int nCntVtxZ = 0; nCntVtxZ < (g_nNumBlockZField + 1); nCntVtxZ++)
+		for (int nCntVtxZ = 0; nCntVtxZ < (this[0].nNumBlockZField + 1); nCntVtxZ++)
 		{
-			for (int nCntVtxX = 0; nCntVtxX < (g_nNumBlockXField + 1); nCntVtxX++)
+			for (int nCntVtxX = 0; nCntVtxX < (this[0].nNumBlockZField + 1); nCntVtxX++)
 			{
 				//縮退ポリゴンよけなさい
-				if (nCntVtxZ*nCntVtxX == g_nNumVertexIndexField - 2) break;
-				else if (pVtxDraw[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx == pVtxDraw[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX + 1].vtx) continue;
-				else if (pVtxDraw[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX + 1].vtx == pVtxDraw[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX + 2].vtx) continue;
+				if (nCntVtxZ*nCntVtxX == this[0].model.nNumVertexIndex - 2) break;
+				else if (pVtxDraw[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx == pVtxDraw[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX + 1].vtx) continue;
+				else if (pVtxDraw[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX + 1].vtx == pVtxDraw[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX + 2].vtx) continue;
 
 				//補間開始
-				pVtxDraw[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx = MyInterpolation(
-					pVtxStart[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx, 
-					pVtxEnd[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx,
-					0.0, 1.0f, dt, g_time, LerpEaseInEaseOut);
+				pVtxDraw[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx = MyInterpolation(
+					pVtxStart[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx, 
+					pVtxEnd[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx,
+					0.0, 1.0f, dt, time, LerpEaseInEaseOut);
 
 				// 反射光の設定
-				if (pVtxDraw[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx.y >= FIELD_Y_HIGH)
+				if (pVtxDraw[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y >= FIELD_Y_HIGH)
 				{
-					pVtxDraw[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].diffuse = D3DXCOLOR(0.4f, 0.4f, 0.4f, 1.0f);//山
+					pVtxDraw[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].diffuse = D3DXCOLOR(0.4f, 0.4f, 0.4f, 1.0f);//山
 				}
-				else if (pVtxDraw[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx.y < FIELD_Y_HIGH && pVtxDraw[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx.y > FIELD_Y_LOW)
+				else if (pVtxDraw[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y < FIELD_Y_HIGH && pVtxDraw[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y > FIELD_Y_LOW)
 				{
-					pVtxDraw[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].diffuse = D3DXCOLOR(0.3f, 1.0f, 0.3f, 1.0f);//緑
+					pVtxDraw[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].diffuse = D3DXCOLOR(0.3f, 1.0f, 0.3f, 1.0f);//緑
 				}
 				else
 				{
-					pVtxDraw[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].diffuse = D3DXCOLOR(0.78f, 0.76f, 0.63f, 1.0f);//砂
+					pVtxDraw[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].diffuse = D3DXCOLOR(0.78f, 0.76f, 0.63f, 1.0f);//砂
 				}
 			}
 		}
-		if (g_time >= 1.0f)
+		if (time >= 1.0f)
 		{
-			//変形が終了したら現在描画している地形をg_pD3DVtxBuffFieldStartへ保存。次の変形開始時の地形にする
-			for (int nCntVtxZ = 0; nCntVtxZ < (g_nNumBlockZField + 1); nCntVtxZ++)
+			//変形が終了したら現在描画している地形をpD3DVtxBuffFieldStartへ保存。次の変形開始時の地形にする
+			for (int nCntVtxZ = 0; nCntVtxZ < (this[0].nNumBlockZField + 1); nCntVtxZ++)
 			{
-				for (int nCntVtxX = 0; nCntVtxX < (g_nNumBlockXField + 1); nCntVtxX++)
+				for (int nCntVtxX = 0; nCntVtxX < (this[0].nNumBlockZField + 1); nCntVtxX++)
 				{
-					pVtxStart[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx = pVtxDraw[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx;
+					pVtxStart[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx = pVtxDraw[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx;
 				}
 			}
-			g_time = 0.0f;
+			time = 0.0f;
 			InterPolationFieldSignalEnd = true;
 		}
 		// 頂点データをアンロックする
-		g_pD3DVtxBuffFieldStart->Unlock();
-		g_pD3DVtxBuffFieldDraw->Unlock();
-		g_pD3DVtxBuffFieldEnd->Unlock();
+		this[0].pD3DVtxBuffFieldStart->Unlock();
+		this[0].pD3DVtxBuffFieldDraw->Unlock();
+		this[0].pD3DVtxBuffFieldEnd->Unlock();
 	}
-	if (InterPolationFieldSignalEnd == true)
+	if (this[0].InterPolationFieldSignalEnd == true)
 	{
-		InterPolationFieldSignalEnd = false;
+		this[0].InterPolationFieldSignalEnd = false;
 		StopSound(SOUND_LABEL_SE_quake);
 		return true;
 	}
@@ -947,33 +984,35 @@ bool InterPolationField(void)
 //=============================================================================
 // 縮退ポリゴンの座標を再計算する関数　地形変形後、縮退ポリゴンの座標を設定する
 //=============================================================================
-void SetDegenerationPoly(void)
+void FIELD::SetDegenerationPoly(void)
 {
 	VERTEX_3D *pVtxDraw;
 	// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
-	g_pD3DVtxBuffFieldDraw->Lock(0, 0, (void**)&pVtxDraw, 0);
+	this[0].pD3DVtxBuffFieldDraw->Lock(0, 0, (void**)&pVtxDraw, 0);
 
-	for (int nCntVtxZ = 0; nCntVtxZ < (g_nNumBlockZField + 1); nCntVtxZ++)
+	for (int nCntVtxZ = 0; nCntVtxZ < (this[0].nNumBlockZField + 1); nCntVtxZ++)
 	{
-		for (int nCntVtxX = 0; nCntVtxX < (g_nNumBlockXField + 1); nCntVtxX++)
+		for (int nCntVtxX = 0; nCntVtxX < (this[0].nNumBlockZField + 1); nCntVtxX++)
 		{
 			//縮退ポリゴンの
-			if (pVtxDraw[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx == pVtxDraw[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX + 1].vtx)
+			if (pVtxDraw[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx == pVtxDraw[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX + 1].vtx)
 			{
-				pVtxDraw[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX].vtx = pVtxDraw[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX + 1].vtx;
+				pVtxDraw[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx = pVtxDraw[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX + 1].vtx;
 			}
-			else if (pVtxDraw[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX + 1].vtx == pVtxDraw[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX + 2].vtx)
+			else if (pVtxDraw[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX + 1].vtx == pVtxDraw[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX + 2].vtx)
 			{
-				pVtxDraw[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX + 1].vtx = pVtxDraw[nCntVtxZ * (g_nNumBlockXField + 1) + nCntVtxX + 2].vtx;
+				pVtxDraw[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX + 1].vtx = pVtxDraw[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX + 2].vtx;
 			}
 		}
 	}
+
+	this[0].pD3DVtxBuffFieldDraw->Unlock();
 }
 
 //=============================================================================
 // 地形との当たり判定 rayS,rayG,vtxHOUSEN,posy 返り値void バレットの当たり判定で使用
 //=============================================================================
-void FieldHit(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVECTOR3 *vtxNor, float *posY)
+void FIELD::FieldHit(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVECTOR3 *vtxNor, float *posY)
 {
 	//頂点バッファの中身を埋める
 	VERTEX_3D *pVtx;
@@ -987,17 +1026,17 @@ void FieldHit(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVECTOR3 *vtxNor, float
 
 	//高速化処理。4分木で当たり判定をする範囲を絞る。
 	SpeedUpFieldHitPoly(InrayS, &HitPosUp, &HitPosDown, &HitPosLeft, &HitPosRight, 
-		g_fSideSizeXHalf, g_fSideSizeZHalf, g_fSideSizeXEighth, g_fSideSizeZEighth);
+		fSideSizeXHalf, fSideSizeZHalf, fSideSizeXEighth, fSideSizeZEighth);
 
 	// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
-	g_pD3DVtxBuffFieldDraw->Lock(0, 0, (void**)&pVtx, 0);
-	g_pD3DIdxBuffFieldDraw->Lock(0, 0, (void**)&pIdx, 0);
+	this[0].pD3DVtxBuffFieldDraw->Lock(0, 0, (void**)&pVtx, 0);
+	this[0].model.pD3DIdxBuff->Lock(0, 0, (void**)&pIdx, 0);
 
 
-	for (int nCntVtx = 0; nCntVtx < g_nNumVertexIndexField; nCntVtx++)
+	for (int nCntVtx = 0; nCntVtx < int(this[0].model.nNumVertexIndex); nCntVtx++)
 	{
 		//縮退ポリゴンのときはコンティニュー。最終ポリゴンの時はbreak;
-		if (nCntVtx == g_nNumVertexIndexField - 2)
+		if (nCntVtx == this[0].model.nNumVertexIndex - 2)
 		{
 			break;
 		}
@@ -1019,9 +1058,11 @@ void FieldHit(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVECTOR3 *vtxNor, float
 				D3DXVECTOR3 vtxHen[2];
 				D3DXVECTOR3 NaibunPos;
 
-				vtx[0] = pVtx[pIdx[nCntVtx]].vtx + g_posField;
-				vtx[1] = pVtx[pIdx[nCntVtx + 1]].vtx + g_posField;
-				vtx[2] = pVtx[pIdx[nCntVtx + 2]].vtx + g_posField;
+				//-----------------------オブジェクト読み込み
+				D3DXVECTOR3 pos = this[0].GetPos();
+				vtx[0] = pVtx[pIdx[nCntVtx]].vtx + pos;
+				vtx[1] = pVtx[pIdx[nCntVtx + 1]].vtx + pos;
+				vtx[2] = pVtx[pIdx[nCntVtx + 2]].vtx + pos;
 
 				//レイキャストで調べる。trueで座標yを変更
 				if (RayCast(InrayS, InrayG, vtx[0], vtx[1], vtx[2], &NaibunPos))
@@ -1042,16 +1083,16 @@ void FieldHit(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVECTOR3 *vtxNor, float
 	}
 
 	// 頂点データをアンロックする
-	g_pD3DVtxBuffFieldDraw->Unlock();
+	this[0].pD3DVtxBuffFieldDraw->Unlock();
 	// インデックスデータをアンロックする
-	g_pD3DIdxBuffFieldDraw->Unlock();
+	this[0].model.pD3DIdxBuff->Unlock();
 
 }
 
 //=============================================================================
 // 地形との当たり判定 rayS,rayG,vtxHOUSEN,posy 返り値void　プレイヤーの当たり判定で使用。球面補間で使用するため。
 //=============================================================================
-void FieldHitGetSphereVec(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVECTOR3 *vtxNor, float *posY)
+void FIELD::FieldHitGetSphereVec(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVECTOR3 *vtxNor, float *posY)
 {
 	//頂点バッファの中身を埋める
 	VERTEX_3D *pVtx;
@@ -1065,18 +1106,18 @@ void FieldHitGetSphereVec(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVECTOR3 *v
 
 	//高速化処理。4分木で当たり判定をする範囲を絞る。
 	SpeedUpFieldHitPoly(InrayS, &HitPosUp, &HitPosDown, &HitPosLeft, &HitPosRight,
-		g_fSideSizeXQuarter, g_fSideSizeZQuarter, g_fSideSizeXEighth, g_fSideSizeZEighth);
+		fSideSizeXQuarter, fSideSizeZQuarter, fSideSizeXEighth, fSideSizeZEighth);
 
 
 	// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
-	g_pD3DVtxBuffFieldDraw->Lock(0, 0, (void**)&pVtx, 0);
-	g_pD3DIdxBuffFieldDraw->Lock(0, 0, (void**)&pIdx, 0);
+	this[0].pD3DVtxBuffFieldDraw->Lock(0, 0, (void**)&pVtx, 0);
+	this[0].model.pD3DIdxBuff->Lock(0, 0, (void**)&pIdx, 0);
 
 
-		for (int nCntVtx = 0; nCntVtx < g_nNumVertexIndexField; nCntVtx++)
+		for (int nCntVtx = 0; nCntVtx < int(this[0].model.nNumVertexIndex); nCntVtx++)
 		{
 			//縮退ポリゴンのときはコンティニュー。最終ポリゴンの時はbreak;
-			if (nCntVtx == g_nNumVertexIndexField - 2)
+			if (nCntVtx == this[0].model.nNumVertexIndex - 2)
 			{
 				break;
 			}
@@ -1098,9 +1139,11 @@ void FieldHitGetSphereVec(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVECTOR3 *v
 					D3DXVECTOR3 vtxHen[2];
 					D3DXVECTOR3 NaibunPos;
 
-					vtx[0] = pVtx[pIdx[nCntVtx]].vtx + g_posField;
-					vtx[1] = pVtx[pIdx[nCntVtx + 1]].vtx + g_posField;
-					vtx[2] = pVtx[pIdx[nCntVtx + 2]].vtx + g_posField;
+					//-----------------------オブジェクト読み込み
+					D3DXVECTOR3 pos = this[0].GetPos();
+					vtx[0] = pVtx[pIdx[nCntVtx]].vtx + pos;
+					vtx[1] = pVtx[pIdx[nCntVtx + 1]].vtx + pos;
+					vtx[2] = pVtx[pIdx[nCntVtx + 2]].vtx + pos;
 
 					//レイキャストで調べる。trueで座標yを変更
 					if (RayCast(InrayS, InrayG, vtx[0], vtx[1], vtx[2], &NaibunPos))
@@ -1126,7 +1169,7 @@ void FieldHitGetSphereVec(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVECTOR3 *v
 						if (pVtx[pIdx[nCntVtx]].vtx.z < pVtx[pIdx[nCntVtx + 1]].vtx.z)
 						{
 							//特別な頂点番号
-							if (nCntVtx == g_nNumVertexIndexField - g_nNumBlockXField * 2)
+							if (nCntVtx == this[0].model.nNumVertexIndex - this[0].nNumBlockZField * 2)
 							{
 								//頂点境界辺に近づくと球面線形補間で姿勢ベクトルを制御
 								float MinDistance = PointAndLineMinDistance(InrayS, pVtx[pIdx[nCntVtx + 1]].vtx, pVtx[pIdx[nCntVtx + 2]].vtx);
@@ -1145,8 +1188,8 @@ void FieldHitGetSphereVec(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVECTOR3 *v
 									*vtxNor = NewPolyNorVec;
 								}
 							}
-							//　左　左下直角三角形で今の頂点番号がg_nNumBlockZField以下ならば、地面の最左端にいる
-							//else if (nCntVtx >= g_nNumBlockZField)
+							//　左　左下直角三角形で今の頂点番号がthis[0].nNumBlockZField以下ならば、地面の最左端にいる
+							//else if (nCntVtx >= this[0].nNumBlockZField)
 							//{
 							//	int a = 0;
 
@@ -1181,7 +1224,7 @@ void FieldHitGetSphereVec(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVECTOR3 *v
 
 									// 2つめ　辺先にある地面ポリゴンの法線を求める MinDistanceDown
 									D3DXVECTOR3 NextPolyNorVec2;
-									D3DXVec3Cross(&NextPolyNorVec2, &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 2]].vtx - pVtx[pIdx[nCntVtx]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx + (g_nNumBlockXField * 2 + 6)]].vtx - pVtx[pIdx[nCntVtx]].vtx));
+									D3DXVec3Cross(&NextPolyNorVec2, &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 2]].vtx - pVtx[pIdx[nCntVtx]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx + (this[0].nNumBlockZField * 2 + 6)]].vtx - pVtx[pIdx[nCntVtx]].vtx));
 									if (NextPolyNorVec2.y <= 0) NextPolyNorVec2 *= -1;
 									D3DXVec3Normalize(&NextPolyNorVec2, &NextPolyNorVec2);
 
@@ -1208,7 +1251,7 @@ void FieldHitGetSphereVec(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVECTOR3 *v
 
 									// 2つめ　辺先にある地面ポリゴンの法線を求める MinDistanceLeft
 									D3DXVECTOR3 NextPolyNorVec2;
-									D3DXVec3Cross(&NextPolyNorVec2, &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 2]].vtx - pVtx[pIdx[nCntVtx]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx + (g_nNumBlockXField * 2 + 6)]].vtx - pVtx[pIdx[nCntVtx]].vtx));
+									D3DXVec3Cross(&NextPolyNorVec2, &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 2]].vtx - pVtx[pIdx[nCntVtx]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx + (this[0].nNumBlockZField * 2 + 6)]].vtx - pVtx[pIdx[nCntVtx]].vtx));
 									if (NextPolyNorVec2.y <= 0) NextPolyNorVec2 *= -1;
 									D3DXVec3Normalize(&NextPolyNorVec2, &NextPolyNorVec2);
 
@@ -1230,13 +1273,13 @@ void FieldHitGetSphereVec(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVECTOR3 *v
 								{
 									// 1つめ　辺先にある地面ポリゴンの法線を求める MinDistanceDown
 									D3DXVECTOR3 NextPolyNorVec1;
-									D3DXVec3Cross(&NextPolyNorVec1, &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 2]].vtx - pVtx[pIdx[nCntVtx]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx + (g_nNumBlockXField * 2 + 6)]].vtx - pVtx[pIdx[nCntVtx]].vtx));
+									D3DXVec3Cross(&NextPolyNorVec1, &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 2]].vtx - pVtx[pIdx[nCntVtx]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx + (this[0].nNumBlockZField * 2 + 6)]].vtx - pVtx[pIdx[nCntVtx]].vtx));
 									if (NextPolyNorVec1.y <= 0) NextPolyNorVec1 *= -1;
 									D3DXVec3Normalize(&NextPolyNorVec1, &NextPolyNorVec1);
 
 									// 2つめ　辺先にある地面ポリゴンの法線を求める MinDistanceLeft
 									D3DXVECTOR3 NextPolyNorVec2;
-									D3DXVec3Cross(&NextPolyNorVec2, &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 2]].vtx - pVtx[pIdx[nCntVtx]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx + (g_nNumBlockXField * 2 + 6)]].vtx - pVtx[pIdx[nCntVtx]].vtx));
+									D3DXVec3Cross(&NextPolyNorVec2, &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 2]].vtx - pVtx[pIdx[nCntVtx]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx + (this[0].nNumBlockZField * 2 + 6)]].vtx - pVtx[pIdx[nCntVtx]].vtx));
 									if (NextPolyNorVec2.y <= 0) NextPolyNorVec2 *= -1;
 									D3DXVec3Normalize(&NextPolyNorVec2, &NextPolyNorVec2);
 
@@ -1273,7 +1316,7 @@ void FieldHitGetSphereVec(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVECTOR3 *v
 								{
 									//辺先にある地面ポリゴンの法線を求める
 									D3DXVECTOR3 NextPolyNorVec;
-									D3DXVec3Cross(&NextPolyNorVec, &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 2]].vtx - pVtx[pIdx[nCntVtx]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx + (g_nNumBlockXField * 2 + 6)]].vtx - pVtx[pIdx[nCntVtx]].vtx));
+									D3DXVec3Cross(&NextPolyNorVec, &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 2]].vtx - pVtx[pIdx[nCntVtx]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx + (this[0].nNumBlockZField * 2 + 6)]].vtx - pVtx[pIdx[nCntVtx]].vtx));
 									if (NextPolyNorVec.y <= 0) NextPolyNorVec *= -1;
 									D3DXVec3Normalize(&NextPolyNorVec, &NextPolyNorVec);
 									D3DXVECTOR3 NowPolyNorVec;
@@ -1303,7 +1346,7 @@ void FieldHitGetSphereVec(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVECTOR3 *v
 						else
 						{
 							//特別な頂点番号
-							if (nCntVtx == g_nNumBlockXField * 2 - 3)
+							if (nCntVtx == this[0].nNumBlockZField * 2 - 3)
 							{
 								//頂点境界辺に近づくと球面線形補間で姿勢ベクトルを制御
 								float MinDistance = PointAndLineMinDistance(InrayS, pVtx[pIdx[nCntVtx]].vtx, pVtx[pIdx[nCntVtx + 1]].vtx);
@@ -1332,8 +1375,8 @@ void FieldHitGetSphereVec(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVECTOR3 *v
 							{
 
 							}
-							//　右　右上直角三角形で今の頂点番号がg_nNumBlockXField以上ならば、地面の最右端にいる
-							//else if (nCntVtx >= g_nNumBlockXField * g_nNumBlockZField)
+							//　右　右上直角三角形で今の頂点番号がthis[0].nNumBlockZField以上ならば、地面の最右端にいる
+							//else if (nCntVtx >= this[0].nNumBlockZField * this[0].nNumBlockZField)
 							//{
 
 							//}
@@ -1354,7 +1397,7 @@ void FieldHitGetSphereVec(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVECTOR3 *v
 
 									// 2つめ　辺先にある地面ポリゴンの法線を求める MinDistanceUp
 									D3DXVECTOR3 NextPolyNorVec2;
-									D3DXVec3Cross(&NextPolyNorVec2, &D3DXVECTOR3(pVtx[pIdx[nCntVtx - (g_nNumBlockXField * 2 + 6)]].vtx - pVtx[pIdx[nCntVtx]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 2]].vtx - pVtx[pIdx[nCntVtx]].vtx));
+									D3DXVec3Cross(&NextPolyNorVec2, &D3DXVECTOR3(pVtx[pIdx[nCntVtx - (this[0].nNumBlockZField * 2 + 6)]].vtx - pVtx[pIdx[nCntVtx]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 2]].vtx - pVtx[pIdx[nCntVtx]].vtx));
 									if (NextPolyNorVec2.y <= 0) NextPolyNorVec2 *= -1;
 									D3DXVec3Normalize(&NextPolyNorVec2, &NextPolyNorVec2);
 
@@ -1403,13 +1446,13 @@ void FieldHitGetSphereVec(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVECTOR3 *v
 								{
 									// 1つめ　辺先にある地面ポリゴンの法線を求める MinDistanceUp
 									D3DXVECTOR3 NextPolyNorVec1;
-									D3DXVec3Cross(&NextPolyNorVec1, &D3DXVECTOR3(pVtx[pIdx[nCntVtx - (g_nNumBlockXField * 2 + 6)]].vtx - pVtx[pIdx[nCntVtx]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 2]].vtx - pVtx[pIdx[nCntVtx]].vtx));
+									D3DXVec3Cross(&NextPolyNorVec1, &D3DXVECTOR3(pVtx[pIdx[nCntVtx - (this[0].nNumBlockZField * 2 + 6)]].vtx - pVtx[pIdx[nCntVtx]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 2]].vtx - pVtx[pIdx[nCntVtx]].vtx));
 									if (NextPolyNorVec1.y <= 0) NextPolyNorVec1 *= -1;
 									D3DXVec3Normalize(&NextPolyNorVec1, &NextPolyNorVec1);
 
 									// 2つめ　辺先にある地面ポリゴンの法線を求める MinDistanceLeftDown
 									D3DXVECTOR3 NextPolyNorVec2;
-									D3DXVec3Cross(&NextPolyNorVec2, &D3DXVECTOR3(pVtx[pIdx[nCntVtx - (g_nNumBlockXField * 2 + 6)]].vtx - pVtx[pIdx[nCntVtx]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 2]].vtx - pVtx[pIdx[nCntVtx]].vtx));
+									D3DXVec3Cross(&NextPolyNorVec2, &D3DXVECTOR3(pVtx[pIdx[nCntVtx - (this[0].nNumBlockZField * 2 + 6)]].vtx - pVtx[pIdx[nCntVtx]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 2]].vtx - pVtx[pIdx[nCntVtx]].vtx));
 									if (NextPolyNorVec2.y <= 0) NextPolyNorVec2 *= -1;
 									D3DXVec3Normalize(&NextPolyNorVec2, &NextPolyNorVec2);
 
@@ -1447,7 +1490,7 @@ void FieldHitGetSphereVec(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVECTOR3 *v
 								{
 									//辺先にある地面ポリゴンの法線を求める
 									D3DXVECTOR3 NextPolyNorVec;
-									D3DXVec3Cross(&NextPolyNorVec, &D3DXVECTOR3(pVtx[pIdx[nCntVtx - (g_nNumBlockXField * 2 + 6)]].vtx - pVtx[pIdx[nCntVtx]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 2]].vtx - pVtx[pIdx[nCntVtx]].vtx));
+									D3DXVec3Cross(&NextPolyNorVec, &D3DXVECTOR3(pVtx[pIdx[nCntVtx - (this[0].nNumBlockZField * 2 + 6)]].vtx - pVtx[pIdx[nCntVtx]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 2]].vtx - pVtx[pIdx[nCntVtx]].vtx));
 									if (NextPolyNorVec.y <= 0) NextPolyNorVec *= -1;
 									D3DXVec3Normalize(&NextPolyNorVec, &NextPolyNorVec);
 									D3DXVECTOR3 NowPolyNorVec;
@@ -1484,16 +1527,16 @@ void FieldHitGetSphereVec(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVECTOR3 *v
 		}
 
 	// 頂点データをアンロックする
-	g_pD3DVtxBuffFieldDraw->Unlock();
+		this[0].pD3DVtxBuffFieldDraw->Unlock();
 	// インデックスデータをアンロックする
-	g_pD3DIdxBuffFieldDraw->Unlock();
+	this[0].model.pD3DIdxBuff->Unlock();
 
 }
 
 //=============================================================================
 // 地形との当たり判定 rayS,rayG,vtxHOUSEN,posy 返り値bool アイテムの当たり判定で使用
 //=============================================================================
-bool FieldHitItem(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVECTOR3 *vtxNor, float *posY)
+bool FIELD::FieldHitItem(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVECTOR3 *vtxNor, float *posY)
 {
 	bool Cheack = false;
 	//頂点バッファの中身を埋める
@@ -1508,17 +1551,17 @@ bool FieldHitItem(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVECTOR3 *vtxNor, f
 
 	//高速化処理。4分木で当たり判定をする範囲を絞る。
 	SpeedUpFieldHitPoly(InrayS, &HitPosUp, &HitPosDown, &HitPosLeft, &HitPosRight,
-		g_fSideSizeXHalf, g_fSideSizeZHalf, g_fSideSizeXEighth, g_fSideSizeZEighth);
+		fSideSizeXHalf, fSideSizeZHalf, fSideSizeXEighth, fSideSizeZEighth);
 
 	// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
-	g_pD3DVtxBuffFieldDraw->Lock(0, 0, (void**)&pVtx, 0);
-	g_pD3DIdxBuffFieldDraw->Lock(0, 0, (void**)&pIdx, 0);
+	this[0].pD3DVtxBuffFieldDraw->Lock(0, 0, (void**)&pVtx, 0);
+	this[0].model.pD3DIdxBuff->Lock(0, 0, (void**)&pIdx, 0);
 
 
-	for (int nCntVtx = 0; nCntVtx < g_nNumVertexIndexField; nCntVtx++)
+	for (int nCntVtx = 0; nCntVtx < int(this[0].model.nNumVertexIndex); nCntVtx++)
 	{
 		//縮退ポリゴンのときはコンティニュー。最終ポリゴンの時はbreak;
-		if (nCntVtx == g_nNumVertexIndexField - 2)
+		if (nCntVtx == this[0].model.nNumVertexIndex - 2)
 		{
 			break;
 		}
@@ -1542,9 +1585,11 @@ bool FieldHitItem(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVECTOR3 *vtxNor, f
 					D3DXVECTOR3 vtxHen[2];
 					D3DXVECTOR3 NaibunPos;
 
-					vtx[0] = pVtx[pIdx[nCntVtx]].vtx + g_posField;
-					vtx[1] = pVtx[pIdx[nCntVtx + 1]].vtx + g_posField;
-					vtx[2] = pVtx[pIdx[nCntVtx + 2]].vtx + g_posField;
+					//-----------------------オブジェクト読み込み
+					D3DXVECTOR3 pos = this[0].GetPos();
+					vtx[0] = pVtx[pIdx[nCntVtx]].vtx + pos;
+					vtx[1] = pVtx[pIdx[nCntVtx + 1]].vtx + pos;
+					vtx[2] = pVtx[pIdx[nCntVtx + 2]].vtx + pos;
 
 					//レイキャストで調べる。trueで座標yを変更
 					if (RayCast(InrayS, InrayG, vtx[0], vtx[1], vtx[2], &NaibunPos))
@@ -1566,9 +1611,9 @@ bool FieldHitItem(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVECTOR3 *vtxNor, f
 	}
 
 	// 頂点データをアンロックする
-	g_pD3DVtxBuffFieldDraw->Unlock();
+	this[0].pD3DVtxBuffFieldDraw->Unlock();
 	// インデックスデータをアンロックする
-	g_pD3DIdxBuffFieldDraw->Unlock();
+	this[0].model.pD3DIdxBuff->Unlock();
 	if (Cheack == true) return true;
 
 	return false;

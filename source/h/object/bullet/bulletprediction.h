@@ -13,11 +13,11 @@
 class BULLETPREDICTION : public OBJECT_3D
 {
 public:
-	void						Init(void);					//!< 初期化
-	void						Reinit(void);				//!< 再初期化
-	void						Uninit(void);				//!< 終了
-	void						Update(void);				//!< 更新
-	void						Draw(void);					//!< 描画
+	virtual void						Init(void);					//!< 初期化
+	virtual void						Reinit(void);				//!< 再初期化
+	virtual void						Uninit(void);				//!< 終了
+	virtual void						Update(void);				//!< 更新
+	virtual void						Draw(void);					//!< 描画
 	HRESULT						MakeVertexBulletprediction(LPDIRECT3DDEVICE9 pDevice);
 	void						SetVertexBulletprediction(int PlayerType, int nIdxBulletprediction, float fSizeX, float fSizeY);
 	void						SetColorBulletprediction(int PlayerType, int nIdxBulletprediction, D3DXCOLOR col);

@@ -50,10 +50,11 @@ int					stop = 0;					//!< デバッグ時の一時停止用変数
 void ReinitGame(GAME_OBJECT *obj)
 {
 	InitCamera();
+	GAME_OBJECT *Resetobj = obj->GetPointerPlayer();
 
-	for (int CntOBJ = 0; CntOBJ < OBJECT_ALL_MAX; CntOBJ++,obj++)
+	for (int CntOBJ = 0; CntOBJ < OBJECT_ALL_MAX; CntOBJ++)
 	{
-		obj[CntOBJ].Reinit();
+		Resetobj[CntOBJ].Reinit();
 	}
 }
 
@@ -99,10 +100,16 @@ void UpdateGame(GAME_OBJECT *GameObj)
 			//チュートリアル更新
 			tuto->Update();
 
+			//-----------------------------------オブジェクト先頭アドレスを読み込み
+			GAME_OBJECT *fieldobj = GameObj->GetPointerField();
+			FIELD *field = dynamic_cast<FIELD*>(&fieldobj[0]);
+			GAME_OBJECT *skyobj = GameObj->GetPointerSky();
+			SKY *sky = dynamic_cast<SKY*>(&skyobj[0]);
+
 			// map更新
-			UpdateMeshField();
-			UpdateMeshSky();
-			UpdateMeshWall();
+			field->Update();
+			sky->Update();
+
 			//-----------------------------------オブジェクト先頭アドレスを読み込み
 			GAME_OBJECT *playerobj = GameObj->GetPointerPlayer();
 			PLAYER_HONTAI *player = dynamic_cast<PLAYER_HONTAI*>(&playerobj[0]);
@@ -153,10 +160,15 @@ void UpdateGame(GAME_OBJECT *GameObj)
 		}
 		case SCENE_GAME:
 		{
-			// map処理の更新
-			UpdateMeshField();
-			UpdateMeshSky();
-			UpdateMeshWall();
+			//-----------------------------------オブジェクト先頭アドレスを読み込み
+			GAME_OBJECT *fieldobj = GameObj->GetPointerField();
+			FIELD *field = dynamic_cast<FIELD*>(&fieldobj[0]);
+			GAME_OBJECT *skyobj = GameObj->GetPointerSky();
+			SKY *sky = dynamic_cast<SKY*>(&skyobj[0]);
+
+			// map更新
+			field->Update();
+			sky->Update();
 
 			//-----------------------------------オブジェクト先頭アドレスを読み込み
 			GAME_OBJECT *playerobj = GameObj->GetPointerPlayer();
@@ -292,11 +304,17 @@ void DrawGame(GAME_OBJECT *GameObj)
 				DAMEGE *damege = dynamic_cast<DAMEGE*>(&damegeobj[0]);
 				GAME_OBJECT *statusobj = GameObj->GetPointerStatus();
 				STATUS *status = dynamic_cast<STATUS*>(&statusobj[0]);
+				GAME_OBJECT *fieldobj = GameObj->GetPointerField();
+				FIELD *field = dynamic_cast<FIELD*>(&fieldobj[0]);
+				GAME_OBJECT *skyobj = GameObj->GetPointerSky();
+				SKY *sky = dynamic_cast<SKY*>(&skyobj[0]);
+				GAME_OBJECT *wallobj = GameObj->GetPointerWall();
+				WALL *wall = dynamic_cast<WALL*>(&wallobj[0]);
 
-				//map
-				DrawMeshSky();
-				DrawMeshField();
-				DrawMeshWall();
+				// map描画
+				field->Draw();
+				sky->Draw();
+				wall->Draw();
 
 				//3D空間
 				player->Draw();
@@ -348,11 +366,17 @@ void DrawGame(GAME_OBJECT *GameObj)
 				DAMEGE *damege = dynamic_cast<DAMEGE*>(&damegeobj[0]);
 				GAME_OBJECT *statusobj = GameObj->GetPointerStatus();
 				STATUS *status = dynamic_cast<STATUS*>(&statusobj[0]);
+				GAME_OBJECT *fieldobj = GameObj->GetPointerField();
+				FIELD *field = dynamic_cast<FIELD*>(&fieldobj[0]);
+				GAME_OBJECT *skyobj = GameObj->GetPointerSky();
+				SKY *sky = dynamic_cast<SKY*>(&skyobj[0]);
+				GAME_OBJECT *wallobj = GameObj->GetPointerWall();
+				WALL *wall = dynamic_cast<WALL*>(&wallobj[0]);
 
-				//map
-				DrawMeshSky();
-				DrawMeshField();
-				DrawMeshWall();
+				// map描画
+				field->Draw();
+				sky->Draw();
+				wall->Draw();
 
 				//3D空間
 				player->Draw();
@@ -415,11 +439,17 @@ void DrawGame(GAME_OBJECT *GameObj)
 					DAMEGE *damege = dynamic_cast<DAMEGE*>(&damegeobj[0]);
 					GAME_OBJECT *statusobj = GameObj->GetPointerStatus();
 					STATUS *status = dynamic_cast<STATUS*>(&statusobj[0]);
+					GAME_OBJECT *fieldobj = GameObj->GetPointerField();
+					FIELD *field = dynamic_cast<FIELD*>(&fieldobj[0]);
+					GAME_OBJECT *skyobj = GameObj->GetPointerSky();
+					SKY *sky = dynamic_cast<SKY*>(&skyobj[0]);
+					GAME_OBJECT *wallobj = GameObj->GetPointerWall();
+					WALL *wall = dynamic_cast<WALL*>(&wallobj[0]);
 
-					//map
-					DrawMeshSky();
-					DrawMeshField();
-					DrawMeshWall();
+					// map描画
+					field->Draw();
+					sky->Draw();
+					wall->Draw();
 
 					//3D空間
 					player->Draw();
@@ -462,14 +492,21 @@ void DrawGame(GAME_OBJECT *GameObj)
 					STATUS *status = dynamic_cast<STATUS*>(&statusobj[0]);
 					GAME_OBJECT *rankobj = GameObj->GetPointerRank();
 					RANK *rank = dynamic_cast<RANK*>(&rankobj[0]);
+					GAME_OBJECT *fieldobj = GameObj->GetPointerField();
+					FIELD *field = dynamic_cast<FIELD*>(&fieldobj[0]);
+					GAME_OBJECT *skyobj = GameObj->GetPointerSky();
+					SKY *sky = dynamic_cast<SKY*>(&skyobj[0]);
+					GAME_OBJECT *wallobj = GameObj->GetPointerWall();
+					WALL *wall = dynamic_cast<WALL*>(&wallobj[0]);
 
 					// カメラの設定
 					SetCamera(CntPlayer);
 
-					//map
-					DrawMeshSky();
-					DrawMeshField();
-					DrawMeshWall();
+
+					// map描画
+					field->Draw();
+					sky->Draw();
+					wall->Draw();
 
 					//3D空間
 					player->Draw();

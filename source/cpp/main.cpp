@@ -215,6 +215,15 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	ObjectAll->SetPointerTitle(ObjectAll->GetCnt());
 	ObjectAll->obj = new TITLE[OBJECT_TITLE_MAX];
 
+	ObjectAll->SetPointerField(ObjectAll->GetCnt());
+	ObjectAll->obj = new FIELD[OBJECT_FIELD_MAX];
+
+	ObjectAll->SetPointerSky(ObjectAll->GetCnt());
+	ObjectAll->obj = new SKY[OBJECT_SKY_MAX];
+
+	ObjectAll->SetPointerWall(ObjectAll->GetCnt());
+	ObjectAll->obj = new WALL[OBJECT_WALL_MAX];
+
 	if (FAILED(Init(hInstance, hWnd, mode)))
 	{
 		return -1;
@@ -452,57 +461,8 @@ HRESULT Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	InitSound(hWnd);
 	InitDebugProc();
 	InitFade();
-	//InitTitle();
-	//InitTutorial(0);
-	//InitCountdown(0);
-	//InitResult(0);
-	//InitBullet(0);
-	//InitEffect(0);
-	//InitBulletprediction(0);
-	//InitExplosion(0);
-	//InitVitalGauge();
-	//InitBulletGauge();
-	//InitDamege(0);
-	//InitStatus(0);
-	//InitRank(0);
-
-
-	// フィールドの初期化
-	{
-		// 空の初期化
-		InitMeshSky(D3DXVECTOR3(0.0f, -100.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), 16, 8, 4000.0f, 0.0001f);
-
-		// 地面の初期化
-		InitMeshField(D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), 32, 32, 250.0f,250.0f);
-
-		// 壁の初期化
-		InitMeshWall(D3DXVECTOR3(0.0f, 0.0f, WALL_INIT_POSZ), D3DXVECTOR3(0.0f, 0.0f, 0.0f),
-			D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f), 1, 1, WALL_SIZE_X, WALL_SIZE_Y);
-		InitMeshWall(D3DXVECTOR3(-WALL_INIT_POSX, 0.0f, 0.0f), D3DXVECTOR3(0.0f, -D3DX_PI * 0.50f, 0.0f),
-			D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f), 1, 1, WALL_SIZE_X, WALL_SIZE_Y);
-		InitMeshWall(D3DXVECTOR3(WALL_INIT_POSX, 0.0f, 0.0f), D3DXVECTOR3(0.0f, D3DX_PI * 0.50f, 0.0f),
-			D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f), 1, 1, WALL_SIZE_X, WALL_SIZE_Y);
-		InitMeshWall(D3DXVECTOR3(0.0f, 0.0f, -WALL_INIT_POSZ), D3DXVECTOR3(0.0f, D3DX_PI, 0.0f),
-			D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f), 1, 1, WALL_SIZE_X, WALL_SIZE_Y);
-
-		/*
-		// 壁(裏側用の半透明)
-		InitMeshWall(D3DXVECTOR3(0.0f, 0.0f, 875.0f), D3DXVECTOR3(0.0f, D3DX_PI, 0.0f),
-			D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.25f), 1, 1, 1750.0f, 1750.0f);
-		InitMeshWall(D3DXVECTOR3(-875.0f, 0.0f, 0.0f), D3DXVECTOR3(0.0f, D3DX_PI * 0.50f, 0.0f),
-			D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.25f), 1, 1, 1750.0f, 1750.0f);
-		InitMeshWall(D3DXVECTOR3(875.0f, 0.0f, 0.0f), D3DXVECTOR3(0.0f, -D3DX_PI * 0.50f, 0.0f),
-			D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.25f), 1, 1, 1750.0f, 1750.0f);
-		InitMeshWall(D3DXVECTOR3(0.0f, 0.0f, -875.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f),
-			D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.25f), 1, 1, 1750.0f, 1750.0f);
-			*/
-
-	}
 	InitCamera();
 	InitLight();
-	//InitShadow(0);
-	//InitPlayer();
-	//InitItem();
 
 	return S_OK;
 }
@@ -523,32 +483,6 @@ void Uninit(void)
 		g_pD3D->Release();
 		g_pD3D = NULL;
 	}
-
-	//UninitPlayer();
-	//UninitInput();
-	//UninitTitle();
-	//UninitResult();
-	//UninitFade();
-	//UninitTutorial();
-	//UninitCountdown();
-	//UninitSound();
-	//UninitBullet();
-	//UninitEffect();
-	//UninitBulletprediction();
-	//UninitExplosion();
-	//UninitItem();
-	//UninitVitalGauge();
-	//UninitBulletGauge();
-	//UninitDamege();
-	//UninitStatus();
-	//UninitRank();
-	//UninitMeshSky();
-	//UninitMeshField();
-	//UninitMeshWall();
-	//UninitPlayer();
-	//UninitShadow();
-	//UninitCamera();
-	//UninitDebugProc();
 }
 
 //=============================================================================

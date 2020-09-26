@@ -65,7 +65,7 @@ void TUTO::Update(void)
 	{
 		PlaySound(SOUND_LABEL_SE_enter02);
 		SetFade(FADE_OUT, SCENE_TITLE, SOUND_LABEL_BGM_title01);
-		InitGame();
+		ReinitGame(&this[0]);
 	}
 	for (int CntPlayer = 0; CntPlayer < OBJECT_TUTORIAL_MAX; CntPlayer++)
 	{

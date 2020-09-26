@@ -53,11 +53,6 @@ public:
 		dashFlag = false;
 	}
 
-
-	//PLAYER_HONTAI *GetPlayerPointer() { return &this[0]; }	//!< 先頭アドレス取得
-	//void *SetPlayerPointer(int cnt) { this[cnt]; }			//!< アドレスセット
-
-
 	PLAYER_PRATS				*parts[2];					//!< モデルのパーツ階層　親本体(砲台)、子パーツ[0](砲塔)、孫パーツ[1](砲身)
 	PLAYER_HONTAI				*Parent;					//!< 親子判定
 	GPUMODEL					*ModelDate[2];				//!< モデルデータ　0ノーマル、1攻撃、2スピード

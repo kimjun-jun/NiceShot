@@ -70,7 +70,7 @@ void RESULT::Update(void)
 {
 	if (IsButtonTriggered(0, BUTTON_A))
 	{
-		ReinitGame();				// ƒQ[ƒ€‚ÌÄ‰Šú‰»ˆ—
+		ReinitGame(&this[0]);				// ƒQ[ƒ€‚ÌÄ‰Šú‰»ˆ—
 		SetFade(FADE_OUT, SCENE_TITLE, SOUND_LABEL_BGM_title01);
 	}
 }
@@ -90,7 +90,7 @@ void RESULT::Draw(void)
 		pDevice->SetTexture(0, this[0].tex2D.GetpD3DTexture());
 
 		// ƒ|ƒŠƒSƒ“‚Ì•`‰æ
-		pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, POLYGON_2D_NUM, this[0].tex2D.GettextureVTX, sizeof(VERTEX_2D));
+		pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, POLYGON_2D_NUM, this[0].tex2D.GettextureVTX(), sizeof(VERTEX_2D));
 	}
 }
 

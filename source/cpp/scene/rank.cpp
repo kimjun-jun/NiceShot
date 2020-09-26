@@ -47,7 +47,9 @@ void RANK::Init(void)
 //=============================================================================
 void RANK::Reinit(void)
 {
-	rank->SetUse(false);
+	this[0].SetUse(false);
+	this[1].SetUse(false);
+	this[2].SetUse(false);
 }
 
 //=============================================================================

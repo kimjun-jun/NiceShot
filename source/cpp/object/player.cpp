@@ -11,6 +11,8 @@
 #include "../../h/map/field.h"
 #include "../../h/other/sound.h"
 #include "../../h/object/bullet/bullet.h"
+#include "../../h/effect/effect.h"
+#include "../../h/other/fade.h"
 #include "../../h/object/player.h"
 
 static D3DXCOLOR PLAYER_COLOR[] = {
@@ -57,94 +59,83 @@ void PLAYER_HONTAI::Init(void)
 		// テクスチャの読み込み
 		D3DXCreateTextureFromFile(pDevice,					// デバイスへのポインタ
 			TEXTURE_MEISAI,									// ファイルの名前
-			&this[CntPlayer].model.pD3DTexture());	// 読み込むメモリー
+			&this[CntPlayer].model.pD3DTexture);	// 読み込むメモリー
 
 
 		/////////////////////////////////////////////////////////////////////////////////////////砲塔
-		this[CntPlayer].parts[PARTSTYPE_HOUTOU].ParentHontai = &this[CntPlayer];
+		this[CntPlayer].parts[PARTSTYPE_HOUTOU]->ParentHontai = &this[CntPlayer];
 
 		// Xファイルの読み込み
-		LoadMesh(MODEL_HOUTOU, &this[CntPlayer].parts[PARTSTYPE_HOUTOU].model.pD3DXBuffMat,
-			&this[CntPlayer].parts[PARTSTYPE_HOUTOU].model.nNumMat, &this[CntPlayer].parts[PARTSTYPE_HOUTOU].model.pD3DXMesh,
-			&this[CntPlayer].parts[PARTSTYPE_HOUTOU].model.pD3DVtxBuff, &this[CntPlayer].parts[PARTSTYPE_HOUTOU].model.pD3DIdxBuff,
-			&this[CntPlayer].parts[PARTSTYPE_HOUTOU].model.nNumVertex, &this[CntPlayer].parts[PARTSTYPE_HOUTOU].model.nNumPolygon,
-			&this[CntPlayer].parts[PARTSTYPE_HOUTOU].model.nNumVertexIndex, &this[CntPlayer].parts[PARTSTYPE_HOUTOU].model.pD3DTexture);
+		LoadMesh(MODEL_HOUTOU, &this[CntPlayer].parts[PARTSTYPE_HOUTOU]->model.pD3DXBuffMat,
+			&this[CntPlayer].parts[PARTSTYPE_HOUTOU]->model.nNumMat, &this[CntPlayer].parts[PARTSTYPE_HOUTOU]->model.pD3DXMesh,
+			&this[CntPlayer].parts[PARTSTYPE_HOUTOU]->model.pD3DVtxBuff, &this[CntPlayer].parts[PARTSTYPE_HOUTOU]->model.pD3DIdxBuff,
+			&this[CntPlayer].parts[PARTSTYPE_HOUTOU]->model.nNumVertex, &this[CntPlayer].parts[PARTSTYPE_HOUTOU]->model.nNumPolygon,
+			&this[CntPlayer].parts[PARTSTYPE_HOUTOU]->model.nNumVertexIndex, &this[CntPlayer].parts[PARTSTYPE_HOUTOU]->model.pD3DTexture);
 
 		//頂点カラーをプレイヤー色に変更
-		this[CntPlayer].SetPlayerMeshColor(this[CntPlayer].parts[PARTSTYPE_HOUTOU].model.pD3DVtxBuff,
-			this[CntPlayer].parts[PARTSTYPE_HOUTOU].model.pD3DIdxBuff, this[CntPlayer].parts[PARTSTYPE_HOUTOU].model.nNumPolygon, CntPlayer);
+		this[CntPlayer].SetPlayerMeshColor(this[CntPlayer].parts[PARTSTYPE_HOUTOU]->model.pD3DVtxBuff,
+			this[CntPlayer].parts[PARTSTYPE_HOUTOU]->model.pD3DIdxBuff, this[CntPlayer].parts[PARTSTYPE_HOUTOU]->model.nNumPolygon, CntPlayer);
 
 		// テクスチャの読み込み
 		D3DXCreateTextureFromFile(pDevice,					// デバイスへのポインタ
 			TEXTURE_MEISAI,									// ファイルの名前
-			&this[CntPlayer].parts[PARTSTYPE_HOUTOU].model.pD3DTexture);	// 読み込むメモリー
+			&this[CntPlayer].parts[PARTSTYPE_HOUTOU]->model.pD3DTexture);	// 読み込むメモリー
 
 		///////////////////////////////////////////////////////////////////////////////////////////////砲身
-		this[CntPlayer].parts[PARTSTYPE_HOUSIN].ParentParts = &this[CntPlayer].parts[PARTSTYPE_HOUTOU];
+		this[CntPlayer].parts[PARTSTYPE_HOUSIN]->ParentParts = this[CntPlayer].parts[PARTSTYPE_HOUTOU];
 
 		// Xファイルの読み込み
-		LoadMesh(MODEL_HOUSIN, &this[CntPlayer].parts[PARTSTYPE_HOUSIN].model.pD3DXBuffMat,
-			&this[CntPlayer].parts[PARTSTYPE_HOUSIN].model.nNumMat, &this[CntPlayer].parts[PARTSTYPE_HOUSIN].model.pD3DXMesh,
-			&this[CntPlayer].parts[PARTSTYPE_HOUSIN].model.pD3DVtxBuff, &this[CntPlayer].parts[PARTSTYPE_HOUSIN].model.pD3DIdxBuff,
-			&this[CntPlayer].parts[PARTSTYPE_HOUSIN].model.nNumVertex, &this[CntPlayer].parts[PARTSTYPE_HOUSIN].model.nNumPolygon,
-			&this[CntPlayer].parts[PARTSTYPE_HOUSIN].model.nNumVertexIndex, &this[CntPlayer].parts[PARTSTYPE_HOUSIN].model.pD3DTexture);
+		LoadMesh(MODEL_HOUSIN, &this[CntPlayer].parts[PARTSTYPE_HOUSIN]->model.pD3DXBuffMat,
+			&this[CntPlayer].parts[PARTSTYPE_HOUSIN]->model.nNumMat, &this[CntPlayer].parts[PARTSTYPE_HOUSIN]->model.pD3DXMesh,
+			&this[CntPlayer].parts[PARTSTYPE_HOUSIN]->model.pD3DVtxBuff, &this[CntPlayer].parts[PARTSTYPE_HOUSIN]->model.pD3DIdxBuff,
+			&this[CntPlayer].parts[PARTSTYPE_HOUSIN]->model.nNumVertex, &this[CntPlayer].parts[PARTSTYPE_HOUSIN]->model.nNumPolygon,
+			&this[CntPlayer].parts[PARTSTYPE_HOUSIN]->model.nNumVertexIndex, &this[CntPlayer].parts[PARTSTYPE_HOUSIN]->model.pD3DTexture);
 
 			//頂点カラーをプレイヤー色に変更
-		this[CntPlayer].SetPlayerMeshColor(this[CntPlayer].parts[PARTSTYPE_HOUSIN].model.pD3DVtxBuff,
-			this[CntPlayer].parts[PARTSTYPE_HOUSIN].model.pD3DIdxBuff, this[CntPlayer].parts[PARTSTYPE_HOUSIN].model.nNumPolygon, CntPlayer);
+		this[CntPlayer].SetPlayerMeshColor(this[CntPlayer].parts[PARTSTYPE_HOUSIN]->model.pD3DVtxBuff,
+			this[CntPlayer].parts[PARTSTYPE_HOUSIN]->model.pD3DIdxBuff, this[CntPlayer].parts[PARTSTYPE_HOUSIN]->model.nNumPolygon, CntPlayer);
 
 		// テクスチャの読み込み
 		D3DXCreateTextureFromFile(pDevice,					// デバイスへのポインタ
 			TEXTURE_MEISAI,									// ファイルの名前
-			&this[CntPlayer].parts[PARTSTYPE_HOUSIN].model.pD3DTexture);	// 読み込むメモリー
+			&this[CntPlayer].parts[PARTSTYPE_HOUSIN]->model.pD3DTexture);	// 読み込むメモリー
 
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////砲身通常データ
-		// 位置・回転・スケールの初期設定
-		this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL].pD3DTexture = NULL;
-		this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL].pD3DXMesh = NULL;
-		this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL].pD3DXBuffMat = NULL;
-		this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL].nNumMat = 0;
-		this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL].pD3DVtxBuff = NULL;
-		this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL].pD3DIdxBuff = NULL;
-		this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL].nNumVertex = 0;
-		this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL].nNumPolygon = 0;
-		this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL].nNumVertexIndex = 0;
-
 		// Xファイルの読み込み
-		LoadMesh(MODEL_HOUSIN, &this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL].pD3DXBuffMat,
-			&this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL].nNumMat, &this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL].pD3DXMesh,
-			&this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL].pD3DVtxBuff, &this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL].pD3DIdxBuff,
-			&this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL].nNumVertex, &this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL].nNumPolygon,
-			&this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL].nNumVertexIndex, &this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL].pD3DTexture);
+		LoadMesh(MODEL_HOUSIN, &this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL]->pD3DXBuffMat,
+			&this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL]->nNumMat, &this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL]->pD3DXMesh,
+			&this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL]->pD3DVtxBuff, &this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL]->pD3DIdxBuff,
+			&this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL]->nNumVertex, &this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL]->nNumPolygon,
+			&this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL]->nNumVertexIndex, &this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL]->pD3DTexture);
 
 		//頂点カラーをプレイヤー色に変更
-		this[CntPlayer].SetPlayerMeshColor(this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL].pD3DVtxBuff,
-			this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL].pD3DIdxBuff, this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL].nNumPolygon, CntPlayer);
+		this[CntPlayer].SetPlayerMeshColor(this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL]->pD3DVtxBuff,
+			this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL]->pD3DIdxBuff, this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL]->nNumPolygon, CntPlayer);
 
 		// テクスチャの読み込み
 		D3DXCreateTextureFromFile(pDevice,					// デバイスへのポインタ
 			TEXTURE_MEISAI,									// ファイルの名前
-			&this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL].pD3DTexture);	// 読み込むメモリー
+			&this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL]->pD3DTexture);	// 読み込むメモリー
 
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////砲身攻撃データ
 
 		// Xファイルの読み込み
-		LoadMesh(MODEL_HOUSINMO, &this[CntPlayer].ModelDate[PLAYER_MODEL_ATTACK].pD3DXBuffMat,
-			&this[CntPlayer].ModelDate[PLAYER_MODEL_ATTACK].nNumMat, &this[CntPlayer].ModelDate[PLAYER_MODEL_ATTACK].pD3DXMesh,
-			&this[CntPlayer].ModelDate[PLAYER_MODEL_ATTACK].pD3DVtxBuff, &this[CntPlayer].ModelDate[PLAYER_MODEL_ATTACK].pD3DIdxBuff,
-			&this[CntPlayer].ModelDate[PLAYER_MODEL_ATTACK].nNumVertex, &this[CntPlayer].ModelDate[PLAYER_MODEL_ATTACK].nNumPolygon,
-			&this[CntPlayer].ModelDate[PLAYER_MODEL_ATTACK].nNumVertexIndex, &this[CntPlayer].ModelDate[PLAYER_MODEL_ATTACK].pD3DTexture));
+		LoadMesh(MODEL_HOUSINMO, &this[CntPlayer].ModelDate[PLAYER_MODEL_ATTACK]->pD3DXBuffMat,
+			&this[CntPlayer].ModelDate[PLAYER_MODEL_ATTACK]->nNumMat, &this[CntPlayer].ModelDate[PLAYER_MODEL_ATTACK]->pD3DXMesh,
+			&this[CntPlayer].ModelDate[PLAYER_MODEL_ATTACK]->pD3DVtxBuff, &this[CntPlayer].ModelDate[PLAYER_MODEL_ATTACK]->pD3DIdxBuff,
+			&this[CntPlayer].ModelDate[PLAYER_MODEL_ATTACK]->nNumVertex, &this[CntPlayer].ModelDate[PLAYER_MODEL_ATTACK]->nNumPolygon,
+			&this[CntPlayer].ModelDate[PLAYER_MODEL_ATTACK]->nNumVertexIndex, &this[CntPlayer].ModelDate[PLAYER_MODEL_ATTACK]->pD3DTexture);
 
 		//頂点カラーをプレイヤー色に変更
-		this[CntPlayer].SetPlayerMeshColor(this[CntPlayer].ModelDate[PLAYER_MODEL_ATTACK].pD3DVtxBuff,
-			this[CntPlayer].ModelDate[PLAYER_MODEL_ATTACK].pD3DIdxBuff, this[CntPlayer].ModelDate[PLAYER_MODEL_ATTACK].nNumPolygon, CntPlayer);
+		this[CntPlayer].SetPlayerMeshColor(this[CntPlayer].ModelDate[PLAYER_MODEL_ATTACK]->pD3DVtxBuff,
+			this[CntPlayer].ModelDate[PLAYER_MODEL_ATTACK]->pD3DIdxBuff, this[CntPlayer].ModelDate[PLAYER_MODEL_ATTACK]->nNumPolygon, CntPlayer);
 
 		// テクスチャの読み込み
 		D3DXCreateTextureFromFile(pDevice,					// デバイスへのポインタ
 			TEXTURE_MEISAI,									// ファイルの名前
-			&this[CntPlayer].ModelDate[PLAYER_MODEL_ATTACK].pD3DTexture);	// 読み込むメモリー
+			&this[CntPlayer].ModelDate[PLAYER_MODEL_ATTACK]->pD3DTexture);	// 読み込むメモリー
 
 	}
 
@@ -172,7 +163,9 @@ void PLAYER_HONTAI::Init(void)
 		float ReturnPosY = 0.0f;
 		D3DXVECTOR3 FieldNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 
-		FieldHitGetSphereVec(RayStart, RayEnd, &FieldNorVec, &ReturnPosY);
+		GAME_OBJECT *fobj = this[CntPlayer].GetPointerField();
+		FIELD *f = dynamic_cast<FIELD*>(&fobj[0]);//床
+		f->FieldHitGetSphereVec(RayStart, RayEnd, &FieldNorVec, &ReturnPosY);
 
 		D3DXVECTOR3 SetPos = RayStart;
 		SetPos.y = ReturnPosY;
@@ -182,8 +175,8 @@ void PLAYER_HONTAI::Init(void)
 		this[CntPlayer].SetCamera(CntPlayer);
 
 		D3DXVECTOR3 HoudaiRot = this[CntPlayer].GetRot();
-		D3DXVECTOR3 HoutouRot = this[CntPlayer].parts[PARTSTYPE_HOUTOU].GetRot();
-		D3DXVECTOR3 HousinRot = this[CntPlayer].parts[PARTSTYPE_HOUSIN].GetRot();
+		D3DXVECTOR3 HoutouRot = this[CntPlayer].parts[PARTSTYPE_HOUTOU]->GetRot();
+		D3DXVECTOR3 HousinRot = this[CntPlayer].parts[PARTSTYPE_HOUSIN]->GetRot();
 
 		CAMERA *cam = GetCamera();
 		cam[CntPlayer].at.x = SetPos.x - (AT_W_CAM * sinf(HoudaiRot.y + HoutouRot.y));
@@ -238,18 +231,18 @@ void PLAYER_HONTAI::Reinit(void)
 
 		//砲塔
 		// 位置・回転・スケールの初期設定
-		this[CntPlayer].parts[PARTSTYPE_HOUTOU].SetPos(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
-		this[CntPlayer].parts[PARTSTYPE_HOUTOU].SetRot(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
-		this[CntPlayer].parts[PARTSTYPE_HOUTOU].SetScl(D3DXVECTOR3(1.0f, 1.0f, 1.0f));
-		this[CntPlayer].parts[PARTSTYPE_HOUTOU].SetMove(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+		this[CntPlayer].parts[PARTSTYPE_HOUTOU]->SetPos(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+		this[CntPlayer].parts[PARTSTYPE_HOUTOU]->SetRot(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+		this[CntPlayer].parts[PARTSTYPE_HOUTOU]->SetScl(D3DXVECTOR3(1.0f, 1.0f, 1.0f));
+		this[CntPlayer].parts[PARTSTYPE_HOUTOU]->SetMove(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
 		//砲身								 
 		// 位置・回転・スケールの初期設定
-		this[CntPlayer].parts[PARTSTYPE_HOUSIN].SetPos(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
-		this[CntPlayer].parts[PARTSTYPE_HOUSIN].SetRot(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
-		this[CntPlayer].parts[PARTSTYPE_HOUSIN].SetScl(D3DXVECTOR3(1.0f, 1.0f, 1.0f));
-		this[CntPlayer].parts[PARTSTYPE_HOUSIN].SetMove(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+		this[CntPlayer].parts[PARTSTYPE_HOUSIN]->SetPos(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+		this[CntPlayer].parts[PARTSTYPE_HOUSIN]->SetRot(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+		this[CntPlayer].parts[PARTSTYPE_HOUSIN]->SetScl(D3DXVECTOR3(1.0f, 1.0f, 1.0f));
+		this[CntPlayer].parts[PARTSTYPE_HOUSIN]->SetMove(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
 
-		ResetModel(&this[CntPlayer].parts[PARTSTYPE_HOUSIN].model, &this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL]);
+		ResetModel(&this[CntPlayer].parts[PARTSTYPE_HOUSIN]->model, this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL]);
 	}
 
 	//初期化段階で座標と角度をランダムで設定
@@ -274,7 +267,9 @@ void PLAYER_HONTAI::Reinit(void)
 		float ReturnPosY = 0.0f;
 		D3DXVECTOR3 FieldNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 
-		FieldHitGetSphereVec(RayStart, RayEnd, &FieldNorVec, &ReturnPosY);
+		GAME_OBJECT *fobj = this[CntPlayer].GetPointerField();
+		FIELD *f = dynamic_cast<FIELD*>(&fobj[0]);//床
+		f->FieldHitGetSphereVec(RayStart, RayEnd, &FieldNorVec, &ReturnPosY);
 
 		D3DXVECTOR3 SetPos = RayStart;
 		SetPos.y = ReturnPosY;
@@ -284,8 +279,8 @@ void PLAYER_HONTAI::Reinit(void)
 		this[CntPlayer].SetCamera(CntPlayer);
 
 		D3DXVECTOR3 HoudaiRot = this[CntPlayer].GetRot();
-		D3DXVECTOR3 HoutouRot = this[CntPlayer].parts[PARTSTYPE_HOUTOU].GetRot();
-		D3DXVECTOR3 HousinRot = this[CntPlayer].parts[PARTSTYPE_HOUSIN].GetRot();
+		D3DXVECTOR3 HoutouRot = this[CntPlayer].parts[PARTSTYPE_HOUTOU]->GetRot();
+		D3DXVECTOR3 HousinRot = this[CntPlayer].parts[PARTSTYPE_HOUSIN]->GetRot();
 
 		CAMERA *cam = GetCamera();
 		cam[CntPlayer].at.x = SetPos.x - (AT_W_CAM * sinf(HoudaiRot.y + HoutouRot.y));
@@ -347,8 +342,8 @@ void PLAYER_HONTAI::Update(void)
 
 			D3DXVECTOR3 SetPos = this[CntPlayer].GetPos();
 			D3DXVECTOR3 HoudaiRot = this[CntPlayer].GetRot();
-			D3DXVECTOR3 HoutouRot = this[CntPlayer].parts[PARTSTYPE_HOUTOU].GetRot();
-			D3DXVECTOR3 HousinRot = this[CntPlayer].parts[PARTSTYPE_HOUSIN].GetRot();
+			D3DXVECTOR3 HoutouRot = this[CntPlayer].parts[PARTSTYPE_HOUTOU]->GetRot();
+			D3DXVECTOR3 HousinRot = this[CntPlayer].parts[PARTSTYPE_HOUSIN]->GetRot();
 
 			CAMERA *cam = GetCamera();
 			cam[CntPlayer].at.x = SetPos.x - (AT_W_CAM * sinf(HoudaiRot.y + HoutouRot.y));
@@ -498,10 +493,10 @@ void PLAYER_HONTAI::Draw(void)
 			D3DMATERIAL9 matDef;
 
 			//---------------------------------------------------------オブジェクト値呼び出し
-			D3DXMATRIX mtxWorld = this[CntPlayer].parts[PARTSTYPE_HOUTOU].GetMatrix();
-			D3DXVECTOR3 scl = this[CntPlayer].parts[PARTSTYPE_HOUTOU].GetScl();
-			D3DXVECTOR3 rot = this[CntPlayer].parts[PARTSTYPE_HOUTOU].GetRot();
-			D3DXVECTOR3 pos = this[CntPlayer].parts[PARTSTYPE_HOUTOU].GetPos();
+			D3DXMATRIX mtxWorld = this[CntPlayer].parts[PARTSTYPE_HOUTOU]->GetMatrix();
+			D3DXVECTOR3 scl = this[CntPlayer].parts[PARTSTYPE_HOUTOU]->GetScl();
+			D3DXVECTOR3 rot = this[CntPlayer].parts[PARTSTYPE_HOUTOU]->GetRot();
+			D3DXVECTOR3 pos = this[CntPlayer].parts[PARTSTYPE_HOUTOU]->GetPos();
 
 			// ワールドマトリックスの初期化
 			D3DXMatrixIdentity(&mtxWorld);
@@ -518,10 +513,10 @@ void PLAYER_HONTAI::Draw(void)
 			D3DXMatrixTranslation(&mtxTranslate, pos.x, pos.y, pos.z);
 			D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxTranslate);
 
-			if (this[CntPlayer].parts[PARTSTYPE_HOUTOU].ParentHontai != NULL)
+			if (this[CntPlayer].parts[PARTSTYPE_HOUTOU]->ParentHontai != NULL)
 			{
 				//-------------------------------------------------親のワールドマトリクスを取得
-				D3DXMATRIX ParentmtxWorld = this[CntPlayer].parts[PARTSTYPE_HOUTOU].ParentHontai->GetMatrix();
+				D3DXMATRIX ParentmtxWorld = this[CntPlayer].parts[PARTSTYPE_HOUTOU]->ParentHontai->GetMatrix();
 				D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &ParentmtxWorld);
 			}
 
@@ -532,27 +527,27 @@ void PLAYER_HONTAI::Draw(void)
 			pDevice->GetMaterial(&matDef);
 
 			// マテリアル情報に対するポインタを取得
-			pD3DXMat = (D3DXMATERIAL*)this[CntPlayer].parts[PARTSTYPE_HOUTOU].model.pD3DXBuffMat->GetBufferPointer();
+			pD3DXMat = (D3DXMATERIAL*)this[CntPlayer].parts[PARTSTYPE_HOUTOU]->model.pD3DXBuffMat->GetBufferPointer();
 
-			for (int nCntMat = 0; nCntMat < (int)this[CntPlayer].parts[PARTSTYPE_HOUTOU].model.nNumMat; nCntMat++)
+			for (int nCntMat = 0; nCntMat < (int)this[CntPlayer].parts[PARTSTYPE_HOUTOU]->model.nNumMat; nCntMat++)
 			{
 				// マテリアルの設定
 				pDevice->SetMaterial(&pD3DXMat[nCntMat].MatD3D);
 				if (pD3DXMat[nCntMat].pTextureFilename != NULL)
 				{
 					// テクスチャの設定
-					pDevice->SetTexture(0, this[CntPlayer].parts[PARTSTYPE_HOUTOU].model.pD3DTexture);
+					pDevice->SetTexture(0, this[CntPlayer].parts[PARTSTYPE_HOUTOU]->model.pD3DTexture);
 				}
 				// 描画
 				{
 					// 頂点フォーマットの設定
 					pDevice->SetFVF(FVF_VERTEX_3D);
 					// 頂点バッファをレンダリングパイプラインに設定
-					pDevice->SetStreamSource(0, this[CntPlayer].parts[PARTSTYPE_HOUTOU].model.pD3DVtxBuff, 0, sizeof(VERTEX_3D));
+					pDevice->SetStreamSource(0, this[CntPlayer].parts[PARTSTYPE_HOUTOU]->model.pD3DVtxBuff, 0, sizeof(VERTEX_3D));
 					// インデックスバッファをレンダリングパイプラインに設定
-					pDevice->SetIndices(this[CntPlayer].parts[PARTSTYPE_HOUTOU].model.pD3DIdxBuff);
+					pDevice->SetIndices(this[CntPlayer].parts[PARTSTYPE_HOUTOU]->model.pD3DIdxBuff);
 					//描画
-					pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, this[CntPlayer].parts[PARTSTYPE_HOUTOU].model.nNumVertex, 0, this[CntPlayer].parts[PARTSTYPE_HOUTOU].model.nNumPolygon);
+					pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, this[CntPlayer].parts[PARTSTYPE_HOUTOU]->model.nNumVertex, 0, this[CntPlayer].parts[PARTSTYPE_HOUTOU]->model.nNumPolygon);
 				}
 			}
 			// マテリアルをデフォルトに戻す
@@ -565,10 +560,10 @@ void PLAYER_HONTAI::Draw(void)
 			D3DMATERIAL9 matDef;
 
 			//---------------------------------------------------------オブジェクト値呼び出し
-			D3DXMATRIX mtxWorld = this[CntPlayer].parts[PARTSTYPE_HOUSIN].GetMatrix();
-			D3DXVECTOR3 scl = this[CntPlayer].parts[PARTSTYPE_HOUSIN].GetScl();
-			D3DXVECTOR3 rot = this[CntPlayer].parts[PARTSTYPE_HOUSIN].GetRot();
-			D3DXVECTOR3 pos = this[CntPlayer].parts[PARTSTYPE_HOUSIN].GetPos();
+			D3DXMATRIX mtxWorld = this[CntPlayer].parts[PARTSTYPE_HOUSIN]->GetMatrix();
+			D3DXVECTOR3 scl = this[CntPlayer].parts[PARTSTYPE_HOUSIN]->GetScl();
+			D3DXVECTOR3 rot = this[CntPlayer].parts[PARTSTYPE_HOUSIN]->GetRot();
+			D3DXVECTOR3 pos = this[CntPlayer].parts[PARTSTYPE_HOUSIN]->GetPos();
 
 			// ワールドマトリックスの初期化
 			D3DXMatrixIdentity(&mtxWorld);
@@ -587,10 +582,10 @@ void PLAYER_HONTAI::Draw(void)
 
 
 
-			if (this[CntPlayer].parts[PARTSTYPE_HOUSIN].ParentParts != NULL)
+			if (this[CntPlayer].parts[PARTSTYPE_HOUSIN]->ParentParts != NULL)
 			{
 				//-------------------------------------------------親のワールドマトリクスを取得
-				D3DXMATRIX ParentmtxWorld = this[CntPlayer].parts[PARTSTYPE_HOUSIN].ParentHontai->GetMatrix();
+				D3DXMATRIX ParentmtxWorld = this[CntPlayer].parts[PARTSTYPE_HOUSIN]->ParentHontai->GetMatrix();
 				D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &ParentmtxWorld);
 			}
 
@@ -601,27 +596,27 @@ void PLAYER_HONTAI::Draw(void)
 			pDevice->GetMaterial(&matDef);
 
 			// マテリアル情報に対するポインタを取得
-			pD3DXMat = (D3DXMATERIAL*)this[CntPlayer].parts[PARTSTYPE_HOUSIN].model.pD3DXBuffMat->GetBufferPointer();
+			pD3DXMat = (D3DXMATERIAL*)this[CntPlayer].parts[PARTSTYPE_HOUSIN]->model.pD3DXBuffMat->GetBufferPointer();
 
-			for (int nCntMat = 0; nCntMat < (int)this[CntPlayer].parts[PARTSTYPE_HOUSIN].model.nNumMat; nCntMat++)
+			for (int nCntMat = 0; nCntMat < (int)this[CntPlayer].parts[PARTSTYPE_HOUSIN]->model.nNumMat; nCntMat++)
 			{
 				// マテリアルの設定
 				pDevice->SetMaterial(&pD3DXMat[nCntMat].MatD3D);
 				if (pD3DXMat[nCntMat].pTextureFilename != NULL)
 				{
 					// テクスチャの設定
-					pDevice->SetTexture(0, this[CntPlayer].parts[PARTSTYPE_HOUSIN].model.pD3DTexture);
+					pDevice->SetTexture(0, this[CntPlayer].parts[PARTSTYPE_HOUSIN]->model.pD3DTexture);
 				}
 				// 描画
 				{
 					// 頂点フォーマットの設定
 					pDevice->SetFVF(FVF_VERTEX_3D);
 					// 頂点バッファをレンダリングパイプラインに設定
-					pDevice->SetStreamSource(0, this[CntPlayer].parts[PARTSTYPE_HOUSIN].model.pD3DVtxBuff, 0, sizeof(VERTEX_3D));
+					pDevice->SetStreamSource(0, this[CntPlayer].parts[PARTSTYPE_HOUSIN]->model.pD3DVtxBuff, 0, sizeof(VERTEX_3D));
 					// インデックスバッファをレンダリングパイプラインに設定
-					pDevice->SetIndices(this[CntPlayer].parts[PARTSTYPE_HOUSIN].model.pD3DIdxBuff);
+					pDevice->SetIndices(this[CntPlayer].parts[PARTSTYPE_HOUSIN]->model.pD3DIdxBuff);
 					//描画
-					pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, this[CntPlayer].parts[PARTSTYPE_HOUSIN].model.nNumVertex, 0, this[CntPlayer].parts[PARTSTYPE_HOUSIN].model.nNumPolygon);
+					pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, this[CntPlayer].parts[PARTSTYPE_HOUSIN]->model.nNumVertex, 0, this[CntPlayer].parts[PARTSTYPE_HOUSIN]->model.nNumPolygon);
 				}
 			}
 			// マテリアルをデフォルトに戻す
@@ -662,8 +657,8 @@ void PLAYER_HONTAI::SetMoveABL(int CntPlayer)
 	//---------------------------------------------------------オブジェクト値呼び出し
 	D3DXVECTOR3 pos = this[CntPlayer].GetPos();
 	D3DXVECTOR3 HoudaiRot = this[CntPlayer].GetRot();
-	D3DXVECTOR3 HoutouRot = this[CntPlayer].parts[PARTSTYPE_HOUTOU].GetRot();
-	D3DXVECTOR3 HousinRot = this[CntPlayer].parts[PARTSTYPE_HOUSIN].GetRot();
+	D3DXVECTOR3 HoutouRot = this[CntPlayer].parts[PARTSTYPE_HOUTOU]->GetRot();
+	D3DXVECTOR3 HousinRot = this[CntPlayer].parts[PARTSTYPE_HOUSIN]->GetRot();
 
 	//座標を保存
 	this[CntPlayer].SetOldPos(pos);
@@ -722,8 +717,9 @@ void PLAYER_HONTAI::SetMoveABL(int CntPlayer)
 		this[CntPlayer].speedbufftime -= VALUE_SPEEDBUFF_SUB;
 
 		// エフェクトスピードアップの生成
+		GAME_OBJECT *effectobj = this[CntPlayer].GetPointerEffect();
+		EFFECT *effect = dynamic_cast<EFFECT*>(&effectobj[0]);//床
 		D3DXVECTOR3 EffctSpeedupPos = D3DXVECTOR3(pos.x, pos.y, pos.z);
-		EFFECT *effect = this[0].GetEffect();
 		effect->SetEffect(EffctSpeedupPos, D3DXVECTOR3(0.0f, 0.0f, 0.0f), PLAYER_COLOR[CntPlayer], EFFECT_SPEEDUP_SIZE_X, EFFECT_SPEEDUP_SIZE_Y, EFFECT_SPEEDUP_TIME);
 
 		if (this[CntPlayer].speedbufftime <= 0.0f)
@@ -760,8 +756,8 @@ void PLAYER_HONTAI::SetMoveABL(int CntPlayer)
 	//---------------------------------------------------------オブジェクト値セット
 	this[CntPlayer].SetPos(pos);
 	this[CntPlayer].SetRot(HoudaiRot);
-	this[CntPlayer].parts[PARTSTYPE_HOUTOU].SetRot(HoutouRot);
-	this[CntPlayer].parts[PARTSTYPE_HOUSIN].SetRot(HousinRot);
+	this[CntPlayer].parts[PARTSTYPE_HOUTOU]->SetRot(HoutouRot);
+	this[CntPlayer].parts[PARTSTYPE_HOUSIN]->SetRot(HousinRot);
 
 }
 
@@ -773,8 +769,8 @@ void PLAYER_HONTAI::SetCamera(int CntPlayer)
 	//---------------------------------------------------------オブジェクト値呼び出し
 	D3DXVECTOR3 pos = this[CntPlayer].GetPos();
 	D3DXVECTOR3 HoudaiRot = this[CntPlayer].GetRot();
-	D3DXVECTOR3 HoutouRot = this[CntPlayer].parts[PARTSTYPE_HOUTOU].GetRot();
-	D3DXVECTOR3 HousinRot = this[CntPlayer].parts[PARTSTYPE_HOUSIN].GetRot();
+	D3DXVECTOR3 HoutouRot = this[CntPlayer].parts[PARTSTYPE_HOUTOU]->GetRot();
+	D3DXVECTOR3 HousinRot = this[CntPlayer].parts[PARTSTYPE_HOUSIN]->GetRot();
 
 	CAMERA *cam = GetCamera();
 	//バックカメラ処理
@@ -854,7 +850,8 @@ void PLAYER_HONTAI::SetMoveL(int CntPlayer)
 
 		// エフェクトスピードアップの生成
 		D3DXVECTOR3 EffctSpeedupPos = pos;
-		EFFECT *effect = this[0].GetEffect();
+		GAME_OBJECT *effectobj = this[CntPlayer].GetPointerEffect();
+		EFFECT *effect = dynamic_cast<EFFECT*>(&effectobj[0]);//床
 		effect->SetEffect(EffctSpeedupPos, D3DXVECTOR3(0.0f, 0.0f, 0.0f), PLAYER_COLOR[CntPlayer], EFFECT_SPEEDUP_SIZE_X, EFFECT_SPEEDUP_SIZE_Y, EFFECT_SPEEDUP_TIME);
 
 		if (this[CntPlayer].speedbufftime <= 0.0f)
@@ -913,8 +910,8 @@ void PLAYER_HONTAI::SetMoveL(int CntPlayer)
 void PLAYER_HONTAI::SetCameraR(int CntPlayer)
 {
 	//---------------------------------------------------------オブジェクト値呼び出し
-	D3DXVECTOR3 HoutouRot = this[CntPlayer].parts[PARTSTYPE_HOUTOU].GetRot();
-	D3DXVECTOR3 HousinRot = this[CntPlayer].parts[PARTSTYPE_HOUSIN].GetRot();
+	D3DXVECTOR3 HoutouRot = this[CntPlayer].parts[PARTSTYPE_HOUTOU]->GetRot();
+	D3DXVECTOR3 HousinRot = this[CntPlayer].parts[PARTSTYPE_HOUSIN]->GetRot();
 
 	CAMERA *cam = GetCamera();
 
@@ -961,8 +958,8 @@ void PLAYER_HONTAI::SetCameraR(int CntPlayer)
 	}
 
 	//---------------------------------------------------------オブジェクト値セット
-	this[CntPlayer].parts[PARTSTYPE_HOUTOU].SetRot(HoutouRot);
-	this[CntPlayer].parts[PARTSTYPE_HOUSIN].SetRot(HousinRot);
+	this[CntPlayer].parts[PARTSTYPE_HOUTOU]->SetRot(HoutouRot);
+	this[CntPlayer].parts[PARTSTYPE_HOUSIN]->SetRot(HousinRot);
 
 
 	////カメラの視点更新
@@ -1005,7 +1002,8 @@ void PLAYER_HONTAI::SetMoveL2R2(int CntPlayer)
 
 		// エフェクトスピードアップの生成
 		D3DXVECTOR3 EffctSpeedupPos = pos;
-		EFFECT *effect = this[0].GetEffect();
+		GAME_OBJECT *effectobj = this[CntPlayer].GetPointerEffect();
+		EFFECT *effect = dynamic_cast<EFFECT*>(&effectobj[0]);//床
 		effect->SetEffect(EffctSpeedupPos, D3DXVECTOR3(0.0f, 0.0f, 0.0f), PLAYER_COLOR[CntPlayer], EFFECT_SPEEDUP_SIZE_X, EFFECT_SPEEDUP_SIZE_Y, EFFECT_SPEEDUP_TIME);
 
 		if (this[CntPlayer].speedbufftime <= 0.0f)
@@ -1123,8 +1121,8 @@ void PLAYER_HONTAI::SetBulletALL(int CntPlayer)
 	//---------------------------------------------------------オブジェクト値呼び出し
 	D3DXVECTOR3 pos = this[CntPlayer].GetPos();
 	D3DXVECTOR3 HoudaiRot = this[CntPlayer].GetRot();
-	D3DXVECTOR3 HoutouRot = this[CntPlayer].parts[PARTSTYPE_HOUTOU].GetRot();
-	D3DXVECTOR3 HousinRot = this[CntPlayer].parts[PARTSTYPE_HOUSIN].GetRot();
+	D3DXVECTOR3 HoutouRot = this[CntPlayer].parts[PARTSTYPE_HOUTOU]->GetRot();
+	D3DXVECTOR3 HousinRot = this[CntPlayer].parts[PARTSTYPE_HOUSIN]->GetRot();
 
 //	D3DXVECTOR3 FieldNorVec = this[CntPlayer].GetFieldNorVec();
 	D3DXVECTOR3 FieldNorUpNorCross = this[CntPlayer].GetFieldNorUpNorCross();
@@ -1229,8 +1227,8 @@ void PLAYER_HONTAI::SetBulletALLMoveL2R2Ver(int CntPlayer)
 	//---------------------------------------------------------オブジェクト値呼び出し
 	D3DXVECTOR3 pos = this[CntPlayer].GetPos();
 	D3DXVECTOR3 HoudaiRot = this[CntPlayer].GetRot();
-	D3DXVECTOR3 HoutouRot = this[CntPlayer].parts[PARTSTYPE_HOUTOU].GetRot();
-	D3DXVECTOR3 HousinRot = this[CntPlayer].parts[PARTSTYPE_HOUSIN].GetRot();
+	D3DXVECTOR3 HoutouRot = this[CntPlayer].parts[PARTSTYPE_HOUTOU]->GetRot();
+	D3DXVECTOR3 HousinRot = this[CntPlayer].parts[PARTSTYPE_HOUSIN]->GetRot();
 
 	//	D3DXVECTOR3 FieldNorVec = this[CntPlayer].GetFieldNorVec();
 	D3DXVECTOR3 FieldNorUpNorCross = this[CntPlayer].GetFieldNorUpNorCross();
@@ -1290,7 +1288,8 @@ void PLAYER_HONTAI::SetBulletALLMoveL2R2Ver(int CntPlayer)
 			IsButtonTriggered(CntPlayer, BUTTON_DIGITAL_LEFT) || IsButtonTriggered(CntPlayer, BUTTON_DIGITAL_LEFTUP))
 		{
 
-			BULLET *bullet = this[0].GetBullet();
+			GAME_OBJECT *bulletobj = this[CntPlayer].GetPointerBullet();
+			BULLET *bullet = dynamic_cast<BULLET*>(&bulletobj[0]);//床
 			bullet->SetBullet(BposStart, bulletmove, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer);
 
 			//拡散弾処理
@@ -1360,7 +1359,7 @@ void PLAYER_HONTAI::SetMorphing(int CntPlayer)
 		if (this[CntPlayer].MorphingSignal == NowMorphing)
 		{
 			this[CntPlayer].ModelType = PLAYER_MODEL_ATTACK;
-			DoMorphing(&this[CntPlayer].parts[PARTSTYPE_HOUSIN].model, &this[CntPlayer].ModelDate[PLAYER_MODEL_ATTACK],
+			DoMorphing(&this[CntPlayer].parts[PARTSTYPE_HOUSIN]->model, this[CntPlayer].ModelDate[PLAYER_MODEL_ATTACK],
 				0.01f, &this[CntPlayer].time, &this[CntPlayer].MorphingSignal);
 		}
 		///////////////////////////////////////////////////////////////////////バレット3つ時間終了
@@ -1377,7 +1376,7 @@ void PLAYER_HONTAI::SetMorphing(int CntPlayer)
 	// モーフィングオリジナルタイプに変更開始
 	if (this[CntPlayer].Morphing == false && this[CntPlayer].MorphingTime <= 0.0f)
 	{
-		DoMorphing(&this[CntPlayer].parts[PARTSTYPE_HOUSIN].model, &this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL],
+		DoMorphing(&this[CntPlayer].parts[PARTSTYPE_HOUSIN]->model, this[CntPlayer].ModelDate[PLAYER_MODEL_NORMAL],
 			0.01f, &this[CntPlayer].time, &this[CntPlayer].MorphingSignal);
 		if (this[CntPlayer].MorphingSignal == EndMorphing)
 		{
