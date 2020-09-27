@@ -95,11 +95,9 @@ void VITALGAUGE::Uninit(void)
 //=============================================================================
 // 更新処理
 //=============================================================================
-void VITALGAUGE::Update(void)
+void VITALGAUGE::Update(PLAYER_HONTAI *p,RANK *rank)
 {
 	//-----------------------------------オブジェクト先頭アドレスを読み込み
-	GAME_OBJECT *playerobj = this->GetPointerPlayer();
-	PLAYER_HONTAI *p = dynamic_cast<PLAYER_HONTAI*>(&playerobj[0]);
 	for (int CntPlayer = 0; CntPlayer < OBJECT_VITAL_MAX; CntPlayer++)
 	{
 		bool puse = p[CntPlayer].GetUse();
@@ -109,8 +107,6 @@ void VITALGAUGE::Update(void)
 			{
 				p[CntPlayer].SetUse(false);
 				//-----------------------------------オブジェクト先頭アドレスを読み込み
-				GAME_OBJECT *rankobj = this->GetPointerRank();
-				RANK *rank = dynamic_cast<RANK*>(&rankobj[0]);
 				rank->SetRank(CntPlayer);
 			}
 		}

@@ -205,7 +205,7 @@ void ITEM::Uninit(void)
 //=============================================================================
 // 更新処理
 //=============================================================================
-void ITEM::Update(void)
+void ITEM::Update(PLAYER_HONTAI *p)
 {
 	for (int nCntItem = 0; nCntItem < OBJECT_ITEM_MAX; nCntItem++)
 	{
@@ -253,7 +253,7 @@ void ITEM::Update(void)
 
 		if (this[nCntItem].GettingSignal == true)
 		{
-			GettingItem(nCntItem);
+			GettingItem(nCntItem,p);
 		}
 
 
@@ -407,7 +407,7 @@ void ITEM::DeleteItem(int nIdxItem)
 //=============================================================================
 // アイテムを取得したプレイヤーへ近づける関数
 //=============================================================================
-void ITEM::GettingItem(int nIdxItem)
+void ITEM::GettingItem(int nIdxItem, PLAYER_HONTAI *p)
 {
 	if (this[nIdxItem].GettingSignalEnd == false)
 	{
@@ -420,9 +420,6 @@ void ITEM::GettingItem(int nIdxItem)
 		rot.y += VALUE_ROTATE_ITEM*10;
 		
 		//プレイヤーとアイテムの距離を計算し/5分づつ近づける
-		//-----------------------------------オブジェクト先頭アドレスを読み込み
-		GAME_OBJECT *pobj = this[nIdxItem].GetPointerPlayer();
-		PLAYER_HONTAI *p = dynamic_cast<PLAYER_HONTAI*>(&pobj[0]);
 
 		D3DXVECTOR3 ppos = p[0].GetPos();
 		D3DXVECTOR3 PlayerPos = this[nIdxItem].p[this[nIdxItem].GetPlayerType].GetPos();

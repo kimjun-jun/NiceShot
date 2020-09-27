@@ -34,6 +34,9 @@ using namespace std;
 #include "../../h/object/vitalgauge.h"
 #include "../../h/object/objectclass.h"
 
+void SetOjama(int type, int UsePlayer, PLAYER_HONTAI *p);
+
+
 static D3DXCOLOR PLAYER_COLOR[] = {
 	D3DXCOLOR(1.0f, 1.0f, 0.1f, 1.0f),//p1カラー
 	D3DXCOLOR(0.2f, 0.2f, 1.0f, 1.0f),//p2カラー
@@ -62,12 +65,13 @@ void GAME_OBJECT::Create()
 	field = new FIELD[OBJECT_FIELD_MAX];
 	sky = new SKY[OBJECT_SKY_MAX];
 	wall = new WALL[OBJECT_WALL_MAX];
+	fade = new FADE[OBJECT_FADE_MAX];
 
 }
 
 void GAME_OBJECT::Init()
 {
-	player->Init();
+	player->Init(&field[0]);
 	effect->Init();
 	bullet->Init();
 	shadow->Init();
@@ -86,11 +90,12 @@ void GAME_OBJECT::Init()
 	field->Init();
 	sky->Init();
 	wall->Init();
+	fade->Init();
 }
 
 void GAME_OBJECT::Reinit()
 {
-	player->Reinit();
+	player->Reinit(&field[0]);
 	effect->Reinit();
 	bullet->Reinit();
 	shadow->Reinit();
@@ -109,6 +114,7 @@ void GAME_OBJECT::Reinit()
 	field->Reinit();
 	sky->Reinit();
 	wall->Reinit();
+	fade->Reinit();
 }
 
 void GAME_OBJECT::Update()
@@ -122,7 +128,7 @@ void GAME_OBJECT::Update()
 	{
 		MasterVolumeChange(1);
 		Reinit();
-		SetFade(FADE_OUT, SCENE_TITLE, SOUND_LABEL_BGM_title01);
+		fade->SetFade(FADE_OUT, SCENE_TITLE, SOUND_LABEL_BGM_title01);
 	}
 #endif
 
@@ -135,69 +141,69 @@ void GAME_OBJECT::Update()
 		{
 		case SCENE_TITLE:
 			//タイトル更新
-			title->Update();
+			title->Update(&fade[0]);
 			break;
 		case SCENE_TUTORIAL:
 			//チュートリアル更新
-			tuto->Update();
+			tuto->Update(&this[0], &fade[0]);
 			// map更新
-			field->Update();
+			field->Update(&player[0], &item[0], &bullet[0], &explosion[0],&shadow[0]);
 			sky->Update();
 
 			//3D空間
-			player->Update();
-			bullet->Update();
-			bulletprediction->Update();
+			player->Update(&effect[0],&bullet[0],&shadow[0], &fade[0]);
+			bullet->Update(&shadow[0], &effect[0]);
+			bulletprediction->Update(&player[0]);
 			effect->Update();
 			explosion->Update();
-			item->Update();
+			item->Update(&player[0]);
 			shadow->Update();
 
 			CheakHit(0);
 
 			//2D空間
-			bulletgauge->Update();
+			bulletgauge->Update(&player[0]);
 			damege->Update();
-			status->Update();
+			status->Update(&player[0]);
 			break;
 
 		case SCENE_GAMECOUNTDOWN:
 			//カウントダウンの更新
-			countdown->Update();
+			countdown->Update(&this[0]);
 			countdown->AddCountdown(-1);
 			break;
 
 		case SCENE_GAME:
 			// map更新
-			field->Update();
+			field->Update(&player[0], &item[0], &bullet[0], &explosion[0], &shadow[0]);
 			sky->Update();
 
 			//オブジェクトの更新
-			player->Update();
-			bullet->Update();
-			bulletprediction->Update();
+			player->Update(&effect[0], &bullet[0], &shadow[0], &fade[0]);
+			bullet->Update(&shadow[0],&effect[0]);
+			bulletprediction->Update(&player[0]);
 			effect->Update();
 			explosion->Update();
-			item->Update();
+			item->Update(&player[0]);
 			shadow->Update();
 
 			//当たり判定
 			CheakHit(1);
 
 			//2D空間
-			bulletgauge->Update();
+			bulletgauge->Update(&player[0]);
 			damege->Update();
-			status->Update();
-			vitalgauge->Update();
+			status->Update(&player[0]);
+			vitalgauge->Update(&player[0],&rank[0]);
 			break;
 
 		case SCENE_RESULT:
 			//リザルトの更新
-			result->Update();
+			result->Update(&this[0],&fade[0]);
 			break;
 		}
 		// フェード処理
-		UpdateFade();
+		fade->Update(&this[0]);
 	}
 
 }
@@ -253,7 +259,7 @@ void GAME_OBJECT::Draw()
 				//3D空間
 				player->Draw();
 				item->Draw();
-				bulletprediction->Draw();
+				bulletprediction->Draw(&player[0]);
 				explosion->Draw();
 				effect->Draw();
 				shadow->Draw();
@@ -285,7 +291,7 @@ void GAME_OBJECT::Draw()
 				//3D空間
 				player->Draw();
 				item->Draw();
-				bulletprediction->Draw();
+				bulletprediction->Draw(&player[0]);
 				explosion->Draw();
 				effect->Draw();
 				shadow->Draw();
@@ -324,7 +330,7 @@ void GAME_OBJECT::Draw()
 					//3D空間
 					player->Draw();
 					item->Draw();
-					bulletprediction->Draw();
+					bulletprediction->Draw(&player[0]);
 					explosion->Draw();
 					effect->Draw();
 					shadow->Draw();
@@ -350,7 +356,7 @@ void GAME_OBJECT::Draw()
 					//3D空間
 					player->Draw();
 					item->Draw();
-					bulletprediction->Draw();
+					bulletprediction->Draw(&player[0]);
 					explosion->Draw();
 					effect->Draw();
 					shadow->Draw();
@@ -374,7 +380,7 @@ void GAME_OBJECT::Draw()
 		}
 		}
 		// フェード描画
-		DrawFade();
+		fade->Draw();
 
 		// デバッグ表示
 #ifdef _DEBUG
@@ -477,7 +483,7 @@ void GAME_OBJECT::CheakHit(int scene)
 							damege[CntPlayer].alpha = 0;
 
 							// バレット破棄
-							bullet[CntPlayerBullet].ReleaseBullet(CntPlayerBullet);
+							bullet[CntPlayerBullet].ReleaseBullet(CntPlayerBullet,shadow);
 
 							// SE再生
 							PlaySound(SOUND_LABEL_SE_attack02);
@@ -497,7 +503,7 @@ void GAME_OBJECT::CheakHit(int scene)
 								//D3DXVECTOR3 ExploPos = D3DXVECTOR3(bpos.x, bpos.y, bpos.z- EXPLOSION_COLLISIONPOS_BUFFSIZE);
 								//SetExplosion(ExploPos, 40.0f, 40.0f, EXPLOSIONTYPE_BULLET_PLAYER, PLAYER_COLOR[b[CntPlayerBullet].UsePlayerType]);
 								// バレット破棄
-								bullet[CntPlayerBullet].ReleaseBullet(CntPlayerBullet);
+								bullet[CntPlayerBullet].ReleaseBullet(CntPlayerBullet, shadow);
 								// SE再生
 								//PlaySound(SOUND_LABEL_SE_damage);
 							}
@@ -509,7 +515,7 @@ void GAME_OBJECT::CheakHit(int scene)
 								//D3DXVECTOR3 ExploPos = D3DXVECTOR3(bpos.x + EXPLOSION_COLLISIONPOS_BUFFSIZE, bpos.y, bpos.z);
 								//SetExplosion(ExploPos, 40.0f, 40.0f, EXPLOSIONTYPE_BULLET_PLAYER, PLAYER_COLOR[b[CntPlayerBullet].UsePlayerType]);
 								// バレット破棄
-								bullet[CntPlayerBullet].ReleaseBullet(CntPlayerBullet);
+								bullet[CntPlayerBullet].ReleaseBullet(CntPlayerBullet, shadow);
 								// SE再生
 								//PlaySound(SOUND_LABEL_SE_damage);
 							}
@@ -521,7 +527,7 @@ void GAME_OBJECT::CheakHit(int scene)
 								//D3DXVECTOR3 ExploPos = D3DXVECTOR3(bpos.x - EXPLOSION_COLLISIONPOS_BUFFSIZE, bpos.y, bpos.z);
 								//SetExplosion(ExploPos, 40.0f, 40.0f, EXPLOSIONTYPE_BULLET_PLAYER, PLAYER_COLOR[b[CntPlayerBullet].UsePlayerType]);
 								// バレット破棄
-								bullet[CntPlayerBullet].ReleaseBullet(CntPlayerBullet);
+								bullet[CntPlayerBullet].ReleaseBullet(CntPlayerBullet, shadow);
 								// SE再生
 								//PlaySound(SOUND_LABEL_SE_damage);
 							}
@@ -533,7 +539,7 @@ void GAME_OBJECT::CheakHit(int scene)
 								//D3DXVECTOR3 ExploPos = D3DXVECTOR3(bpos.x, bpos.y, bpos.z + EXPLOSION_COLLISIONPOS_BUFFSIZE);
 								//SetExplosion(ExploPos, 40.0f, 40.0f, EXPLOSIONTYPE_BULLET_PLAYER, PLAYER_COLOR[b[CntPlayerBullet].UsePlayerType]);
 								// バレット破棄
-								bullet[CntPlayerBullet].ReleaseBullet(CntPlayerBullet);
+								bullet[CntPlayerBullet].ReleaseBullet(CntPlayerBullet, shadow);
 								// SE再生
 								//PlaySound(SOUND_LABEL_SE_damage);
 							}
@@ -558,7 +564,7 @@ void GAME_OBJECT::CheakHit(int scene)
 					switch (item[CntItem].nType)
 					{
 					case ITEMTYPE_TIKEI:
-						field->SetFieldInterPolationFieldType(FIELD_TYPE_PLAYERADVANTAGE, CntPlayer);
+						field->SetFieldInterPolationFieldType(FIELD_TYPE_PLAYERADVANTAGE, CntPlayer, &item[0]);
 						//SetFieldInterPolationFieldType(0);
 						PlaySound(SOUND_LABEL_SE_enter03);
 						PlaySound(SOUND_LABEL_SE_quake);

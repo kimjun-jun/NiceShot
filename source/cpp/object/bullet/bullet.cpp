@@ -65,7 +65,7 @@ void BULLET::Uninit(void)
 //=============================================================================
 // çXêVèàóù
 //=============================================================================
-void BULLET::Update(void)
+void BULLET::Update(SHADOW *shadow, EFFECT *effect)
 {
 	for(int nCntBullet = 0; nCntBullet < OBJECT_BULLET_MAX; nCntBullet++)
 	{
@@ -118,23 +118,19 @@ void BULLET::Update(void)
 			if (this[nCntBullet].Gravity > VALUE_GRAVITYMAX_BULLET) this[nCntBullet].Gravity = VALUE_GRAVITYMAX_BULLET;
 
 			this[nCntBullet].nTimer--;
-			GAME_OBJECT *sobj = this[0].GetPointerShadow();
-			SHADOW *s = dynamic_cast<SHADOW*>(&sobj[0]);
 
 			if (this[nCntBullet].nTimer <= 0)
 			{
-				s->ReleaseShadow(this[nCntBullet].nIdxShadow);
-				ReleaseBullet(nCntBullet);
+				shadow->ReleaseShadow(this[nCntBullet].nIdxShadow);
+				ReleaseBullet(nCntBullet, &shadow[0]);
 			}
 			else
 			{
 				// âeÇÃà íuê›íË
-				s->SetPositionShadow(this[nCntBullet].nIdxShadow, D3DXVECTOR3(pos.x, this[nCntBullet].FieldPosY, pos.z), scl);
+				shadow->SetPositionShadow(this[nCntBullet].nIdxShadow, D3DXVECTOR3(pos.x, this[nCntBullet].FieldPosY, pos.z), scl);
 
 				// ÉGÉtÉFÉNÉgÇÃê›íË
-				GAME_OBJECT *eobj = this[0].GetPointerEffect();
-				EFFECT *e = dynamic_cast<EFFECT*>(&eobj[0]);
-				e->SetEffect(pos, D3DXVECTOR3(0.0f, 0.0f, 0.0f),
+				effect->SetEffect(pos, D3DXVECTOR3(0.0f, 0.0f, 0.0f),
 					PLAYER_COLOR[this[nCntBullet].UsePlayerType], EFFECT_BULLET_SIZE_X, EFFECT_BULLET_SIZE_Y, EFFECT_BULLET_TIME);
 			}
 
@@ -143,11 +139,11 @@ void BULLET::Update(void)
 			if (fSizeX < 8.0f) fSizeX = 8.0f;
 			float fSizeY = 8.0f + (pos.y - 4.0f) * 0.05f;
 			if (fSizeY < 8.0f) fSizeY = 8.0f;
-			s->SetVertexShadow(this[nCntBullet].nIdxShadow, fSizeX, fSizeY);
+			shadow->SetVertexShadow(this[nCntBullet].nIdxShadow, fSizeX, fSizeY);
 
 			float colA = (200.0f - (pos.y - 4.0f)) / 400.0f;
 			if (colA < 0.0f) colA = 0.0f;
-			s->SetColorShadow(this[nCntBullet].nIdxShadow, D3DXCOLOR(1.0f, 1.0f, 1.0f, colA));
+			shadow->SetColorShadow(this[nCntBullet].nIdxShadow, D3DXCOLOR(1.0f, 1.0f, 1.0f, colA));
 
 		}
 	}
@@ -164,7 +160,7 @@ void BULLET::Draw(void)
 //=============================================================================
 // íeÇÃê›íË
 //=============================================================================
-int BULLET::SetBullet(D3DXVECTOR3 pos, D3DXVECTOR3 move, float fSizeX, float fSizeY, int nTimer, int type)
+int BULLET::SetBullet(D3DXVECTOR3 pos, D3DXVECTOR3 move, float fSizeX, float fSizeY, int nTimer, int type,SHADOW *s)
 {
 	int nIdxBullet = -1;
 
@@ -184,8 +180,6 @@ int BULLET::SetBullet(D3DXVECTOR3 pos, D3DXVECTOR3 move, float fSizeX, float fSi
 
 
 			// âeÇÃê›íË
-			GAME_OBJECT *sobj = this[0].GetPointerShadow();
-			SHADOW *s = dynamic_cast<SHADOW*>(&sobj[0]);
 			this[nCntBullet].nIdxShadow = s->CreateShadow(pos, D3DXVECTOR3(1.0f, 1.0f, 1.0f));		// âeÇÃê›íË
 
 			nIdxBullet = nCntBullet;
@@ -200,12 +194,10 @@ int BULLET::SetBullet(D3DXVECTOR3 pos, D3DXVECTOR3 move, float fSizeX, float fSi
 //=============================================================================
 // íeÇÃçÌèú
 //=============================================================================
-void BULLET::ReleaseBullet(int nIdxBullet)
+void BULLET::ReleaseBullet(int nIdxBullet, SHADOW *s)
 {
 	if(nIdxBullet >= 0 && nIdxBullet < OBJECT_BULLET_MAX)
 	{
-		GAME_OBJECT *sobj = this[0].GetPointerShadow();
-		SHADOW *s = dynamic_cast<SHADOW*>(&sobj[0]);
 		s->ReleaseShadow(this[nIdxBullet].nIdxShadow);
 		this[nIdxBullet].SetUse(false);
 	}

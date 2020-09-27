@@ -83,7 +83,7 @@ void COUNTDOWN::Uninit(void)
 //=============================================================================
 // XVˆ—
 //=============================================================================
-void COUNTDOWN::Update(void)
+void COUNTDOWN::Update(GAME_OBJECT*obj)
 {
 	SetTextureCountdown();
 	SetVertexCountdown();
@@ -91,7 +91,7 @@ void COUNTDOWN::Update(void)
 	MasterVolumeChange(1);
 	if (this[0].signal == true)
 	{
-		SetScene(SCENE_GAME);
+		obj->SetScene(SCENE_GAME);
 		PlaySound(SOUND_LABEL_BGM_normal01);
 	}
 }

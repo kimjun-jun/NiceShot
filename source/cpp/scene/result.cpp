@@ -65,12 +65,12 @@ void RESULT::Uninit(void)
 //=============================================================================
 // 更新処理
 //=============================================================================
-void RESULT::Update(void)
+void RESULT::Update(GAME_OBJECT* obj, FADE *fade)
 {
 	if (IsButtonTriggered(0, BUTTON_A))
 	{
-		ReinitGame(&this[0]);				// ゲームの再初期化処理
-		SetFade(FADE_OUT, SCENE_TITLE, SOUND_LABEL_BGM_title01);
+		obj->Reinit();				// ゲームの再初期化処理
+		fade->SetFade(FADE_OUT, SCENE_TITLE, SOUND_LABEL_BGM_title01);
 	}
 }
 
@@ -120,7 +120,7 @@ HRESULT RESULT::MakeVertexResult(void)
 
 		// テクスチャ座標の設定
 		vtx2d[0].tex = D3DXVECTOR2(0.0f, 0.0f);
-		vtx2d[1].tex = D3DXVECTOR2(1.0f, 0.0f);
+		vtx2d[1].tex = D3DXVECTOR2(0.5f, 0.0f);
 		vtx2d[2].tex = D3DXVECTOR2(0.0f, 1.0f);
 		vtx2d[3].tex = D3DXVECTOR2(1.0f, 1.0f);
 

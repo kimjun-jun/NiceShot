@@ -17,7 +17,7 @@ public:
 	virtual void						Init(void);					//!< 初期化
 	virtual void						Reinit(void);				//!< 再初期化
 	virtual void						Uninit(void);				//!< 終了
-	virtual void						Update(void);				//!< 更新
+	virtual void						Update(PLAYER_HONTAI *p, RANK *rank);				//!< 更新
 	virtual void						Draw(void);					//!< 描画
 	HRESULT						MakeVertexVitalGauge(LPDIRECT3DDEVICE9 pDevice, int CntPlayer);
 	int							VitalPower;

@@ -27,11 +27,11 @@ public:
 	};
 	void SetItem(D3DXVECTOR3 pos, D3DXVECTOR3 scl, D3DXVECTOR3 rot, int nType);
 	void DeleteItem(int nIdxItem);
-	void GettingItem(int nIdxItem);
+	void GettingItem(int nIdxItem,PLAYER_HONTAI *p);
 	virtual void						Init(void);					//!< 初期化
 	virtual void						Reinit(void);				//!< 再初期化
 	virtual void						Uninit(void);				//!< 終了
-	virtual void						Update(void);				//!< 更新
+	virtual void						Update(PLAYER_HONTAI *p);				//!< 更新
 	virtual void						Draw(void);					//!< 描画
 	PLAYER_HONTAI				*p;						//!<プレイヤー先頭アドレス
 	float						Droptime;				//!< 出現するまでの時間

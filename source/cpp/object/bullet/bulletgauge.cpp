@@ -85,14 +85,11 @@ void BULLETGAUGE::Uninit(void)
 //=============================================================================
 // 更新処理
 //=============================================================================
-void BULLETGAUGE::Update(void)
+void BULLETGAUGE::Update(PLAYER_HONTAI *player)
 {
-	//-----------------------------------オブジェクト先頭アドレスを読み込み
-	GAME_OBJECT *playerobj = this->GetPointerPlayer();
-	PLAYER_HONTAI *p = dynamic_cast<PLAYER_HONTAI*>(&playerobj[0]);
 	for (int CntBulletGauge = 0; CntBulletGauge < OBJECT_BULLETGAUGE_MAX; CntBulletGauge++)
 	{
-		this[CntBulletGauge].AmmoPower = p[CntBulletGauge].AmmoCnt;
+		this[CntBulletGauge].AmmoPower = player[CntBulletGauge].AmmoCnt;
 	}
 }
 

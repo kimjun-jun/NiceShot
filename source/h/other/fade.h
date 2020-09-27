@@ -11,7 +11,7 @@
  * @enum FADE
  * フェードの状態
  */
-enum FADE
+enum FADE_TYPE
 {
 	FADE_NONE = 0,		//!< 何もない状態
 	FADE_IN,			//!< フェードイン処理
@@ -20,44 +20,33 @@ enum FADE
 	FADE_MAX			//!< マックス
 };
 
-//*****************************************************************************
-// プロトタイプ宣言
-//*****************************************************************************
+#include "../../h/object/objectclass.h"
+
 
 /**
-* @brief フェード初期化関数 InitFade
-* @return HRESULT
+*　@struct FADE
+*　@brief 2Dポリゴンを定義する構造体
 */
-HRESULT InitFade(void);
+class FADE : public OBJECT_2D
+{
+public:
+	FADE() { color = D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.0f); eFade = FADE_NONE; eScene = 0; sno = 0; }
+	virtual void						Init(void);					//!< 初期化
+	virtual void						Reinit(void);				//!< 再初期化
+	virtual void						Uninit(void);				//!< 終了
+	virtual void						Update(GAME_OBJECT*obj);				//!< 更新
+	virtual void						Draw(void);					//!< 描画
+	void								SetFade(FADE_TYPE fade, E_STAGE next, int sno);
+	void								SetColor(D3DCOLOR col);
 
-/**
-* @brief フェードメモリ開放関数 UninitFade
-*/
-void UninitFade(void);
+	D3DXCOLOR				color;								//!< カラー情報
+	FADE_TYPE				eFade = FADE_IN;						//!< フェード番号
+	int						eScene = SCENE_TITLE;					//!< 次に飛ぶ予定のScene
+	int						sno = -1;								//!< サウンドナンバー
 
-/**
-* @brief フェード更新関数 UpdateFade
-* @details ゲームシーン切り替え時(SetFade()を使用するとき)に実行される。
-*/
-void UpdateFade(void);
+private:
+	void MakeVertexFade(void);
+};
 
-/**
-* @brief フェード描画関数 DrawFade
-*/
-void DrawFade(void);
 
-/**
-* @brief フェード設定関数 SetFade
-* @param[in] FADE fade フェードの種類 enum FADE参照
-* @param[in] E_STAGE next 次のゲームシーン　enum E_STAGE参照
-* @param[in] int sno 流したい音楽 enum SOUND_TRACK参照
-*/
-void SetFade(FADE fade, E_STAGE next, int sno);
-
-/**
-* @brief フェード取得関数 GetFade
-* @return FADE
-* @details 現在のフェード状態を取得できる
-*/
-FADE GetFade(void);
 

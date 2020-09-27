@@ -72,11 +72,8 @@ void STATUS::Uninit(void)
 //=============================================================================
 // 更新処理
 //=============================================================================
-void STATUS::Update(void)
+void STATUS::Update(PLAYER_HONTAI *p)
 {
-	//-----------------------------------オブジェクト先頭アドレスを読み込み
-	GAME_OBJECT *playerobj = this->GetPointerPlayer();
-	PLAYER_HONTAI *p = dynamic_cast<PLAYER_HONTAI*>(&playerobj[0]);
 	for (int CntPlayer = 0; CntPlayer < OBJECT_STATUS_MAX; CntPlayer++)
 	{
 		//スピード

@@ -85,7 +85,7 @@ void BULLETPREDICTION::Uninit(void)
 //=============================================================================
 // 更新処理
 //=============================================================================
-void BULLETPREDICTION::Update(void)
+void BULLETPREDICTION::Update(PLAYER_HONTAI *player)
 {
 	for (int nCntBulletprediction = 0; nCntBulletprediction < OBJECT_BULLETPREDICTION_MAX; nCntBulletprediction++)
 	{
@@ -95,9 +95,6 @@ void BULLETPREDICTION::Update(void)
 			this[nCntBulletprediction].SetUse(false);
 		}
 	}
-	//-----------------------------------オブジェクト先頭アドレスを読み込み
-	GAME_OBJECT *playerobj = this->GetPointerPlayer();
-	PLAYER_HONTAI *player = dynamic_cast<PLAYER_HONTAI*>(&playerobj[0]);
 
 	//プレイヤーの情報から発射位置角度移動量を利用してバレットの着弾点を算出する
 	for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
@@ -151,14 +148,12 @@ void BULLETPREDICTION::Update(void)
 //=============================================================================
 // 描画処理
 //=============================================================================
-void BULLETPREDICTION::Draw(void)
+void BULLETPREDICTION::Draw(PLAYER_HONTAI *player)
 {
 	//-----------------------------------オブジェクト先頭アドレスを読み込み
-	GAME_OBJECT *playerobj = this->GetPointerPlayer();
-	PLAYER_HONTAI *p = dynamic_cast<PLAYER_HONTAI*>(&playerobj[0]);
 	for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
 	{
-		bool puse = p[CntPlayer].GetUse();
+		bool puse = player[CntPlayer].GetUse();
 		if (puse)
 		{
 			LPDIRECT3DDEVICE9 pDevice = GetDevice();

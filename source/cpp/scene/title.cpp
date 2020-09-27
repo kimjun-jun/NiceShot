@@ -104,7 +104,7 @@ void TITLE::Uninit(void)
 //=============================================================================
 // 更新処理
 //=============================================================================
-void TITLE::Update(void)
+void TITLE::Update(FADE *fade)
 {
 	//タイトル画面(セレクト中)
 	if (this[0].TitleSelectTime == true)
@@ -113,8 +113,8 @@ void TITLE::Update(void)
 		if (GetKeyboardTrigger(DIK_RETURN) || IsButtonTriggered(0, BUTTON_A))
 		{
 			PlaySound(SOUND_LABEL_SE_enter01);
-			if(TitleSelectSceneNum == TITLE_SELECT_SCENE_TUTORIAL) SetFade(FADE_OUT, SCENE_TUTORIAL, SOUND_LABEL_BGM_tutorial01);
-			else if (TitleSelectSceneNum == TITLE_SELECT_SCENE_GAME) SetFade(FADE_OUT, SCENE_GAMECOUNTDOWN, SOUND_LABEL_BGM_normal01);
+			if(TitleSelectSceneNum == TITLE_SELECT_SCENE_TUTORIAL) fade->SetFade(FADE_OUT, SCENE_TUTORIAL, SOUND_LABEL_BGM_tutorial01);
+			else if (TitleSelectSceneNum == TITLE_SELECT_SCENE_GAME) fade->SetFade(FADE_OUT, SCENE_GAMECOUNTDOWN, SOUND_LABEL_BGM_normal01);
 		}
 		//セレクト切り替え
 		else if (GetKeyboardTrigger(DIK_BACK) || IsButtonTriggered(0, BUTTON_B))

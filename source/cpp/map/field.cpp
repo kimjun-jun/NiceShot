@@ -405,7 +405,7 @@ void FIELD::Uninit(void)
 //=============================================================================
 // 更新処理
 //=============================================================================
-void FIELD::Update(void)
+void FIELD::Update(PLAYER_HONTAI *player,ITEM *item, BULLET *bullet, EXPLOSION *explosion, SHADOW *shadow)
 {
 	//アイテムを拾うとInterPolationFieldTypeが変わる。このスイッチ文SetFieldType関数最後に-1を入れる
 	switch (this[0].InterPolationFieldType)
@@ -418,7 +418,7 @@ void FIELD::Update(void)
 		this[0].SetFieldType02();
 		break;
 	case FIELD_TYPE_PLAYERADVANTAGE:
-		this[0].SetFieldType03();
+		this[0].SetFieldType03(&player[0]);
 		break;
 	default:
 		break;
@@ -430,9 +430,6 @@ void FIELD::Update(void)
 	}
 
 	//プレイヤーと地面の当たり判定
-	//-----------------------------------オブジェクト先頭アドレスを読み込み
-	GAME_OBJECT *playerobj = this->GetPointerPlayer();
-	PLAYER_HONTAI *player = dynamic_cast<PLAYER_HONTAI*>(&playerobj[0]);
 	for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
 	{
 		//-------------------オブジェクト値読み込み
@@ -453,8 +450,6 @@ void FIELD::Update(void)
 
 	//アイテムと地面の当たり判定
 	//-----------------------------------オブジェクト先頭アドレスを読み込み
-	GAME_OBJECT *itemobj = this->GetPointerItem();
-	ITEM *item = dynamic_cast<ITEM*>(&itemobj[0]);
 	for (int CntItem = 0; CntItem < OBJECT_ITEM_MAX; CntItem++)
 	{
 		bool use = item[CntItem].GetUse();
@@ -499,9 +494,6 @@ void FIELD::Update(void)
 	}
 
 	//バレットと地面の当たり判定
-	//-----------------------------------オブジェクト先頭アドレスを読み込み
-	GAME_OBJECT *bulletobj = this->GetPointerBullet();
-	BULLET *bullet = dynamic_cast<BULLET*>(&bulletobj[0]);
 	for (int Cntbullet = 0; Cntbullet < OBJECT_BULLET_MAX; Cntbullet++)
 	{
 		bool use = bullet[Cntbullet].GetUse();
@@ -521,14 +513,11 @@ void FIELD::Update(void)
 			D3DXVECTOR3 bpos = bullet[Cntbullet].GetPos();
 			if (bullet[Cntbullet].FieldPosY - 3.0f > bpos.y)
 			{
-				GAME_OBJECT *explosionobj = this->GetPointerExplosion();
-				EXPLOSION *explosion = dynamic_cast<EXPLOSION*>(&explosionobj[0]);
-
 				// 爆発の生成
 				D3DXVECTOR3 ExploPos = D3DXVECTOR3(bpos.x, bullet[Cntbullet].FieldPosY, bpos.z);
 				explosion->SetExplosion(ExploPos, 40.0f, 40.0f, EXPLOSIONTYPE_BULLET_PLAYER, PLAYER_COLOR[bullet[Cntbullet].UsePlayerType]);
 				// バレット破棄
-				bullet[Cntbullet].ReleaseBullet(Cntbullet);
+				bullet[Cntbullet].ReleaseBullet(Cntbullet, shadow);
 				// SE再生
 				PlaySound(SOUND_LABEL_SE_damage);
 			}
@@ -581,14 +570,12 @@ void FIELD::Draw(void)
 //=============================================================================
 // 地形変形タイプ
 //=============================================================================
-void FIELD::SetFieldInterPolationFieldType(int type,int CntPlayer)
+void FIELD::SetFieldInterPolationFieldType(int type,int CntPlayer,ITEM *item)
 {
 	//フラグセット
 	this[0].InterPolationFieldType = type;
 	this[0].InterPolationFieldPlayerNum = CntPlayer;
 	//-----------------------------------オブジェクト先頭アドレスを読み込み
-	GAME_OBJECT *itemobj = this->GetPointerItem();
-	ITEM *item = dynamic_cast<ITEM*>(&itemobj[0]);
 	for (int CntItem = 0; CntItem < OBJECT_ITEM_MAX; CntItem++)
 	{
 		item[CntItem].CollisionFieldEnd = false;
@@ -748,7 +735,7 @@ void FIELD::SetFieldType02(void)
 //=============================================================================
 // 地形の自動生成03　取得プレイヤーが有利になる地形(相手プレイヤー付近を盆地)　　ブロック数32*32　ブロックサイズ250*250
 //=============================================================================
-void FIELD::SetFieldType03(void)
+void FIELD::SetFieldType03(PLAYER_HONTAI *player)
 {
 	//高さを決める
 	{
@@ -848,8 +835,6 @@ void FIELD::SetFieldType03(void)
 		this[0].model.pD3DIdxBuff->Lock(0, 0, (void**)&pIdx, 0);
 
 		//-----------------------------------オブジェクト先頭アドレスを読み込み
-		GAME_OBJECT *playerobj = this->GetPointerPlayer();
-		PLAYER_HONTAI *player = dynamic_cast<PLAYER_HONTAI*>(&playerobj[0]);
 		for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
 		{
 			if (CntPlayer != InterPolationFieldPlayerNum)

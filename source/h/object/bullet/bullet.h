@@ -18,10 +18,10 @@ public:
 	virtual void				Init(void);					//!< 初期化
 	virtual void				Reinit(void);				//!< 再初期化
 	virtual void				Uninit(void);				//!< 終了
-	virtual void				Update(void);				//!< 更新
+	virtual void				Update(SHADOW *s, EFFECT *e);				//!< 更新
 	virtual void				Draw(void);					//!< 描画
-	int					SetBullet(D3DXVECTOR3 pos, D3DXVECTOR3 move, float fSizeX, float fSizeY, int nTimer, int type);
-	void				ReleaseBullet(int nIdxBullet);
+	int					SetBullet(D3DXVECTOR3 pos, D3DXVECTOR3 move, float fSizeX, float fSizeY, int nTimer, int type, SHADOW *s);
+	void				ReleaseBullet(int nIdxBullet, SHADOW *s);
 	int					nTimer;						// タイマー
 	int					nIdxShadow;					// 影ID
 	int					UsePlayerType;				// 何プレイヤーが使用してるか識別する

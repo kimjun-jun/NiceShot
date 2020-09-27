@@ -399,7 +399,6 @@ HRESULT Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	//‰Šú‰»ˆ—
 	InitSound(hWnd);
 	InitDebugProc();
-	InitFade();
 	InitCamera();
 	InitLight();
 

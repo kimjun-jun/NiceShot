@@ -19,7 +19,7 @@ public:
 	virtual void						Init(void);					//!< 初期化
 	virtual void						Reinit(void);				//!< 再初期化
 	virtual void						Uninit(void);				//!< 終了
-	virtual void						Update(void);				//!< 更新
+	virtual void						Update(GAME_OBJECT* obj, FADE *fade);				//!< 更新
 	virtual void						Draw(void);					//!< 描画
 	HRESULT						MakeVertexTutorial(void);
 	int							cnt;						//!< 描画判定用　2で割った余り判定　0表示　1非表示　今後のテクスチャ情報が増えることを加味してint定義

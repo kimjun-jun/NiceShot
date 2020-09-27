@@ -25,7 +25,7 @@ static D3DXCOLOR PLAYER_COLOR[] = {
 //=============================================================================
 // 初期化処理
 //=============================================================================
-void PLAYER_HONTAI::Init(void)
+void PLAYER_HONTAI::Init(FIELD *field)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 
@@ -163,10 +163,7 @@ void PLAYER_HONTAI::Init(void)
 		float ReturnPosY = 0.0f;
 		D3DXVECTOR3 FieldNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 
-		FIELD *f = new FIELD;//床
-		D3DXVECTOR3 posff = f[0].GetPos();
-
-		f->FieldHitGetSphereVec(RayStart, RayEnd, &FieldNorVec, &ReturnPosY);
+		field->FieldHitGetSphereVec(RayStart, RayEnd, &FieldNorVec, &ReturnPosY);
 
 		D3DXVECTOR3 SetPos = RayStart;
 		SetPos.y = ReturnPosY;
@@ -194,7 +191,7 @@ void PLAYER_HONTAI::Init(void)
 //=============================================================================
 // 再初期化処理
 //=============================================================================
-void PLAYER_HONTAI::Reinit(void)
+void PLAYER_HONTAI::Reinit(FIELD *field)
 {
 	//PLAYER 初期化
 	for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
@@ -268,9 +265,7 @@ void PLAYER_HONTAI::Reinit(void)
 		float ReturnPosY = 0.0f;
 		D3DXVECTOR3 FieldNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 
-		GAME_OBJECT *fobj = this[CntPlayer].GetPointerField();
-		FIELD *f = dynamic_cast<FIELD*>(&fobj[0]);//床
-		f->FieldHitGetSphereVec(RayStart, RayEnd, &FieldNorVec, &ReturnPosY);
+		field->FieldHitGetSphereVec(RayStart, RayEnd, &FieldNorVec, &ReturnPosY);
 
 		D3DXVECTOR3 SetPos = RayStart;
 		SetPos.y = ReturnPosY;
@@ -306,7 +301,7 @@ void PLAYER_HONTAI::Uninit(void)
 //=============================================================================
 // プレイヤー更新処理
 //=============================================================================
-void PLAYER_HONTAI::Update(void)
+void PLAYER_HONTAI::Update(EFFECT*effect,BULLET*bullet, SHADOW*shadow,FADE *fade)
 {
 	//何人死んだか計算。三人死んだらゲーム終了。次のシーンへ
 	int deadcnt = 0;
@@ -315,7 +310,7 @@ void PLAYER_HONTAI::Update(void)
 	{
 		bool use = this[CntPlayer].GetUse();
 		if (use == false) deadcnt++;
-		if (deadcnt >= 3) SetFade(FADE_OUT, SCENE_RESULT, SOUND_LABEL_BGM_gameclear01);
+		if (deadcnt >= 3) fade->SetFade(FADE_OUT, SCENE_RESULT, SOUND_LABEL_BGM_gameclear01);
 	}
 
 	//プレイヤー制御
@@ -327,11 +322,11 @@ void PLAYER_HONTAI::Update(void)
 		if (use)
 		{
 			//this[CntPlayer].SetMoveL2R2(CntPlayer);
-			this[CntPlayer].SetMoveL(CntPlayer);
+			this[CntPlayer].SetMoveL(CntPlayer, &effect[0]);
 			this[CntPlayer].SetQ(CntPlayer);
 			this[CntPlayer].SetCamera(CntPlayer);
 			//this[CntPlayer].SetBulletALLMoveL2R2Ver(CntPlayer);
-			this[CntPlayer].SetBulletALL(CntPlayer);
+			this[CntPlayer].SetBulletALL(CntPlayer,&bullet[0], shadow);
 			this[CntPlayer].SetKiri(CntPlayer);
 			this[CntPlayer].SetMorphing(CntPlayer);
 		}
@@ -653,7 +648,7 @@ void PLAYER_HONTAI::SetPlayerMeshColor(LPDIRECT3DVERTEXBUFFER9 pD3DVtxBuff, LPDI
 //=============================================================================
 // 移動制御(ABボタンLスティックで移動制御)
 //=============================================================================
-void PLAYER_HONTAI::SetMoveABL(int CntPlayer)
+void PLAYER_HONTAI::SetMoveABL(int CntPlayer, EFFECT *effect)
 {
 	//---------------------------------------------------------オブジェクト値呼び出し
 	D3DXVECTOR3 pos = this[CntPlayer].GetPos();
@@ -718,8 +713,6 @@ void PLAYER_HONTAI::SetMoveABL(int CntPlayer)
 		this[CntPlayer].speedbufftime -= VALUE_SPEEDBUFF_SUB;
 
 		// エフェクトスピードアップの生成
-		GAME_OBJECT *effectobj = this[CntPlayer].GetPointerEffect();
-		EFFECT *effect = dynamic_cast<EFFECT*>(&effectobj[0]);//床
 		D3DXVECTOR3 EffctSpeedupPos = D3DXVECTOR3(pos.x, pos.y, pos.z);
 		effect->SetEffect(EffctSpeedupPos, D3DXVECTOR3(0.0f, 0.0f, 0.0f), PLAYER_COLOR[CntPlayer], EFFECT_SPEEDUP_SIZE_X, EFFECT_SPEEDUP_SIZE_Y, EFFECT_SPEEDUP_TIME);
 
@@ -825,7 +818,7 @@ void PLAYER_HONTAI::SetCamera(int CntPlayer)
 //=============================================================================
 // 移動制御(Lスティックで移動制御)
 //=============================================================================
-void PLAYER_HONTAI::SetMoveL(int CntPlayer)
+void PLAYER_HONTAI::SetMoveL(int CntPlayer, EFFECT *effect)
 {
 	//---------------------------------------------------------オブジェクト値呼び出し
 	D3DXVECTOR3 pos = this[CntPlayer].GetPos();
@@ -851,8 +844,6 @@ void PLAYER_HONTAI::SetMoveL(int CntPlayer)
 
 		// エフェクトスピードアップの生成
 		D3DXVECTOR3 EffctSpeedupPos = pos;
-		GAME_OBJECT *effectobj = this[CntPlayer].GetPointerEffect();
-		EFFECT *effect = dynamic_cast<EFFECT*>(&effectobj[0]);//床
 		effect->SetEffect(EffctSpeedupPos, D3DXVECTOR3(0.0f, 0.0f, 0.0f), PLAYER_COLOR[CntPlayer], EFFECT_SPEEDUP_SIZE_X, EFFECT_SPEEDUP_SIZE_Y, EFFECT_SPEEDUP_TIME);
 
 		if (this[CntPlayer].speedbufftime <= 0.0f)
@@ -979,7 +970,7 @@ void PLAYER_HONTAI::SetCameraR(int CntPlayer)
 //=============================================================================
 // 移動制御(LRスティックでキャタピラ移動制御)
 //=============================================================================
-void PLAYER_HONTAI::SetMoveL2R2(int CntPlayer)
+void PLAYER_HONTAI::SetMoveL2R2(int CntPlayer, EFFECT *effect)
 {
 	//---------------------------------------------------------オブジェクト値呼び出し
 	D3DXVECTOR3 pos = this[CntPlayer].GetPos();
@@ -1003,8 +994,6 @@ void PLAYER_HONTAI::SetMoveL2R2(int CntPlayer)
 
 		// エフェクトスピードアップの生成
 		D3DXVECTOR3 EffctSpeedupPos = pos;
-		GAME_OBJECT *effectobj = this[CntPlayer].GetPointerEffect();
-		EFFECT *effect = dynamic_cast<EFFECT*>(&effectobj[0]);//床
 		effect->SetEffect(EffctSpeedupPos, D3DXVECTOR3(0.0f, 0.0f, 0.0f), PLAYER_COLOR[CntPlayer], EFFECT_SPEEDUP_SIZE_X, EFFECT_SPEEDUP_SIZE_Y, EFFECT_SPEEDUP_TIME);
 
 		if (this[CntPlayer].speedbufftime <= 0.0f)
@@ -1117,7 +1106,7 @@ void PLAYER_HONTAI::SetQ(int CntPlayer)
 //=============================================================================
 // バレット関連制御
 //=============================================================================
-void PLAYER_HONTAI::SetBulletALL(int CntPlayer)
+void PLAYER_HONTAI::SetBulletALL(int CntPlayer, BULLET *bullet, SHADOW *shadow)
 {
 	//---------------------------------------------------------オブジェクト値呼び出し
 	D3DXVECTOR3 pos = this[CntPlayer].GetPos();
@@ -1181,9 +1170,7 @@ void PLAYER_HONTAI::SetBulletALL(int CntPlayer)
 		if (IsButtonTriggered(CntPlayer, BUTTON_R1))
 		{
 			//-----------------------------------オブジェクト先頭アドレスを読み込み
-			GAME_OBJECT *bobj = this->GetPointerBullet();
-			BULLET *b = dynamic_cast<BULLET*>(&bobj[0]);
-			b->SetBullet(BposStart, bulletmove, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer);
+			bullet->SetBullet(BposStart, bulletmove, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer,shadow);
 
 			//拡散弾処理
 			if (this[CntPlayer].ModelType == PLAYER_MODEL_ATTACK)
@@ -1195,8 +1182,8 @@ void PLAYER_HONTAI::SetBulletALL(int CntPlayer)
 				rightB = D3DXVECTOR3(-sinf(HoutouRot.y + HoudaiRot.y - 0.3f)*VALUE_MOVE_BULLET,
 					bulletmove.y,
 					-cosf(HoutouRot.y + HoudaiRot.y - 0.3f) *VALUE_MOVE_BULLET);
-				b->SetBullet(BposStart, leftB, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer);
-				b->SetBullet(BposStart, rightB, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer);
+				bullet->SetBullet(BposStart, leftB, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer, shadow);
+				bullet->SetBullet(BposStart, rightB, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer, shadow);
 
 			}
 			//残弾を減らす
@@ -1223,7 +1210,7 @@ void PLAYER_HONTAI::SetBulletALL(int CntPlayer)
 //=============================================================================
 // バレット関連制御
 //=============================================================================
-void PLAYER_HONTAI::SetBulletALLMoveL2R2Ver(int CntPlayer)
+void PLAYER_HONTAI::SetBulletALLMoveL2R2Ver(int CntPlayer, BULLET *bullet, SHADOW *shadow)
 {
 	//---------------------------------------------------------オブジェクト値呼び出し
 	D3DXVECTOR3 pos = this[CntPlayer].GetPos();
@@ -1289,9 +1276,7 @@ void PLAYER_HONTAI::SetBulletALLMoveL2R2Ver(int CntPlayer)
 			IsButtonTriggered(CntPlayer, BUTTON_DIGITAL_LEFT) || IsButtonTriggered(CntPlayer, BUTTON_DIGITAL_LEFTUP))
 		{
 
-			GAME_OBJECT *bulletobj = this[CntPlayer].GetPointerBullet();
-			BULLET *bullet = dynamic_cast<BULLET*>(&bulletobj[0]);//床
-			bullet->SetBullet(BposStart, bulletmove, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer);
+			bullet->SetBullet(BposStart, bulletmove, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer, shadow);
 
 			//拡散弾処理
 			if (this[CntPlayer].ModelType == PLAYER_MODEL_ATTACK)
@@ -1303,8 +1288,8 @@ void PLAYER_HONTAI::SetBulletALLMoveL2R2Ver(int CntPlayer)
 				rightB = D3DXVECTOR3(-sinf(HoutouRot.y + HoudaiRot.y - 0.3f)*VALUE_MOVE_BULLET,
 					bulletmove.y,
 					-cosf(HoutouRot.y + HoudaiRot.y - 0.3f) *VALUE_MOVE_BULLET);
-				bullet->SetBullet(BposStart, leftB, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer);
-				bullet->SetBullet(BposStart, rightB, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer);
+				bullet->SetBullet(BposStart, leftB, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer, shadow);
+				bullet->SetBullet(BposStart, rightB, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer, shadow);
 
 			}
 			//残弾を減らす

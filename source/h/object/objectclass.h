@@ -24,6 +24,7 @@ class TITLE;
 class FIELD;
 class SKY;
 class WALL;
+class FADE;
 
 /**
  * @class GAMEOBJECT
@@ -110,6 +111,7 @@ private:
 	FIELD *field;
 	SKY *sky;
 	WALL *wall;
+	FADE *fade;
 	int	nScene = SCENE_TITLE;		//!< ステージ番号
 	int	stop = 0;					//!< デバッグ時の一時停止用変数
 };

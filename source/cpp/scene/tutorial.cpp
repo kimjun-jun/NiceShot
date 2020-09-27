@@ -58,13 +58,13 @@ void TUTO::Uninit(void)
 //=============================================================================
 // XVˆ—
 //=============================================================================
-void TUTO::Update(void)
+void TUTO::Update(GAME_OBJECT* obj, FADE *fade)
 {
 	if (GetKeyboardTrigger(DIK_RETURN) || IsButtonTriggered(0, BUTTON_START) || IsButtonTriggered(1, BUTTON_START) || IsButtonTriggered(2, BUTTON_START) || IsButtonTriggered(3, BUTTON_START))
 	{
 		PlaySound(SOUND_LABEL_SE_enter02);
-		SetFade(FADE_OUT, SCENE_TITLE, SOUND_LABEL_BGM_title01);
-		ReinitGame(&this[0]);
+		fade->SetFade(FADE_OUT, SCENE_TITLE, SOUND_LABEL_BGM_title01);
+		obj->Reinit();
 	}
 	for (int CntPlayer = 0; CntPlayer < OBJECT_TUTORIAL_MAX; CntPlayer++)
 	{

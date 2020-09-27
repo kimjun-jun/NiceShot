@@ -56,20 +56,20 @@ public:
 	PLAYER_PRATS				*parts[2];					//!< モデルのパーツ階層　親本体(砲台)、子パーツ[0](砲塔)、孫パーツ[1](砲身)
 	PLAYER_HONTAI				*Parent;					//!< 親子判定
 	GPUMODEL					*ModelDate[2];				//!< モデルデータ　0ノーマル、1攻撃、2スピード
-	virtual void				Init(void);					//!< 初期化
-	virtual void				Reinit(void);				//!< 再初期化
+	virtual void				Init(FIELD *field);					//!< 初期化
+	virtual void				Reinit(FIELD *field);				//!< 再初期化
 	virtual void				Uninit(void);				//!< 終了
-	virtual void				Update(void);				//!< 更新
+	virtual void				Update(EFFECT*effect, BULLET*bullet, SHADOW*shadow, FADE *fade);				//!< 更新
 	virtual void				Draw(void);					//!< 描画
 	void						SetPlayerMeshColor(LPDIRECT3DVERTEXBUFFER9 pD3DVtxBuff, LPDIRECT3DINDEXBUFFER9 pD3DIdxBuff,DWORD nNumPolygon, int CntPlayer);
-	void						SetMoveABL(int CntPlayer);				//!< 移動制御(ABボタンLスティックで移動制御)
+	void						SetMoveABL(int CntPlayer, EFFECT *effect);				//!< 移動制御(ABボタンLスティックで移動制御)
 	void						SetCamera(int CntPlayer);				//!< カメラ更新
-	void						SetMoveL(int CntPlayer);				//!< 移動制御(LRスティックで移動制御)
+	void						SetMoveL(int CntPlayer, EFFECT *effect);				//!< 移動制御(LRスティックで移動制御)
 	void						SetCameraR(int CntPlayer);				//!< カメラ制御(LRスティックで移動制御)
-	void						SetMoveL2R2(int CntPlayer);				//!< 移動制御(L2R2で移動制御)
+	void						SetMoveL2R2(int CntPlayer, EFFECT *effect);				//!< 移動制御(L2R2で移動制御)
 	void						SetQ(int CntPlayer);					//!< クォータニオン制御
-	void						SetBulletALL(int CntPlayer);			//!< バレット関連制御
-	void						SetBulletALLMoveL2R2Ver(int CntPlayer);	//!< バレット関連制御 発射ボタンを十字カーソル
+	void						SetBulletALL(int CntPlayer, BULLET *bullet, SHADOW *shadow);			//!< バレット関連制御
+	void						SetBulletALLMoveL2R2Ver(int CntPlayer, BULLET *bullet, SHADOW *shadow);	//!< バレット関連制御 発射ボタンを十字カーソル
 	void						SetKiri(int CntPlayer);					//!< フォグ制御
 	void						SetMorphing(int CntPlayer);				//!< モーフィング制御
 

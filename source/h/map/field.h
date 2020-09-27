@@ -46,16 +46,16 @@ public:
 	virtual void Init(void);
 	virtual void Reinit(void);
 	virtual void Uninit(void);
-	virtual void Update(void);
+	virtual void Update(PLAYER_HONTAI *player, ITEM *item, BULLET *bullet, EXPLOSION *explosion, SHADOW *shadow);
 	virtual void Draw(void);
 
 	void ClearField(void);				//初期化
 	void SetFieldType01(void);			//オリジナル1 
 	void SetFieldType02(void);			//オリジナル2 
-	void SetFieldType03(void);			//オリジナル3 
+	void SetFieldType03(PLAYER_HONTAI *player);			//オリジナル3 
 	bool InterPolationField(void);		//地形を徐々に変化させる
 	void SetDegenerationPoly(void);		//縮退ポリゴンの座標を再計算する関数　地形変形後、縮退ポリゴンの座標を設定する
-	void SetFieldInterPolationFieldType(int type, int CntPlayer);
+	void SetFieldInterPolationFieldType(int type, int CntPlayer,ITEM *item);
 	void FieldHit(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVECTOR3 *vtxNor, float *posY);
 	void FieldHitGetSphereVec(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVECTOR3 *vtxNor, float *posY);
 	bool FieldHitItem(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVECTOR3 *vtxNor, float *posY);
