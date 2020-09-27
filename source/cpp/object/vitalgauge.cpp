@@ -165,14 +165,14 @@ void VITALGAUGE::Draw(void)
 	for (int CntPlayer = 0; CntPlayer < OBJECT_VITAL_MAX; CntPlayer++)
 	{
 		// 頂点バッファをデバイスのデータストリームにバインド
-		LPDIRECT3DVERTEXBUFFER9 pD3DVtxBuff = this[CntPlayer].tex2DVB.GetpD3DVtxBuff();
-		pDevice->SetStreamSource(0, pD3DVtxBuff, 0, sizeof(VERTEX_2D));
+		//LPDIRECT3DVERTEXBUFFER9 pD3DVtxBuff = this[CntPlayer].tex2DVB.GetpD3DVtxBuff();
+		pDevice->SetStreamSource(0, LPDIRECT3DVERTEXBUFFER9(this[CntPlayer].tex2DVB.GetpD3DVtxBuff()), 0, sizeof(VERTEX_2D));
 
 		// 頂点フォーマットの設定
 		pDevice->SetFVF(FVF_VERTEX_2D);
 
 		// テクスチャの設定
-		LPDIRECT3DTEXTURE9 pD3DTexture = this[CntPlayer].tex2DVB.GetpD3DTexture();
+		LPDIRECT3DTEXTURE9 pD3DTexture = LPDIRECT3DTEXTURE9(this[CntPlayer].tex2DVB.GetpD3DTexture());
 		pDevice->SetTexture(0, pD3DTexture);
 
 		// ポリゴンの描画

@@ -108,7 +108,7 @@ void DAMEGE::Draw(void)
 		if (use == true)
 		{
 			pDevice->SetFVF(FVF_VERTEX_2D);
-			pDevice->SetTexture(0, this[0].tex2D.GetpD3DTexture());
+			pDevice->SetTexture(0, LPDIRECT3DTEXTURE9(this[0].tex2D.GetpD3DTexture()));
 			pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, POLYGON_2D_NUM, this[CntDamege].tex2D.GettextureVTX(), sizeof(VERTEX_2D));
 		}
 	}

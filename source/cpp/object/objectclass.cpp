@@ -71,10 +71,18 @@ void GAME_OBJECT::Create()
 
 void GAME_OBJECT::Init()
 {
+	field->Init();
+	sky->Init();
+	wall->Init();
+	fade->Init();
+	rank->Init();
+	result->Init();
+	title->Init();
+
+	shadow->Init();
 	player->Init(&field[0]);
 	effect->Init();
 	bullet->Init();
-	shadow->Init();
 	countdown->Init();
 	tuto->Init();
 	status->Init();
@@ -84,13 +92,6 @@ void GAME_OBJECT::Init()
 	damege->Init();
 	explosion->Init();
 	item->Init();
-	rank->Init();
-	result->Init();
-	title->Init();
-	field->Init();
-	sky->Init();
-	wall->Init();
-	fade->Init();
 }
 
 void GAME_OBJECT::Reinit()
@@ -232,13 +233,10 @@ void GAME_OBJECT::Draw()
 		switch (nScene)
 		{
 		case SCENE_TITLE:
-		{
 			//タイトル描画
 			title->Draw();
 			break;
-		}
 		case SCENE_TUTORIAL:
-		{
 			for (int CntPlayer = 0, vpCnt = sizeof(vp) / sizeof(vp[0]); CntPlayer < vpCnt; CntPlayer++)
 			{
 				pD3DDevice->SetViewport(&vp[CntPlayer]);
@@ -273,9 +271,7 @@ void GAME_OBJECT::Draw()
 			}
 			pD3DDevice->SetViewport(&VpMaster);
 			break;
-		}
 		case SCENE_GAMECOUNTDOWN:
-		{
 			for (int CntPlayer = 0, vpCnt = sizeof(vp) / sizeof(vp[0]); CntPlayer < vpCnt; CntPlayer++)
 			{
 				pD3DDevice->SetViewport(&vp[CntPlayer]);
@@ -305,9 +301,7 @@ void GAME_OBJECT::Draw()
 			pD3DDevice->SetViewport(&VpMaster);
 			countdown->Draw();
 			break;
-		}
 		case SCENE_GAME:
-		{
 			for (int CntPlayer = 0, vpCnt = sizeof(vp) / sizeof(vp[0]); CntPlayer < vpCnt; CntPlayer++)
 			{
 				pD3DDevice->SetViewport(&vp[CntPlayer]);
@@ -371,16 +365,13 @@ void GAME_OBJECT::Draw()
 			}
 			pD3DDevice->SetViewport(&VpMaster);
 			break;
-		}
 		case SCENE_RESULT:
-		{
 			//リザルト描画
 			result->Draw();
 			break;
 		}
-		}
 		// フェード描画
-		fade->Draw();
+		//fade->Draw();
 
 		// デバッグ表示
 #ifdef _DEBUG
@@ -416,6 +407,7 @@ void GAME_OBJECT::Uninit()
 	field->Uninit();
 	sky->Uninit();
 	wall->Uninit();
+
 }
 
 void GAME_OBJECT::CheakHit(int scene)

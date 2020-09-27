@@ -169,7 +169,7 @@ void STATUS::Draw(void)
 		for (int CntStatus = 0; CntStatus < STATUSTYPE_MAX; CntStatus++)
 		{
 				pDevice->SetFVF(FVF_VERTEX_2D);
-				pDevice->SetTexture(0, this[CntStatus].tex2D.GetpD3DTexture());
+				pDevice->SetTexture(0, LPDIRECT3DTEXTURE9(this[CntStatus].tex2D.GetpD3DTexture()));
 				pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, POLYGON_2D_NUM, this[CntStatus].tex2D.GettextureVTX(), sizeof(VERTEX_2D));
 		}
 	}

@@ -50,24 +50,22 @@ void TITLE::Init(void)
 	MakeVertexTitle();
 
 	// テクスチャの読み込み
-	LPDIRECT3DTEXTURE9 pD3DTexture[OBJECT_TITLE_MAX];
-	D3DXCreateTextureFromFile(pDevice,TEXTURE_TITLE_BG,&pD3DTexture[0]);	
+	//LPDIRECT3DTEXTURE9 pD3DTexture[OBJECT_TITLE_MAX];
+	//D3DXCreateTextureFromFile(pDevice,TEXTURE_TITLE_BG,&pD3DTexture[0]);	
+	//D3DXCreateTextureFromFile(pDevice,TEXTURE_LOGO_START,&pD3DTexture[1]);
+	//D3DXCreateTextureFromFile(pDevice,TEXTURE_TITLE_SELECT_TUTORIAL,&pD3DTexture[2]);
+	//D3DXCreateTextureFromFile(pDevice,TEXTURE_TITLE_SELECT_GAME,&pD3DTexture[3]);
+	//this[0].tex2DVB.SetpD3DTexture(pD3DTexture[0]);
+	//this[1].tex2DVB.SetpD3DTexture(pD3DTexture[1]);
+	//this[2].tex2DVB.SetpD3DTexture(pD3DTexture[2]);
+	//this[3].tex2DVB.SetpD3DTexture(pD3DTexture[3]);
 
-	D3DXCreateTextureFromFile(pDevice,TEXTURE_LOGO_START,&pD3DTexture[1]);
 
-	D3DXCreateTextureFromFile(pDevice,TEXTURE_TITLE_SELECT_TUTORIAL,&pD3DTexture[2]);
+	D3DXCreateTextureFromFile(pDevice, TEXTURE_TITLE_BG, &this[0].tex2DVB.pD3DTexture);
+	D3DXCreateTextureFromFile(pDevice, TEXTURE_LOGO_START, &this[1].tex2DVB.pD3DTexture);
+	D3DXCreateTextureFromFile(pDevice, TEXTURE_TITLE_SELECT_TUTORIAL, &this[2].tex2DVB.pD3DTexture);
+	D3DXCreateTextureFromFile(pDevice, TEXTURE_TITLE_SELECT_GAME, &this[3].tex2DVB.pD3DTexture);
 
-	D3DXCreateTextureFromFile(pDevice,TEXTURE_TITLE_SELECT_GAME,&pD3DTexture[3]);
-
-	this[0].tex2DVB.SetpD3DTexture(pD3DTexture[0]);
-	this[1].tex2DVB.SetpD3DTexture(pD3DTexture[1]);
-	this[2].tex2DVB.SetpD3DTexture(pD3DTexture[2]);
-	this[3].tex2DVB.SetpD3DTexture(pD3DTexture[3]);
-
-	pD3DTexture[0]->Release();
-	pD3DTexture[1]->Release();
-	pD3DTexture[2]->Release();
-	pD3DTexture[3]->Release();
 }
 
 //=============================================================================
@@ -113,7 +111,7 @@ void TITLE::Update(FADE *fade)
 		if (GetKeyboardTrigger(DIK_RETURN) || IsButtonTriggered(0, BUTTON_A))
 		{
 			PlaySound(SOUND_LABEL_SE_enter01);
-			if(TitleSelectSceneNum == TITLE_SELECT_SCENE_TUTORIAL) fade->SetFade(FADE_OUT, SCENE_TUTORIAL, SOUND_LABEL_BGM_tutorial01);
+			if (TitleSelectSceneNum == TITLE_SELECT_SCENE_TUTORIAL) fade->SetFade(FADE_OUT, SCENE_TUTORIAL, SOUND_LABEL_BGM_tutorial01);
 			else if (TitleSelectSceneNum == TITLE_SELECT_SCENE_GAME) fade->SetFade(FADE_OUT, SCENE_GAMECOUNTDOWN, SOUND_LABEL_BGM_normal01);
 		}
 		//セレクト切り替え
@@ -137,8 +135,7 @@ void TITLE::Update(FADE *fade)
 			//3つ以上選択肢があるとこっち使う
 			{
 				if (this[0].TitleSelectSceneNum != TITLE_SELECT_SCENE_GAME) PlaySound(SOUND_LABEL_SE_enter02);
-				this[0].TitleSelectSceneNum++;
-				if (this[0].TitleSelectSceneNum > TITLE_SELECT_SCENE_GAME) this[0].TitleSelectSceneNum = TITLE_SELECT_SCENE_GAME;
+				this[0].TitleSelectSceneNum = TITLE_SELECT_SCENE_GAME;
 			}
 		}
 		else if (GetKeyboardTrigger(DIK_UP) || IsButtonTriggered(0, BUTTON_DIGITAL_UP))
@@ -150,23 +147,21 @@ void TITLE::Update(FADE *fade)
 			//3つ以上選択肢があるとこっち使う
 			{
 				if (this[0].TitleSelectSceneNum != TITLE_SELECT_SCENE_TUTORIAL) PlaySound(SOUND_LABEL_SE_enter02);
-				this[0].TitleSelectSceneNum--;
-				if (this[0].TitleSelectSceneNum <= TITLE_SELECT_SCENE_TUTORIAL) this[0].TitleSelectSceneNum = TITLE_SELECT_SCENE_TUTORIAL;
+				this[0].TitleSelectSceneNum = TITLE_SELECT_SCENE_TUTORIAL;
 			}
 		}
-		for (int CntTitleSelectScene = 0; CntTitleSelectScene < TITLE_SELECT_SCENE_MAX; CntTitleSelectScene++)
+		if (this[0].TitleSelectSceneNum == TITLE_SELECT_SCENE_TUTORIAL)
 		{
-			if (this[0].TitleSelectSceneNum == CntTitleSelectScene)
-			{
-				this[2].fAlpha = 1.0f;
-			}
-			else
-			{
-				this[3].fAlpha = 0.2f;
-			}
-			SetColorTitle(2, this[2].fAlpha);
-			SetColorTitle(3, this[3].fAlpha);
+			this[2].fAlpha = 1.0f;
+			this[3].fAlpha = 0.2f;
 		}
+		else
+		{
+			this[2].fAlpha = 0.2f;
+			this[3].fAlpha = 1.0f;
+		}
+		SetColorTitle(2, this[2].fAlpha);
+		SetColorTitle(3, this[3].fAlpha);
 	}
 
 	//タイトル画面(ロゴ点滅)
@@ -183,16 +178,6 @@ void TITLE::Update(FADE *fade)
 			this[0].TitleSelectTime = true;
 			this[2].bDisp = true;
 			this[3].bDisp = true;
-		}
-		//初めは透明テクスチャのアルファ値を上げていき見えるようにする
-		if (this[1].fAlpha < 1.0f)
-		{
-			this[1].fAlpha += 0.05f;
-			if (this[1].fAlpha >= 1.0f)
-			{
-				this[1].fAlpha = 1.0f;
-			}
-			SetColorTitle(1, this[1].fAlpha);
 		}
 		//アルファ値が最大まで来たらカウントをとり、点滅を繰り返す
 		else
@@ -223,13 +208,15 @@ void TITLE::Draw(void)
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 
 	// 頂点バッファをデバイスのデータストリームにバインド
-	pDevice->SetStreamSource(0, this[0].tex2DVB.GetpD3DVtxBuff(), 0, sizeof(VERTEX_2D));
+	LPDIRECT3DVERTEXBUFFER9 pD3DVtxBuff0 = this[0].tex2DVB.GetpD3DVtxBuff();
+	pDevice->SetStreamSource(0, pD3DVtxBuff0, 0, sizeof(VERTEX_2D));
 
 	// 頂点フォーマットの設定
 	pDevice->SetFVF(FVF_VERTEX_2D);
 
 	// テクスチャの設定
-	pDevice->SetTexture(0, this[0].tex2DVB.GetpD3DTexture());
+	LPDIRECT3DTEXTURE9 pD3DTexture0 = this[0].tex2DVB.GetpD3DTexture();
+	pDevice->SetTexture(0, this[0].tex2DVB.pD3DTexture);
 
 	// ポリゴンの描画
 	pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, POLYGON_2D_NUM);
@@ -237,13 +224,15 @@ void TITLE::Draw(void)
 	if (this[1].bDisp == true)
 	{
 		// 頂点バッファをデバイスのデータストリームにバインド
-		pDevice->SetStreamSource(0, this[1].tex2DVB.GetpD3DVtxBuff(), 0, sizeof(VERTEX_2D));
+		LPDIRECT3DVERTEXBUFFER9 pD3DVtxBuff1 = this[1].tex2DVB.GetpD3DVtxBuff();
+		pDevice->SetStreamSource(0, pD3DVtxBuff1, 0, sizeof(VERTEX_2D));
 
 		// 頂点フォーマットの設定
 		pDevice->SetFVF(FVF_VERTEX_2D);
 
 		// テクスチャの設定
-		pDevice->SetTexture(0, this[1].tex2DVB.GetpD3DTexture());
+		LPDIRECT3DTEXTURE9 pD3DTexture1 = this[1].tex2DVB.GetpD3DTexture();
+		pDevice->SetTexture(0, this[1].tex2DVB.pD3DTexture);
 
 		// ポリゴンの描画
 		pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, POLYGON_2D_NUM);
@@ -252,17 +241,19 @@ void TITLE::Draw(void)
 
 	for (int CntTitleSelectScene = 0; CntTitleSelectScene < TITLE_SELECT_SCENE_MAX; CntTitleSelectScene++)
 	{
-		if (this[CntTitleSelectScene].bDisp == true)
+		if (this[CntTitleSelectScene+2].bDisp == true)
 		{
 
 			// 頂点バッファをデバイスのデータストリームにバインド
-			pDevice->SetStreamSource(0, this[CntTitleSelectScene].tex2DVB.GetpD3DVtxBuff(), 0, sizeof(VERTEX_2D));
+			LPDIRECT3DVERTEXBUFFER9 pD3DVtxBuff2 = this[CntTitleSelectScene + 2].tex2DVB.GetpD3DVtxBuff();
+			pDevice->SetStreamSource(0, pD3DVtxBuff2, 0, sizeof(VERTEX_2D));
 
 			// 頂点フォーマットの設定
 			pDevice->SetFVF(FVF_VERTEX_2D);
 
 			// テクスチャの設定
-			pDevice->SetTexture(0, this[CntTitleSelectScene].tex2DVB.GetpD3DTexture());
+			LPDIRECT3DTEXTURE9 pD3DTexture2 = this[CntTitleSelectScene + 2].tex2DVB.GetpD3DTexture();
+			pDevice->SetTexture(0, this[CntTitleSelectScene+2].tex2DVB.pD3DTexture);
 
 			// ポリゴンの描画
 			pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, POLYGON_2D_NUM);
@@ -362,10 +353,10 @@ HRESULT TITLE::MakeVertexTitle(void)
 				pVtx[3].rhw = 1.0f;
 
 			// 反射光の設定
-			pVtx[0].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, this[1].fAlpha);
-			pVtx[1].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, this[1].fAlpha);
-			pVtx[2].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, this[1].fAlpha);
-			pVtx[3].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, this[1].fAlpha);
+			pVtx[0].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+			pVtx[1].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+			pVtx[2].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+			pVtx[3].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
 
 			// テクスチャ座標の設定
 			pVtx[0].tex = D3DXVECTOR2(0.0f, 0.0f);
@@ -415,10 +406,10 @@ HRESULT TITLE::MakeVertexTitle(void)
 					pVtx[3].rhw = 1.0f;
 
 				// 反射光の設定
-				pVtx[0].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, this[CntTitleSelectScene].fAlpha);
-				pVtx[1].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, this[CntTitleSelectScene].fAlpha);
-				pVtx[2].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, this[CntTitleSelectScene].fAlpha);
-				pVtx[3].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, this[CntTitleSelectScene].fAlpha);
+				pVtx[0].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+				pVtx[1].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+				pVtx[2].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+				pVtx[3].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
 
 				// テクスチャ座標の設定
 				pVtx[0].tex = D3DXVECTOR2(0.0f, 0.0f);
@@ -428,7 +419,7 @@ HRESULT TITLE::MakeVertexTitle(void)
 
 				// 頂点データをアンロックする
 				pD3DVtxBuff->Unlock();
-				this[CntTitleSelectScene].tex2DVB.SetpD3DVtxBuff(pD3DVtxBuff);
+				this[CntTitleSelectScene + 2].tex2DVB.SetpD3DVtxBuff(pD3DVtxBuff);
 			}
 		}
 	}
@@ -449,10 +440,10 @@ void TITLE::SetColorTitle(int CntTitle, float alpha)
 		pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
 
 		// 反射光の設定
-		pVtx[0].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, fAlpha);
-		pVtx[1].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, fAlpha);
-		pVtx[2].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, fAlpha);
-		pVtx[3].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, fAlpha);
+		pVtx[0].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, alpha);
+		pVtx[1].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, alpha);
+		pVtx[2].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, alpha);
+		pVtx[3].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, alpha);
 
 		// 頂点データをアンロックする
 		pD3DVtxBuff->Unlock();

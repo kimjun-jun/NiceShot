@@ -225,9 +225,9 @@ public:
 	//------------------------set関数
 	void SetpD3DTexture(LPDIRECT3DTEXTURE9 pD3DTexture);
 	void SetpD3DVtxBuff(LPDIRECT3DVERTEXBUFFER9 pD3DVtxBuff);
+	LPDIRECT3DTEXTURE9		pD3DTexture;				//!< テクスチャへのポインタ
 
 private:
-	LPDIRECT3DTEXTURE9		pD3DTexture;				//!< テクスチャへのポインタ
 	LPDIRECT3DVERTEXBUFFER9 pD3DVtxBuff;				//!< 頂点バッファインターフェースへのポインタ
 };
 

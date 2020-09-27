@@ -53,9 +53,9 @@ public:
 		dashFlag = false;
 	}
 
-	PLAYER_PRATS				*parts[2];					//!< モデルのパーツ階層　親本体(砲台)、子パーツ[0](砲塔)、孫パーツ[1](砲身)
+	PLAYER_PRATS				parts[2];					//!< モデルのパーツ階層　親本体(砲台)、子パーツ[0](砲塔)、孫パーツ[1](砲身)
 	PLAYER_HONTAI				*Parent;					//!< 親子判定
-	GPUMODEL					*ModelDate[2];				//!< モデルデータ　0ノーマル、1攻撃、2スピード
+	GPUMODEL					ModelDate[2];				//!< モデルデータ　0ノーマル、1攻撃、2スピード
 	virtual void				Init(FIELD *field);					//!< 初期化
 	virtual void				Reinit(FIELD *field);				//!< 再初期化
 	virtual void				Uninit(void);				//!< 終了

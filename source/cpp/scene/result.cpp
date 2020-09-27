@@ -86,7 +86,7 @@ void RESULT::Draw(void)
 		pDevice->SetFVF(FVF_VERTEX_2D);
 
 		// テクスチャの設定
-		pDevice->SetTexture(0, this[0].tex2D.GetpD3DTexture());
+		pDevice->SetTexture(0, LPDIRECT3DTEXTURE9(this[0].tex2D.GetpD3DTexture()));
 
 		// ポリゴンの描画
 		pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, POLYGON_2D_NUM, this[0].tex2D.GettextureVTX(), sizeof(VERTEX_2D));

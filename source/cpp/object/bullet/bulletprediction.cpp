@@ -102,8 +102,8 @@ void BULLETPREDICTION::Update(PLAYER_HONTAI *player)
 		//---------------------------------オブジェクト値読み込み
 		D3DXVECTOR3	BulletPredictionPos = player[CntPlayer].GetPos();
 		D3DXVECTOR3 HoudaiRot = player[CntPlayer].GetRot();
-		D3DXVECTOR3 HoutouRot = player[CntPlayer].parts[PARTSTYPE_HOUTOU]->GetRot();
-		D3DXVECTOR3 HousinRot = player[CntPlayer].parts[PARTSTYPE_HOUSIN]->GetRot();
+		D3DXVECTOR3 HoutouRot = player[CntPlayer].parts[PARTSTYPE_HOUTOU].GetRot();
+		D3DXVECTOR3 HousinRot = player[CntPlayer].parts[PARTSTYPE_HOUSIN].GetRot();
 
 		//発射角度、発射座用計算
 		D3DXVECTOR3 BmoveRot;

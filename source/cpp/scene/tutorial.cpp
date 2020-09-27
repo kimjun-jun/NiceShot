@@ -87,7 +87,7 @@ void TUTO::Draw(void)
 		if (this[CntPlayer].cnt % 2 == 0)
 		{
 			pDevice->SetFVF(FVF_VERTEX_2D);
-			pDevice->SetTexture(0, this[CntPlayer].tex2D.GetpD3DTexture());
+			pDevice->SetTexture(0, LPDIRECT3DTEXTURE9(this[CntPlayer].tex2D.GetpD3DTexture()));
 			pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, POLYGON_2D_NUM, this[CntPlayer].tex2D.GettextureVTX(), sizeof(VERTEX_2D));
 		}
 	}
