@@ -420,8 +420,8 @@ void PLAYER_HONTAI::Draw(void)
 			D3DXMatrixIdentity(&mtxQ);
 
 			//---------------------------------------------------------オブジェクト値呼び出し
-			D3DXVECTOR3 FieldNorVec= this[CntPlayer].GetFieldNorVec();
-			float PlayerUpToFieldNorVec= this[CntPlayer].GetQrot();
+			D3DXVECTOR3 PlayerUpToFieldNorVec = this[CntPlayer].GetFieldNorUpNorCross();
+			float Qrot= this[CntPlayer].GetQrot();
 			D3DXQUATERNION q = D3DXQUATERNION(0, 0, 0, 1);
 			D3DXMATRIX mtxWorldOYA=this[CntPlayer].GetMatrix();
 			D3DXVECTOR3 scl = this[CntPlayer].GetScl();
@@ -429,7 +429,7 @@ void PLAYER_HONTAI::Draw(void)
 			D3DXVECTOR3 pos = this[CntPlayer].GetPos();
 
 			//q=(rotVecAxis法線)*(g_Player.rot回転)
-			D3DXQuaternionRotationAxis(&q, &FieldNorVec, -PlayerUpToFieldNorVec);
+			D3DXQuaternionRotationAxis(&q, &PlayerUpToFieldNorVec, -Qrot);
 			D3DXMatrixRotationQuaternion(&mtxQ, &q);
 
 			// ワールドマトリックスの初期化

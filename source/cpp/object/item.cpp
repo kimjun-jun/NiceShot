@@ -246,7 +246,6 @@ void ITEM::Update(PLAYER_HONTAI *p)
 			//-------------------------------------------オブジェクトの値書き込み
 			this[nCntItem].SetPos(pos);
 			this[nCntItem].SetRot(rot);
-			//this[nCntItem].SetFieldNorVec(FieldNorVec);
 			this[nCntItem].SetFieldNorUpNorCross(FieldNorUpNorCross);
 			this[nCntItem].SetQrot(Qrot);
 		}
@@ -318,12 +317,12 @@ void ITEM::Draw(void)
 			D3DXVECTOR3 pos = this[nCntItem].GetPos();
 			D3DXVECTOR3 rot = this[nCntItem].GetRot();
 			D3DXVECTOR3 scl = this[nCntItem].GetScl();
-			D3DXVECTOR3 FieldNorVec = this[nCntItem].GetFieldNorVec();
+			D3DXVECTOR3 PlayerUpToFieldNorVec = this[nCntItem].GetFieldNorUpNorCross();
 			float Qrot = this[nCntItem].GetQrot();
 
 
 			//q=(rotVecAxis法線)*(g_Player.rot回転)  -がキモ？
-			D3DXQuaternionRotationAxis(&q, &FieldNorVec, -Qrot);
+			D3DXQuaternionRotationAxis(&q, &PlayerUpToFieldNorVec, -Qrot);
 			D3DXMatrixRotationQuaternion(&mtxQ, &q);
 
 			// ワールドマトリックスの初期化
