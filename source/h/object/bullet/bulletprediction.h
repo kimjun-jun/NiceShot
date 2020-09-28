@@ -17,11 +17,11 @@ public:
 	virtual void						Reinit(void);				//!< Ä‰Šú‰»
 	virtual void						Uninit(void);				//!< I—¹
 	virtual void						Update(PLAYER_HONTAI *player);				//!< XV
-	virtual void						Draw(PLAYER_HONTAI *player);					//!< •`‰æ
+	virtual void						Draw(PLAYER_HONTAI *player, int CntPlayer);					//!< •`‰æ
 	HRESULT						MakeVertexBulletprediction(LPDIRECT3DDEVICE9 pDevice);
 	void						SetVertexBulletprediction(int PlayerType, int nIdxBulletprediction, float fSizeX, float fSizeY);
 	void						SetColorBulletprediction(int PlayerType, int nIdxBulletprediction, D3DXCOLOR col);
-	int							SetBulletprediction(D3DXVECTOR3 pos, int PlayerType, D3DXCOLOR col, float fSizeX, float fSizeY);
+	void						SetBulletprediction(D3DXVECTOR3 pos, int PlayerType, D3DXCOLOR col, float fSizeX, float fSizeY, int CntBulletPrediction);
 };
 
 

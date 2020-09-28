@@ -25,10 +25,10 @@
 void TUTO::Init(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
-	LPDIRECT3DTEXTURE9 pD3DTexture;
-	D3DXCreateTextureFromFile(pDevice, TEXTURE_TUTORIAL, &pD3DTexture);
-	this[0].tex2D.SetpD3DTexture(pD3DTexture);
-	pD3DTexture->Release();
+	for (int CntTuto = 0; CntTuto < OBJECT_TUTORIAL_MAX; CntTuto++)
+	{
+		D3DXCreateTextureFromFile(pDevice, TEXTURE_TUTORIAL, &this[CntTuto].tex2D.pD3DTexture);
+	}
 
 	//描画位置設定
 	this[0].SetPos(D3DXVECTOR3(TUTORIAL_POS_X - TUTORIAL_SIZE_X, TUTORIAL_POS_Y - TUTORIAL_SIZE_Y, 0.0f));
@@ -45,7 +45,6 @@ void TUTO::Init(void)
 //=============================================================================
 void TUTO::Reinit(void)
 {
-	this[0].cnt = 0;
 }
 
 //=============================================================================
@@ -66,11 +65,11 @@ void TUTO::Update(GAME_OBJECT* obj, FADE *fade)
 		fade->SetFade(FADE_OUT, SCENE_TITLE, SOUND_LABEL_BGM_title01);
 		obj->Reinit();
 	}
-	for (int CntPlayer = 0; CntPlayer < OBJECT_TUTORIAL_MAX; CntPlayer++)
+	for (int CntTuto = 0; CntTuto < OBJECT_TUTORIAL_MAX; CntTuto++)
 	{
-		if (GetKeyboardTrigger(DIK_M) || IsButtonTriggered(CntPlayer, BUTTON_R3))
+		if (GetKeyboardTrigger(DIK_M) || IsButtonTriggered(CntTuto, BUTTON_R3))
 		{
-			this[CntPlayer].cnt++;
+			this[CntTuto].cnt++;
 		}
 	}
 }
@@ -82,13 +81,14 @@ void TUTO::Draw(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 
-	for (int CntPlayer = 0; CntPlayer < OBJECT_TUTORIAL_MAX; CntPlayer++)
+	for (int CntTuto = 0; CntTuto < OBJECT_TUTORIAL_MAX; CntTuto++)
 	{
-		if (this[CntPlayer].cnt % 2 == 0)
+		if (this[CntTuto].cnt % 2 == 0)
 		{
 			pDevice->SetFVF(FVF_VERTEX_2D);
-			pDevice->SetTexture(0, LPDIRECT3DTEXTURE9(this[CntPlayer].tex2D.GetpD3DTexture()));
-			pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, POLYGON_2D_NUM, this[CntPlayer].tex2D.GettextureVTX(), sizeof(VERTEX_2D));
+			pDevice->SetTexture(0, this[CntTuto].tex2D.pD3DTexture);
+
+			pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, POLYGON_2D_NUM, this[CntTuto].tex2D.textureVTX, sizeof(VERTEX_2D));
 		}
 	}
 }
@@ -98,33 +98,31 @@ void TUTO::Draw(void)
 //=============================================================================
 HRESULT TUTO::MakeVertexTutorial(void)
 {
-	for (int CntPlayer = 0; CntPlayer < OBJECT_TUTORIAL_MAX; CntPlayer++)
+	for (int CntTuto = 0; CntTuto < OBJECT_TUTORIAL_MAX; CntTuto++)
 	{
-		VERTEX_2D vtx2d[POLYGON_2D_VERTEX];
-		D3DXVECTOR3 pos = this[CntPlayer].GetPos();
+		D3DXVECTOR3 pos = this[CntTuto].GetPos();
 		// 頂点座標の設定
-		vtx2d[0].vtx = D3DXVECTOR3(pos.x - TUTORIAL_SIZE_X, pos.y - TUTORIAL_SIZE_Y, 0.0f);
-		vtx2d[1].vtx = D3DXVECTOR3(pos.x + TUTORIAL_SIZE_X, pos.y - TUTORIAL_SIZE_Y, 0.0f);
-		vtx2d[2].vtx = D3DXVECTOR3(pos.x - TUTORIAL_SIZE_X, pos.y + TUTORIAL_SIZE_Y, 0.0f);
-		vtx2d[3].vtx = D3DXVECTOR3(pos.x + TUTORIAL_SIZE_X, pos.y + TUTORIAL_SIZE_Y, 0.0f);
+		this[CntTuto].tex2D.textureVTX[0].vtx = D3DXVECTOR3(pos.x - TUTORIAL_SIZE_X, pos.y - TUTORIAL_SIZE_Y, 0.0f);
+		this[CntTuto].tex2D.textureVTX[1].vtx = D3DXVECTOR3(pos.x + TUTORIAL_SIZE_X, pos.y - TUTORIAL_SIZE_Y, 0.0f);
+		this[CntTuto].tex2D.textureVTX[2].vtx = D3DXVECTOR3(pos.x - TUTORIAL_SIZE_X, pos.y + TUTORIAL_SIZE_Y, 0.0f);
+		this[CntTuto].tex2D.textureVTX[3].vtx = D3DXVECTOR3(pos.x + TUTORIAL_SIZE_X, pos.y + TUTORIAL_SIZE_Y, 0.0f);
 		// テクスチャのパースペクティブコレクト用
-		vtx2d[0].rhw =
-			vtx2d[1].rhw =
-			vtx2d[2].rhw =
-			vtx2d[3].rhw = 1.0f;
+		this[CntTuto].tex2D.textureVTX[0].rhw =
+			this[CntTuto].tex2D.textureVTX[1].rhw =
+			this[CntTuto].tex2D.textureVTX[2].rhw =
+			this[CntTuto].tex2D.textureVTX[3].rhw = 1.0f;
 
 		// 反射光の設定
-		vtx2d[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-		vtx2d[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-		vtx2d[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-		vtx2d[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+		this[CntTuto].tex2D.textureVTX[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+		this[CntTuto].tex2D.textureVTX[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+		this[CntTuto].tex2D.textureVTX[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+		this[CntTuto].tex2D.textureVTX[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
 
 		// テクスチャ座標の設定
-		vtx2d[0].tex = D3DXVECTOR2(0.0f, 0.0f);
-		vtx2d[1].tex = D3DXVECTOR2(1.0f, 0.0f);
-		vtx2d[2].tex = D3DXVECTOR2(0.0f, 1.0f);
-		vtx2d[3].tex = D3DXVECTOR2(1.0f, 1.0f);
-		this[CntPlayer].tex2D.SettextureVTX(vtx2d);
+		this[CntTuto].tex2D.textureVTX[0].tex = D3DXVECTOR2(0.0f, 0.0f);
+		this[CntTuto].tex2D.textureVTX[1].tex = D3DXVECTOR2(1.0f, 0.0f);
+		this[CntTuto].tex2D.textureVTX[2].tex = D3DXVECTOR2(0.0f, 1.0f);
+		this[CntTuto].tex2D.textureVTX[3].tex = D3DXVECTOR2(1.0f, 1.0f);
 	}
 	return S_OK;
 }

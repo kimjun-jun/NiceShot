@@ -115,8 +115,9 @@ void ITEM::Init(void)
 		int ItemNum = rand() % ITEMTYPE_MAX;
 		//ライフ、カメラ、霧アイテムの時はもう一度抽選
 		if (ItemNum == ITEMTYPE_LIFE && ItemNum == ITEMTYPE_CAMERA && ItemNum == ITEMTYPE_KIRI) ItemNum = rand() % ITEMTYPE_MAX;
-		SetItem(pos, D3DXVECTOR3(2.0f, 2.0f, 2.0f),D3DXVECTOR3(0.0f, 0.0f, 0.0f), ItemNum);
+		this[0].SetItem(pos, D3DXVECTOR3(2.0f, 2.0f, 2.0f),D3DXVECTOR3(0.0f, 0.0f, 0.0f), ItemNum);
 		//SetItem(pos, D3DXVECTOR3(1.0f, 1.0f, 1.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ITEMTYPE_TIKEI);
+		this[nCntItem].SetUse(true);
 
 	}
 	this[0].GoukeiDrop = DROP_ITEM_MAX;
@@ -168,9 +169,9 @@ void ITEM::Reinit(void)
 		int ItemNum = rand() % ITEMTYPE_MAX;
 		//ライフ、カメラ、霧アイテムの時はもう一度抽選
 		if (ItemNum == ITEMTYPE_LIFE && ItemNum == ITEMTYPE_CAMERA && ItemNum == ITEMTYPE_KIRI) ItemNum = rand() % ITEMTYPE_MAX;
-		SetItem(pos, D3DXVECTOR3(2.0f, 2.0f, 2.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ItemNum);
+		this[0].SetItem(pos, D3DXVECTOR3(2.0f, 2.0f, 2.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ItemNum);
 		//SetItem(pos, D3DXVECTOR3(1.0f, 1.0f, 1.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ITEMTYPE_TIKEI);
-
+		this[nCntItem].SetUse(true);
 	}
 	this[0].GoukeiDrop = DROP_ITEM_MAX;
 }
@@ -230,14 +231,14 @@ void ITEM::Update(PLAYER_HONTAI *p)
 
 			//地形の角度とプレイヤーの角度を計算。drawでクオータニオンで使う
 			D3DXVECTOR3 Upvec = D3DXVECTOR3(0.0, 1.0f, 0.0f);
-			D3DXVec3Cross(&FieldNorVec, &FieldNorUpNorCross, &Upvec);
-			float kakezan = D3DXVec3Dot(&FieldNorUpNorCross, &Upvec);
+			D3DXVec3Cross(&FieldNorUpNorCross, &FieldNorVec, &Upvec);
+			float kakezan = D3DXVec3Dot(&FieldNorVec, &Upvec);
 			if (kakezan != 0)
 			{
 				float cossita = kakezan /
-					sqrtf(FieldNorUpNorCross.x*FieldNorUpNorCross.x +
-						FieldNorUpNorCross.y *FieldNorUpNorCross.y +
-						FieldNorUpNorCross.z * FieldNorUpNorCross.z);
+					sqrtf(FieldNorVec.x*FieldNorVec.x +
+						FieldNorVec.y *FieldNorVec.y +
+						FieldNorVec.z * FieldNorVec.z);
 				Qrot = acosf(cossita);
 			}
 			else Qrot = 0.0f;
@@ -245,8 +246,8 @@ void ITEM::Update(PLAYER_HONTAI *p)
 			//-------------------------------------------オブジェクトの値書き込み
 			this[nCntItem].SetPos(pos);
 			this[nCntItem].SetRot(rot);
-			this[nCntItem].SetFieldNorVec(FieldNorVec);
-//			this[nCntItem].SetFieldNorUpNorCross(FieldNorUpNorCross);
+			//this[nCntItem].SetFieldNorVec(FieldNorVec);
+			this[nCntItem].SetFieldNorUpNorCross(FieldNorUpNorCross);
 			this[nCntItem].SetQrot(Qrot);
 		}
 
@@ -278,8 +279,8 @@ void ITEM::Update(PLAYER_HONTAI *p)
 				int ItemNum = rand() % ITEMTYPE_MAX;
 				//ライフ、カメラ、霧アイテムの時はもう一度抽選
 				if (ItemNum == ITEMTYPE_LIFE && ItemNum == ITEMTYPE_CAMERA && ItemNum == ITEMTYPE_KIRI) ItemNum = rand() % ITEMTYPE_MAX;
-				SetItem(pos, D3DXVECTOR3(2.0f, 2.0f, 2.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ItemNum);
-				//SetItem(pos, D3DXVECTOR3(1.0f, 1.0f, 1.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ITEMTYPE_TIKEI);
+				this[0].SetItem(pos, D3DXVECTOR3(2.0f, 2.0f, 2.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ItemNum);
+				//this[0].SetItem(pos, D3DXVECTOR3(1.0f, 1.0f, 1.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ITEMTYPE_TIKEI);
 				this[nCntItem].CollisionFieldEnd = false;
 				this[nCntItem].Droptime = 0.0f;
 				this[0].GoukeiDrop++;
@@ -299,7 +300,7 @@ void ITEM::Draw(void)
 	// ライティングを有効に
 	pDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
 
-	for(int nCntItem = 0; nCntItem < OBJECT_ITEM_MAX; nCntItem++)
+	for (int nCntItem = 0; nCntItem < OBJECT_ITEM_MAX; nCntItem++)
 	{
 		bool use = this[nCntItem].GetUse();
 		if (use == true)
@@ -352,12 +353,7 @@ void ITEM::Draw(void)
 			for (int nCntMat = 0; nCntMat < (int)g_aNumMatItem[this[nCntItem].nType]; nCntMat++)
 			{
 				// マテリアルの設定
-				pDevice->SetMaterial(&pD3DXMat[nCntMat].MatD3D);
-				if (pD3DXMat[nCntMat].pTextureFilename != NULL)
-				{
-					// テクスチャの設定
-					pDevice->SetTexture(0, g_pD3DTextureItem[this[nCntItem].nType]);
-				}
+				pDevice->SetMaterial(&pD3DXMat[0].MatD3D);
 
 				// テクスチャの設定
 				pDevice->SetTexture(0, g_pD3DTextureItem[this[nCntItem].nType]);

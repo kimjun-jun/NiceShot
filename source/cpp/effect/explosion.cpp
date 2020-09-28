@@ -117,7 +117,7 @@ void EXPLOSION::Update(void)
 //=============================================================================
 // 描画処理
 //=============================================================================
-void EXPLOSION::Draw(void)
+void EXPLOSION::Draw(int CntPlayer)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 
@@ -136,8 +136,6 @@ void EXPLOSION::Draw(void)
 			D3DXCOLOR col = this[nCntExplosion].GetCol();
 			D3DXMATRIX mtxWorldExplosion = this[nCntExplosion].GetMatrix();
 
-			for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
-			{
 				D3DXMATRIX mtxView, mtxScale, mtxTranslate;
 
 				// ワールドマトリックスの初期化
@@ -182,7 +180,6 @@ void EXPLOSION::Draw(void)
 				pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, (nCntExplosion * 4), POLYGON_2D_NUM);
 
 				pDevice->SetRenderState(D3DRS_LIGHTING, TRUE);
-			}
 		}
 	}
 	pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);		// αソースカラーの指定

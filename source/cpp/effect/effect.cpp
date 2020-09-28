@@ -117,7 +117,7 @@ void  EFFECT::Update(void)
 //=============================================================================
 // 描画処理
 //=============================================================================
-void  EFFECT::Draw(void)
+void  EFFECT::Draw(int CntPlayer)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 
@@ -136,53 +136,50 @@ void  EFFECT::Draw(void)
 			D3DXCOLOR col = this[nCntEffect].GetCol();
 			D3DXMATRIX mtxWorldEffect = this[nCntEffect].GetMatrix();
 
-			for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
-			{
-				D3DXMATRIX mtxView, mtxScale, mtxTranslate;
+			D3DXMATRIX mtxView, mtxScale, mtxTranslate;
 
-				// ワールドマトリックスの初期化
-				D3DXMatrixIdentity(&mtxWorldEffect);
+			// ワールドマトリックスの初期化
+			D3DXMatrixIdentity(&mtxWorldEffect);
 
-				// ビューマトリックスを取得
-				CAMERA *cam = GetCamera();
+			// ビューマトリックスを取得
+			CAMERA *cam = GetCamera();
 
-				mtxWorldEffect._11 = cam[CntPlayer].mtxView._11;
-				mtxWorldEffect._12 = cam[CntPlayer].mtxView._21;
-				mtxWorldEffect._13 = cam[CntPlayer].mtxView._31;
-				mtxWorldEffect._21 = cam[CntPlayer].mtxView._12;
-				mtxWorldEffect._22 = cam[CntPlayer].mtxView._22;
-				mtxWorldEffect._23 = cam[CntPlayer].mtxView._32;
-				mtxWorldEffect._31 = cam[CntPlayer].mtxView._13;
-				mtxWorldEffect._32 = cam[CntPlayer].mtxView._23;
-				mtxWorldEffect._33 = cam[CntPlayer].mtxView._33;
+			mtxWorldEffect._11 = cam[CntPlayer].mtxView._11;
+			mtxWorldEffect._12 = cam[CntPlayer].mtxView._21;
+			mtxWorldEffect._13 = cam[CntPlayer].mtxView._31;
+			mtxWorldEffect._21 = cam[CntPlayer].mtxView._12;
+			mtxWorldEffect._22 = cam[CntPlayer].mtxView._22;
+			mtxWorldEffect._23 = cam[CntPlayer].mtxView._32;
+			mtxWorldEffect._31 = cam[CntPlayer].mtxView._13;
+			mtxWorldEffect._32 = cam[CntPlayer].mtxView._23;
+			mtxWorldEffect._33 = cam[CntPlayer].mtxView._33;
 
-				// スケールを反映
-				D3DXMatrixScaling(&mtxScale, scl.x, scl.y, scl.z);
-				D3DXMatrixMultiply(&mtxWorldEffect, &mtxWorldEffect, &mtxScale);
+			// スケールを反映
+			D3DXMatrixScaling(&mtxScale, scl.x, scl.y, scl.z);
+			D3DXMatrixMultiply(&mtxWorldEffect, &mtxWorldEffect, &mtxScale);
 
-				// 移動を反映
-				D3DXMatrixTranslation(&mtxTranslate, pos.x, pos.y, pos.z);
-				D3DXMatrixMultiply(&mtxWorldEffect, &mtxWorldEffect, &mtxTranslate);
+			// 移動を反映
+			D3DXMatrixTranslation(&mtxTranslate, pos.x, pos.y, pos.z);
+			D3DXMatrixMultiply(&mtxWorldEffect, &mtxWorldEffect, &mtxTranslate);
 
-				// ワールドマトリックスの設定
-				pDevice->SetTransform(D3DTS_WORLD, &mtxWorldEffect);
+			// ワールドマトリックスの設定
+			pDevice->SetTransform(D3DTS_WORLD, &mtxWorldEffect);
 
-				pDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
+			pDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
 
-				// 頂点バッファをデバイスのデータストリームにバインド
-				pDevice->SetStreamSource(0, g_pD3DVtxBuffEffect, 0, sizeof(VERTEX_3D));
+			// 頂点バッファをデバイスのデータストリームにバインド
+			pDevice->SetStreamSource(0, g_pD3DVtxBuffEffect, 0, sizeof(VERTEX_3D));
 
-				// 頂点フォーマットの設定
-				pDevice->SetFVF(FVF_VERTEX_3D);
+			// 頂点フォーマットの設定
+			pDevice->SetFVF(FVF_VERTEX_3D);
 
-				// テクスチャの設定
-				pDevice->SetTexture(0, g_pD3DTextureEffect);
+			// テクスチャの設定
+			pDevice->SetTexture(0, g_pD3DTextureEffect);
 
-				// ポリゴンの描画
-				pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, (nCntEffect * 4), POLYGON_2D_NUM);
+			// ポリゴンの描画
+			pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, (nCntEffect * 4), POLYGON_2D_NUM);
 
-				pDevice->SetRenderState(D3DRS_LIGHTING, TRUE);
-			}
+			pDevice->SetRenderState(D3DRS_LIGHTING, TRUE);
 		}
 	}
 	pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);		// αソースカラーの指定

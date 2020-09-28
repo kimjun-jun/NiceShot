@@ -14,7 +14,7 @@
 #define	SKY_TEXTURE_FILENAME	"../data/TEXTURE/sky001.jpg"		// 読み込むテクスチャファイル名
 #define	VALUE_MOVE_SKY		(5.0f)							// 移動速度
 #define	VALUE_ROTATE_SKY	(D3DX_PI * 0.01f)				// 回転速度
-#define	VALUE_TIME_SKY		(0.001f)							// 移動速度
+#define	VALUE_TIME_SKY		(0.01f)							// 移動速度
 
 #define	SKY_HEIGHT_RATE		(2.0f)		// 空ドームの高さ係数
 #define	TEX_COUNT_LOOP		(1)			// テクスチャの繰り返し回数
@@ -244,6 +244,8 @@ void SKY::Init()
 		// インデックスデータをアンロックする
 		this[1].model.pD3DIdxBuff->Unlock();
 	}
+	this[0].time = 1.0f;
+	this[1].time = 1.0f;
 
 }
 
@@ -287,10 +289,8 @@ void SKY::Reinit(void)
 		this[1].model.pD3DVtxBuff->Unlock();
 	}
 
-	this[0].fRotY = 0.0f;
-	this[0].time = 0.0f;
-	this[1].fRotY = 0.0f;
-	this[1].time = 0.0f;
+	this[0].time = 1.0f;
+	this[1].time = 1.0f;
 }
 
 //=============================================================================
@@ -362,8 +362,11 @@ void SKY::Update(void)
 		this[1].time += this[1].Addtime;
 
 
-	if (this[0].time >= 1.0 || this[0].time <= -1.0) this[0].Addtime *= -1.0f;
-	if (this[1].time >= 1.0 || this[1].time <= -1.0) this[1].Addtime *= -1.0f;
+		if (this[0].time >= 1.0f || this[0].time <= 0.8f)
+		{
+			this[0].Addtime *= -1.0f;
+		}
+		if (this[1].time >= 1.0f || this[1].time <= 0.8f) this[1].Addtime *= -1.0f;
 }
 
 //=============================================================================
@@ -372,13 +375,13 @@ void SKY::Update(void)
 void SKY::Draw(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
-	DWORD dwSettingLighting, dwSettingCullmode;
+	//DWORD dwSettingLighting, dwSettingCullmode;
 
-	pDevice->GetRenderState(D3DRS_LIGHTING, &dwSettingLighting);
-	pDevice->GetRenderState(D3DRS_CULLMODE, &dwSettingCullmode);
+	//pDevice->GetRenderState(D3DRS_LIGHTING, &dwSettingLighting);
+	//pDevice->GetRenderState(D3DRS_CULLMODE, &dwSettingCullmode);
 
-	// ライティングを無効に
-	pDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
+	//// ライティングを無効に
+	//pDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
 
 	D3DXMATRIX mtxRot, mtxTranslate, mtxWorld;
 	// ワールドマトリックスの初期化
@@ -430,14 +433,14 @@ void SKY::Draw(void)
 	// ポリゴンの描画
 	pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLEFAN, 0, 0, (this[1].nNumBlockH + 2), 0, this[1].nNumBlockH);
 
-	pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);	// 裏面をカリング
+	//pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);	// 裏面をカリング
 
-	pDevice->SetRenderState(D3DRS_CULLMODE, dwSettingCullmode);
+	//pDevice->SetRenderState(D3DRS_CULLMODE, dwSettingCullmode);
 
-	// ライティングを有効に
-	pDevice->SetRenderState(D3DRS_LIGHTING, TRUE);
+	//// ライティングを有効に
+	//pDevice->SetRenderState(D3DRS_LIGHTING, TRUE);
 
-	pDevice->SetRenderState(D3DRS_LIGHTING, dwSettingLighting);
-	pDevice->SetRenderState(D3DRS_CULLMODE, dwSettingCullmode);
+	//pDevice->SetRenderState(D3DRS_LIGHTING, dwSettingLighting);
+	//pDevice->SetRenderState(D3DRS_CULLMODE, dwSettingCullmode);
 }
 

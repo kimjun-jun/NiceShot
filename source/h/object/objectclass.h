@@ -54,25 +54,25 @@ public:
 	stop = 0;
 	}
 	~GAME_OBJECT() {
-		player = NULL;
-		effect = NULL;
-		bullet = NULL;
-		shadow = NULL;
-		countdown = NULL;
-		tuto = NULL;
-		status = NULL;
-		bulletprediction = NULL;
-		vitalgauge = NULL;
-		bulletgauge = NULL;
-		damege = NULL;
-		explosion = NULL;
-		item = NULL;
-		rank = NULL;
-		result = NULL;
-		title = NULL;
-		field = NULL;
-		sky = NULL;
-		wall = NULL;
+		//SAFE_DELETE_ARRAY(player);
+		//SAFE_DELETE_ARRAY(effect);
+		//SAFE_DELETE_ARRAY(bullet);
+		//SAFE_DELETE_ARRAY(shadow);
+		//SAFE_DELETE_ARRAY(countdown);
+		//SAFE_DELETE_ARRAY(tuto);
+		//SAFE_DELETE_ARRAY(status);
+		//SAFE_DELETE_ARRAY(bulletprediction);
+		//SAFE_DELETE_ARRAY(vitalgauge);
+		//SAFE_DELETE_ARRAY(bulletgauge);
+		//SAFE_DELETE_ARRAY(damege);
+		//SAFE_DELETE_ARRAY(explosion);
+		//SAFE_DELETE_ARRAY(item);
+		//SAFE_DELETE_ARRAY(rank);
+		//SAFE_DELETE_ARRAY(result);
+		//SAFE_DELETE_ARRAY(title);
+		//SAFE_DELETE_ARRAY(field);
+		//SAFE_DELETE_ARRAY(sky);
+		//SAFE_DELETE_ARRAY(wall);
 	}
 	void Create();
 	void Init();
@@ -189,8 +189,8 @@ struct ALL_OBJECT_PARAMETER
 struct GPUMODEL
 {
 	GPUMODEL() {
-		pD3DTexture = NULL; pD3DXMesh = NULL; pD3DXBuffMat = NULL; nNumMat = NULL; pD3DVtxBuff = NULL;
-		pD3DIdxBuff = NULL; nNumVertex = NULL; nNumVertexIndex = NULL; nNumPolygon = NULL;
+		pD3DTexture = NULL; pD3DXMesh = NULL; pD3DXBuffMat = NULL; nNumMat = 0; pD3DVtxBuff = NULL;
+		pD3DIdxBuff = NULL; nNumVertex = 0; nNumVertexIndex = 0; nNumPolygon = 0;
 	}
 	virtual ~GPUMODEL() {
 		SAFE_RELEASE(pD3DTexture); SAFE_RELEASE(pD3DXMesh); SAFE_RELEASE(pD3DXBuffMat); SAFE_RELEASE(pD3DVtxBuff); SAFE_RELEASE(pD3DIdxBuff);
@@ -217,18 +217,10 @@ class TEXTURE2D_VERTEXBUFFER
 public:
 	TEXTURE2D_VERTEXBUFFER() { pD3DTexture = NULL; pD3DVtxBuff = NULL; }
 	virtual ~TEXTURE2D_VERTEXBUFFER() { SAFE_RELEASE(pD3DTexture); SAFE_RELEASE(pD3DVtxBuff); }
-
-	//------------------------get関数
-	LPDIRECT3DTEXTURE9 GetpD3DTexture();
-	LPDIRECT3DVERTEXBUFFER9 GetpD3DVtxBuff();
-
-	//------------------------set関数
-	void SetpD3DTexture(LPDIRECT3DTEXTURE9 pD3DTexture);
-	void SetpD3DVtxBuff(LPDIRECT3DVERTEXBUFFER9 pD3DVtxBuff);
 	LPDIRECT3DTEXTURE9		pD3DTexture;				//!< テクスチャへのポインタ
+	LPDIRECT3DVERTEXBUFFER9 pD3DVtxBuff;				//!< 頂点バッファインターフェースへのポインタ
 
 private:
-	LPDIRECT3DVERTEXBUFFER9 pD3DVtxBuff;				//!< 頂点バッファインターフェースへのポインタ
 };
 
 /**
@@ -240,18 +232,16 @@ class TEXTURE_2D
 public:
 	TEXTURE_2D() { pD3DTexture = NULL; }
 	virtual ~TEXTURE_2D() { SAFE_RELEASE(pD3DTexture); }
+	LPDIRECT3DTEXTURE9		pD3DTexture;				//!< テクスチャへのポインタ
+	VERTEX_2D				textureVTX[POLYGON_2D_VERTEX];					   //!< 頂点情報格納ワーク
 
 	//------------------------get関数
-	LPDIRECT3DTEXTURE9 GetpD3DTexture();
-	VERTEX_2D* GettextureVTX();
+	//VERTEX_2D* GettextureVTX();
 
 	//------------------------set関数
-	void SetpD3DTexture(LPDIRECT3DTEXTURE9 pD3DTexture);
-	void SettextureVTX(VERTEX_2D *textureVTX);
+	//void SettextureVTX(VERTEX_2D *textureVTX);
 
 private:
-	LPDIRECT3DTEXTURE9		pD3DTexture;							   //!< テクスチャへのポインタ 
-	VERTEX_2D				textureVTX[POLYGON_2D_VERTEX];					   //!< 頂点情報格納ワーク
 };
 
 

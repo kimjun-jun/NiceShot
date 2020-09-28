@@ -18,7 +18,7 @@ public:
 	virtual void				Reinit(void);				//!< Ä‰Šú‰»
 	virtual void				Uninit(void);				//!< I—¹
 	virtual void				Update(void);				//!< XV
-	virtual void				Draw(void);					//!< •`‰æ
+	virtual void				Draw(int CntPlayer);					//!< •`‰æ
 	HRESULT						MakeVertexEffect(LPDIRECT3DDEVICE9 pDevice);
 	void						SetVertexEffect(int nIdxEffect, float fSizeX, float fSizeY);
 	void						SetColorEffect(int nIdxEffect, D3DXCOLOR col);

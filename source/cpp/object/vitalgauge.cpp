@@ -45,12 +45,29 @@ void VITALGAUGE::Init(void)
 	{
 		MakeVertexVitalGauge(pDevice,CntPlayer);
 
-		LPDIRECT3DTEXTURE9 pD3DTexture;
 		// テクスチャの読み込み
 		D3DXCreateTextureFromFile(pDevice,					// デバイスへのポインタ
 			TEXTURE_VITALGAUGE,			// ファイルの名前
-			&pD3DTexture);	// 読み込むメモリー
-		this[CntPlayer].tex2DVB.SetpD3DTexture(pD3DTexture);
+			&this[CntPlayer].tex2DVB.pD3DTexture);	// 読み込むメモリー
+
+				// ライフの初期化
+		this[CntPlayer].VitalPower = PLAYER_VITAL;
+
+		{//頂点バッファの中身を埋める
+			VERTEX_2D *pVtx;
+			// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
+			this[CntPlayer].tex2DVB.pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+			for (int nCntPlace = 0; nCntPlace < PLAYER_VITAL; nCntPlace++, pVtx += 4)
+			{
+				// 反射光の設定
+				pVtx[0].diffuse = D3DXCOLOR(0.5f, 1.0f, 0.5f, 1.0f);
+				pVtx[1].diffuse = D3DXCOLOR(0.5f, 1.0f, 0.5f, 1.0f);
+				pVtx[2].diffuse = D3DXCOLOR(0.5f, 1.0f, 0.5f, 1.0f);
+				pVtx[3].diffuse = D3DXCOLOR(0.5f, 1.0f, 0.5f, 1.0f);
+			}
+			// 頂点データをアンロックする
+			this[CntPlayer].tex2DVB.pD3DVtxBuff->Unlock();
+		}
 	}
 }
 
@@ -66,9 +83,8 @@ void VITALGAUGE::Reinit(void)
 
 		{//頂点バッファの中身を埋める
 			VERTEX_2D *pVtx;
-			LPDIRECT3DVERTEXBUFFER9 pD3DVtxBuff = this[CntPlayer].tex2DVB.GetpD3DVtxBuff();
 			// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
-			pD3DVtxBuff[CntPlayer].Lock(0, 0, (void**)&pVtx, 0);
+			this[CntPlayer].tex2DVB.pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
 			for (int nCntPlace = 0; nCntPlace < PLAYER_VITAL; nCntPlace++, pVtx += 4)
 			{
 				// 反射光の設定
@@ -78,9 +94,7 @@ void VITALGAUGE::Reinit(void)
 				pVtx[3].diffuse = D3DXCOLOR(0.5f, 1.0f, 0.5f, 1.0f);
 			}
 			// 頂点データをアンロックする
-			pD3DVtxBuff[CntPlayer].Unlock();
-
-			this[CntPlayer].tex2DVB.SetpD3DVtxBuff(pD3DVtxBuff);
+			this[CntPlayer].tex2DVB.pD3DVtxBuff->Unlock();
 		}
 	}
 }
@@ -116,9 +130,8 @@ void VITALGAUGE::Update(PLAYER_HONTAI *p,RANK *rank)
 		{
 			{//頂点バッファの中身を埋める
 				VERTEX_2D *pVtx;
-				LPDIRECT3DVERTEXBUFFER9 pD3DVtxBuff = this[CntPlayer].tex2DVB.GetpD3DVtxBuff();
 				// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
-				pD3DVtxBuff[CntPlayer].Lock(0, 0, (void**)&pVtx, 0);
+				this[CntPlayer].tex2DVB.pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
 				for (int nCntPlace = 0; nCntPlace < PLAYER_VITAL; nCntPlace++, pVtx += 4)
 				{
 
@@ -129,7 +142,7 @@ void VITALGAUGE::Update(PLAYER_HONTAI *p,RANK *rank)
 					pVtx[3].diffuse = D3DXCOLOR(0.5f, 1.0f, 0.5f, 1.0f);
 				}
 				// 頂点データをアンロックする
-				pD3DVtxBuff[CntPlayer].Unlock();
+				this[CntPlayer].tex2DVB.pD3DVtxBuff->Unlock();
 			}
 		}
 		//体力一定以下で赤色
@@ -137,9 +150,9 @@ void VITALGAUGE::Update(PLAYER_HONTAI *p,RANK *rank)
 		{
 			{//頂点バッファの中身を埋める
 				VERTEX_2D *pVtx;
-				LPDIRECT3DVERTEXBUFFER9 pD3DVtxBuff = this[CntPlayer].tex2DVB.GetpD3DVtxBuff();
+
 				// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
-				pD3DVtxBuff[CntPlayer].Lock(0, 0, (void**)&pVtx, 0);
+				this[CntPlayer].tex2DVB.pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
 				for (int nCntPlace = 0; nCntPlace < PLAYER_VITAL; nCntPlace++, pVtx += 4)
 				{
 
@@ -150,7 +163,7 @@ void VITALGAUGE::Update(PLAYER_HONTAI *p,RANK *rank)
 					pVtx[3].diffuse = D3DXCOLOR(1.0f, 0.6f, 0.6f, 1.0f);
 				}
 				// 頂点データをアンロックする
-				pD3DVtxBuff[CntPlayer].Unlock();
+				this[CntPlayer].tex2DVB.pD3DVtxBuff->Unlock();
 			}
 		}
 	}
@@ -165,15 +178,13 @@ void VITALGAUGE::Draw(void)
 	for (int CntPlayer = 0; CntPlayer < OBJECT_VITAL_MAX; CntPlayer++)
 	{
 		// 頂点バッファをデバイスのデータストリームにバインド
-		//LPDIRECT3DVERTEXBUFFER9 pD3DVtxBuff = this[CntPlayer].tex2DVB.GetpD3DVtxBuff();
-		pDevice->SetStreamSource(0, LPDIRECT3DVERTEXBUFFER9(this[CntPlayer].tex2DVB.GetpD3DVtxBuff()), 0, sizeof(VERTEX_2D));
+		pDevice->SetStreamSource(0, this[CntPlayer].tex2DVB.pD3DVtxBuff, 0, sizeof(VERTEX_2D));
 
 		// 頂点フォーマットの設定
 		pDevice->SetFVF(FVF_VERTEX_2D);
 
 		// テクスチャの設定
-		LPDIRECT3DTEXTURE9 pD3DTexture = LPDIRECT3DTEXTURE9(this[CntPlayer].tex2DVB.GetpD3DTexture());
-		pDevice->SetTexture(0, pD3DTexture);
+		pDevice->SetTexture(0, this[CntPlayer].tex2DVB.pD3DTexture);
 
 		// ポリゴンの描画
 		for (int nCntPlace = 0; nCntPlace < this[CntPlayer].VitalPower; nCntPlace++)
@@ -189,12 +200,11 @@ void VITALGAUGE::Draw(void)
 HRESULT VITALGAUGE::MakeVertexVitalGauge(LPDIRECT3DDEVICE9 pDevice, int CntPlayer)
 {
 	// オブジェクトの頂点バッファを生成
-	LPDIRECT3DVERTEXBUFFER9 VtxBuffBulletGauge = NULL;
 	if( FAILED( pDevice->CreateVertexBuffer(sizeof(VERTEX_2D) * (POLYGON_2D_VERTEX * PLAYER_VITAL + 4),		// 頂点データ用に確保するバッファサイズ(バイト単位)
 												D3DUSAGE_WRITEONLY,							// 頂点バッファの使用法　
 												FVF_VERTEX_2D,								// 使用する頂点フォーマット
 												D3DPOOL_MANAGED,							// リソースのバッファを保持するメモリクラスを指定
-												&VtxBuffBulletGauge,							// 頂点バッファインターフェースへのポインタ
+												&this[CntPlayer].tex2DVB.pD3DVtxBuff,							// 頂点バッファインターフェースへのポインタ
 												NULL)))										// NULLに設定
 	{
         return E_FAIL;
@@ -204,7 +214,7 @@ HRESULT VITALGAUGE::MakeVertexVitalGauge(LPDIRECT3DDEVICE9 pDevice, int CntPlaye
 		VERTEX_2D *pVtx;
 
 		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
-		VtxBuffBulletGauge->Lock(0, 0, (void**)&pVtx, 0);
+		this[CntPlayer].tex2DVB.pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
 
 		for(int nCntPlace = 0; nCntPlace < PLAYER_VITAL; nCntPlace++, pVtx += 4)
 		{
@@ -237,10 +247,8 @@ HRESULT VITALGAUGE::MakeVertexVitalGauge(LPDIRECT3DDEVICE9 pDevice, int CntPlaye
 
 
 		// 頂点データをアンロックする
-		VtxBuffBulletGauge->Unlock();
+		this[CntPlayer].tex2DVB.pD3DVtxBuff->Unlock();
 
-		//---------------------------オブジェクト値書き込み
-		this[CntPlayer].tex2DVB.SetpD3DVtxBuff(VtxBuffBulletGauge);
 	}
 
 	return S_OK;

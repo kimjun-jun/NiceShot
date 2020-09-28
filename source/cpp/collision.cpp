@@ -28,7 +28,7 @@ static D3DXCOLOR PLAYER_COLOR[] = {
 	D3DXCOLOR(0.2f, 1.0f, 0.2f, 1.0f),//p4ÉJÉâÅ[
 };
 
-void SetOjama(int type, int UsePlayer, PLAYER_HONTAI *p);
+//void SetOjama(int type, int UsePlayer, PLAYER_HONTAI *p);
 
 //=============================================================================
 // ìñÇΩÇËîªíËBB2DÅ@xzé≤

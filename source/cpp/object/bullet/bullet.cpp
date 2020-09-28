@@ -133,7 +133,7 @@ void BULLET::Update(SHADOW *shadow, EFFECT *effect)
 				effect->SetEffect(pos, D3DXVECTOR3(0.0f, 0.0f, 0.0f),
 					PLAYER_COLOR[this[nCntBullet].UsePlayerType], EFFECT_BULLET_SIZE_X, EFFECT_BULLET_SIZE_Y, EFFECT_BULLET_TIME);
 			}
-
+			this[nCntBullet].SetPos(pos);
 			//âeÇÃèàóù
 			float fSizeX = 8.0f + (pos.y - 4.0f) * 0.05f;
 			if (fSizeX < 8.0f) fSizeX = 8.0f;

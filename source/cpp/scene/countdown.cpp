@@ -33,19 +33,14 @@
 void COUNTDOWN::Init(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
-	LPDIRECT3DTEXTURE9 pD3DTexture[OBJECT_COUNTDOWN_MAX];
-	// テクスチャの読み込み  
-	D3DXCreateTextureFromFile(pDevice, TEXTURE_GAME_SCORE, &pD3DTexture[0]);
-	D3DXCreateTextureFromFile(pDevice, TEXTURE_GAME_COUNTDOWNGO, &pD3DTexture[1]);
-	this[0].tex2D.SetpD3DTexture(pD3DTexture[0]);
-	this[1].tex2D.SetpD3DTexture(pD3DTexture[1]);
-
-	pD3DTexture[0]->Release();
-	pD3DTexture[1]->Release();
-	for (int i = 0; i < OBJECT_COUNTDOWN_MAX; i++)
+	for (int CntCountDown = 0; CntCountDown < OBJECT_COUNTDOWN_MAX; CntCountDown++)
 	{
-		this[i].SetPos(D3DXVECTOR3(TEXTURE_COUNTDOWN_POS_X, TEXTURE_COUNTDOWN_POS_Y, 0.0f));
+		this[CntCountDown].SetPos(D3DXVECTOR3(TEXTURE_COUNTDOWN_POS_X, TEXTURE_COUNTDOWN_POS_Y, 0.0f));
 	}
+	// テクスチャの読み込み  
+	D3DXCreateTextureFromFile(pDevice, TEXTURE_GAME_SCORE, &this[0].tex2D.pD3DTexture);
+	D3DXCreateTextureFromFile(pDevice, TEXTURE_GAME_COUNTDOWNGO, &this[1].tex2D.pD3DTexture);
+
 	this[0].SetUse(true);
 	this[1].color = 255;
 	this[0].time_maneger = FPS_TIME_COUNTDOWN;
@@ -104,15 +99,15 @@ void COUNTDOWN::Draw(void)
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 	// 頂点フォーマットの設定
 	pDevice->SetFVF(FVF_VERTEX_2D);
-	for (int i = 0; i < OBJECT_COUNTDOWN_MAX; i++)
+	for (int CntCountDown = 0; CntCountDown < OBJECT_COUNTDOWN_MAX; CntCountDown++)
 	{
-		bool use = this[i].GetUse();
+		bool use = this[CntCountDown].GetUse();
 		if (use == true )
 		{
 			// テクスチャの設定  
-			pDevice->SetTexture(0, LPDIRECT3DTEXTURE9(this->tex2D.GetpD3DTexture()));
+			pDevice->SetTexture(0, this[CntCountDown].tex2D.pD3DTexture);
 			// ポリゴンの描画
-			pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, POLYGON_2D_NUM, this->tex2D.GettextureVTX(), sizeof(VERTEX_2D));
+			pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, POLYGON_2D_NUM, this[CntCountDown].tex2D.textureVTX, sizeof(VERTEX_2D));
 		}
 	}
 }
@@ -127,42 +122,38 @@ HRESULT COUNTDOWN::MakeVertexCountdown(void)
 	SetVertexCountdown();
 
 	{
-		VERTEX_2D vtx2d[POLYGON_2D_VERTEX];
 		// rhwの設定
-		vtx2d[0].rhw =
-			vtx2d[1].rhw =
-			vtx2d[2].rhw =
-			vtx2d[3].rhw = 1.0f;
+		this[0].tex2D.textureVTX[0].rhw =
+			this[0].tex2D.textureVTX[1].rhw =
+			this[0].tex2D.textureVTX[2].rhw =
+			this[0].tex2D.textureVTX[3].rhw = 1.0f;
 		// 反射設定  [i]
-		vtx2d[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-		vtx2d[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-		vtx2d[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-		vtx2d[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+		this[0].tex2D.textureVTX[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+		this[0].tex2D.textureVTX[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+		this[0].tex2D.textureVTX[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+		this[0].tex2D.textureVTX[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
 		// テクャ座標[i]の設定  
-		vtx2d[0].tex = D3DXVECTOR2(0.3f, 0.0f);
-		vtx2d[1].tex = D3DXVECTOR2(0.4f, 0.0f);
-		vtx2d[2].tex = D3DXVECTOR2(0.3f, 1.0f);
-		vtx2d[3].tex = D3DXVECTOR2(0.4f, 1.0f);
-		this[0].tex2D.SettextureVTX(vtx2d);
+		this[0].tex2D.textureVTX[0].tex = D3DXVECTOR2(0.3f, 0.0f);
+		this[0].tex2D.textureVTX[1].tex = D3DXVECTOR2(0.4f, 0.0f);
+		this[0].tex2D.textureVTX[2].tex = D3DXVECTOR2(0.3f, 1.0f);
+		this[0].tex2D.textureVTX[3].tex = D3DXVECTOR2(0.4f, 1.0f);
 	}
 	{
-		VERTEX_2D vtx2d[POLYGON_2D_VERTEX];
 		// rhwの設定
-		vtx2d[0].rhw =
-			vtx2d[1].rhw =
-			vtx2d[2].rhw =
-			vtx2d[3].rhw = 1.0f;
+		this[1].tex2D.textureVTX[0].rhw =
+			this[1].tex2D.textureVTX[1].rhw =
+			this[1].tex2D.textureVTX[2].rhw =
+			this[1].tex2D.textureVTX[3].rhw = 1.0f;
 		// 反射設定  [i]
-		vtx2d[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-		vtx2d[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-		vtx2d[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-		vtx2d[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+		this[1].tex2D.textureVTX[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+		this[1].tex2D.textureVTX[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+		this[1].tex2D.textureVTX[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+		this[1].tex2D.textureVTX[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
 		// テクャ座標[i]の設定  
-		vtx2d[0].tex = D3DXVECTOR2(0.0f, 0.0f);
-		vtx2d[1].tex = D3DXVECTOR2(1.0f, 0.0f);
-		vtx2d[2].tex = D3DXVECTOR2(0.0f, 1.0f);
-		vtx2d[3].tex = D3DXVECTOR2(1.0f, 1.0f);
-		this[0].tex2D.SettextureVTX(vtx2d);
+		this[1].tex2D.textureVTX[0].tex = D3DXVECTOR2(0.0f, 0.0f);
+		this[1].tex2D.textureVTX[1].tex = D3DXVECTOR2(1.0f, 0.0f);
+		this[1].tex2D.textureVTX[2].tex = D3DXVECTOR2(0.0f, 1.0f);
+		this[1].tex2D.textureVTX[3].tex = D3DXVECTOR2(1.0f, 1.0f);
 	}
 	return S_OK;
 }
@@ -182,24 +173,20 @@ void COUNTDOWN::SetTextureCountdown(void)
 	if (val % (FPS_TIME_COUNTDOWN/3) == 0)
 	{
 		this[0].fps_maneger -= 1;
-		VERTEX_2D vtx2d[POLYGON_2D_VERTEX];
-		vtx2d[0].tex = D3DXVECTOR2(0.1f*this[0].fps_maneger, 0.0f);
-		vtx2d[1].tex = D3DXVECTOR2(0.1f*this[0].fps_maneger+0.1f, 0.0f);
-		vtx2d[2].tex = D3DXVECTOR2(0.1f*this[0].fps_maneger, 1.0f);
-		vtx2d[3].tex = D3DXVECTOR2(0.1f*this[0].fps_maneger+0.1f, 1.0f);
-		this[0].tex2D.SettextureVTX(vtx2d);
+		this[0].tex2D.textureVTX[0].tex = D3DXVECTOR2(0.1f*this[0].fps_maneger, 0.0f);
+		this[0].tex2D.textureVTX[1].tex = D3DXVECTOR2(0.1f*this[0].fps_maneger+0.1f, 0.0f);
+		this[0].tex2D.textureVTX[2].tex = D3DXVECTOR2(0.1f*this[0].fps_maneger, 1.0f);
+		this[0].tex2D.textureVTX[3].tex = D3DXVECTOR2(0.1f*this[0].fps_maneger+0.1f, 1.0f);
 		this[0].changeval = 0;
 	}
 	bool use = this[1].GetUse();
 	if (use == true)
 	{
 		this[1].color -= COUNTDOWN_A;
-		VERTEX_2D vtx2d[POLYGON_2D_VERTEX];
-		vtx2d[0].diffuse = D3DCOLOR_RGBA(255, 255, 255,this[1].color);
-		vtx2d[1].diffuse = D3DCOLOR_RGBA(255, 255, 255,this[1].color);
-		vtx2d[2].diffuse = D3DCOLOR_RGBA(255, 255, 255,this[1].color);
-		vtx2d[3].diffuse = D3DCOLOR_RGBA(255, 255, 255,this[1].color);
-		this[1].tex2D.SettextureVTX(vtx2d);
+		this[1].tex2D.textureVTX[0].diffuse = D3DCOLOR_RGBA(255, 255, 255,this[1].color);
+		this[1].tex2D.textureVTX[1].diffuse = D3DCOLOR_RGBA(255, 255, 255,this[1].color);
+		this[1].tex2D.textureVTX[2].diffuse = D3DCOLOR_RGBA(255, 255, 255,this[1].color);
+		this[1].tex2D.textureVTX[3].diffuse = D3DCOLOR_RGBA(255, 255, 255,this[1].color);
 		if (this[1].color <= 0) this[0].signal = true;
 	}
 	this[0].changeval += COUNTDOWN_CHANGESIZE;
@@ -212,45 +199,41 @@ void COUNTDOWN::SetVertexCountdown(void)
 {
 	// 頂点座標の設定 
 	{
-		VERTEX_2D vtx2d1[POLYGON_2D_VERTEX];
 		//--------------------------------------オブジェクト値読み込み
 		D3DXVECTOR3 pos1 = this[0].GetPos();
-		vtx2d1[0].vtx.x = pos1.x - TEXTURE_COUNTDOWN_SIZE_X - this[0].changeval;
-		vtx2d1[0].vtx.y = pos1.y - TEXTURE_COUNTDOWN_SIZE_Y - this[0].changeval;
-		vtx2d1[0].vtx.z = 0.0f;
-		vtx2d1[1].vtx.x = pos1.x + TEXTURE_COUNTDOWN_SIZE_X + this[0].changeval;
-		vtx2d1[1].vtx.y = pos1.y - TEXTURE_COUNTDOWN_SIZE_Y - this[0].changeval;
-		vtx2d1[1].vtx.z = 0.0f;
-		vtx2d1[2].vtx.x = pos1.x - TEXTURE_COUNTDOWN_SIZE_X - this[0].changeval;
-		vtx2d1[2].vtx.y = pos1.y + TEXTURE_COUNTDOWN_SIZE_Y + this[0].changeval;
-		vtx2d1[2].vtx.z = 0.0f;
-		vtx2d1[3].vtx.x = pos1.x + TEXTURE_COUNTDOWN_SIZE_X + this[0].changeval;
-		vtx2d1[3].vtx.y = pos1.y + TEXTURE_COUNTDOWN_SIZE_Y + this[0].changeval;
-		vtx2d1[3].vtx.z = 0.0f;
+		this[0].tex2D.textureVTX[0].vtx.x = pos1.x - TEXTURE_COUNTDOWN_SIZE_X - this[0].changeval;
+		this[0].tex2D.textureVTX[0].vtx.y = pos1.y - TEXTURE_COUNTDOWN_SIZE_Y - this[0].changeval;
+		this[0].tex2D.textureVTX[0].vtx.z = 0.0f;
+		this[0].tex2D.textureVTX[1].vtx.x = pos1.x + TEXTURE_COUNTDOWN_SIZE_X + this[0].changeval;
+		this[0].tex2D.textureVTX[1].vtx.y = pos1.y - TEXTURE_COUNTDOWN_SIZE_Y - this[0].changeval;
+		this[0].tex2D.textureVTX[1].vtx.z = 0.0f;
+		this[0].tex2D.textureVTX[2].vtx.x = pos1.x - TEXTURE_COUNTDOWN_SIZE_X - this[0].changeval;
+		this[0].tex2D.textureVTX[2].vtx.y = pos1.y + TEXTURE_COUNTDOWN_SIZE_Y + this[0].changeval;
+		this[0].tex2D.textureVTX[2].vtx.z = 0.0f;
+		this[0].tex2D.textureVTX[3].vtx.x = pos1.x + TEXTURE_COUNTDOWN_SIZE_X + this[0].changeval;
+		this[0].tex2D.textureVTX[3].vtx.y = pos1.y + TEXTURE_COUNTDOWN_SIZE_Y + this[0].changeval;
+		this[0].tex2D.textureVTX[3].vtx.z = 0.0f;
 		//--------------------------------------オブジェクト値書き込み
-		this[0].tex2D.SettextureVTX(vtx2d1);
 
 	}
 
 	{
-		VERTEX_2D vtx2d2[POLYGON_2D_VERTEX];
 		//--------------------------------------オブジェクト値読み込み
 		D3DXVECTOR3 pos2 = this[0].GetPos();
 
-		vtx2d2[0].vtx.x = pos2.x - TEXTURE_COUNTDOWNGO_SIZE_X;
-		vtx2d2[0].vtx.y = pos2.y - TEXTURE_COUNTDOWNGO_SIZE_Y;
-		vtx2d2[0].vtx.z = 0.0f;
-		vtx2d2[1].vtx.x = pos2.x + TEXTURE_COUNTDOWNGO_SIZE_X;
-		vtx2d2[1].vtx.y = pos2.y - TEXTURE_COUNTDOWNGO_SIZE_Y;
-		vtx2d2[1].vtx.z = 0.0f;
-		vtx2d2[2].vtx.x = pos2.x - TEXTURE_COUNTDOWNGO_SIZE_X;
-		vtx2d2[2].vtx.y = pos2.y + TEXTURE_COUNTDOWNGO_SIZE_Y;
-		vtx2d2[2].vtx.z = 0.0f;
-		vtx2d2[3].vtx.x = pos2.x + TEXTURE_COUNTDOWNGO_SIZE_X;
-		vtx2d2[3].vtx.y = pos2.y + TEXTURE_COUNTDOWNGO_SIZE_Y;
-		vtx2d2[3].vtx.z = 0.0f;
+		this[1].tex2D.textureVTX[0].vtx.x = pos2.x - TEXTURE_COUNTDOWNGO_SIZE_X;
+		this[1].tex2D.textureVTX[0].vtx.y = pos2.y - TEXTURE_COUNTDOWNGO_SIZE_Y;
+		this[1].tex2D.textureVTX[0].vtx.z = 0.0f;
+		this[1].tex2D.textureVTX[1].vtx.x = pos2.x + TEXTURE_COUNTDOWNGO_SIZE_X;
+		this[1].tex2D.textureVTX[1].vtx.y = pos2.y - TEXTURE_COUNTDOWNGO_SIZE_Y;
+		this[1].tex2D.textureVTX[1].vtx.z = 0.0f;
+		this[1].tex2D.textureVTX[2].vtx.x = pos2.x - TEXTURE_COUNTDOWNGO_SIZE_X;
+		this[1].tex2D.textureVTX[2].vtx.y = pos2.y + TEXTURE_COUNTDOWNGO_SIZE_Y;
+		this[1].tex2D.textureVTX[2].vtx.z = 0.0f;
+		this[1].tex2D.textureVTX[3].vtx.x = pos2.x + TEXTURE_COUNTDOWNGO_SIZE_X;
+		this[1].tex2D.textureVTX[3].vtx.y = pos2.y + TEXTURE_COUNTDOWNGO_SIZE_Y;
+		this[1].tex2D.textureVTX[3].vtx.z = 0.0f;
 		//--------------------------------------オブジェクト値書き込み
-		this[1].tex2D.SettextureVTX(vtx2d2);
 
 	}
 }

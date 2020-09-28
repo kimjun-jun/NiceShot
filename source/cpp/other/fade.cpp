@@ -103,7 +103,7 @@ void FADE::Draw()
 	pDevice->SetTexture(0, NULL);
 
 	// ポリゴンの描画
-	pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, POLYGON_2D_NUM, this[0].tex2D.GettextureVTX(), sizeof(VERTEX_2D));
+	pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, POLYGON_2D_NUM, this[0].tex2D.textureVTX, sizeof(VERTEX_2D));
 }
 
 //=============================================================================
@@ -113,33 +113,30 @@ void FADE::MakeVertexFade(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 
-	VERTEX_2D vtx2d[POLYGON_2D_VERTEX];
 	// テクスチャのパースペクティブコレクト用
-	vtx2d[0].rhw =
-		vtx2d[1].rhw =
-		vtx2d[2].rhw =
-		vtx2d[3].rhw = 1.0f;
+	this[0].tex2D.textureVTX[0].rhw =
+		this[0].tex2D.textureVTX[1].rhw =
+		this[0].tex2D.textureVTX[2].rhw =
+		this[0].tex2D.textureVTX[3].rhw = 1.0f;
 
 	// 反射光の設定
-	color = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
-	vtx2d[0].diffuse = color;
-	vtx2d[1].diffuse = color;
-	vtx2d[2].diffuse = color;
-	vtx2d[3].diffuse = color;
+	color = D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.0f);
+	this[0].tex2D.textureVTX[0].diffuse = color;
+	this[0].tex2D.textureVTX[1].diffuse = color;
+	this[0].tex2D.textureVTX[2].diffuse = color;
+	this[0].tex2D.textureVTX[3].diffuse = color;
 
 	// 頂点座標の設定
-	vtx2d[0].vtx = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-	vtx2d[1].vtx = D3DXVECTOR3(SCREEN_W, 0.0f, 0.0f);
-	vtx2d[2].vtx = D3DXVECTOR3(0.0f, SCREEN_H, 0.0f);
-	vtx2d[3].vtx = D3DXVECTOR3(SCREEN_W, SCREEN_H, 0.0f);
+	this[0].tex2D.textureVTX[0].vtx = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	this[0].tex2D.textureVTX[1].vtx = D3DXVECTOR3(SCREEN_W, 0.0f, 0.0f);
+	this[0].tex2D.textureVTX[2].vtx = D3DXVECTOR3(0.0f, SCREEN_H, 0.0f);
+	this[0].tex2D.textureVTX[3].vtx = D3DXVECTOR3(SCREEN_W, SCREEN_H, 0.0f);
 
 	// テクスチャ座標の設定
-	vtx2d[0].tex = D3DXVECTOR2(0.0f, 0.0f);
-	vtx2d[1].tex = D3DXVECTOR2(1.0f, 0.0f);
-	vtx2d[2].tex = D3DXVECTOR2(0.0f, 1.0f);
-	vtx2d[3].tex = D3DXVECTOR2(1.0f, 1.0f);
-
-	this[0].tex2D.SettextureVTX(vtx2d);
+	this[0].tex2D.textureVTX[0].tex = D3DXVECTOR2(0.0f, 0.0f);
+	this[0].tex2D.textureVTX[1].tex = D3DXVECTOR2(1.0f, 0.0f);
+	this[0].tex2D.textureVTX[2].tex = D3DXVECTOR2(0.0f, 1.0f);
+	this[0].tex2D.textureVTX[3].tex = D3DXVECTOR2(1.0f, 1.0f);
 }
 
 //=============================================================================
@@ -148,12 +145,10 @@ void FADE::MakeVertexFade(void)
 void FADE::SetColor(D3DCOLOR col)
 {
 	// 反射光の設定
-	VERTEX_2D vtx2d[POLYGON_2D_VERTEX];
-	vtx2d[0].diffuse = col;
-	vtx2d[1].diffuse = col;
-	vtx2d[2].diffuse = col;
-	vtx2d[3].diffuse = col;
-	this[0].tex2D.SettextureVTX(vtx2d);
+	this[0].tex2D.textureVTX[0].diffuse = col;
+	this[0].tex2D.textureVTX[1].diffuse = col;
+	this[0].tex2D.textureVTX[2].diffuse = col;
+	this[0].tex2D.textureVTX[3].diffuse = col;
 
 }
 
@@ -162,9 +157,9 @@ void FADE::SetColor(D3DCOLOR col)
 //=============================================================================
 void FADE::SetFade(FADE_TYPE fade, E_STAGE next, int sno)
 {
-	eFade = fade;
-	eScene = next;
-	sno = sno;
+	this[0].eFade = fade;
+	this[0].eScene = next;
+	this[0].sno = sno;
 
 }
 

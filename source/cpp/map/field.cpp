@@ -314,47 +314,7 @@ void FIELD::Reinit(void)
 
 	//--------------------------------DRAWとSTARTのセット
 	//描画用
-	{//頂点バッファの中身を埋める
-		VERTEX_3D *pVtx;
-		VERTEX_3D *pVtxS;
-#if 0
-		const float texSizeX = 1.0f / nNumBlockXField;
-		const float texSizeZ = 1.0f / nNumBlockZField;
-#else
-		const float texSizeX = 1.0f;
-		const float texSizeZ = 1.0f;
-#endif
-
-		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
-		this[0].pD3DVtxBuffFieldDraw->Lock(0, 0, (void**)&pVtx, 0);
-		this[0].pD3DVtxBuffFieldStart->Lock(0, 0, (void**)&pVtxS, 0);
-
-		for (int nCntVtxZ = 0; nCntVtxZ < (this[0].nNumBlockZField + 1); nCntVtxZ++)
-		{
-			for (int nCntVtxX = 0; nCntVtxX < (this[0].nNumBlockZField + 1); nCntVtxX++)
-			{
-				// 頂点座標の設定
-				pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.x = -(this[0].nNumBlockZField / 2.0f) * fBlockSizeXField + nCntVtxX * fBlockSizeXField;
-				pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = 0.0f;
-				pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.z = (this[0].nNumBlockZField / 2.0f) * fBlockSizeZField - nCntVtxZ * fBlockSizeZField;
-
-				pVtxS[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.x = -(this[0].nNumBlockZField / 2.0f) * fBlockSizeXField + nCntVtxX * fBlockSizeXField;
-				pVtxS[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.z = (this[0].nNumBlockZField / 2.0f) * fBlockSizeZField - nCntVtxZ * fBlockSizeZField;
-
-				// 法線の設定
-				pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].nor = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
-
-				// テクスチャ座標の設定
-				pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].tex.x = texSizeX * nCntVtxX;
-				pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].tex.y = texSizeZ * nCntVtxZ;
-			}
-		}
-
-		// 頂点データをアンロックする
-		this[0].pD3DVtxBuffFieldDraw->Unlock();
-		this[0].pD3DVtxBuffFieldStart->Unlock();
-	}
-
+	SetFieldType01();
 	//----------------------------ENDのセット
 	//自動生成のバッファ。地形変更するときにこの形に変形	F
 	{//頂点バッファの中身を埋める
@@ -496,10 +456,10 @@ void FIELD::Update(PLAYER_HONTAI *player,ITEM *item, BULLET *bullet, EXPLOSION *
 	//バレットと地面の当たり判定
 	for (int Cntbullet = 0; Cntbullet < OBJECT_BULLET_MAX; Cntbullet++)
 	{
-		bool use = bullet[Cntbullet].GetUse();
-		if (use == true)
+		bool buse = bullet[Cntbullet].GetUse();
+		if (buse == true)
 		{
-			D3DXVECTOR3 kari;
+			D3DXVECTOR3 kari = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 			//-------------------オブジェクト値読み込み
 			D3DXVECTOR3 rayS = bullet[Cntbullet].GetPos();
 			rayS.y += 1000.0f;
@@ -517,7 +477,7 @@ void FIELD::Update(PLAYER_HONTAI *player,ITEM *item, BULLET *bullet, EXPLOSION *
 				D3DXVECTOR3 ExploPos = D3DXVECTOR3(bpos.x, bullet[Cntbullet].FieldPosY, bpos.z);
 				explosion->SetExplosion(ExploPos, 40.0f, 40.0f, EXPLOSIONTYPE_BULLET_PLAYER, PLAYER_COLOR[bullet[Cntbullet].UsePlayerType]);
 				// バレット破棄
-				bullet[Cntbullet].ReleaseBullet(Cntbullet, shadow);
+				bullet[0].ReleaseBullet(Cntbullet, shadow);
 				// SE再生
 				PlaySound(SOUND_LABEL_SE_damage);
 			}

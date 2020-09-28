@@ -50,17 +50,6 @@ void TITLE::Init(void)
 	MakeVertexTitle();
 
 	// テクスチャの読み込み
-	//LPDIRECT3DTEXTURE9 pD3DTexture[OBJECT_TITLE_MAX];
-	//D3DXCreateTextureFromFile(pDevice,TEXTURE_TITLE_BG,&pD3DTexture[0]);	
-	//D3DXCreateTextureFromFile(pDevice,TEXTURE_LOGO_START,&pD3DTexture[1]);
-	//D3DXCreateTextureFromFile(pDevice,TEXTURE_TITLE_SELECT_TUTORIAL,&pD3DTexture[2]);
-	//D3DXCreateTextureFromFile(pDevice,TEXTURE_TITLE_SELECT_GAME,&pD3DTexture[3]);
-	//this[0].tex2DVB.SetpD3DTexture(pD3DTexture[0]);
-	//this[1].tex2DVB.SetpD3DTexture(pD3DTexture[1]);
-	//this[2].tex2DVB.SetpD3DTexture(pD3DTexture[2]);
-	//this[3].tex2DVB.SetpD3DTexture(pD3DTexture[3]);
-
-
 	D3DXCreateTextureFromFile(pDevice, TEXTURE_TITLE_BG, &this[0].tex2DVB.pD3DTexture);
 	D3DXCreateTextureFromFile(pDevice, TEXTURE_LOGO_START, &this[1].tex2DVB.pD3DTexture);
 	D3DXCreateTextureFromFile(pDevice, TEXTURE_TITLE_SELECT_TUTORIAL, &this[2].tex2DVB.pD3DTexture);
@@ -78,15 +67,15 @@ void TITLE::Reinit(void)
 	this[0].TitleSelectTime = false;
 
 	this[1].nCountAppearStart = 0;
-	this[1].fAlpha = 0.0f;
+	this[1].fAlpha = 1.0f;
 	this[1].nCountDisp = 0;
 	this[1].bDisp = false;
 	this[1].nConutDemo = 0;
 
 	for (int CntTitleSelectScene = 0; CntTitleSelectScene < TITLE_SELECT_SCENE_MAX; CntTitleSelectScene++)
 	{
-		this[CntTitleSelectScene].bDisp = false;
-		this[CntTitleSelectScene].fAlpha = 0.0f;
+		this[CntTitleSelectScene+2].bDisp = false;
+		this[CntTitleSelectScene + 2].fAlpha = 0.0f;
 	}
 	this[0].SetColorTitle(0, this[0].fAlpha);
 	this[0].SetColorTitle(1, this[0].fAlpha);
@@ -120,7 +109,7 @@ void TITLE::Update(FADE *fade)
 			PlaySound(SOUND_LABEL_SE_enter01);
 			this[0].fAlpha = 1.0f;
 			SetColorTitle(0, this[0].fAlpha);
-			this[1].fAlpha = 0.0f;
+			this[1].fAlpha = 1.0f;
 			SetColorTitle(1, this[1].fAlpha);
 			this[0].TitleSelectTime = false;
 			this[2].bDisp = false;
@@ -208,14 +197,12 @@ void TITLE::Draw(void)
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 
 	// 頂点バッファをデバイスのデータストリームにバインド
-	LPDIRECT3DVERTEXBUFFER9 pD3DVtxBuff0 = this[0].tex2DVB.GetpD3DVtxBuff();
-	pDevice->SetStreamSource(0, pD3DVtxBuff0, 0, sizeof(VERTEX_2D));
+	pDevice->SetStreamSource(0, this[0].tex2DVB.pD3DVtxBuff, 0, sizeof(VERTEX_2D));
 
 	// 頂点フォーマットの設定
 	pDevice->SetFVF(FVF_VERTEX_2D);
 
 	// テクスチャの設定
-	LPDIRECT3DTEXTURE9 pD3DTexture0 = this[0].tex2DVB.GetpD3DTexture();
 	pDevice->SetTexture(0, this[0].tex2DVB.pD3DTexture);
 
 	// ポリゴンの描画
@@ -224,14 +211,12 @@ void TITLE::Draw(void)
 	if (this[1].bDisp == true)
 	{
 		// 頂点バッファをデバイスのデータストリームにバインド
-		LPDIRECT3DVERTEXBUFFER9 pD3DVtxBuff1 = this[1].tex2DVB.GetpD3DVtxBuff();
-		pDevice->SetStreamSource(0, pD3DVtxBuff1, 0, sizeof(VERTEX_2D));
+		pDevice->SetStreamSource(0, this[1].tex2DVB.pD3DVtxBuff, 0, sizeof(VERTEX_2D));
 
 		// 頂点フォーマットの設定
 		pDevice->SetFVF(FVF_VERTEX_2D);
 
 		// テクスチャの設定
-		LPDIRECT3DTEXTURE9 pD3DTexture1 = this[1].tex2DVB.GetpD3DTexture();
 		pDevice->SetTexture(0, this[1].tex2DVB.pD3DTexture);
 
 		// ポリゴンの描画
@@ -245,14 +230,12 @@ void TITLE::Draw(void)
 		{
 
 			// 頂点バッファをデバイスのデータストリームにバインド
-			LPDIRECT3DVERTEXBUFFER9 pD3DVtxBuff2 = this[CntTitleSelectScene + 2].tex2DVB.GetpD3DVtxBuff();
-			pDevice->SetStreamSource(0, pD3DVtxBuff2, 0, sizeof(VERTEX_2D));
+			pDevice->SetStreamSource(0, this[CntTitleSelectScene+2].tex2DVB.pD3DVtxBuff, 0, sizeof(VERTEX_2D));
 
 			// 頂点フォーマットの設定
 			pDevice->SetFVF(FVF_VERTEX_2D);
 
 			// テクスチャの設定
-			LPDIRECT3DTEXTURE9 pD3DTexture2 = this[CntTitleSelectScene + 2].tex2DVB.GetpD3DTexture();
 			pDevice->SetTexture(0, this[CntTitleSelectScene+2].tex2DVB.pD3DTexture);
 
 			// ポリゴンの描画
@@ -269,14 +252,12 @@ HRESULT TITLE::MakeVertexTitle(void)
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 	//タイトルBG生成
 	{
-		LPDIRECT3DVERTEXBUFFER9 pD3DVtxBuff;
-
 		// オブジェクトの頂点バッファを生成
 		if (FAILED(pDevice->CreateVertexBuffer(sizeof(VERTEX_2D) * POLYGON_2D_VERTEX,	// 頂点データ用に確保するバッファサイズ(バイト単位)
 			D3DUSAGE_WRITEONLY,			// 頂点バッファの使用法　
 			FVF_VERTEX_2D,				// 使用する頂点フォーマット
 			D3DPOOL_MANAGED,			// リソースのバッファを保持するメモリクラスを指定
-			&pD3DVtxBuff,		// 頂点バッファインターフェースへのポインタ
+			&this[0].tex2DVB.pD3DVtxBuff,		// 頂点バッファインターフェースへのポインタ
 			NULL)))						// NULLに設定
 		{
 			return E_FAIL;
@@ -286,7 +267,7 @@ HRESULT TITLE::MakeVertexTitle(void)
 			VERTEX_2D *pVtx;
 
 			// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
-			pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+			this[0].tex2DVB.pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
 
 			// 頂点座標の設定
 			pVtx[0].vtx = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
@@ -313,22 +294,18 @@ HRESULT TITLE::MakeVertexTitle(void)
 			pVtx[3].tex = D3DXVECTOR2(1.0f, 1.0f);
 
 			// 頂点データをアンロックする
-			pD3DVtxBuff->Unlock();
-
-			this[0].tex2DVB.SetpD3DVtxBuff(pD3DVtxBuff);
+			this[0].tex2DVB.pD3DVtxBuff->Unlock();
 		}
 	}
 
 	//タイトルスタートロゴ生成
 	{
-		LPDIRECT3DVERTEXBUFFER9 pD3DVtxBuff;
-
 		// オブジェクトの頂点バッファを生成
 		if (FAILED(pDevice->CreateVertexBuffer(sizeof(VERTEX_2D) * POLYGON_2D_VERTEX,	// 頂点データ用に確保するバッファサイズ(バイト単位)
 			D3DUSAGE_WRITEONLY,			// 頂点バッファの使用法　
 			FVF_VERTEX_2D,				// 使用する頂点フォーマット
 			D3DPOOL_MANAGED,			// リソースのバッファを保持するメモリクラスを指定
-			&pD3DVtxBuff,	// 頂点バッファインターフェースへのポインタ
+			&this[1].tex2DVB.pD3DVtxBuff,	// 頂点バッファインターフェースへのポインタ
 			NULL)))						// NULLに設定
 		{
 			return E_FAIL;
@@ -338,7 +315,7 @@ HRESULT TITLE::MakeVertexTitle(void)
 			VERTEX_2D *pVtx;
 
 			// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
-			pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+			this[1].tex2DVB.pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
 
 			// 頂点座標の設定
 			pVtx[0].vtx = D3DXVECTOR3(TITLE_START_LOGO_POS_X - TITLE_START_LOGO_WIDTH, TITLE_START_LOGO_POS_Y - TITLE_START_LOGO_HEIGHT, 0.0f);
@@ -365,8 +342,7 @@ HRESULT TITLE::MakeVertexTitle(void)
 			pVtx[3].tex = D3DXVECTOR2(1.0f, 1.0f);
 
 			// 頂点データをアンロックする
-			pD3DVtxBuff->Unlock();
-			this[1].tex2DVB.SetpD3DVtxBuff(pD3DVtxBuff);
+			this[1].tex2DVB.pD3DVtxBuff->Unlock();
 		}
 	}
 
@@ -374,14 +350,13 @@ HRESULT TITLE::MakeVertexTitle(void)
 	{
 		for (int CntTitleSelectScene = 0; CntTitleSelectScene < TITLE_SELECT_SCENE_MAX; CntTitleSelectScene++)
 		{
-			LPDIRECT3DVERTEXBUFFER9 pD3DVtxBuff;
 
 			// オブジェクトの頂点バッファを生成
 			if (FAILED(pDevice->CreateVertexBuffer(sizeof(VERTEX_2D) * POLYGON_2D_VERTEX,	// 頂点データ用に確保するバッファサイズ(バイト単位)
 				D3DUSAGE_WRITEONLY,			// 頂点バッファの使用法　
 				FVF_VERTEX_2D,				// 使用する頂点フォーマット
 				D3DPOOL_MANAGED,			// リソースのバッファを保持するメモリクラスを指定
-				&pD3DVtxBuff,	// 頂点バッファインターフェースへのポインタ
+				&this[CntTitleSelectScene+2].tex2DVB.pD3DVtxBuff,	// 頂点バッファインターフェースへのポインタ
 				NULL)))						// NULLに設定
 			{
 				return E_FAIL;
@@ -391,7 +366,7 @@ HRESULT TITLE::MakeVertexTitle(void)
 				VERTEX_2D *pVtx;
 
 				// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
-				pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+				this[CntTitleSelectScene + 2].tex2DVB.pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
 
 				// 頂点座標の設定
 				pVtx[0].vtx = D3DXVECTOR3(TITLE_SELECT_POS_X - TITLE_SELECT_WIDTH, TITLE_SELECT_POS_Y - TITLE_SELECT_HEIGHT + (CntTitleSelectScene*TITLE_SELECT_HEIGHT * 2), 0.0f);
@@ -418,8 +393,7 @@ HRESULT TITLE::MakeVertexTitle(void)
 				pVtx[3].tex = D3DXVECTOR2(1.0f, 1.0f);
 
 				// 頂点データをアンロックする
-				pD3DVtxBuff->Unlock();
-				this[CntTitleSelectScene + 2].tex2DVB.SetpD3DVtxBuff(pD3DVtxBuff);
+				this[CntTitleSelectScene + 2].tex2DVB.pD3DVtxBuff->Unlock();
 			}
 		}
 	}
@@ -435,7 +409,7 @@ void TITLE::SetColorTitle(int CntTitle, float alpha)
 {
 	{//頂点バッファの中身を埋める
 		VERTEX_2D *pVtx;
-		LPDIRECT3DVERTEXBUFFER9 pD3DVtxBuff = this[CntTitle].tex2DVB.GetpD3DVtxBuff();
+		LPDIRECT3DVERTEXBUFFER9 pD3DVtxBuff = this[CntTitle].tex2DVB.pD3DVtxBuff;
 		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
 		pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
 
@@ -447,8 +421,6 @@ void TITLE::SetColorTitle(int CntTitle, float alpha)
 
 		// 頂点データをアンロックする
 		pD3DVtxBuff->Unlock();
-
-		this[CntTitle].tex2DVB.SetpD3DVtxBuff(pD3DVtxBuff);
 	}
 
 }

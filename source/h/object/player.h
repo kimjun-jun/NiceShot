@@ -60,7 +60,7 @@ public:
 	virtual void				Reinit(FIELD *field);				//!< 再初期化
 	virtual void				Uninit(void);				//!< 終了
 	virtual void				Update(EFFECT*effect, BULLET*bullet, SHADOW*shadow, FADE *fade);				//!< 更新
-	virtual void				Draw(void);					//!< 描画
+	virtual void				Draw();					//!< 描画
 	void						SetPlayerMeshColor(LPDIRECT3DVERTEXBUFFER9 pD3DVtxBuff, LPDIRECT3DINDEXBUFFER9 pD3DIdxBuff,DWORD nNumPolygon, int CntPlayer);
 	void						SetMoveABL(int CntPlayer, EFFECT *effect);				//!< 移動制御(ABボタンLスティックで移動制御)
 	void						SetCamera(int CntPlayer);				//!< カメラ更新

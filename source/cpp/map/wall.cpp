@@ -173,7 +173,6 @@ void WALL::Update(void)
 void WALL::Draw(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
-	
 	for(int nCntMeshField = 0; nCntMeshField < OBJECT_WALL_MAX; nCntMeshField++)
 	{
 		D3DXMATRIX mtxRot, mtxTranslate, mtxWorld;
@@ -211,6 +210,5 @@ void WALL::Draw(void)
 		// ƒ|ƒŠƒSƒ“‚Ì•`‰æ
 		pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLESTRIP, 0, 0, this[nCntMeshField].model.nNumVertex, 0, this[nCntMeshField].model.nNumPolygon);
 	}
-
 }
 

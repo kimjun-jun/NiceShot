@@ -15,31 +15,40 @@
 void STATUS::Init(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
+	for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
+	{
+		D3DXCreateTextureFromFile(pDevice,
+			TEXTURE_STATUS_SPEED_ITEM,
+			&this[CntPlayer].obj[STATUSTYPE_SPEED].tex2D.pD3DTexture);
+		D3DXCreateTextureFromFile(pDevice,
+			TEXTURE_STATUS_SENSYA_ITEM,
+			&this[CntPlayer].obj[STATUSTYPE_SENSYA].tex2D.pD3DTexture);
+		D3DXCreateTextureFromFile(pDevice,
+			TEXTURE_STATUS_CAMERA_ITEM,
+			&this[CntPlayer].obj[STATUSTYPE_CAMERA].tex2D.pD3DTexture);
+		D3DXCreateTextureFromFile(pDevice,
+			TEXTURE_STATUS_KIRI_ITEM,
+			&this[CntPlayer].obj[STATUSTYPE_KIRI].tex2D.pD3DTexture);
+	}
+	this[0].obj[STATUSTYPE_SPEED].SetPos(D3DXVECTOR3(STATUS_POS_X - STATUS_POS_X_OFFSET, STATUS_POS_Y - STATUS_POS_Y_OFFSET, 0.0f));
+	this[0].obj[STATUSTYPE_SENSYA].SetPos(D3DXVECTOR3(STATUS_POS_X - STATUS_POS_X_OFFSET, STATUS_POS_Y - STATUS_POS_Y_OFFSET, 0.0f));
+	this[0].obj[STATUSTYPE_CAMERA].SetPos(D3DXVECTOR3(STATUS_POS_X - STATUS_POS_X_OFFSET, STATUS_POS_Y - STATUS_POS_Y_OFFSET, 0.0f));
+	this[0].obj[STATUSTYPE_KIRI].SetPos(D3DXVECTOR3(STATUS_POS_X - STATUS_POS_X_OFFSET, STATUS_POS_Y - STATUS_POS_Y_OFFSET, 0.0f));
 
-	LPDIRECT3DTEXTURE9 pD3DTexture[4];
-	D3DXCreateTextureFromFile(pDevice,
-		TEXTURE_STATUS_SPEED_ITEM,
-		&pD3DTexture[0]);
-	D3DXCreateTextureFromFile(pDevice,
-		TEXTURE_STATUS_SENSYA_ITEM,
-		&pD3DTexture[1]);
-	D3DXCreateTextureFromFile(pDevice,
-		TEXTURE_STATUS_CAMERA_ITEM,
-		&pD3DTexture[2]);
-	D3DXCreateTextureFromFile(pDevice,
-		TEXTURE_STATUS_KIRI_ITEM,
-		&pD3DTexture[3]);
+	this[1].obj[STATUSTYPE_SPEED].SetPos(D3DXVECTOR3(STATUS_POS_X * 2 - STATUS_POS_X_OFFSET, STATUS_POS_Y - STATUS_POS_Y_OFFSET, 0.0f));
+	this[1].obj[STATUSTYPE_SENSYA].SetPos(D3DXVECTOR3(STATUS_POS_X * 2 - STATUS_POS_X_OFFSET, STATUS_POS_Y - STATUS_POS_Y_OFFSET, 0.0f));
+	this[1].obj[STATUSTYPE_CAMERA].SetPos(D3DXVECTOR3(STATUS_POS_X * 2 - STATUS_POS_X_OFFSET, STATUS_POS_Y - STATUS_POS_Y_OFFSET, 0.0f));
+	this[1].obj[STATUSTYPE_KIRI].SetPos(D3DXVECTOR3(STATUS_POS_X * 2 - STATUS_POS_X_OFFSET, STATUS_POS_Y - STATUS_POS_Y_OFFSET, 0.0f));
 
-	//---------------------------------------オブジェクト値書き込み
-	this[STATUSTYPE_SPEED].tex2D.SetpD3DTexture(pD3DTexture[0]);
-	this[STATUSTYPE_SENSYA].tex2D.SetpD3DTexture(pD3DTexture[0]);
-	this[STATUSTYPE_CAMERA].tex2D.SetpD3DTexture(pD3DTexture[0]);
-	this[STATUSTYPE_KIRI].tex2D.SetpD3DTexture(pD3DTexture[0]);
+	this[2].obj[STATUSTYPE_SPEED].SetPos(D3DXVECTOR3(STATUS_POS_X - STATUS_POS_X_OFFSET, STATUS_POS_Y * 2 - STATUS_POS_Y_OFFSET, 0.0f));
+	this[2].obj[STATUSTYPE_SENSYA].SetPos(D3DXVECTOR3(STATUS_POS_X - STATUS_POS_X_OFFSET, STATUS_POS_Y * 2 - STATUS_POS_Y_OFFSET, 0.0f));
+	this[2].obj[STATUSTYPE_CAMERA].SetPos(D3DXVECTOR3(STATUS_POS_X - STATUS_POS_X_OFFSET, STATUS_POS_Y * 2 - STATUS_POS_Y_OFFSET, 0.0f));
+	this[2].obj[STATUSTYPE_KIRI].SetPos(D3DXVECTOR3(STATUS_POS_X - STATUS_POS_X_OFFSET, STATUS_POS_Y * 2 - STATUS_POS_Y_OFFSET, 0.0f));
 
-	this[STATUSTYPE_SPEED].SetPos(D3DXVECTOR3(STATUS_POS_X - STATUS_POS_X_OFFSET, STATUS_POS_Y - STATUS_POS_Y_OFFSET, 0.0f));
-	this[STATUSTYPE_SENSYA].SetPos(D3DXVECTOR3(STATUS_POS_X * 2 - STATUS_POS_X_OFFSET, STATUS_POS_Y - STATUS_POS_Y_OFFSET, 0.0f));
-	this[STATUSTYPE_CAMERA].SetPos(D3DXVECTOR3(STATUS_POS_X - STATUS_POS_X_OFFSET, STATUS_POS_Y * 2 - STATUS_POS_Y_OFFSET, 0.0f));
-	this[STATUSTYPE_KIRI].SetPos(D3DXVECTOR3(STATUS_POS_X * 2 - STATUS_POS_X_OFFSET, STATUS_POS_Y * 2 - STATUS_POS_Y_OFFSET, 0.0f));
+	this[3].obj[STATUSTYPE_SPEED].SetPos(D3DXVECTOR3(STATUS_POS_X * 2 - STATUS_POS_X_OFFSET, STATUS_POS_Y * 2 - STATUS_POS_Y_OFFSET, 0.0f));
+	this[3].obj[STATUSTYPE_SENSYA].SetPos(D3DXVECTOR3(STATUS_POS_X * 2 - STATUS_POS_X_OFFSET, STATUS_POS_Y * 2 - STATUS_POS_Y_OFFSET, 0.0f));
+	this[3].obj[STATUSTYPE_CAMERA].SetPos(D3DXVECTOR3(STATUS_POS_X * 2 - STATUS_POS_X_OFFSET, STATUS_POS_Y * 2 - STATUS_POS_Y_OFFSET, 0.0f));
+	this[3].obj[STATUSTYPE_KIRI].SetPos(D3DXVECTOR3(STATUS_POS_X * 2 - STATUS_POS_X_OFFSET, STATUS_POS_Y * 2 - STATUS_POS_Y_OFFSET, 0.0f));
 
 	// 頂点情報の作成
 	MakeVertexStatus();
@@ -50,15 +59,28 @@ void STATUS::Init(void)
 //=============================================================================
 void STATUS::Reinit(void)
 {
-	VERTEX_2D vtx[POLYGON_2D_VERTEX];
-	vtx[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
-	vtx[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
-	vtx[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
-	vtx[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
-	this[STATUSTYPE_SPEED].tex2D.SettextureVTX(vtx);
-	this[STATUSTYPE_SENSYA].tex2D.SettextureVTX(vtx);
-	this[STATUSTYPE_CAMERA].tex2D.SettextureVTX(vtx);
-	this[STATUSTYPE_KIRI].tex2D.SettextureVTX(vtx);
+	for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
+	{
+		this[CntPlayer].obj[STATUSTYPE_SPEED].tex2D.textureVTX[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
+		this[CntPlayer].obj[STATUSTYPE_SPEED].tex2D.textureVTX[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
+		this[CntPlayer].obj[STATUSTYPE_SPEED].tex2D.textureVTX[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
+		this[CntPlayer].obj[STATUSTYPE_SPEED].tex2D.textureVTX[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
+
+		this[CntPlayer].obj[STATUSTYPE_SENSYA].tex2D.textureVTX[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
+		this[CntPlayer].obj[STATUSTYPE_SENSYA].tex2D.textureVTX[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
+		this[CntPlayer].obj[STATUSTYPE_SENSYA].tex2D.textureVTX[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
+		this[CntPlayer].obj[STATUSTYPE_SENSYA].tex2D.textureVTX[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
+
+		this[CntPlayer].obj[STATUSTYPE_CAMERA].tex2D.textureVTX[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
+		this[CntPlayer].obj[STATUSTYPE_CAMERA].tex2D.textureVTX[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
+		this[CntPlayer].obj[STATUSTYPE_CAMERA].tex2D.textureVTX[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
+		this[CntPlayer].obj[STATUSTYPE_CAMERA].tex2D.textureVTX[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
+
+		this[CntPlayer].obj[STATUSTYPE_KIRI].tex2D.textureVTX[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
+		this[CntPlayer].obj[STATUSTYPE_KIRI].tex2D.textureVTX[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
+		this[CntPlayer].obj[STATUSTYPE_KIRI].tex2D.textureVTX[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
+		this[CntPlayer].obj[STATUSTYPE_KIRI].tex2D.textureVTX[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
+	}
 }
 
 //=============================================================================
@@ -74,85 +96,67 @@ void STATUS::Uninit(void)
 //=============================================================================
 void STATUS::Update(PLAYER_HONTAI *p)
 {
-	for (int CntPlayer = 0; CntPlayer < OBJECT_STATUS_MAX; CntPlayer++)
+	for (int CntStatus = 0; CntStatus < OBJECT_STATUS_MAX; CntStatus++)
 	{
 		//スピード
 		if (p->speedbuffsignal == true)
 		{
-			VERTEX_2D *vtx2d;
-			vtx2d = this[STATUSTYPE_SPEED].tex2D.GettextureVTX();
-
-			vtx2d[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-			vtx2d[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-			vtx2d[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-			vtx2d[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+			this[CntStatus].obj[STATUSTYPE_SPEED].tex2D.textureVTX[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+			this[CntStatus].obj[STATUSTYPE_SPEED].tex2D.textureVTX[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+			this[CntStatus].obj[STATUSTYPE_SPEED].tex2D.textureVTX[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+			this[CntStatus].obj[STATUSTYPE_SPEED].tex2D.textureVTX[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
 		}
 		else
 		{
-			VERTEX_2D *vtx2d;
-			vtx2d = this[STATUSTYPE_SPEED].tex2D.GettextureVTX();
-
-			vtx2d[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
-			vtx2d[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
-			vtx2d[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
-			vtx2d[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
+			this[CntStatus].obj[STATUSTYPE_SPEED].tex2D.textureVTX[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
+			this[CntStatus].obj[STATUSTYPE_SPEED].tex2D.textureVTX[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
+			this[CntStatus].obj[STATUSTYPE_SPEED].tex2D.textureVTX[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
+			this[CntStatus].obj[STATUSTYPE_SPEED].tex2D.textureVTX[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
 		}
 		//戦車
 		if (p->ModelType == PLAYER_MODEL_ATTACK)
 		{
-			VERTEX_2D *vtx2d;
-			vtx2d = this[STATUSTYPE_SENSYA].tex2D.GettextureVTX();
-			vtx2d[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-			vtx2d[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-			vtx2d[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-			vtx2d[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+			this[CntStatus].obj[STATUSTYPE_SENSYA].tex2D.textureVTX[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+			this[CntStatus].obj[STATUSTYPE_SENSYA].tex2D.textureVTX[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+			this[CntStatus].obj[STATUSTYPE_SENSYA].tex2D.textureVTX[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+			this[CntStatus].obj[STATUSTYPE_SENSYA].tex2D.textureVTX[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
 		}
 		else
 		{
-			VERTEX_2D *vtx2d;
-			vtx2d = this[STATUSTYPE_SENSYA].tex2D.GettextureVTX();
-			vtx2d[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
-			vtx2d[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
-			vtx2d[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
-			vtx2d[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
+			this[CntStatus].obj[STATUSTYPE_SENSYA].tex2D.textureVTX[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
+			this[CntStatus].obj[STATUSTYPE_SENSYA].tex2D.textureVTX[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
+			this[CntStatus].obj[STATUSTYPE_SENSYA].tex2D.textureVTX[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
+			this[CntStatus].obj[STATUSTYPE_SENSYA].tex2D.textureVTX[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
 		}
 		//カメラ
 		if (p->BackCameraItemSignal == true)
 		{
-			VERTEX_2D *vtx2d;
-			vtx2d = this[STATUSTYPE_CAMERA].tex2D.GettextureVTX();
-			vtx2d[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-			vtx2d[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-			vtx2d[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-			vtx2d[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+			this[CntStatus].obj[STATUSTYPE_CAMERA].tex2D.textureVTX[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+			this[CntStatus].obj[STATUSTYPE_CAMERA].tex2D.textureVTX[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+			this[CntStatus].obj[STATUSTYPE_CAMERA].tex2D.textureVTX[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+			this[CntStatus].obj[STATUSTYPE_CAMERA].tex2D.textureVTX[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
 		}
 		else
 		{
-			VERTEX_2D *vtx2d;
-			vtx2d = this[STATUSTYPE_CAMERA].tex2D.GettextureVTX();
-			vtx2d[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
-			vtx2d[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
-			vtx2d[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
-			vtx2d[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
+			this[CntStatus].obj[STATUSTYPE_CAMERA].tex2D.textureVTX[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
+			this[CntStatus].obj[STATUSTYPE_CAMERA].tex2D.textureVTX[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
+			this[CntStatus].obj[STATUSTYPE_CAMERA].tex2D.textureVTX[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
+			this[CntStatus].obj[STATUSTYPE_CAMERA].tex2D.textureVTX[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
 		}
 		//霧
 		if (p->KiriSignal == true)
 		{
-			VERTEX_2D *vtx2d;
-			vtx2d = this[STATUSTYPE_KIRI].tex2D.GettextureVTX();
-			vtx2d[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-			vtx2d[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-			vtx2d[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-			vtx2d[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+			this[CntStatus].obj[STATUSTYPE_KIRI].tex2D.textureVTX[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+			this[CntStatus].obj[STATUSTYPE_KIRI].tex2D.textureVTX[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+			this[CntStatus].obj[STATUSTYPE_KIRI].tex2D.textureVTX[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+			this[CntStatus].obj[STATUSTYPE_KIRI].tex2D.textureVTX[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
 		}
 		else
 		{
-			VERTEX_2D *vtx2d;
-			vtx2d = this[STATUSTYPE_KIRI].tex2D.GettextureVTX();
-			vtx2d[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
-			vtx2d[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
-			vtx2d[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
-			vtx2d[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
+			this[CntStatus].obj[STATUSTYPE_KIRI].tex2D.textureVTX[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
+			this[CntStatus].obj[STATUSTYPE_KIRI].tex2D.textureVTX[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
+			this[CntStatus].obj[STATUSTYPE_KIRI].tex2D.textureVTX[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
+			this[CntStatus].obj[STATUSTYPE_KIRI].tex2D.textureVTX[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
 		}
 	}
 }
@@ -169,8 +173,8 @@ void STATUS::Draw(void)
 		for (int CntStatus = 0; CntStatus < STATUSTYPE_MAX; CntStatus++)
 		{
 				pDevice->SetFVF(FVF_VERTEX_2D);
-				pDevice->SetTexture(0, LPDIRECT3DTEXTURE9(this[CntStatus].tex2D.GetpD3DTexture()));
-				pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, POLYGON_2D_NUM, this[CntStatus].tex2D.GettextureVTX(), sizeof(VERTEX_2D));
+				pDevice->SetTexture(0, this[CntPlayer].obj[CntStatus].tex2D.pD3DTexture);
+				pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, POLYGON_2D_NUM, this[CntPlayer].obj[CntStatus].tex2D.textureVTX, sizeof(VERTEX_2D));
 		}
 	}
 }
@@ -180,37 +184,36 @@ void STATUS::Draw(void)
 //=============================================================================
 HRESULT STATUS::MakeVertexStatus(void)
 {
-	for (int CntStatus = 0; CntStatus < STATUSTYPE_MAX; CntStatus++)
+	for (int CntPlayer = 0; CntPlayer < OBJECT_STATUS_MAX; CntPlayer++)
 	{
-		//-----------------------------------オブジェクト値読み込み
-		D3DXVECTOR3 pos = this[CntStatus].GetPos();
+		for (int CntStatus = 0; CntStatus < STATUSTYPE_MAX; CntStatus++)
+		{
+			//-----------------------------------オブジェクト値読み込み
+			D3DXVECTOR3 pos = this[CntPlayer].obj[CntStatus].GetPos();
 
-		// 頂点座標の設定
-		VERTEX_2D vtx2d[POLYGON_2D_VERTEX];
-		vtx2d[0].vtx = D3DXVECTOR3(pos.x - STATUS_SIZE_X + (CntStatus*STATUS_SIZE_X * 2), pos.y - STATUS_SIZE_Y, 0.0f);
-		vtx2d[1].vtx = D3DXVECTOR3(pos.x + STATUS_SIZE_X + (CntStatus*STATUS_SIZE_X * 2), pos.y - STATUS_SIZE_Y, 0.0f);
-		vtx2d[2].vtx = D3DXVECTOR3(pos.x - STATUS_SIZE_X + (CntStatus*STATUS_SIZE_X * 2), pos.y + STATUS_SIZE_Y, 0.0f);
-		vtx2d[3].vtx = D3DXVECTOR3(pos.x + STATUS_SIZE_X + (CntStatus*STATUS_SIZE_X * 2), pos.y + STATUS_SIZE_Y, 0.0f);
-		// テクスチャのパースペクティブコレクト用
-		vtx2d[0].rhw =
-			vtx2d[1].rhw =
-			vtx2d[2].rhw =
-			vtx2d[3].rhw = 1.0f;
+			// 頂点座標の設定
+			this[CntPlayer].obj[CntStatus].tex2D.textureVTX[0].vtx = D3DXVECTOR3(pos.x - STATUS_SIZE_X + (CntStatus*STATUS_SIZE_X * 2), pos.y - STATUS_SIZE_Y, 0.0f);
+			this[CntPlayer].obj[CntStatus].tex2D.textureVTX[1].vtx = D3DXVECTOR3(pos.x + STATUS_SIZE_X + (CntStatus*STATUS_SIZE_X * 2), pos.y - STATUS_SIZE_Y, 0.0f);
+			this[CntPlayer].obj[CntStatus].tex2D.textureVTX[2].vtx = D3DXVECTOR3(pos.x - STATUS_SIZE_X + (CntStatus*STATUS_SIZE_X * 2), pos.y + STATUS_SIZE_Y, 0.0f);
+			this[CntPlayer].obj[CntStatus].tex2D.textureVTX[3].vtx = D3DXVECTOR3(pos.x + STATUS_SIZE_X + (CntStatus*STATUS_SIZE_X * 2), pos.y + STATUS_SIZE_Y, 0.0f);
+			// テクスチャのパースペクティブコレクト用
+			this[CntPlayer].obj[CntStatus].tex2D.textureVTX[0].rhw =
+				this[CntPlayer].obj[CntStatus].tex2D.textureVTX[1].rhw =
+				this[CntPlayer].obj[CntStatus].tex2D.textureVTX[2].rhw =
+				this[CntPlayer].obj[CntStatus].tex2D.textureVTX[3].rhw = 1.0f;
 
-		// 反射光の設定
-		vtx2d[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
-		vtx2d[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
-		vtx2d[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
-		vtx2d[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
+			// 反射光の設定
+			this[CntPlayer].obj[CntStatus].tex2D.textureVTX[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
+			this[CntPlayer].obj[CntStatus].tex2D.textureVTX[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
+			this[CntPlayer].obj[CntStatus].tex2D.textureVTX[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
+			this[CntPlayer].obj[CntStatus].tex2D.textureVTX[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
 
-		// テクスチャ座標の設定
-		vtx2d[0].tex = D3DXVECTOR2(0.0f, 0.0f);
-		vtx2d[1].tex = D3DXVECTOR2(1.0f, 0.0f);
-		vtx2d[2].tex = D3DXVECTOR2(0.0f, 1.0f);
-		vtx2d[3].tex = D3DXVECTOR2(1.0f, 1.0f);
-
-		//-----------------------------------オブジェクト値書き込み
-		this[CntStatus].tex2D.SettextureVTX(vtx2d);
+			// テクスチャ座標の設定
+			this[CntPlayer].obj[CntStatus].tex2D.textureVTX[0].tex = D3DXVECTOR2(0.0f, 0.0f);
+			this[CntPlayer].obj[CntStatus].tex2D.textureVTX[1].tex = D3DXVECTOR2(1.0f, 0.0f);
+			this[CntPlayer].obj[CntStatus].tex2D.textureVTX[2].tex = D3DXVECTOR2(0.0f, 1.0f);
+			this[CntPlayer].obj[CntStatus].tex2D.textureVTX[3].tex = D3DXVECTOR2(1.0f, 1.0f);
+		}
 	}
 	return S_OK;
 }

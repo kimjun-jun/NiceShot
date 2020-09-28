@@ -21,7 +21,7 @@
 class OBJECT_2D;
 
 
-class STATUS : public OBJECT_2D
+class STATUS
 {
 public:
 	virtual void						Init(void);					//!< ‰Šú‰»
@@ -30,4 +30,5 @@ public:
 	virtual void						Update(PLAYER_HONTAI *p);				//!< XV
 	virtual void						Draw(void);					//!< •`‰æ
 	HRESULT						MakeVertexStatus(void);
+	OBJECT_2D							obj[OBJECT_STATUS_MAX];
 };

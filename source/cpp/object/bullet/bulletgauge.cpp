@@ -50,16 +50,15 @@ void BULLETGAUGE::Init(void)
 		// 頂点情報の作成
 		MakeVertexBulletGauge(pDevice, CntBulletGauge);
 
+		// テクスチャの読み込み
+		D3DXCreateTextureFromFile(pDevice,					// デバイスへのポインタ
+			TEXTURE_BULLETGAUGE,			// ファイルの名前
+			&this[CntBulletGauge].tex2DVB.pD3DTexture);	// 読み込むメモリー
+
 	}
 
-	LPDIRECT3DTEXTURE9 pD3DTexture = NULL;
 
-	// テクスチャの読み込み
-	D3DXCreateTextureFromFile(pDevice,					// デバイスへのポインタ
-		TEXTURE_BULLETGAUGE,			// ファイルの名前
-		&pD3DTexture);	// 読み込むメモリー
 
-	this[0].tex2DVB.SetpD3DTexture(pD3DTexture);
 }
 
 //=============================================================================
@@ -103,13 +102,13 @@ void BULLETGAUGE::Draw(void)
 	for (int CntBulletGauge = 0; CntBulletGauge < OBJECT_BULLETGAUGE_MAX; CntBulletGauge++)
 	{
 		// 頂点バッファをデバイスのデータストリームにバインド
-		pDevice->SetStreamSource(0, LPDIRECT3DVERTEXBUFFER9(this[CntBulletGauge].tex2DVB.GetpD3DVtxBuff()), 0, sizeof(VERTEX_2D));
+		pDevice->SetStreamSource(0, this[CntBulletGauge].tex2DVB.pD3DVtxBuff, 0, sizeof(VERTEX_2D));
 
 		// 頂点フォーマットの設定
 		pDevice->SetFVF(FVF_VERTEX_2D);
 
 		// テクスチャの設定
-		pDevice->SetTexture(0, LPDIRECT3DTEXTURE9(this[0].tex2DVB.GetpD3DTexture()));
+		pDevice->SetTexture(0, this[CntBulletGauge].tex2DVB.pD3DTexture);
 
 		// ポリゴンの描画
 		for (int nCntPlace = 0; nCntPlace < this[CntBulletGauge].AmmoPower; nCntPlace++)
@@ -125,12 +124,11 @@ void BULLETGAUGE::Draw(void)
 HRESULT BULLETGAUGE::MakeVertexBulletGauge(LPDIRECT3DDEVICE9 pDevice, int CntBulletGauge)
 {
 	// オブジェクトの頂点バッファを生成
-	LPDIRECT3DVERTEXBUFFER9 VtxBuffBulletGauge = NULL;
     if( FAILED( pDevice->CreateVertexBuffer(sizeof(VERTEX_2D) * (POLYGON_2D_VERTEX * PLAYER_AMMOPOWER_STRONG + 4),		// 頂点データ用に確保するバッファサイズ(バイト単位)
 												D3DUSAGE_WRITEONLY,							// 頂点バッファの使用法　
 												FVF_VERTEX_2D,								// 使用する頂点フォーマット
 												D3DPOOL_MANAGED,							// リソースのバッファを保持するメモリクラスを指定
-												&VtxBuffBulletGauge,							// 頂点バッファインターフェースへのポインタ
+												&this[CntBulletGauge].tex2DVB.pD3DVtxBuff,							// 頂点バッファインターフェースへのポインタ
 												NULL)))										// NULLに設定
 	{
         return E_FAIL;
@@ -140,7 +138,7 @@ HRESULT BULLETGAUGE::MakeVertexBulletGauge(LPDIRECT3DDEVICE9 pDevice, int CntBul
 		VERTEX_2D *pVtx;
 
 		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
-		VtxBuffBulletGauge->Lock(0, 0, (void**)&pVtx, 0);
+		this[CntBulletGauge].tex2DVB.pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
 
 		for(int nCntPlace = 0; nCntPlace < PLAYER_AMMOPOWER_STRONG; nCntPlace++, pVtx += 4)
 		{
@@ -174,10 +172,7 @@ HRESULT BULLETGAUGE::MakeVertexBulletGauge(LPDIRECT3DDEVICE9 pDevice, int CntBul
 
 
 		// 頂点データをアンロックする
-		VtxBuffBulletGauge->Unlock();
-
-		//---------------------------オブジェクト値書き込み
-		this[CntBulletGauge].tex2DVB.SetpD3DVtxBuff(VtxBuffBulletGauge);
+		this[CntBulletGauge].tex2DVB.pD3DVtxBuff->Unlock();
 	}
 
 	return S_OK;

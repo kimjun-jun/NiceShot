@@ -18,10 +18,10 @@
 
 
 static D3DXCOLOR PLAYER_COLOR[] = {
-	D3DXCOLOR(1.0f, 1.0f, 0.1f, 0.01f),//p1カラー
-	D3DXCOLOR(0.2f, 0.2f, 1.0f, 0.01f),//p2カラー
-	D3DXCOLOR(1.0f, 0.2f, 0.2f, 0.01f),//p3カラー
-	D3DXCOLOR(0.2f, 1.0f, 0.2f, 0.01f),//p4カラー 
+	D3DXCOLOR(1.0f, 1.0f, 0.1f, 0.1f),//p1カラー
+	D3DXCOLOR(0.2f, 0.2f, 1.0f, 0.1f),//p2カラー
+	D3DXCOLOR(1.0f, 0.2f, 0.2f, 0.1f),//p3カラー
+	D3DXCOLOR(0.2f, 1.0f, 0.2f, 0.1f),//p4カラー 
 };
 
 //*****************************************************************************
@@ -56,6 +56,7 @@ void BULLETPREDICTION::Reinit(void)
 	for (int nCntBulletprediction = 0; nCntBulletprediction < OBJECT_BULLETPREDICTION_MAX; nCntBulletprediction++)
 	{
 		this[nCntBulletprediction].SetPos(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+		this[nCntBulletprediction].SetScl(D3DXVECTOR3(1.0f, 1.0f, 1.0f));
 		this[nCntBulletprediction].SetCol(D3DXCOLOR(DWORD(0)));
 		this[nCntBulletprediction].SetUse(false);
 	}
@@ -89,11 +90,7 @@ void BULLETPREDICTION::Update(PLAYER_HONTAI *player)
 {
 	for (int nCntBulletprediction = 0; nCntBulletprediction < OBJECT_BULLETPREDICTION_MAX; nCntBulletprediction++)
 	{
-		bool use = this[nCntBulletprediction].GetUse();
-		if (use)
-		{
-			this[nCntBulletprediction].SetUse(false);
-		}
+		this[nCntBulletprediction].SetUse(false);
 	}
 
 	//プレイヤーの情報から発射位置角度移動量を利用してバレットの着弾点を算出する
@@ -101,6 +98,7 @@ void BULLETPREDICTION::Update(PLAYER_HONTAI *player)
 	{
 		//---------------------------------オブジェクト値読み込み
 		D3DXVECTOR3	BulletPredictionPos = player[CntPlayer].GetPos();
+		BulletPredictionPos.y += 20.0f;
 		D3DXVECTOR3 HoudaiRot = player[CntPlayer].GetRot();
 		D3DXVECTOR3 HoutouRot = player[CntPlayer].parts[PARTSTYPE_HOUTOU].GetRot();
 		D3DXVECTOR3 HousinRot = player[CntPlayer].parts[PARTSTYPE_HOUSIN].GetRot();
@@ -119,13 +117,8 @@ void BULLETPREDICTION::Update(PLAYER_HONTAI *player)
 		float Gravity = 0.0f;
 		//float time = 1.0f;
 		//float maxtime = 10.0f;
-		for (int nCntBulletprediction = 0; nCntBulletprediction < BULLETPREDICTION_MAX; nCntBulletprediction++)
+		for (int nCntBulletprediction = 0 + (CntPlayer * BULLETPREDICTION_MAX); nCntBulletprediction < BULLETPREDICTION_MAX + (CntPlayer* BULLETPREDICTION_MAX); nCntBulletprediction++)
 		{
-			//重力と移動量を反映
-			//BulletPredictionPos.x += player[CntPlayer].bulletmove.x*(time / maxtime);
-			//BulletPredictionPos.y -= player[CntPlayer].bulletmove.y*(time / maxtime) + Gravity;
-			//BulletPredictionPos.z += player[CntPlayer].bulletmove.z*(time / maxtime);
-
 			BulletPredictionPos.x += bulletmove.x;
 			BulletPredictionPos.y -= bulletmove.y + Gravity;
 			BulletPredictionPos.z += bulletmove.z;
@@ -138,7 +131,7 @@ void BULLETPREDICTION::Update(PLAYER_HONTAI *player)
 			if (Gravity > VALUE_GRAVITYMAX_BULLET) Gravity = VALUE_GRAVITYMAX_BULLET;
 			//徐々にアルファ値を強くして遠距離地点を見やすくする
 			col.a += 0.01f;
-			SetBulletprediction(BulletPredictionPos, CntPlayer, col, BULLETPREDICTION_SIZE_X, BULLETPREDICTION_SIZE_Y);
+			this[0].SetBulletprediction(BulletPredictionPos, CntPlayer, col, BULLETPREDICTION_SIZE_X, BULLETPREDICTION_SIZE_Y, nCntBulletprediction - (CntPlayer * BULLETPREDICTION_MAX));
 
 
 		}
@@ -148,79 +141,71 @@ void BULLETPREDICTION::Update(PLAYER_HONTAI *player)
 //=============================================================================
 // 描画処理
 //=============================================================================
-void BULLETPREDICTION::Draw(PLAYER_HONTAI *player)
+void BULLETPREDICTION::Draw(PLAYER_HONTAI *player, int CntPlayer)
 {
-	//-----------------------------------オブジェクト先頭アドレスを読み込み
-	for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
+	bool puse = player[CntPlayer].GetUse();
+	if (puse)
 	{
-		bool puse = player[CntPlayer].GetUse();
-		if (puse)
+		LPDIRECT3DDEVICE9 pDevice = GetDevice();
+
+		pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);		// αソースカラーの指定
+		pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);			// αデスティネーションカラーの指定
+		pDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
+		for (int nCntBulletprediction = 0; nCntBulletprediction < BULLETPREDICTION_MAX; nCntBulletprediction++)
 		{
-			LPDIRECT3DDEVICE9 pDevice = GetDevice();
+			D3DXMATRIX mtxView, mtxScale, mtxTranslate;
 
-			pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);		// αソースカラーの指定
-			pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);			// αデスティネーションカラーの指定
-			pDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
-			for (int nCntBulletprediction = 0; nCntBulletprediction < BULLETPREDICTION_MAX; nCntBulletprediction++)
-			{
-				D3DXMATRIX mtxView, mtxScale, mtxTranslate;
+			//---------------------------------オブジェクト値読み込み
+			D3DXVECTOR3	pos = this[nCntBulletprediction + BULLETPREDICTION_MAX * CntPlayer].GetPos();
+			D3DXVECTOR3	scl = this[nCntBulletprediction + BULLETPREDICTION_MAX * CntPlayer].GetScl();
+			D3DXMATRIX mtxWorld = this[nCntBulletprediction + BULLETPREDICTION_MAX * CntPlayer].GetMatrix();
 
-				bool bpuse = this[nCntBulletprediction].GetUse();
-				if (bpuse)
-				{
-					//---------------------------------オブジェクト値読み込み
-					D3DXVECTOR3	pos = this[nCntBulletprediction].GetPos();
-					D3DXVECTOR3	scl = this[nCntBulletprediction].GetScl();
-					D3DXMATRIX mtxWorld = this[nCntBulletprediction].GetMatrix();
+			// ワールドマトリックスの初期化
+			D3DXMatrixIdentity(&mtxWorld);
 
-					// ワールドマトリックスの初期化
-					D3DXMatrixIdentity(&mtxWorld);
+			// ビューマトリックスを取得
+			CAMERA *cam = GetCamera();
 
-					// ビューマトリックスを取得
-					CAMERA *cam = GetCamera();
+			mtxWorld._11 = cam[CntPlayer].mtxView._11;
+			mtxWorld._12 = cam[CntPlayer].mtxView._21;
+			mtxWorld._13 = cam[CntPlayer].mtxView._31;
+			mtxWorld._21 = cam[CntPlayer].mtxView._12;
+			mtxWorld._22 = cam[CntPlayer].mtxView._22;
+			mtxWorld._23 = cam[CntPlayer].mtxView._32;
+			mtxWorld._31 = cam[CntPlayer].mtxView._13;
+			mtxWorld._32 = cam[CntPlayer].mtxView._23;
+			mtxWorld._33 = cam[CntPlayer].mtxView._33;
 
-					mtxWorld._11 = cam[CntPlayer].mtxView._11;
-					mtxWorld._12 = cam[CntPlayer].mtxView._21;
-					mtxWorld._13 = cam[CntPlayer].mtxView._31;
-					mtxWorld._21 = cam[CntPlayer].mtxView._12;
-					mtxWorld._22 = cam[CntPlayer].mtxView._22;
-					mtxWorld._23 = cam[CntPlayer].mtxView._32;
-					mtxWorld._31 = cam[CntPlayer].mtxView._13;
-					mtxWorld._32 = cam[CntPlayer].mtxView._23;
-					mtxWorld._33 = cam[CntPlayer].mtxView._33;
+			// スケールを反映
+			D3DXMatrixScaling(&mtxScale, scl.x, scl.y, scl.z);
+			D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxScale);
 
-					// スケールを反映
-					D3DXMatrixScaling(&mtxScale, scl.x, scl.y, scl.z);
-					D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxScale);
+			// 移動を反映
+			D3DXMatrixTranslation(&mtxTranslate, pos.x, pos.y, pos.z);
+			D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxTranslate);
 
-					// 移動を反映
-					D3DXMatrixTranslation(&mtxTranslate, pos.x, pos.y, pos.z);
-					D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxTranslate);
+			// ワールドマトリックスの設定
+			pDevice->SetTransform(D3DTS_WORLD, &mtxWorld);
 
-					// ワールドマトリックスの設定
-					pDevice->SetTransform(D3DTS_WORLD, &mtxWorld);
+			pDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
 
-					pDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
+			// 頂点バッファをデバイスのデータストリームにバインド
+			pDevice->SetStreamSource(0, g_pD3DVtxBuffBulletprediction[CntPlayer], 0, sizeof(VERTEX_3D));
 
-					// 頂点バッファをデバイスのデータストリームにバインド
-					pDevice->SetStreamSource(0, g_pD3DVtxBuffBulletprediction[CntPlayer], 0, sizeof(VERTEX_3D));
+			// 頂点フォーマットの設定
+			pDevice->SetFVF(FVF_VERTEX_3D);
 
-					// 頂点フォーマットの設定
-					pDevice->SetFVF(FVF_VERTEX_3D);
+			// テクスチャの設定
+			pDevice->SetTexture(0, g_pD3DTextureBulletprediction[CntPlayer]);
 
-					// テクスチャの設定
-					pDevice->SetTexture(0, g_pD3DTextureBulletprediction[CntPlayer]);
+			// ポリゴンの描画
+			pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, (nCntBulletprediction * 4), POLYGON_2D_NUM);
 
-					// ポリゴンの描画
-					pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, (nCntBulletprediction * 4), POLYGON_2D_NUM);
-
-					pDevice->SetRenderState(D3DRS_LIGHTING, TRUE);
-				}
-			}
-			pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);		// αソースカラーの指定
-			pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);	// αデスティネーションカラーの指定
-			pDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
+			pDevice->SetRenderState(D3DRS_LIGHTING, TRUE);
 		}
+		pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);		// αソースカラーの指定
+		pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);	// αデスティネーションカラーの指定
+		pDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
 	}
 }
 
@@ -232,7 +217,7 @@ HRESULT BULLETPREDICTION::MakeVertexBulletprediction(LPDIRECT3DDEVICE9 pDevice)
 	for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
 	{
 		// オブジェクトの頂点バッファを生成
-		if (FAILED(pDevice->CreateVertexBuffer(sizeof(VERTEX_3D) * POLYGON_2D_VERTEX * OBJECT_BULLETPREDICTION_MAX,	// 頂点データ用に確保するバッファサイズ(バイト単位)
+		if (FAILED(pDevice->CreateVertexBuffer(sizeof(VERTEX_3D) * POLYGON_2D_VERTEX * BULLETPREDICTION_MAX + 4,	// 頂点データ用に確保するバッファサイズ(バイト単位)
 			D3DUSAGE_WRITEONLY,							// 頂点バッファの使用法　
 			FVF_VERTEX_3D,								// 使用する頂点フォーマット
 			D3DPOOL_MANAGED,							// リソースのバッファを保持するメモリクラスを指定
@@ -248,7 +233,7 @@ HRESULT BULLETPREDICTION::MakeVertexBulletprediction(LPDIRECT3DDEVICE9 pDevice)
 			// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
 			g_pD3DVtxBuffBulletprediction[CntPlayer]->Lock(0, 0, (void**)&pVtx, 0);
 
-			for (int nCntBulletprediction = 0; nCntBulletprediction < OBJECT_BULLETPREDICTION_MAX; nCntBulletprediction++, pVtx += 4)
+			for (int nCntBulletprediction = 0; nCntBulletprediction < BULLETPREDICTION_MAX; nCntBulletprediction++, pVtx += 4)
 			{
 				// 頂点座標の設定
 				pVtx[0].vtx = D3DXVECTOR3(-BULLETPREDICTION_SIZE_X / 2, -BULLETPREDICTION_SIZE_Y / 2, 0.0f);
@@ -333,27 +318,17 @@ void BULLETPREDICTION::SetColorBulletprediction(int PlayerType, int nIdxBulletpr
 //=============================================================================
 // エフェクトの設定
 //=============================================================================
-int BULLETPREDICTION::SetBulletprediction(D3DXVECTOR3 pos, int PlayerType,D3DXCOLOR col, float fSizeX, float fSizeY)
+void BULLETPREDICTION::SetBulletprediction(D3DXVECTOR3 pos, int PlayerType, D3DXCOLOR col, float fSizeX, float fSizeY,int CntBulletPrediction)
 {
-	int nIdxBulletprediction = -1;
+	this[CntBulletPrediction+ (PlayerType * BULLETPREDICTION_MAX)].SetPos(pos);
+	this[CntBulletPrediction+ (PlayerType * BULLETPREDICTION_MAX)].SetScl(D3DXVECTOR3(1.0f, 1.0f, 1.0f));
+	this[CntBulletPrediction+ (PlayerType * BULLETPREDICTION_MAX)].SetCol(col);
+	this[CntBulletPrediction+ (PlayerType * BULLETPREDICTION_MAX)].SetUse(true);
 
-	for (int nCntBulletprediction = 0; nCntBulletprediction < OBJECT_BULLETPREDICTION_MAX; nCntBulletprediction++)
-	{
-		bool use = this[nCntBulletprediction].GetUse();
-		if (use != true)
-		{
-			this[nCntBulletprediction].SetPos(pos);
-			this[nCntBulletprediction].SetCol(col);
-			this[nCntBulletprediction].SetUse(true);
+	// 頂点座標の設定
+	SetVertexBulletprediction(PlayerType, CntBulletPrediction, fSizeX, fSizeY);
 
-			// 頂点座標の設定
-			SetVertexBulletprediction(PlayerType,nCntBulletprediction, fSizeX, fSizeY);
+	// 頂点カラーの設定
+	SetColorBulletprediction(PlayerType, CntBulletPrediction, col);
 
-			// 頂点カラーの設定
-			SetColorBulletprediction(PlayerType,nCntBulletprediction,col);
-			nIdxBulletprediction = nCntBulletprediction;
-			break;
-		}
-	}
-	return nIdxBulletprediction;
 }

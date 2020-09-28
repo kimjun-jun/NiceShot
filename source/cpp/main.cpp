@@ -251,8 +251,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	//-----------------------------------------------------オブジェクト終了
 	ObjectAll->Uninit();
 
-	delete[] ObjectAll;
-
 	timeEndPeriod(1);				// 分解能を戻す
 
 	return (int)msg.wParam;

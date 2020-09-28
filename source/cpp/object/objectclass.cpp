@@ -242,7 +242,6 @@ void GAME_OBJECT::Draw()
 				pD3DDevice->SetViewport(&vp[CntPlayer]);
 				pD3DDevice->Clear(0, NULL, (D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER), D3DCOLOR_RGBA(0, 0, 0, 0), 1.0f, 0);
 
-				//-----------------------------------オブジェクト先頭アドレスを読み込み
 				if (player[CntPlayer].KiriSignal == true) pD3DDevice->SetRenderState(D3DRS_FOGENABLE, TRUE); //フォグ：ON
 				else pD3DDevice->SetRenderState(D3DRS_FOGENABLE, FALSE); //フォグ：OFF
 
@@ -256,10 +255,10 @@ void GAME_OBJECT::Draw()
 
 				//3D空間
 				player->Draw();
-				item->Draw();
-				bulletprediction->Draw(&player[0]);
-				explosion->Draw();
-				effect->Draw();
+				//item->Draw();
+				bulletprediction->Draw(&player[0], CntPlayer);
+				explosion->Draw(CntPlayer);
+				effect->Draw(CntPlayer);
 				shadow->Draw();
 
 				//2d画面上
@@ -286,10 +285,10 @@ void GAME_OBJECT::Draw()
 
 				//3D空間
 				player->Draw();
-				item->Draw();
-				bulletprediction->Draw(&player[0]);
-				explosion->Draw();
-				effect->Draw();
+				//item->Draw();
+				bulletprediction->Draw(&player[0], CntPlayer);
+				explosion->Draw(CntPlayer);
+				effect->Draw(CntPlayer);
 				shadow->Draw();
 
 				//2d画面上
@@ -323,10 +322,10 @@ void GAME_OBJECT::Draw()
 
 					//3D空間
 					player->Draw();
-					item->Draw();
-					bulletprediction->Draw(&player[0]);
-					explosion->Draw();
-					effect->Draw();
+					//item->Draw();
+					bulletprediction->Draw(&player[0], CntPlayer);
+					explosion->Draw(CntPlayer);
+					effect->Draw(CntPlayer);
 					shadow->Draw();
 
 					//2d画面上
@@ -349,10 +348,10 @@ void GAME_OBJECT::Draw()
 
 					//3D空間
 					player->Draw();
-					item->Draw();
-					bulletprediction->Draw(&player[0]);
-					explosion->Draw();
-					effect->Draw();
+					//item->Draw();
+					bulletprediction->Draw(&player[0], CntPlayer);
+					explosion->Draw(CntPlayer);
+					effect->Draw(CntPlayer);
 					shadow->Draw();
 
 					//2d画面上
@@ -371,7 +370,7 @@ void GAME_OBJECT::Draw()
 			break;
 		}
 		// フェード描画
-		//fade->Draw();
+		fade->Draw();
 
 		// デバッグ表示
 #ifdef _DEBUG
@@ -475,7 +474,7 @@ void GAME_OBJECT::CheakHit(int scene)
 							damege[CntPlayer].alpha = 0;
 
 							// バレット破棄
-							bullet[CntPlayerBullet].ReleaseBullet(CntPlayerBullet,shadow);
+							bullet[0].ReleaseBullet(CntPlayerBullet,shadow);
 
 							// SE再生
 							PlaySound(SOUND_LABEL_SE_attack02);
@@ -495,7 +494,7 @@ void GAME_OBJECT::CheakHit(int scene)
 								//D3DXVECTOR3 ExploPos = D3DXVECTOR3(bpos.x, bpos.y, bpos.z- EXPLOSION_COLLISIONPOS_BUFFSIZE);
 								//SetExplosion(ExploPos, 40.0f, 40.0f, EXPLOSIONTYPE_BULLET_PLAYER, PLAYER_COLOR[b[CntPlayerBullet].UsePlayerType]);
 								// バレット破棄
-								bullet[CntPlayerBullet].ReleaseBullet(CntPlayerBullet, shadow);
+								bullet[0].ReleaseBullet(CntPlayerBullet, shadow);
 								// SE再生
 								//PlaySound(SOUND_LABEL_SE_damage);
 							}
@@ -507,7 +506,7 @@ void GAME_OBJECT::CheakHit(int scene)
 								//D3DXVECTOR3 ExploPos = D3DXVECTOR3(bpos.x + EXPLOSION_COLLISIONPOS_BUFFSIZE, bpos.y, bpos.z);
 								//SetExplosion(ExploPos, 40.0f, 40.0f, EXPLOSIONTYPE_BULLET_PLAYER, PLAYER_COLOR[b[CntPlayerBullet].UsePlayerType]);
 								// バレット破棄
-								bullet[CntPlayerBullet].ReleaseBullet(CntPlayerBullet, shadow);
+								bullet[0].ReleaseBullet(CntPlayerBullet, shadow);
 								// SE再生
 								//PlaySound(SOUND_LABEL_SE_damage);
 							}
@@ -519,7 +518,7 @@ void GAME_OBJECT::CheakHit(int scene)
 								//D3DXVECTOR3 ExploPos = D3DXVECTOR3(bpos.x - EXPLOSION_COLLISIONPOS_BUFFSIZE, bpos.y, bpos.z);
 								//SetExplosion(ExploPos, 40.0f, 40.0f, EXPLOSIONTYPE_BULLET_PLAYER, PLAYER_COLOR[b[CntPlayerBullet].UsePlayerType]);
 								// バレット破棄
-								bullet[CntPlayerBullet].ReleaseBullet(CntPlayerBullet, shadow);
+								bullet[0].ReleaseBullet(CntPlayerBullet, shadow);
 								// SE再生
 								//PlaySound(SOUND_LABEL_SE_damage);
 							}
@@ -531,7 +530,7 @@ void GAME_OBJECT::CheakHit(int scene)
 								//D3DXVECTOR3 ExploPos = D3DXVECTOR3(bpos.x, bpos.y, bpos.z + EXPLOSION_COLLISIONPOS_BUFFSIZE);
 								//SetExplosion(ExploPos, 40.0f, 40.0f, EXPLOSIONTYPE_BULLET_PLAYER, PLAYER_COLOR[b[CntPlayerBullet].UsePlayerType]);
 								// バレット破棄
-								bullet[CntPlayerBullet].ReleaseBullet(CntPlayerBullet, shadow);
+								bullet[0].ReleaseBullet(CntPlayerBullet, shadow);
 								// SE再生
 								//PlaySound(SOUND_LABEL_SE_damage);
 							}
@@ -707,22 +706,22 @@ void SetOjama(int type, int UsePlayer, PLAYER_HONTAI *p)
 
 
 //-------------------------------------------------------------------2DVBテクスチャゲット関数
-LPDIRECT3DTEXTURE9 TEXTURE2D_VERTEXBUFFER::GetpD3DTexture() { return this->pD3DTexture; };
-LPDIRECT3DVERTEXBUFFER9 TEXTURE2D_VERTEXBUFFER::GetpD3DVtxBuff() { return this->pD3DVtxBuff; };
+//LPDIRECT3DTEXTURE9 TEXTURE2D_VERTEXBUFFER::GetpD3DTexture() { return this->pD3DTexture; };
+//LPDIRECT3DVERTEXBUFFER9 TEXTURE2D_VERTEXBUFFER::GetpD3DVtxBuff() { return this->pD3DVtxBuff; };
 
 //-------------------------------------------------------------------2DVBテクスチャセット関数
-void TEXTURE2D_VERTEXBUFFER::SetpD3DTexture(LPDIRECT3DTEXTURE9 pD3DTexture) { this->pD3DTexture = pD3DTexture; };
-void TEXTURE2D_VERTEXBUFFER::SetpD3DVtxBuff(LPDIRECT3DVERTEXBUFFER9 pD3DVtxBuff) { this->pD3DVtxBuff = pD3DVtxBuff; };
+//void TEXTURE2D_VERTEXBUFFER::SetpD3DTexture(LPDIRECT3DTEXTURE9 pD3DTexture) { this->pD3DTexture = pD3DTexture; };
+//void TEXTURE2D_VERTEXBUFFER::SetpD3DVtxBuff(LPDIRECT3DVERTEXBUFFER9 pD3DVtxBuff) { this->pD3DVtxBuff = pD3DVtxBuff; };
 
 
 //-------------------------------------------------------------------2Dテクスチャゲット関数
-LPDIRECT3DTEXTURE9 TEXTURE_2D::GetpD3DTexture() { return this->pD3DTexture; };
-VERTEX_2D* TEXTURE_2D::GettextureVTX() { return &this->textureVTX[0]; };
+//LPDIRECT3DTEXTURE9 TEXTURE_2D::GetpD3DTexture() { return this->pD3DTexture; };
+//VERTEX_2D* TEXTURE_2D::GettextureVTX() { return &this->textureVTX[0]; };
 
 //-------------------------------------------------------------------2Dテクスチャセット関数
-void TEXTURE_2D::SetpD3DTexture(LPDIRECT3DTEXTURE9 pD3DTexture) {this->pD3DTexture = pD3DTexture;};
-void TEXTURE_2D::SettextureVTX(VERTEX_2D *textureVTX) { this->textureVTX[0] = textureVTX[0], 
-this->textureVTX[1] = textureVTX[1], this->textureVTX[2] = textureVTX[2], this->textureVTX[3] = textureVTX[3]; };
+//void TEXTURE_2D::SetpD3DTexture(LPDIRECT3DTEXTURE9 pD3DTexture) {this->pD3DTexture = pD3DTexture;};
+//void TEXTURE_2D::SettextureVTX(VERTEX_2D *textureVTX) { this->textureVTX[0] = textureVTX[0], 
+//this->textureVTX[1] = textureVTX[1], this->textureVTX[2] = textureVTX[2], this->textureVTX[3] = textureVTX[3]; };
 
 
 //-------------------------------------------------------------------2DオブジェクトVBテクスチャゲット関数

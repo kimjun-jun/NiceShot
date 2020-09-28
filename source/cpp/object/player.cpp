@@ -322,13 +322,13 @@ void PLAYER_HONTAI::Update(EFFECT*effect,BULLET*bullet, SHADOW*shadow,FADE *fade
 		if (use)
 		{
 			//this[CntPlayer].SetMoveL2R2(CntPlayer);
-			this[CntPlayer].SetMoveL(CntPlayer, &effect[0]);
-			this[CntPlayer].SetQ(CntPlayer);
-			this[CntPlayer].SetCamera(CntPlayer);
+			this[0].SetMoveL(CntPlayer, &effect[0]);
+			this[0].SetQ(CntPlayer);
+			this[0].SetCamera(CntPlayer);
 			//this[CntPlayer].SetBulletALLMoveL2R2Ver(CntPlayer);
-			this[CntPlayer].SetBulletALL(CntPlayer,&bullet[0], shadow);
-			this[CntPlayer].SetKiri(CntPlayer);
-			this[CntPlayer].SetMorphing(CntPlayer);
+			this[0].SetBulletALL(CntPlayer,&bullet[0], shadow);
+			this[0].SetKiri(CntPlayer);
+			this[0].SetMorphing(CntPlayer);
 		}
 
 		//それ以外はカメラだけ制御
@@ -423,7 +423,7 @@ void PLAYER_HONTAI::Draw(void)
 			D3DXVECTOR3 FieldNorVec= this[CntPlayer].GetFieldNorVec();
 			float PlayerUpToFieldNorVec= this[CntPlayer].GetQrot();
 			D3DXQUATERNION q = D3DXQUATERNION(0, 0, 0, 1);
-			D3DXMATRIX mtxWorld=this[CntPlayer].GetMatrix();
+			D3DXMATRIX mtxWorldOYA=this[CntPlayer].GetMatrix();
 			D3DXVECTOR3 scl = this[CntPlayer].GetScl();
 			D3DXVECTOR3 rot = this[CntPlayer].GetRot();
 			D3DXVECTOR3 pos = this[CntPlayer].GetPos();
@@ -433,24 +433,25 @@ void PLAYER_HONTAI::Draw(void)
 			D3DXMatrixRotationQuaternion(&mtxQ, &q);
 
 			// ワールドマトリックスの初期化
-			D3DXMatrixIdentity(&mtxWorld);
+			D3DXMatrixIdentity(&mtxWorldOYA);
 
 			// スケールを反映
 			D3DXMatrixScaling(&mtxScl, scl.x, scl.y, scl.z);
-			D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxScl);
+			D3DXMatrixMultiply(&mtxWorldOYA, &mtxWorldOYA, &mtxScl);
 
 			// 回転を反映
 			D3DXMatrixRotationYawPitchRoll(&mtxRot, rot.y, rot.x, rot.z);
 
-			D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxRot);
-			D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxQ);
+			D3DXMatrixMultiply(&mtxWorldOYA, &mtxWorldOYA, &mtxRot);
+			D3DXMatrixMultiply(&mtxWorldOYA, &mtxWorldOYA, &mtxQ);
 
 			// 移動を反映
 			D3DXMatrixTranslation(&mtxTranslate, pos.x, pos.y, pos.z);
-			D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxTranslate);
+			D3DXMatrixMultiply(&mtxWorldOYA, &mtxWorldOYA, &mtxTranslate);
 
 			// ワールドマトリックスの設定
-			pDevice->SetTransform(D3DTS_WORLD, &mtxWorld);
+			pDevice->SetTransform(D3DTS_WORLD, &mtxWorldOYA);
+			this[CntPlayer].SetMatrix(mtxWorldOYA);
 
 			// 現在のマテリアルを取得
 			pDevice->GetMaterial(&matDef);
@@ -489,35 +490,36 @@ void PLAYER_HONTAI::Draw(void)
 			D3DMATERIAL9 matDef;
 
 			//---------------------------------------------------------オブジェクト値呼び出し
-			D3DXMATRIX mtxWorld = this[CntPlayer].parts[PARTSTYPE_HOUTOU].GetMatrix();
+			D3DXMATRIX mtxWorldKO = this[CntPlayer].parts[PARTSTYPE_HOUTOU].GetMatrix();
 			D3DXVECTOR3 scl = this[CntPlayer].parts[PARTSTYPE_HOUTOU].GetScl();
 			D3DXVECTOR3 rot = this[CntPlayer].parts[PARTSTYPE_HOUTOU].GetRot();
 			D3DXVECTOR3 pos = this[CntPlayer].parts[PARTSTYPE_HOUTOU].GetPos();
 
 			// ワールドマトリックスの初期化
-			D3DXMatrixIdentity(&mtxWorld);
+			D3DXMatrixIdentity(&mtxWorldKO);
 
 			// スケールを反映
 			D3DXMatrixScaling(&mtxScl, scl.x, scl.y, scl.z);
-			D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxScl);
+			D3DXMatrixMultiply(&mtxWorldKO, &mtxWorldKO, &mtxScl);
 
 			// 回転を反映
 			D3DXMatrixRotationYawPitchRoll(&mtxRot, rot.y, rot.x, rot.z);
-			D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxRot);
+			D3DXMatrixMultiply(&mtxWorldKO, &mtxWorldKO, &mtxRot);
 
 			// 移動を反映
 			D3DXMatrixTranslation(&mtxTranslate, pos.x, pos.y, pos.z);
-			D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxTranslate);
+			D3DXMatrixMultiply(&mtxWorldKO, &mtxWorldKO, &mtxTranslate);
 
 			if (this[CntPlayer].parts[PARTSTYPE_HOUTOU].ParentHontai != NULL)
 			{
 				//-------------------------------------------------親のワールドマトリクスを取得
-				D3DXMATRIX ParentmtxWorld = this[CntPlayer].parts[PARTSTYPE_HOUTOU].ParentHontai->GetMatrix();
-				D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &ParentmtxWorld);
+				D3DXMATRIX ParentmtxWorldKO = this[CntPlayer].parts[PARTSTYPE_HOUTOU].ParentHontai->GetMatrix();
+				D3DXMatrixMultiply(&mtxWorldKO, &mtxWorldKO, &ParentmtxWorldKO);
 			}
 
 			// ワールドマトリックスの設定
-			pDevice->SetTransform(D3DTS_WORLD, &mtxWorld);
+			pDevice->SetTransform(D3DTS_WORLD, &mtxWorldKO);
+			this[CntPlayer].parts[PARTSTYPE_HOUTOU].SetMatrix(mtxWorldKO);
 
 			// 現在のマテリアルを取得
 			pDevice->GetMaterial(&matDef);
@@ -556,38 +558,38 @@ void PLAYER_HONTAI::Draw(void)
 			D3DMATERIAL9 matDef;
 
 			//---------------------------------------------------------オブジェクト値呼び出し
-			D3DXMATRIX mtxWorld = this[CntPlayer].parts[PARTSTYPE_HOUSIN].GetMatrix();
+			D3DXMATRIX mtxWorldMAGO = this[CntPlayer].parts[PARTSTYPE_HOUSIN].GetMatrix();
 			D3DXVECTOR3 scl = this[CntPlayer].parts[PARTSTYPE_HOUSIN].GetScl();
 			D3DXVECTOR3 rot = this[CntPlayer].parts[PARTSTYPE_HOUSIN].GetRot();
 			D3DXVECTOR3 pos = this[CntPlayer].parts[PARTSTYPE_HOUSIN].GetPos();
 
 			// ワールドマトリックスの初期化
-			D3DXMatrixIdentity(&mtxWorld);
+			D3DXMatrixIdentity(&mtxWorldMAGO);
 
 			// スケールを反映
 			D3DXMatrixScaling(&mtxScl, scl.x, scl.y, scl.z);
-			D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxScl);
+			D3DXMatrixMultiply(&mtxWorldMAGO, &mtxWorldMAGO, &mtxScl);
 
 			// 回転を反映
 			D3DXMatrixRotationYawPitchRoll(&mtxRot, rot.y, rot.x, rot.z);
-			D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxRot);
+			D3DXMatrixMultiply(&mtxWorldMAGO, &mtxWorldMAGO, &mtxRot);
 
 			// 移動を反映
 			D3DXMatrixTranslation(&mtxTranslate, pos.x, pos.y, pos.z);
-			D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxTranslate);
+			D3DXMatrixMultiply(&mtxWorldMAGO, &mtxWorldMAGO, &mtxTranslate);
 
 
 
 			if (this[CntPlayer].parts[PARTSTYPE_HOUSIN].ParentParts != NULL)
 			{
 				//-------------------------------------------------親のワールドマトリクスを取得
-				D3DXMATRIX ParentmtxWorld = this[CntPlayer].parts[PARTSTYPE_HOUSIN].ParentHontai->GetMatrix();
-				D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &ParentmtxWorld);
+				D3DXMATRIX ParentmtxWorldMAGO = this[CntPlayer].parts[PARTSTYPE_HOUSIN].ParentParts->GetMatrix();
+				D3DXMatrixMultiply(&mtxWorldMAGO, &mtxWorldMAGO, &ParentmtxWorldMAGO);
 			}
 
 			// ワールドマトリックスの設定
-			pDevice->SetTransform(D3DTS_WORLD, &mtxWorld);
-
+			pDevice->SetTransform(D3DTS_WORLD, &mtxWorldMAGO);
+			this[CntPlayer].parts[PARTSTYPE_HOUSIN].SetMatrix(mtxWorldMAGO);
 			// 現在のマテリアルを取得
 			pDevice->GetMaterial(&matDef);
 
@@ -659,7 +661,7 @@ void PLAYER_HONTAI::SetMoveABL(int CntPlayer, EFFECT *effect)
 	//座標を保存
 	this[CntPlayer].SetOldPos(pos);
 
-	int dir;
+	int dir = FRONT_VEC;
 	//移動処理
 	if (IsButtonPressed(CntPlayer, BUTTON_A))
 	{
@@ -828,7 +830,7 @@ void PLAYER_HONTAI::SetMoveL(int CntPlayer, EFFECT *effect)
 	//座標を保存
 	this[CntPlayer].SetOldPos(pos);
 
-	int dir;
+	int dir = FRONT_VEC;
 
 	//移動変化はLスティックアナログ値を使用
 	float LAnalogX = 0.0f;		//縦入力
@@ -1084,22 +1086,21 @@ void PLAYER_HONTAI::SetQ(int CntPlayer)
 	D3DXVECTOR3 UpVec = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
 
 	//地形の角度とプレイヤーの角度を計算。drawでクオータニオンで使う
-	D3DXVec3Cross(&FieldNorVec, &FieldNorUpNorCross, &UpVec);
-	float Upkakezan = D3DXVec3Dot(&FieldNorUpNorCross, &UpVec);
+	D3DXVec3Cross(&FieldNorUpNorCross, &FieldNorVec, &UpVec);
+	float Upkakezan = D3DXVec3Dot(&FieldNorVec, &UpVec);
 	if (Upkakezan != 0)
 	{
 		float cossita = Upkakezan /
-			sqrtf(FieldNorUpNorCross.x*FieldNorUpNorCross.x +
-				FieldNorUpNorCross.y *FieldNorUpNorCross.y +
-				FieldNorUpNorCross.z * FieldNorUpNorCross.z);
+			sqrtf(FieldNorVec.x*FieldNorVec.x +
+				FieldNorVec.y *FieldNorVec.y +
+				FieldNorVec.z * FieldNorVec.z);
 		Qrot = acosf(cossita);
 	}
 	else Qrot = 0.0f;
 
 	//---------------------------------------------------------オブジェクト値セット
 	this[CntPlayer].SetQrot(Qrot);
-	this[CntPlayer].SetFieldNorVec(FieldNorVec);
-//	this[CntPlayer].SetFieldNorUpNorCross(FieldNorUpNorCross);
+	this[CntPlayer].SetFieldNorUpNorCross(FieldNorUpNorCross);
 
 }
 
@@ -1114,8 +1115,8 @@ void PLAYER_HONTAI::SetBulletALL(int CntPlayer, BULLET *bullet, SHADOW *shadow)
 	D3DXVECTOR3 HoutouRot = this[CntPlayer].parts[PARTSTYPE_HOUTOU].GetRot();
 	D3DXVECTOR3 HousinRot = this[CntPlayer].parts[PARTSTYPE_HOUSIN].GetRot();
 
-//	D3DXVECTOR3 FieldNorVec = this[CntPlayer].GetFieldNorVec();
-	D3DXVECTOR3 FieldNorUpNorCross = this[CntPlayer].GetFieldNorUpNorCross();
+	D3DXVECTOR3 FieldNorVec = this[CntPlayer].GetFieldNorVec();
+	//D3DXVECTOR3 FieldNorUpNorCross = this[CntPlayer].GetFieldNorUpNorCross();
 
 	D3DXVECTOR3 Frontvec;
 	Frontvec.x = sinf(HoudaiRot.y + HoutouRot.y);
@@ -1123,14 +1124,14 @@ void PLAYER_HONTAI::SetBulletALL(int CntPlayer, BULLET *bullet, SHADOW *shadow)
 	Frontvec.z = cosf(HoudaiRot.y + HoutouRot.y);
 
 	//地形の角度とプレイヤーの角度を計算。バレット発射方向で使う
-	D3DXVec3Cross(&this[CntPlayer].FrontRotTOaxis, &FieldNorUpNorCross, &Frontvec);
-	float Bkakezan = D3DXVec3Dot(&FieldNorUpNorCross, &Frontvec);
+	D3DXVec3Cross(&this[CntPlayer].FrontRotTOaxis, &FieldNorVec, &Frontvec);
+	float Bkakezan = D3DXVec3Dot(&FieldNorVec, &Frontvec);
 	if (Bkakezan != 0)
 	{
 		float cossita = Bkakezan /
-			sqrtf(FieldNorUpNorCross.x*FieldNorUpNorCross.x +
-				FieldNorUpNorCross.y *FieldNorUpNorCross.y +
-				FieldNorUpNorCross.z * FieldNorUpNorCross.z)
+			sqrtf(FieldNorVec.x*FieldNorVec.x +
+				FieldNorVec.y *FieldNorVec.y +
+				FieldNorVec.z * FieldNorVec.z)
 			*
 			sqrtf(Frontvec.x*Frontvec.x +
 				Frontvec.y *Frontvec.y +
@@ -1188,7 +1189,6 @@ void PLAYER_HONTAI::SetBulletALL(int CntPlayer, BULLET *bullet, SHADOW *shadow)
 			}
 			//残弾を減らす
 			this[CntPlayer].AmmoCnt -= 1;
-//			ChangeBulletTex(-1, CntPlayer);
 
 			// SE再生
 			PlaySound(SOUND_LABEL_SE_attack03);
@@ -1201,7 +1201,6 @@ void PLAYER_HONTAI::SetBulletALL(int CntPlayer, BULLET *bullet, SHADOW *shadow)
 	if (this[CntPlayer].AmmoBornTime >= BORN_AMMO_MAXTIME)
 	{
 		this[CntPlayer].AmmoCnt++;
-		//ChangeBulletTex(1, CntPlayer);
 		this[CntPlayer].AmmoBornTime = 0.0f;
 	}
 
@@ -1218,8 +1217,7 @@ void PLAYER_HONTAI::SetBulletALLMoveL2R2Ver(int CntPlayer, BULLET *bullet, SHADO
 	D3DXVECTOR3 HoutouRot = this[CntPlayer].parts[PARTSTYPE_HOUTOU].GetRot();
 	D3DXVECTOR3 HousinRot = this[CntPlayer].parts[PARTSTYPE_HOUSIN].GetRot();
 
-	//	D3DXVECTOR3 FieldNorVec = this[CntPlayer].GetFieldNorVec();
-	D3DXVECTOR3 FieldNorUpNorCross = this[CntPlayer].GetFieldNorUpNorCross();
+	D3DXVECTOR3 FieldNorVec = this[CntPlayer].GetFieldNorVec();
 
 	D3DXVECTOR3 Frontvec;
 	Frontvec.x = sinf(HoudaiRot.y + HoutouRot.y);
@@ -1227,14 +1225,14 @@ void PLAYER_HONTAI::SetBulletALLMoveL2R2Ver(int CntPlayer, BULLET *bullet, SHADO
 	Frontvec.z = cosf(HoudaiRot.y + HoutouRot.y);
 
 	//地形の角度とプレイヤーの角度を計算。バレット発射方向で使う
-	D3DXVec3Cross(&this[CntPlayer].FrontRotTOaxis, &FieldNorUpNorCross, &Frontvec);
-	float Bkakezan = D3DXVec3Dot(&FieldNorUpNorCross, &Frontvec);
+	D3DXVec3Cross(&this[CntPlayer].FrontRotTOaxis, &FieldNorVec, &Frontvec);
+	float Bkakezan = D3DXVec3Dot(&FieldNorVec, &Frontvec);
 	if (Bkakezan != 0)
 	{
 		float cossita = Bkakezan /
-			sqrtf(FieldNorUpNorCross.x*FieldNorUpNorCross.x +
-				FieldNorUpNorCross.y *FieldNorUpNorCross.y +
-				FieldNorUpNorCross.z * FieldNorUpNorCross.z)
+			sqrtf(FieldNorVec.x*FieldNorVec.x +
+				FieldNorVec.y *FieldNorVec.y +
+				FieldNorVec.z * FieldNorVec.z)
 			*
 			sqrtf(Frontvec.x*Frontvec.x +
 				Frontvec.y *Frontvec.y +
@@ -1294,7 +1292,6 @@ void PLAYER_HONTAI::SetBulletALLMoveL2R2Ver(int CntPlayer, BULLET *bullet, SHADO
 			}
 			//残弾を減らす
 			this[CntPlayer].AmmoCnt -= 1;
-			//ChangeBulletTex(-1, CntPlayer);
 
 			// SE再生
 			PlaySound(SOUND_LABEL_SE_attack03);
@@ -1307,7 +1304,6 @@ void PLAYER_HONTAI::SetBulletALLMoveL2R2Ver(int CntPlayer, BULLET *bullet, SHADO
 	if (this[CntPlayer].AmmoBornTime >= BORN_AMMO_MAXTIME)
 	{
 		this[CntPlayer].AmmoCnt++;
-		//ChangeBulletTex(1, CntPlayer);
 		this[CntPlayer].AmmoBornTime = 0.0f;
 	}
 

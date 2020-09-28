@@ -22,9 +22,9 @@ public:
 
 private:
 	static int cnt;						// 空の数
-	float time;						// 空の時間　時間によって空の色が変わる
+	float time;							// 空の時間　時間によって空の色が変わる
 	float Addtime;						// 空の時間　時間によって空の色が変わる
-	float fRotY;							// 回転量
+	float fRotY;						// 回転量
 	int nNumBlockH;
 	int nNumBlockV;
 };

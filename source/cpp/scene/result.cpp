@@ -32,16 +32,10 @@ void RESULT::Init(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 
-	LPDIRECT3DTEXTURE9 pD3DTexture[OBJECT_RESULT_MAX];
 	// テクスチャの読み込み
-	D3DXCreateTextureFromFile(pDevice, TEXTURE_RESULT_OK, &pD3DTexture[0]);
-	D3DXCreateTextureFromFile(pDevice, TEXTURE_RESULT_NO, &pD3DTexture[1]);
+	D3DXCreateTextureFromFile(pDevice, TEXTURE_RESULT_OK, &this[0].tex2D.pD3DTexture);
+	D3DXCreateTextureFromFile(pDevice, TEXTURE_RESULT_NO, &this[1].tex2D.pD3DTexture);
 
-	this[0].tex2D.SetpD3DTexture(pD3DTexture[0]);
-	this[1].tex2D.SetpD3DTexture(pD3DTexture[1]);
-
-	pD3DTexture[0]->Release();
-	pD3DTexture[1]->Release();
 
 	// 頂点情報の作成
 	MakeVertexResult();
@@ -86,10 +80,10 @@ void RESULT::Draw(void)
 		pDevice->SetFVF(FVF_VERTEX_2D);
 
 		// テクスチャの設定
-		pDevice->SetTexture(0, LPDIRECT3DTEXTURE9(this[0].tex2D.GetpD3DTexture()));
+		pDevice->SetTexture(0, this[0].tex2D.pD3DTexture);
 
 		// ポリゴンの描画
-		pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, POLYGON_2D_NUM, this[0].tex2D.GettextureVTX(), sizeof(VERTEX_2D));
+		pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, POLYGON_2D_NUM, this[0].tex2D.textureVTX, sizeof(VERTEX_2D));
 	}
 }
 
@@ -99,60 +93,56 @@ void RESULT::Draw(void)
 HRESULT RESULT::MakeVertexResult(void)
 {
 	{
-		VERTEX_2D vtx2d[POLYGON_2D_VERTEX];
 		// 頂点座標の設定
-		vtx2d[0].vtx = D3DXVECTOR3(RESULT_OK_POS_X, RESULT_OK_POS_Y, 0.0f);
-		vtx2d[1].vtx = D3DXVECTOR3(RESULT_OK_POS_X + RESULT_OK_SIZE_X, RESULT_OK_POS_Y, 0.0f);
-		vtx2d[2].vtx = D3DXVECTOR3(RESULT_OK_POS_X, RESULT_OK_POS_Y + RESULT_OK_SIZE_Y, 0.0f);
-		vtx2d[3].vtx = D3DXVECTOR3(RESULT_OK_POS_X + RESULT_OK_SIZE_X, RESULT_OK_POS_Y + RESULT_OK_SIZE_Y, 0.0f);
+		this[0].tex2D.textureVTX[0].vtx = D3DXVECTOR3(RESULT_OK_POS_X, RESULT_OK_POS_Y, 0.0f);
+		this[0].tex2D.textureVTX[1].vtx = D3DXVECTOR3(RESULT_OK_POS_X + RESULT_OK_SIZE_X, RESULT_OK_POS_Y, 0.0f);
+		this[0].tex2D.textureVTX[2].vtx = D3DXVECTOR3(RESULT_OK_POS_X, RESULT_OK_POS_Y + RESULT_OK_SIZE_Y, 0.0f);
+		this[0].tex2D.textureVTX[3].vtx = D3DXVECTOR3(RESULT_OK_POS_X + RESULT_OK_SIZE_X, RESULT_OK_POS_Y + RESULT_OK_SIZE_Y, 0.0f);
 
 		// テクスチャのパースペクティブコレクト用
-		vtx2d[0].rhw =
-			vtx2d[1].rhw =
-			vtx2d[2].rhw =
-			vtx2d[3].rhw = 1.0f;
+		this[0].tex2D.textureVTX[0].rhw =
+			this[0].tex2D.textureVTX[1].rhw =
+			this[0].tex2D.textureVTX[2].rhw =
+			this[0].tex2D.textureVTX[3].rhw = 1.0f;
 
 		// 反射光の設定
-		vtx2d[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-		vtx2d[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-		vtx2d[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-		vtx2d[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+		this[0].tex2D.textureVTX[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+		this[0].tex2D.textureVTX[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+		this[0].tex2D.textureVTX[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+		this[0].tex2D.textureVTX[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
 
 		// テクスチャ座標の設定
-		vtx2d[0].tex = D3DXVECTOR2(0.0f, 0.0f);
-		vtx2d[1].tex = D3DXVECTOR2(0.5f, 0.0f);
-		vtx2d[2].tex = D3DXVECTOR2(0.0f, 1.0f);
-		vtx2d[3].tex = D3DXVECTOR2(1.0f, 1.0f);
+		this[0].tex2D.textureVTX[0].tex = D3DXVECTOR2(0.0f, 0.0f);
+		this[0].tex2D.textureVTX[1].tex = D3DXVECTOR2(0.5f, 0.0f);
+		this[0].tex2D.textureVTX[2].tex = D3DXVECTOR2(0.0f, 1.0f);
+		this[0].tex2D.textureVTX[3].tex = D3DXVECTOR2(1.0f, 1.0f);
 
-		this[0].tex2D.SettextureVTX(vtx2d);
 	}
 
 	{
-		VERTEX_2D vtx2d[POLYGON_2D_VERTEX];
 		// 頂点座標の設定
-		vtx2d[0].vtx = D3DXVECTOR3(RESULT_NO_POS_X, RESULT_NO_POS_Y, 0.0f);
-		vtx2d[1].vtx = D3DXVECTOR3(RESULT_NO_POS_X + RESULT_NO_SIZE_X, RESULT_NO_POS_Y, 0.0f);
-		vtx2d[2].vtx = D3DXVECTOR3(RESULT_NO_POS_X, RESULT_NO_POS_Y + RESULT_NO_SIZE_Y, 0.0f);
-		vtx2d[3].vtx = D3DXVECTOR3(RESULT_NO_POS_X + RESULT_NO_SIZE_X, RESULT_NO_POS_Y + RESULT_NO_SIZE_Y, 0.0f);
+		this[1].tex2D.textureVTX[0].vtx = D3DXVECTOR3(RESULT_NO_POS_X, RESULT_NO_POS_Y, 0.0f);
+		this[1].tex2D.textureVTX[1].vtx = D3DXVECTOR3(RESULT_NO_POS_X + RESULT_NO_SIZE_X, RESULT_NO_POS_Y, 0.0f);
+		this[1].tex2D.textureVTX[2].vtx = D3DXVECTOR3(RESULT_NO_POS_X, RESULT_NO_POS_Y + RESULT_NO_SIZE_Y, 0.0f);
+		this[1].tex2D.textureVTX[3].vtx = D3DXVECTOR3(RESULT_NO_POS_X + RESULT_NO_SIZE_X, RESULT_NO_POS_Y + RESULT_NO_SIZE_Y, 0.0f);
 
 		// テクスチャのパースペクティブコレクト用
-		vtx2d[0].rhw =
-			vtx2d[1].rhw =
-			vtx2d[2].rhw =
-			vtx2d[3].rhw = 1.0f;
+		this[1].tex2D.textureVTX[0].rhw =
+			this[1].tex2D.textureVTX[1].rhw =
+			this[1].tex2D.textureVTX[2].rhw =
+			this[1].tex2D.textureVTX[3].rhw = 1.0f;
 
 		// 反射光の設定
-		vtx2d[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-		vtx2d[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-		vtx2d[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-		vtx2d[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+		this[1].tex2D.textureVTX[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+		this[1].tex2D.textureVTX[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+		this[1].tex2D.textureVTX[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+		this[1].tex2D.textureVTX[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
 
 		// テクスチャ座標の設定
-		vtx2d[0].tex = D3DXVECTOR2(0.0f, 0.0f);
-		vtx2d[1].tex = D3DXVECTOR2(1.0f, 0.0f);
-		vtx2d[2].tex = D3DXVECTOR2(0.0f, 1.0f);
-		vtx2d[3].tex = D3DXVECTOR2(1.0f, 1.0f);
-		this[1].tex2D.SettextureVTX(vtx2d);
+		this[1].tex2D.textureVTX[0].tex = D3DXVECTOR2(0.0f, 0.0f);
+		this[1].tex2D.textureVTX[1].tex = D3DXVECTOR2(1.0f, 0.0f);
+		this[1].tex2D.textureVTX[2].tex = D3DXVECTOR2(0.0f, 1.0f);
+		this[1].tex2D.textureVTX[3].tex = D3DXVECTOR2(1.0f, 1.0f);
 	}
 
 	return S_OK;
