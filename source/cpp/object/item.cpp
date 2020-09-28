@@ -21,11 +21,6 @@
 #define DROP_ITEM_CHARGE_CNT				(60.0f)																		//!< アイテムをリスポーンさせる時の所要タイム
 
 //*****************************************************************************
-// プロトタイプ宣言
-//*****************************************************************************
-
-
-//*****************************************************************************
 // グローバル変数
 //*****************************************************************************
 LPDIRECT3DTEXTURE9	g_pD3DTextureItem[ITEMTYPE_MAX];	// テクスチャ読み込み場所
@@ -112,11 +107,11 @@ void ITEM::Init(void)
 			ITEMTYPE_MAX
 		};
 		*/
-		int ItemNum = rand() % ITEMTYPE_MAX;
+		int ItemTypeNum = rand() % ITEMTYPE_MAX;
 		//ライフ、カメラ、霧アイテムの時はもう一度抽選
-		if (ItemNum == ITEMTYPE_LIFE && ItemNum == ITEMTYPE_CAMERA && ItemNum == ITEMTYPE_KIRI) ItemNum = rand() % ITEMTYPE_MAX;
-		this[0].SetItem(pos, D3DXVECTOR3(2.0f, 2.0f, 2.0f),D3DXVECTOR3(0.0f, 0.0f, 0.0f), ItemNum);
-		//SetItem(pos, D3DXVECTOR3(1.0f, 1.0f, 1.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ITEMTYPE_TIKEI);
+		if (ItemTypeNum == ITEMTYPE_LIFE && ItemTypeNum == ITEMTYPE_CAMERA && ItemTypeNum == ITEMTYPE_KIRI) ItemTypeNum = rand() % ITEMTYPE_MAX;
+		this[0].SetItem(pos, D3DXVECTOR3(2.0f, 2.0f, 2.0f),D3DXVECTOR3(0.0f, 0.0f, 0.0f), ItemTypeNum);
+		//this[0].SetItem(pos, D3DXVECTOR3(1.0f, 1.0f, 1.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ITEMTYPE_TIKEI);
 		this[nCntItem].SetUse(true);
 
 	}
@@ -166,11 +161,11 @@ void ITEM::Reinit(void)
 			ITEMTYPE_MAX
 		};
 		*/
-		int ItemNum = rand() % ITEMTYPE_MAX;
+		int ItemTypeNum = rand() % ITEMTYPE_MAX;
 		//ライフ、カメラ、霧アイテムの時はもう一度抽選
-		if (ItemNum == ITEMTYPE_LIFE && ItemNum == ITEMTYPE_CAMERA && ItemNum == ITEMTYPE_KIRI) ItemNum = rand() % ITEMTYPE_MAX;
-		this[0].SetItem(pos, D3DXVECTOR3(2.0f, 2.0f, 2.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ItemNum);
-		//SetItem(pos, D3DXVECTOR3(1.0f, 1.0f, 1.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ITEMTYPE_TIKEI);
+		if (ItemTypeNum == ITEMTYPE_LIFE && ItemTypeNum == ITEMTYPE_CAMERA && ItemTypeNum == ITEMTYPE_KIRI) ItemTypeNum = rand() % ITEMTYPE_MAX;
+		this[0].SetItem(pos, D3DXVECTOR3(2.0f, 2.0f, 2.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ItemTypeNum);
+		//this[0].SetItem(pos, D3DXVECTOR3(1.0f, 1.0f, 1.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ITEMTYPE_TIKEI);
 		this[nCntItem].SetUse(true);
 	}
 	this[0].GoukeiDrop = DROP_ITEM_MAX;
@@ -312,7 +307,6 @@ void ITEM::Draw(void)
 			D3DXMATRIX mtxQ;
 			D3DXMatrixIdentity(&mtxQ);
 
-			//-------------------------------------------オブジェクトの値読み込み
 			D3DXMATRIX mtxWorldItem = this[nCntItem].GetMatrix();
 			D3DXVECTOR3 pos = this[nCntItem].GetPos();
 			D3DXVECTOR3 rot = this[nCntItem].GetRot();
@@ -375,7 +369,7 @@ void ITEM::SetItem(D3DXVECTOR3 pos, D3DXVECTOR3 scl, D3DXVECTOR3 rot, int nType)
 	for(int nCntItem = 0; nCntItem < OBJECT_ITEM_MAX; nCntItem++)
 	{
 		bool use = this[nCntItem].GetUse();
-		if (use == true)
+		if (use != true)
 		{
 			this[nCntItem].SetPos(pos);
 			this[nCntItem].SetScl(scl);
@@ -407,35 +401,34 @@ void ITEM::GettingItem(int nIdxItem, PLAYER_HONTAI *p)
 	if (this[nIdxItem].GettingSignalEnd == false)
 	{
 		//-------------------------------------------オブジェクトの値読み込み
-		D3DXVECTOR3 pos = this[nIdxItem].GetPos();
-		D3DXVECTOR3 rot = this[nIdxItem].GetRot();
-		D3DXVECTOR3 scl = this[nIdxItem].GetScl();
+		D3DXVECTOR3 ipos = this[nIdxItem].GetPos();
+		D3DXVECTOR3 irot = this[nIdxItem].GetRot();
+		D3DXVECTOR3 iscl = this[nIdxItem].GetScl();
 
 		//くるくる回転を加速
-		rot.y += VALUE_ROTATE_ITEM*10;
+		irot.y += VALUE_ROTATE_ITEM*10;
 		
 		//プレイヤーとアイテムの距離を計算し/5分づつ近づける
+		D3DXVECTOR3 ppos = p[this[nIdxItem].GetPlayerType].GetPos();
 
-		D3DXVECTOR3 ppos = p[0].GetPos();
-		D3DXVECTOR3 PlayerPos = this[nIdxItem].p[this[nIdxItem].GetPlayerType].GetPos();
-
-		D3DXVECTOR3 distance = PlayerPos - pos;
+		D3DXVECTOR3 distance = ppos - ipos;
 		distance /= 4.0f;
-		pos += distance;
-		scl -= D3DXVECTOR3(ITEM_SMALL_SCL, ITEM_SMALL_SCL, ITEM_SMALL_SCL);
-		if (scl.x <= ITEM_DELETE_SCL)
+		ipos += distance;
+		iscl -= D3DXVECTOR3(ITEM_SMALL_SCL, ITEM_SMALL_SCL, ITEM_SMALL_SCL);
+		if (iscl.x <= ITEM_DELETE_SCL)
 		{
 			this[nIdxItem].GettingSignalEnd = true;
 		}
 
 		//-------------------------------------------オブジェクトの値書き込み
-		this[nIdxItem].SetPos(pos);
-		this[nIdxItem].SetRot(rot);
+		this[nIdxItem].SetPos(ipos);
+		this[nIdxItem].SetRot(irot);
+		this[nIdxItem].SetScl(iscl);
 	}
 
 	else
 	{
-		DeleteItem(nIdxItem);
+		this[0].DeleteItem(nIdxItem);
 		this[nIdxItem].GettingSignal = false;
 		this[nIdxItem].GettingSignalEnd = false;
 		this[0].GoukeiDrop--;

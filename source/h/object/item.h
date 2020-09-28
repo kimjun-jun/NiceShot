@@ -33,7 +33,6 @@ public:
 	virtual void						Uninit(void);				//!< 終了
 	virtual void						Update(PLAYER_HONTAI *p);				//!< 更新
 	virtual void						Draw(void);					//!< 描画
-	PLAYER_HONTAI				*p;						//!<プレイヤー先頭アドレス
 	float						Droptime;				//!< 出現するまでの時間
 	int							nIdxShadow;				//!< 影ID
 	int							nType;					//!< 種類

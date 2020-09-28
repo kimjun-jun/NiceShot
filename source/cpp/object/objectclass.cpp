@@ -255,7 +255,7 @@ void GAME_OBJECT::Draw()
 
 				//3D‹óŠÔ
 				player->Draw();
-				//item->Draw();
+				item->Draw();
 				bulletprediction->Draw(&player[0], CntPlayer);
 				explosion->Draw(CntPlayer);
 				effect->Draw(CntPlayer);
