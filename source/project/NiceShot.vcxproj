@@ -28,6 +28,7 @@
     <ClCompile Include="..\cpp\map\field.cpp" />
     <ClCompile Include="..\cpp\map\sky.cpp" />
     <ClCompile Include="..\cpp\map\wall.cpp" />
+    <ClCompile Include="..\cpp\net\sock.cpp" />
     <ClCompile Include="..\cpp\object\bullet\bullet.cpp" />
     <ClCompile Include="..\cpp\object\bullet\bulletgauge.cpp" />
     <ClCompile Include="..\cpp\object\bullet\bulletprediction.cpp" />
