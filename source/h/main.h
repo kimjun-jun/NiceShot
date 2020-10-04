@@ -127,7 +127,7 @@ enum OBJECT_COUNT
 	OBJECT_COUNTDOWN_MAX = 2,
 	OBJECT_RANK_MAX = 3,
 	OBJECT_RESULT_MAX = 2,
-	OBJECT_TITLE_MAX = 4,
+	OBJECT_TITLE_MAX = 6,
 	OBJECT_FIELD_MAX = 1,
 	OBJECT_SKY_MAX = 2,
 	OBJECT_WALL_MAX = 4,
@@ -228,7 +228,8 @@ enum E_STAGE//列挙型。defineの番号を自動で割り当ててくれる。
 	SCENE_TUTORIAL,					//!< 1チュートリアル
 	SCENE_GAMECOUNTDOWN,			//!< 2カウントダウン
 	SCENE_GAME,						//!< 3ゲーム
-	SCENE_RESULT,					//!< 4リザルト
+	SCENE_NETGAME,					//!< 4ネットゲーム
+	SCENE_RESULT,					//!< 5リザルト
 	SCENE_MAX						
 };
 

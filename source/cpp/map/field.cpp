@@ -419,9 +419,9 @@ void FIELD::Update(PLAYER_HONTAI *player,ITEM *item, BULLET *bullet, EXPLOSION *
 			{
 				//-------------------オブジェクト値読み込み
 				D3DXVECTOR3 rayS = item[CntItem].GetPos();
-				rayS.y += 10.0f;
+				rayS.y += 5.0f;
 				D3DXVECTOR3 rayG = item[CntItem].GetPos();
-				rayG.y -= 10.0f;
+				rayG.y -= 5.0f;
 				D3DXVECTOR3 FieldNor = item[CntItem].GetFieldNorVec();
 				D3DXVECTOR3 ReturnPos = item[CntItem].GetPos();
 

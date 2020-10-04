@@ -198,6 +198,8 @@ void GAME_OBJECT::Update()
 			vitalgauge->Update(&player[0],&rank[0]);
 			break;
 
+		case SCENE_NETGAME:
+			break;
 		case SCENE_RESULT:
 			//リザルトの更新
 			result->Update(&this[0],&fade[0]);
@@ -285,7 +287,7 @@ void GAME_OBJECT::Draw()
 
 				//3D空間
 				player->Draw();
-				//item->Draw();
+				item->Draw();
 				bulletprediction->Draw(&player[0], CntPlayer);
 				explosion->Draw(CntPlayer);
 				effect->Draw(CntPlayer);
@@ -322,7 +324,7 @@ void GAME_OBJECT::Draw()
 
 					//3D空間
 					player->Draw();
-					//item->Draw();
+					item->Draw();
 					bulletprediction->Draw(&player[0], CntPlayer);
 					explosion->Draw(CntPlayer);
 					effect->Draw(CntPlayer);
@@ -364,6 +366,12 @@ void GAME_OBJECT::Draw()
 			}
 			pD3DDevice->SetViewport(&VpMaster);
 			break;
+
+
+		case SCENE_NETGAME:
+			break;
+
+
 		case SCENE_RESULT:
 			//リザルト描画
 			result->Draw();
