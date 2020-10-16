@@ -64,6 +64,9 @@
     <Filter Include="cpp\net">
       <UniqueIdentifier>{f8d8f4b6-a232-4326-b612-8820280bbebd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="h\net">
+      <UniqueIdentifier>{3801e6a8-e906-4500-9dfb-7e856e70d212}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\cpp\collision.cpp">
@@ -268,6 +271,9 @@
     </ClInclude>
     <ClInclude Include="..\h\other\fade.h">
       <Filter>h\other</Filter>
+    </ClInclude>
+    <ClInclude Include="sock.h">
+      <Filter>h\net</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

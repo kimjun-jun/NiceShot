@@ -37,7 +37,7 @@ int FIELD::cnt = 0;
 //=============================================================================
 // 初期化処理
 //=============================================================================
-void FIELD::Init()
+void FIELD::Init(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 
@@ -314,7 +314,87 @@ void FIELD::Reinit(void)
 
 	//--------------------------------DRAWとSTARTのセット
 	//描画用
-	SetFieldType01();
+	{//頂点バッファの中身を埋める
+		VERTEX_3D *pVtx;
+		VERTEX_3D *pVtxS;
+#if 0
+		const float texSizeX = 1.0f / nNumBlockXField;
+		const float texSizeZ = 1.0f / nNumBlockZField;
+#else
+		const float texSizeX = 1.0f;
+		const float texSizeZ = 1.0f;
+#endif
+
+		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
+		this[0].pD3DVtxBuffFieldDraw->Lock(0, 0, (void**)&pVtx, 0);
+		this[0].pD3DVtxBuffFieldStart->Lock(0, 0, (void**)&pVtxS, 0);
+
+		//高さクリア
+		for (int nCntVtxZ = 0; nCntVtxZ < (this[0].nNumBlockZField + 1); nCntVtxZ++)
+		{
+			for (int nCntVtxX = 0; nCntVtxX < (this[0].nNumBlockZField + 1); nCntVtxX++)
+			{
+				// 頂点座標の設定
+				pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = pVtxS[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx .y= 0.0f;
+			}
+		}
+
+		//上限
+		for (int nCntVtxZ = 0; nCntVtxZ < (this[0].nNumBlockZField + 1) / 2; nCntVtxZ++)
+		{
+			for (int nCntVtxX = 0; nCntVtxX < (this[0].nNumBlockZField + 1) / 2; nCntVtxX++)
+			{
+				//縮退ポリゴンよけなさい
+				if (pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx == pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX + 1].vtx)	continue;
+				else if (pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX + 1].vtx == pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX + 2].vtx) continue;
+				//高さを仮決定
+				pVtx[(rand() % this[0].model.nNumVertex)].vtx.y = float((rand() % 200));
+			}
+		}
+
+		//縮退ポリゴンの座標を調整
+		//SetDegenerationPoly();
+
+		for (int nCntVtxZ = 0; nCntVtxZ < (this[0].nNumBlockZField + 1); nCntVtxZ++)
+		{
+			for (int nCntVtxX = 0; nCntVtxX < (this[0].nNumBlockZField + 1); nCntVtxX++)
+			{
+				//縮退ポリゴンよけなさい
+				if (pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx == pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX + 1].vtx)	continue;
+				else if (pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX + 1].vtx == pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX + 2].vtx) continue;
+
+				// 頂点座標の設定
+				//上側
+				if (nCntVtxZ == 0 || nCntVtxX == 0 || nCntVtxZ == this[0].nNumBlockZField || nCntVtxX == this[0].nNumBlockZField)
+					pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = pVtxS[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = 50.0f;
+				//中側
+				else
+				{
+					float y = (pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX - 1].vtx.y + pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX + 1].vtx.y +
+						pVtx[(nCntVtxZ - 1) * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y + pVtx[(nCntVtxZ + 1) * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y) / 4;
+					pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = pVtxS[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = y;
+				}
+
+				// 反射光の設定
+				if (pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y >= 60.0f)
+				{
+					pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].diffuse = D3DXCOLOR(0.4f, 0.4f, 0.4f, 1.0f);//山
+				}
+				else if (pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y <= 59.9f && pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y > 20.0f)
+				{
+					pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].diffuse = D3DXCOLOR(0.3f, 1.0f, 0.3f, 1.0f);//緑
+				}
+				else
+				{
+					pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].diffuse = D3DXCOLOR(0.78f, 0.76f, 0.63f, 1.0f);//砂
+				}
+			}
+		}
+
+		// 頂点データをアンロックする
+		this[0].pD3DVtxBuffFieldDraw->Unlock();
+		this[0].pD3DVtxBuffFieldStart->Unlock();
+	}
 	//----------------------------ENDのセット
 	//自動生成のバッファ。地形変更するときにこの形に変形	F
 	{//頂点バッファの中身を埋める

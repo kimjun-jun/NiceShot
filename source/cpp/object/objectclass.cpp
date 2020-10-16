@@ -33,6 +33,7 @@ using namespace std;
 #include "../../h/object/bullet/bulletgauge.h"
 #include "../../h/object/vitalgauge.h"
 #include "../../h/object/objectclass.h"
+#include "../../h/net/sock.h"
 
 void SetOjama(int type, int UsePlayer, PLAYER_HONTAI *p);
 
@@ -199,6 +200,7 @@ void GAME_OBJECT::Update()
 			break;
 
 		case SCENE_NETGAME:
+			client();
 			break;
 		case SCENE_RESULT:
 			//リザルトの更新
@@ -369,6 +371,7 @@ void GAME_OBJECT::Draw()
 
 
 		case SCENE_NETGAME:
+
 			break;
 
 
@@ -377,8 +380,9 @@ void GAME_OBJECT::Draw()
 			result->Draw();
 			break;
 		}
+
 		// フェード描画
-		fade->Draw();
+		if(nScene != SCENE_NETGAME) fade->Draw();
 
 		// デバッグ表示
 #ifdef _DEBUG

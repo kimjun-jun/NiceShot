@@ -66,7 +66,7 @@ void TITLE::Init(void)
 //=============================================================================
 void TITLE::Reinit(void)
 {
-	this[0].HierarchyNum = TITLE_SELECT_SCENE_TUTORIAL;
+	this[0].HierarchyNum = 0;
 	this[0].SceneNum = TITLE_SELECT_SCENE_LOCAL;
 	this[0].fAlpha = 1.0f;
 

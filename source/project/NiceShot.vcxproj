@@ -88,6 +88,7 @@
     <ClInclude Include="..\h\scene\result.h" />
     <ClInclude Include="..\h\scene\title.h" />
     <ClInclude Include="..\h\scene\tutorial.h" />
+    <ClInclude Include="sock.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

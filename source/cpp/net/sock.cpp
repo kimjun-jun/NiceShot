@@ -8,13 +8,17 @@
 #include <stdio.h>
 #include <winsock2.h>
 #include <ws2tcpip.h>
+#include <iostream>
+#include "../../h/net/sock.h"
+
+
 #pragma comment (lib, "Ws2_32.lib")
 
 //STEP1	同端末通信	OK
 //STEP2	LAN通信		OK
 //STEP3	WAN通信		調査中
 
-int client() 
+int client(void) 
 {
 	/* IP アドレス、ポート番号、ソケット */
 	char destination[80];
@@ -37,6 +41,7 @@ int client()
 
 	/* 相手先アドレスの入力 */
 	printf("Connect to ? : (name or IP address) ");
+	//cin >> destination;
 	gets_s(destination);
 
 	/* sockaddr_in 構造体のセット */
