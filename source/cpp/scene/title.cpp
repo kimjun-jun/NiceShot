@@ -8,6 +8,7 @@
 #include "../../h/other/input.h"
 #include "../../h/other/fade.h"
 #include "../../h/other/sound.h"
+#include "../../h/net/sock.h"
 #include "../../h/scene/title.h"
 
 //*****************************************************************************
@@ -230,7 +231,9 @@ void TITLE::Update(FADE *fade)
 				if (GetKeyboardTrigger(DIK_RETURN) || IsButtonTriggered(0, BUTTON_A))
 				{
 					PlaySound(SOUND_LABEL_SE_enter01);
-					fade->SetFade(FADE_OUT, SCENE_NETGAME, SOUND_LABEL_BGM_boss01);
+					client();
+
+					//fade->SetFade(FADE_OUT, SCENE_NETGAME, SOUND_LABEL_BGM_boss01);
 				}
 			}
 		default:

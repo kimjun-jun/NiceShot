@@ -382,13 +382,16 @@ void GAME_OBJECT::Draw()
 		}
 
 		// フェード描画
-		if(nScene != SCENE_NETGAME) fade->Draw();
+		if (nScene != SCENE_NETGAME)
+		{
+			fade->Draw();
 
-		// デバッグ表示
+			// デバッグ表示
+			DrawTextType();
 #ifdef _DEBUG
-		DrawTextType();
-		DrawDebugProc();
+			//DrawDebugProc();
 #endif
+		}
 	}
 	// Direct3Dによる描画の終了
 	pD3DDevice->EndScene();

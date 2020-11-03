@@ -446,7 +446,7 @@ void DrawTextType(void)
 	TCHAR str[256];
 	RECT rect = { 10, 90, SCREEN_W, SCREEN_H };
 	wsprintf(str, _T("%s\n"), g_text);
-	g_pD3DXFont->DrawText(NULL, str, -1, &rect, DT_LEFT, D3DCOLOR_ARGB(0xff, 0xff, 0x00, 0x00));
+	g_pD3DXFont->DrawText(NULL, str, -1, &rect, DT_LEFT, D3DCOLOR_ARGB(0xff, 0xff, 0x00, 0xff));
 }
 
 //=============================================================================

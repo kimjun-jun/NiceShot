@@ -64,6 +64,7 @@
     <ClInclude Include="..\h\map\field.h" />
     <ClInclude Include="..\h\map\sky.h" />
     <ClInclude Include="..\h\map\wall.h" />
+    <ClInclude Include="..\h\net\sock.h" />
     <ClInclude Include="..\h\object\bullet\bullet.h" />
     <ClInclude Include="..\h\object\bullet\bulletgauge.h" />
     <ClInclude Include="..\h\object\bullet\bulletprediction.h" />
@@ -88,7 +89,6 @@
     <ClInclude Include="..\h\scene\result.h" />
     <ClInclude Include="..\h\scene\title.h" />
     <ClInclude Include="..\h\scene\tutorial.h" />
-    <ClInclude Include="sock.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

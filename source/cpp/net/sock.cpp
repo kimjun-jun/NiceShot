@@ -5,11 +5,12 @@
 * @date 2020/01/15
 */
 
-#include <stdio.h>
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <iostream>
-#include "../../h/net/sock.h"
+#include "../../h/main.h"
+#include "../../h/other/sound.h"
+#include "../../h/other/debugproc.h"
 
 
 #pragma comment (lib, "Ws2_32.lib")
@@ -21,7 +22,7 @@
 int client(void) 
 {
 	/* IP アドレス、ポート番号、ソケット */
-	char destination[80];
+	char destination[80] = {"192.168.11.3"};
 	unsigned short port = 20000;
 	int dstSocket;
 
@@ -40,9 +41,17 @@ int client(void)
 	WSAStartup(MAKEWORD(2, 0), &data);
 
 	/* 相手先アドレスの入力 */
-	printf("Connect to ? : (name or IP address) ");
+	//printf("Connect to ? : (name or IP address) ");
+	//PrintDebugProc("Connect to ? : (name or IP address) ");
+	//DrawDebugProc();
+	//char *moji = "Connect to ? : (name or IP address) ";
+	//SetText(moji);
+	//DrawTextType();
+	//scanf_s("%s\n", &destination,30);
+	//rewind(stdin);
 	//cin >> destination;
-	gets_s(destination);
+	//StopSound();
+	//gets_s(destination);
 
 	/* sockaddr_in 構造体のセット */
 	memset(&dstAddr, 0, sizeof(dstAddr));
