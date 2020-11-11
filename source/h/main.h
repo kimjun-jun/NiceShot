@@ -114,6 +114,8 @@ enum OBJECT_COUNT
 	OBJECT_PLAYER_MAX = 4,
 	OBJECT_CAMERA_MAX = OBJECT_PLAYER_MAX,
 	OBJECT_TUTORIAL_MAX = OBJECT_PLAYER_MAX,
+	OBJECT_NETMATCH_MAX = 1,
+	//OBJECT_NETGAME_MAX = 1,
 	OBJECT_STATUS_MAX = OBJECT_PLAYER_MAX,
 	OBJECT_BULLETPREDICTION_MAX = OBJECT_PLAYER_MAX * BULLETPREDICTION_MAX,
 	OBJECT_VITAL_MAX = OBJECT_PLAYER_MAX,
@@ -228,8 +230,9 @@ enum E_STAGE//列挙型。defineの番号を自動で割り当ててくれる。
 	SCENE_TUTORIAL,					//!< 1チュートリアル
 	SCENE_GAMECOUNTDOWN,			//!< 2カウントダウン
 	SCENE_GAME,						//!< 3ゲーム
-	SCENE_NETGAME,					//!< 4ネットゲーム
-	SCENE_RESULT,					//!< 5リザルト
+	SCENE_NETMATCH,					//!< 4ネットマッチ
+	SCENE_NETGAME,					//!< 5ネットゲーム
+	SCENE_RESULT,					//!< 6リザルト
 	SCENE_MAX						
 };
 
@@ -344,3 +347,9 @@ void SetText(char *moji);
 */
 void DrawTextType(void);
 
+void SetTextSo(char *moji);
+void DrawTextTypeSo(void);
+
+LRESULT CALLBACK IDD_DIALOG(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+BOOL CALLBACK IP_DIALOG(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);

@@ -28,6 +28,7 @@
     <ClCompile Include="..\cpp\map\field.cpp" />
     <ClCompile Include="..\cpp\map\sky.cpp" />
     <ClCompile Include="..\cpp\map\wall.cpp" />
+    <ClCompile Include="..\cpp\net\netmatch.cpp" />
     <ClCompile Include="..\cpp\net\sock.cpp" />
     <ClCompile Include="..\cpp\object\bullet\bullet.cpp" />
     <ClCompile Include="..\cpp\object\bullet\bulletgauge.cpp" />
@@ -64,6 +65,7 @@
     <ClInclude Include="..\h\map\field.h" />
     <ClInclude Include="..\h\map\sky.h" />
     <ClInclude Include="..\h\map\wall.h" />
+    <ClInclude Include="..\h\net\netmatch.h" />
     <ClInclude Include="..\h\net\sock.h" />
     <ClInclude Include="..\h\object\bullet\bullet.h" />
     <ClInclude Include="..\h\object\bullet\bulletgauge.h" />
@@ -89,6 +91,10 @@
     <ClInclude Include="..\h\scene\result.h" />
     <ClInclude Include="..\h\scene\title.h" />
     <ClInclude Include="..\h\scene\tutorial.h" />
+    <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="NiceShot.rc" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

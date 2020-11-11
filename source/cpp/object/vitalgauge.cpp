@@ -120,7 +120,6 @@ void VITALGAUGE::Update(PLAYER_HONTAI *p,RANK *rank)
 			if (this[CntPlayer].VitalPower <= 0)
 			{
 				p[CntPlayer].SetUse(false);
-				//-----------------------------------オブジェクト先頭アドレスを読み込み
 				rank->SetRank(CntPlayer);
 			}
 		}

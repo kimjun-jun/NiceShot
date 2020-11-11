@@ -10,6 +10,7 @@ class EFFECT;
 class BULLET;
 class SHADOW;
 class COUNTDOWN;
+class NETMATCH;
 class TUTO;
 class STATUS;
 class BULLETPREDICTION;
@@ -40,6 +41,7 @@ public:
 	shadow = NULL;
 	countdown = NULL;
 	tuto = NULL;
+	netmatch = NULL;
 	status = NULL;
 	bulletprediction = NULL;
 	vitalgauge = NULL;
@@ -98,6 +100,7 @@ private:
 	SHADOW *shadow;
 	COUNTDOWN *countdown;
 	TUTO *tuto;
+	NETMATCH *netmatch;
 	STATUS *status;
 	BULLETPREDICTION *bulletprediction;
 	VITALGAUGE *vitalgauge;

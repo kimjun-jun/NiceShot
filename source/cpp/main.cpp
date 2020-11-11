@@ -32,6 +32,7 @@
 #include "../h/object/bullet/bulletgauge.h"
 #include "../h/object/vitalgauge.h"
 #include "../h/object/objectclass.h"
+#include "../project/resource.h"
 
 //*****************************************************************************
 // マクロ定義
@@ -76,20 +77,24 @@ LPDIRECT3DDEVICE9	g_pD3DDevice = NULL;		//!< Deviceオブジェクト(描画に必要)
 static LPD3DXFONT	g_pD3DXFont = NULL;			//!< フォントへのポインタ
 int					g_nCountFPS;				//!< FPSカウンタ
 char				g_text[256] = { 0 };		//!< 表示させるテキスト
+char				g_textSo[256] = { "aa" };		//!< 表示させるテキスト
 DWORD				dwFrameCount;				//!< 時間計測用
 #endif
+HWND edit;
 
 //-----------------------------------------------------------------オブジェクトの数を0で初期化
 int OBJECT_3D::Num = 0;
 int OBJECT_2D::Num = 0;
 int OBJECT_2D_VERTEXBUFFER::Num = 0;
 
-
 //=============================================================================
 // メイン関数
 //=============================================================================
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
+	//DialogBox(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), HWND_DESKTOP, IDD_DIALOG);
+
+
 	srand((unsigned)time(NULL));
 
 	UNREFERENCED_PARAMETER(hPrevInstance);	// 無くても良いけど、警告が出る（未使用宣言）
@@ -134,6 +139,8 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		NULL,
 		hInstance,
 		NULL);
+	
+
 
 	// DirectXの初期化(ウィンドウを作成してから行う)
 	bool mode;
@@ -171,8 +178,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	{
 		return -1;
 	}
-
-
+	//DialogBox(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), HWND_DESKTOP, IDD_DIALOG);
 	//-----------------------------------------------------オブジェクト初期化
 	ObjectAll->Init();
 
@@ -233,7 +239,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 				// 更新処理
 				ObjectAll->Update();
 
-
 				// 描画処理
 				ObjectAll->Draw();
 
@@ -254,6 +259,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	timeEndPeriod(1);				// 分解能を戻す
 
 	return (int)msg.wParam;
+
 }
 
 //=============================================================================
@@ -266,7 +272,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;
-
 	case WM_KEYDOWN:
 		switch(wParam)
 		{
@@ -281,6 +286,75 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	}
 
 	return DefWindowProc(hWnd, uMsg, wParam, lParam);
+}
+
+LRESULT CALLBACK IDD_DIALOG(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	LPTSTR IpInputStr = { NULL };
+	switch (uMsg)
+	{
+	case WM_INITDIALOG:
+		PostQuitMessage(0);
+		break;
+	case WM_CREATE:
+		// ウィンドウの作成
+		edit = CreateWindowEx(0,
+			"AppClassサーバーIP入力画面",
+			"サーバーIP入力画面",
+			WS_OVERLAPPEDWINDOW,
+			CW_USEDEFAULT,
+			CW_USEDEFAULT,
+			SCREEN_W + GetSystemMetrics(SM_CXDLGFRAME) * 2,
+			SCREEN_H + GetSystemMetrics(SM_CXDLGFRAME) * 2 + GetSystemMetrics(SM_CYCAPTION),
+			NULL,
+			NULL,
+			((LPCREATESTRUCT)(lParam))->hInstance,
+			NULL);
+		break;
+	case WM_COMMAND:
+		switch (LOWORD(wParam))
+		{
+		case IDOK:
+			//GetDlgItemText(hWnd, IDC_IPADDRESS2, IpInputStr, 256);
+			break;
+		case IDCANCEL:
+			break;
+		}
+		break;
+
+	default:
+		break;
+	}
+
+	return DefWindowProc(hWnd, uMsg, wParam, lParam);
+
+}
+
+BOOL CALLBACK IP_DIALOG(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	//LPTSTR IpInputStr = { NULL };
+	//switch (uMsg)
+	//{
+	////case WM_INITDIALOG:
+	////	PostQuitMessage(0);
+	////	break;
+	//case WM_COMMAND:		
+	//	switch (LOWORD(wParam))
+	//	{
+	//	case IDOK:
+	//		//GetDlgItemText(hWnd, IDC_IPADDRESS2, IpInputStr, 256);
+	//		break;
+	//	case IDCANCEL:
+	//		break;
+	//	}
+	//	break;
+
+	//default:
+	//	break;
+	//}
+
+	return 1;
+
 }
 
 //=============================================================================
@@ -428,6 +502,26 @@ LPDIRECT3DDEVICE9 GetDevice(void)
 {
 	return g_pD3DDevice;
 }
+
+//=============================================================================
+// 表示させる文字列をg_textに書き込む
+//=============================================================================
+void SetTextSo(char *moji)
+{
+	strcpy(g_textSo, moji);
+}
+
+//=============================================================================
+// どの制御になったかゲーム画面で判断する文字描画関数
+//=============================================================================
+void DrawTextTypeSo(void)
+{
+	TCHAR str[256];
+	RECT rect = { 10, 90, SCREEN_W, SCREEN_H };
+	wsprintf(str, _T("%s\n"), g_textSo);
+	g_pD3DXFont->DrawText(NULL, str, -1, &rect, DT_LEFT, D3DCOLOR_ARGB(0xff, 0xff, 0x00, 0xff));
+}
+
 
 #ifdef _DEBUG
 //=============================================================================

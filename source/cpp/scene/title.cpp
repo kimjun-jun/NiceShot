@@ -216,7 +216,7 @@ void TITLE::Update(FADE *fade)
 			{
 				this[0].SetColorTitle(TITLE_OBJECT_NAME_LOCAL, 1.0f);
 				this[0].SetColorTitle(TITLE_OBJECT_NAME_NET, 0.2f);
-				//ゲームシーンをゲームへ
+				//シーンをゲームへ
 				if (GetKeyboardTrigger(DIK_RETURN) || IsButtonTriggered(0, BUTTON_A))
 				{
 					PlaySound(SOUND_LABEL_SE_enter01);
@@ -227,13 +227,11 @@ void TITLE::Update(FADE *fade)
 			{
 				this[0].SetColorTitle(TITLE_OBJECT_NAME_LOCAL, 0.2f);
 				this[0].SetColorTitle(TITLE_OBJECT_NAME_NET, 1.0f);
-				//ゲームシーンをネットゲームへ
+				//シーンをネットマッチへ
 				if (GetKeyboardTrigger(DIK_RETURN) || IsButtonTriggered(0, BUTTON_A))
 				{
 					PlaySound(SOUND_LABEL_SE_enter01);
-					client();
-
-					//fade->SetFade(FADE_OUT, SCENE_NETGAME, SOUND_LABEL_BGM_boss01);
+					fade->SetFade(FADE_OUT, SCENE_NETMATCH, SOUND_LABEL_BGM_boss01);
 				}
 			}
 		default:

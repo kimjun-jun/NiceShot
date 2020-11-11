@@ -33,6 +33,7 @@ using namespace std;
 #include "../../h/object/bullet/bulletgauge.h"
 #include "../../h/object/vitalgauge.h"
 #include "../../h/object/objectclass.h"
+#include "../../h/net/netmatch.h"
 #include "../../h/net/sock.h"
 
 void SetOjama(int type, int UsePlayer, PLAYER_HONTAI *p);
@@ -53,6 +54,7 @@ void GAME_OBJECT::Create()
 	shadow = new SHADOW[OBJECT_SHADOW_MAX];
 	countdown = new COUNTDOWN[OBJECT_COUNTDOWN_MAX];
 	tuto = new TUTO[OBJECT_TUTORIAL_MAX];
+	netmatch = new NETMATCH[OBJECT_NETMATCH_MAX];
 	status = new STATUS[OBJECT_STATUS_MAX];
 	bulletprediction = new BULLETPREDICTION[OBJECT_BULLETPREDICTION_MAX];
 	vitalgauge = new VITALGAUGE[OBJECT_VITAL_MAX];
@@ -86,6 +88,7 @@ void GAME_OBJECT::Init()
 	bullet->Init();
 	countdown->Init();
 	tuto->Init();
+	netmatch->Init();
 	status->Init();
 	bulletprediction->Init();
 	vitalgauge->Init();
@@ -121,6 +124,7 @@ void GAME_OBJECT::Reinit()
 
 void GAME_OBJECT::Update()
 {
+	LPDIRECT3DDEVICE9 pD3DDevice = GetDevice();
 	// 入力更新
 	UpdateInput();
 #ifdef _DEBUG
@@ -199,8 +203,35 @@ void GAME_OBJECT::Update()
 			vitalgauge->Update(&player[0],&rank[0]);
 			break;
 
-		case SCENE_NETGAME:
+		case SCENE_NETMATCH:
+			netmatch->Update(&this[0], &fade[0]);
 			client();
+
+			break;
+		case SCENE_NETGAME:
+			//パケットを受け取る
+
+			// map更新
+			field->Update(&player[0], &item[0], &bullet[0], &explosion[0], &shadow[0]);//パケット有り
+			sky->Update();
+
+			//オブジェクトの更新
+			player->Update(&effect[0], &bullet[0], &shadow[0], &fade[0]);//パケット有り
+			bullet->Update(&shadow[0], &effect[0]);//パケット有り
+			bulletprediction->Update(&player[0]);
+			effect->Update();//パケット有り
+			explosion->Update();//パケット有り
+			item->Update(&player[0]);//パケット有り
+			shadow->Update();//パケット有り
+
+			//当たり判定
+			CheakHit(1);
+
+			//2D空間
+			bulletgauge->Update(&player[0]);
+			damege->Update();//パケット有り
+			status->Update(&player[0]);
+			vitalgauge->Update(&player[0], &rank[0]);
 			break;
 		case SCENE_RESULT:
 			//リザルトの更新
@@ -228,7 +259,7 @@ void GAME_OBJECT::Draw()
 	LPDIRECT3DDEVICE9 pD3DDevice = GetDevice();
 
 	// バックバッファ＆Ｚバッファのクリア
-	pD3DDevice->Clear(0, NULL, (D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER), D3DCOLOR_RGBA(0, 0, 0, 0), 1.0f, 0);
+	pD3DDevice->Clear(0, NULL, (D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER), D3DCOLOR_RGBA(100, 200, 100, 150), 1.0f, 0);
 
 	// Direct3Dによる描画の開始
 	if (SUCCEEDED(pD3DDevice->BeginScene()))
@@ -244,7 +275,7 @@ void GAME_OBJECT::Draw()
 			for (int CntPlayer = 0, vpCnt = sizeof(vp) / sizeof(vp[0]); CntPlayer < vpCnt; CntPlayer++)
 			{
 				pD3DDevice->SetViewport(&vp[CntPlayer]);
-				pD3DDevice->Clear(0, NULL, (D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER), D3DCOLOR_RGBA(0, 0, 0, 0), 1.0f, 0);
+				pD3DDevice->Clear(0, NULL, (D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER), D3DCOLOR_RGBA(100, 200, 100, 150), 1.0f, 0);
 
 				if (player[CntPlayer].KiriSignal == true) pD3DDevice->SetRenderState(D3DRS_FOGENABLE, TRUE); //フォグ：ON
 				else pD3DDevice->SetRenderState(D3DRS_FOGENABLE, FALSE); //フォグ：OFF
@@ -278,7 +309,7 @@ void GAME_OBJECT::Draw()
 			for (int CntPlayer = 0, vpCnt = sizeof(vp) / sizeof(vp[0]); CntPlayer < vpCnt; CntPlayer++)
 			{
 				pD3DDevice->SetViewport(&vp[CntPlayer]);
-				pD3DDevice->Clear(0, NULL, (D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER), D3DCOLOR_RGBA(0, 0, 0, 0), 1.0f, 0);
+				pD3DDevice->Clear(0, NULL, (D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER), D3DCOLOR_RGBA(100, 200, 100, 150), 1.0f, 0);
 				// カメラの設定
 				SetCamera(CntPlayer);
 
@@ -308,7 +339,7 @@ void GAME_OBJECT::Draw()
 			for (int CntPlayer = 0, vpCnt = sizeof(vp) / sizeof(vp[0]); CntPlayer < vpCnt; CntPlayer++)
 			{
 				pD3DDevice->SetViewport(&vp[CntPlayer]);
-				pD3DDevice->Clear(0, NULL, (D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER), D3DCOLOR_RGBA(0, 0, 0, 0), 1.0f, 0);
+				pD3DDevice->Clear(0, NULL, (D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER), D3DCOLOR_RGBA(100, 200, 100, 150), 1.0f, 0);
 
 				bool puse = player[CntPlayer].GetUse();
 				if (puse == true)
@@ -352,7 +383,7 @@ void GAME_OBJECT::Draw()
 
 					//3D空間
 					player->Draw();
-					//item->Draw();
+					item->Draw();
 					bulletprediction->Draw(&player[0], CntPlayer);
 					explosion->Draw(CntPlayer);
 					effect->Draw(CntPlayer);
@@ -370,11 +401,70 @@ void GAME_OBJECT::Draw()
 			break;
 
 
-		case SCENE_NETGAME:
+		case SCENE_NETMATCH:
+			netmatch->Draw();
 
 			break;
 
+		case SCENE_NETGAME:
+		{
+			bool puseNet = player[0].GetUse();
+			if (puseNet == true)
+			{
+				if (player[0].KiriSignal == true) pD3DDevice->SetRenderState(D3DRS_FOGENABLE, TRUE); //フォグ：ON
+				else pD3DDevice->SetRenderState(D3DRS_FOGENABLE, FALSE); //フォグ：OFF
 
+				// カメラの設定
+				SetCamera(0);
+
+				// map描画
+				field->Draw();
+				sky->Draw();
+				wall->Draw();
+
+				//3D空間
+				player->Draw();
+				item->Draw();
+				bulletprediction->Draw(&player[0], 0);
+				explosion->Draw(0);
+				effect->Draw(0);
+				shadow->Draw();
+
+				//2d画面上
+				damege->Draw();
+				status->Draw();
+				vitalgauge->Draw();
+				bulletgauge->Draw();
+			}
+			else
+			{
+				pD3DDevice->SetRenderState(D3DRS_FOGENABLE, FALSE); //フォグ：OFF
+
+				// カメラの設定
+				SetCamera(0);
+
+				// map描画
+				field->Draw();
+				sky->Draw();
+				wall->Draw();
+
+				//3D空間
+				player->Draw();
+				item->Draw();
+				bulletprediction->Draw(&player[0], 0);
+				explosion->Draw(0);
+				effect->Draw(0);
+				shadow->Draw();
+
+				//2d画面上
+				damege->Draw();
+				status->Draw();
+				vitalgauge->Draw();
+				bulletgauge->Draw();
+				rank->Draw();
+			}
+			break;
+		}
 		case SCENE_RESULT:
 			//リザルト描画
 			result->Draw();
@@ -382,16 +472,13 @@ void GAME_OBJECT::Draw()
 		}
 
 		// フェード描画
-		if (nScene != SCENE_NETGAME)
-		{
 			fade->Draw();
 
 			// デバッグ表示
-			DrawTextType();
+			//DrawTextType();
 #ifdef _DEBUG
 			//DrawDebugProc();
 #endif
-		}
 	}
 	// Direct3Dによる描画の終了
 	pD3DDevice->EndScene();

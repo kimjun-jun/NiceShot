@@ -171,6 +171,9 @@
     <ClCompile Include="..\cpp\net\sock.cpp">
       <Filter>cpp\net</Filter>
     </ClCompile>
+    <ClCompile Include="..\cpp\net\netmatch.cpp">
+      <Filter>cpp\net</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\h\collision.h">
@@ -275,5 +278,16 @@
     <ClInclude Include="..\h\net\sock.h">
       <Filter>h\net</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\net\netmatch.h">
+      <Filter>h\net</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="NiceShot.rc">
+      <Filter>リソース ファイル</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>
