@@ -231,7 +231,7 @@ void TITLE::Update(FADE *fade)
 				if (GetKeyboardTrigger(DIK_RETURN) || IsButtonTriggered(0, BUTTON_A))
 				{
 					PlaySound(SOUND_LABEL_SE_enter01);
-					fade->SetFade(FADE_OUT, SCENE_NETMATCH, SOUND_LABEL_BGM_boss01);
+					fade->SetFade(FADE_OUT, SCENE_NETMATCH, SOUND_LABEL_SE_damage);
 				}
 			}
 		default:

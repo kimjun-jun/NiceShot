@@ -5,6 +5,13 @@
 * @date 2020/01/15
 */
 #pragma once
+
+//ネット対戦のときに使う
+void SetNetMatchFlag(bool flag);
+void SetNetMyNumberFlagFlag(bool flag);
+void SetNetMyNumber(int num);
+void SetNetGameStartFlag(bool flag);
+
 class PLAYER_HONTAI;
 class EFFECT;
 class BULLET;

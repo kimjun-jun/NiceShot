@@ -17,6 +17,10 @@
 #include<conio.h>
 #include<time.h>
 #include <string.h>
+#include <thread>
+#include <mutex>
+
+using namespace std;
 
 #define DIRECTINPUT_VERSION (0x0800)	//!< 警告対策
 #include <dinput.h>
@@ -115,7 +119,6 @@ enum OBJECT_COUNT
 	OBJECT_CAMERA_MAX = OBJECT_PLAYER_MAX,
 	OBJECT_TUTORIAL_MAX = OBJECT_PLAYER_MAX,
 	OBJECT_NETMATCH_MAX = 1,
-	//OBJECT_NETGAME_MAX = 1,
 	OBJECT_STATUS_MAX = OBJECT_PLAYER_MAX,
 	OBJECT_BULLETPREDICTION_MAX = OBJECT_PLAYER_MAX * BULLETPREDICTION_MAX,
 	OBJECT_VITAL_MAX = OBJECT_PLAYER_MAX,
@@ -231,8 +234,9 @@ enum E_STAGE//列挙型。defineの番号を自動で割り当ててくれる。
 	SCENE_GAMECOUNTDOWN,			//!< 2カウントダウン
 	SCENE_GAME,						//!< 3ゲーム
 	SCENE_NETMATCH,					//!< 4ネットマッチ
-	SCENE_NETGAME,					//!< 5ネットゲーム
-	SCENE_RESULT,					//!< 6リザルト
+	SCENE_NETGAMECOUNTDOWN,			//!< 5ネットカウントダウン
+	SCENE_NETGAME,					//!< 6ネットゲーム
+	SCENE_RESULT,					//!< 7リザルト
 	SCENE_MAX						
 };
 

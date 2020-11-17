@@ -164,17 +164,28 @@ void STATUS::Update(PLAYER_HONTAI *p)
 //=============================================================================
 // ï`âÊèàóù
 //=============================================================================
-void STATUS::Draw(void)
+void STATUS::Draw(bool Netflag, int NetMyNumber)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
-
-	for (int CntPlayer = 0; CntPlayer < OBJECT_STATUS_MAX; CntPlayer++)
+	if (Netflag==false)
 	{
-		for (int CntStatus = 0; CntStatus < STATUSTYPE_MAX; CntStatus++)
+		for (int CntPlayer = 0; CntPlayer < OBJECT_STATUS_MAX; CntPlayer++)
 		{
+			for (int CntStatus = 0; CntStatus < STATUSTYPE_MAX; CntStatus++)
+			{
 				pDevice->SetFVF(FVF_VERTEX_2D);
 				pDevice->SetTexture(0, this[CntPlayer].obj[CntStatus].tex2D.pD3DTexture);
 				pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, POLYGON_2D_NUM, this[CntPlayer].obj[CntStatus].tex2D.textureVTX, sizeof(VERTEX_2D));
+			}
+		}
+	}
+	else
+	{
+		for (int CntStatus = 0; CntStatus < STATUSTYPE_MAX; CntStatus++)
+		{
+			pDevice->SetFVF(FVF_VERTEX_2D);
+			pDevice->SetTexture(0, this[0].obj[CntStatus].tex2D.pD3DTexture);
+			pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, POLYGON_2D_NUM, this[NetMyNumber].obj[CntStatus].tex2D.textureVTX, sizeof(VERTEX_2D));
 		}
 	}
 }

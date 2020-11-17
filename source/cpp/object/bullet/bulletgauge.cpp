@@ -95,23 +95,43 @@ void BULLETGAUGE::Update(PLAYER_HONTAI *player)
 //=============================================================================
 // 描画処理
 //=============================================================================
-void BULLETGAUGE::Draw(void)
+void BULLETGAUGE::Draw(bool Netflag, int NetMyNumber)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 
-	for (int CntBulletGauge = 0; CntBulletGauge < OBJECT_BULLETGAUGE_MAX; CntBulletGauge++)
+	if (Netflag == false)
+	{
+		for (int CntBulletGauge = 0; CntBulletGauge < OBJECT_BULLETGAUGE_MAX; CntBulletGauge++)
+		{
+			// 頂点バッファをデバイスのデータストリームにバインド
+			pDevice->SetStreamSource(0, this[CntBulletGauge].tex2DVB.pD3DVtxBuff, 0, sizeof(VERTEX_2D));
+
+			// 頂点フォーマットの設定
+			pDevice->SetFVF(FVF_VERTEX_2D);
+
+			// テクスチャの設定
+			pDevice->SetTexture(0, this[CntBulletGauge].tex2DVB.pD3DTexture);
+
+			// ポリゴンの描画
+			for (int nCntPlace = 0; nCntPlace < this[CntBulletGauge].AmmoPower; nCntPlace++)
+			{
+				pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, (nCntPlace * 4), POLYGON_2D_NUM);
+			}
+		}
+	}
+	else
 	{
 		// 頂点バッファをデバイスのデータストリームにバインド
-		pDevice->SetStreamSource(0, this[CntBulletGauge].tex2DVB.pD3DVtxBuff, 0, sizeof(VERTEX_2D));
+		pDevice->SetStreamSource(0, this[0].tex2DVB.pD3DVtxBuff, 0, sizeof(VERTEX_2D));//ここは座標だから0
 
 		// 頂点フォーマットの設定
 		pDevice->SetFVF(FVF_VERTEX_2D);
 
 		// テクスチャの設定
-		pDevice->SetTexture(0, this[CntBulletGauge].tex2DVB.pD3DTexture);
+		pDevice->SetTexture(0, this[0].tex2DVB.pD3DTexture);
 
 		// ポリゴンの描画
-		for (int nCntPlace = 0; nCntPlace < this[CntBulletGauge].AmmoPower; nCntPlace++)
+		for (int nCntPlace = 0; nCntPlace < this[NetMyNumber].AmmoPower; nCntPlace++)//サーバーから受け取った自分番号
 		{
 			pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, (nCntPlace * 4), POLYGON_2D_NUM);
 		}

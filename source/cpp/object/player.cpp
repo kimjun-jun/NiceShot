@@ -60,7 +60,7 @@ void PLAYER_HONTAI::Init(FIELD *field)
 		D3DXCreateTextureFromFile(pDevice,					// デバイスへのポインタ
 			TEXTURE_MEISAI,									// ファイルの名前
 			&this[CntPlayer].model.pD3DTexture);	// 読み込むメモリー
-
+	
 
 		/////////////////////////////////////////////////////////////////////////////////////////砲塔
 		this[CntPlayer].parts[PARTSTYPE_HOUTOU].ParentHontai = &this[CntPlayer];

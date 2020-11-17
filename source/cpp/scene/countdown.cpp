@@ -78,7 +78,7 @@ void COUNTDOWN::Uninit(void)
 //=============================================================================
 // 更新処理
 //=============================================================================
-void COUNTDOWN::Update(GAME_OBJECT*obj)
+void COUNTDOWN::Update(GAME_OBJECT*obj, bool Netflag)
 {
 	SetTextureCountdown();
 	SetVertexCountdown();
@@ -86,8 +86,18 @@ void COUNTDOWN::Update(GAME_OBJECT*obj)
 	MasterVolumeChange(1);
 	if (this[0].signal == true)
 	{
-		obj->SetScene(SCENE_GAME);
-		PlaySound(SOUND_LABEL_BGM_normal01);
+		//ローカルゲーム開始
+		if (Netflag == false)
+		{
+			obj->SetScene(SCENE_GAME);
+			PlaySound(SOUND_LABEL_BGM_normal01);
+		}
+		//ネットゲーム開始
+		else
+		{
+			obj->SetScene(SCENE_NETGAME);
+			PlaySound(SOUND_LABEL_BGM_boss01);
+		}
 	}
 }
 

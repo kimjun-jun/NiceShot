@@ -32,7 +32,9 @@
 #include "../h/object/bullet/bulletgauge.h"
 #include "../h/object/vitalgauge.h"
 #include "../h/object/objectclass.h"
+#include "../h/net/sock.h"
 #include "../project/resource.h"
+
 
 //*****************************************************************************
 // マクロ定義
@@ -172,7 +174,14 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	ObjectAll = new GAME_OBJECT;
 	ObjectAll->Create();
 
+	//マルチスレッドで受信プログラム(受信関数)起動　細かく通信する　1/60じゃない　関数一つで出来る
+	//HANDLE thread;
 
+	//注意　メインで書き込む変数とマルチ変数　ぶつかるとやばい　資源の共有　タイミングぶつからないようにする
+
+	//ざっくりとした関数一つでいいから作る　書き換える可能性のある時にアクセス許可をとる
+
+	//同期化する変数だけ信号を待つ(ざっくりした関数のアクセス許可)　シンクロライズ?　
 
 	if (FAILED(Init(hInstance, hWnd, mode)))
 	{
@@ -409,7 +418,7 @@ HRESULT Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	if (FAILED(g_pD3D->CreateDevice(D3DADAPTER_DEFAULT,
 		D3DDEVTYPE_HAL,
 		hWnd,
-		D3DCREATE_HARDWARE_VERTEXPROCESSING,
+		D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_MULTITHREADED,
 		&d3dpp, &g_pD3DDevice)))
 	{
 		// 上記の設定が失敗したら
@@ -417,7 +426,7 @@ HRESULT Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 		if (FAILED(g_pD3D->CreateDevice(D3DADAPTER_DEFAULT,
 			D3DDEVTYPE_HAL,
 			hWnd,
-			D3DCREATE_SOFTWARE_VERTEXPROCESSING,
+			D3DCREATE_SOFTWARE_VERTEXPROCESSING | D3DCREATE_MULTITHREADED,
 			&d3dpp, &g_pD3DDevice)))
 		{
 			// 上記の設定が失敗したら
@@ -425,7 +434,7 @@ HRESULT Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 			if (FAILED(g_pD3D->CreateDevice(D3DADAPTER_DEFAULT,
 				D3DDEVTYPE_REF,
 				hWnd,
-				D3DCREATE_SOFTWARE_VERTEXPROCESSING,
+				D3DCREATE_SOFTWARE_VERTEXPROCESSING | D3DCREATE_MULTITHREADED,
 				&d3dpp, &g_pD3DDevice)))
 			{
 				// 初期化失敗

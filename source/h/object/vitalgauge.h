@@ -18,7 +18,7 @@ public:
 	virtual void						Reinit(void);				//!< Ä‰Šú‰»
 	virtual void						Uninit(void);				//!< I—¹
 	virtual void						Update(PLAYER_HONTAI *p, RANK *rank);				//!< XV
-	virtual void						Draw(void);					//!< •`‰æ
+	virtual void						Draw(bool Netflag, int NetMyNumber);					//!< •`‰æ
 	HRESULT						MakeVertexVitalGauge(LPDIRECT3DDEVICE9 pDevice, int CntPlayer);
 	int							VitalPower;
 };

@@ -91,7 +91,7 @@ void DAMEGE::Update(void)
 //=============================================================================
 // 描画処理
 //=============================================================================
-void DAMEGE::Draw(void)
+void DAMEGE::Draw(bool Netflag, int NetMyNumber)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 
@@ -100,14 +100,28 @@ void DAMEGE::Draw(void)
 	pDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
 	pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS);			// Z比較なし
 
-	for (int CntDamege = 0; CntDamege < OBJECT_DAMEGE_MAX; CntDamege++)
+	if (Netflag==false)
 	{
-		bool use = this[CntDamege].GetUse();
+		for (int CntDamege = 0; CntDamege < OBJECT_DAMEGE_MAX; CntDamege++)
+		{
+			bool use = this[CntDamege].GetUse();
+			if (use == true)
+			{
+				pDevice->SetFVF(FVF_VERTEX_2D);
+				pDevice->SetTexture(0, this[CntDamege].tex2D.pD3DTexture);
+				pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, POLYGON_2D_NUM, this[CntDamege].tex2D.textureVTX, sizeof(VERTEX_2D));
+			}
+		}
+	}
+
+	else
+	{
+		bool use = this[NetMyNumber].GetUse();//サーバーから受け取った自分番号
 		if (use == true)
 		{
 			pDevice->SetFVF(FVF_VERTEX_2D);
-			pDevice->SetTexture(0,this[CntDamege].tex2D.pD3DTexture);
-			pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, POLYGON_2D_NUM, this[CntDamege].tex2D.textureVTX, sizeof(VERTEX_2D));
+			pDevice->SetTexture(0, this[0].tex2D.pD3DTexture);
+			pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, POLYGON_2D_NUM, this[0].tex2D.textureVTX, sizeof(VERTEX_2D));//ここは座標だから0
 		}
 	}
 	pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);		// αソースカラーの指定

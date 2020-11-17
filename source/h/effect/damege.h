@@ -27,7 +27,7 @@ public:
 	virtual void				Reinit(void);				//!< 再初期化
 	virtual void				Uninit(void);				//!< 終了
 	virtual void				Update(void);				//!< 更新
-	virtual void				Draw(void);					//!< 描画
+	virtual void				Draw(bool Netflag, int NetMyNumber);					//!< 描画
 	HRESULT						MakeVertexDamege(void);		//!< 頂点設定
 	int							alpha;						//!< アルファ値
 	float						time;						//!< 描画時間

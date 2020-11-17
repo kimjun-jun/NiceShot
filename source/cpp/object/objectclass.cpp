@@ -38,6 +38,20 @@ using namespace std;
 
 void SetOjama(int type, int UsePlayer, PLAYER_HONTAI *p);
 
+//マッチフラグ
+bool NetMatchFlag = false;
+void SetNetMatchFlag(bool flag) { NetMatchFlag = flag; }
+
+//マイナンバー
+bool NetMyNumberFlag = false;
+int NetMyNumber = -1;
+void SetNetMyNumberFlagFlag(bool flag) { NetMyNumberFlag = flag; }
+void SetNetMyNumber(int num) { NetMyNumber = num; }
+
+//ネットフラグ　trueでネット対戦始める
+bool NetGameStartFlag = false;
+void SetNetGameStartFlag(bool flag) { NetGameStartFlag = flag; }
+
 
 static D3DXCOLOR PLAYER_COLOR[] = {
 	D3DXCOLOR(1.0f, 1.0f, 0.1f, 1.0f),//p1カラー
@@ -74,6 +88,13 @@ void GAME_OBJECT::Create()
 
 void GAME_OBJECT::Init()
 {
+	//ネット対戦用
+	NetClientSocketCreate();
+	NetMatchFlag = false;
+	NetMyNumberFlag = false;
+	NetMyNumber = -1;
+	NetGameStartFlag = false;
+
 	field->Init();
 	sky->Init();
 	wall->Init();
@@ -100,6 +121,14 @@ void GAME_OBJECT::Init()
 
 void GAME_OBJECT::Reinit()
 {
+	//ネット対戦用
+	NetClientSocketCreate();
+	NetMatchFlag = false;
+	NetMyNumberFlag = false;
+	NetMyNumber = -1;
+	NetGameStartFlag = false;
+
+
 	player->Reinit(&field[0]);
 	effect->Reinit();
 	bullet->Reinit();
@@ -129,13 +158,13 @@ void GAME_OBJECT::Update()
 	UpdateInput();
 #ifdef _DEBUG
 
-	if (GetKeyboardTrigger(DIK_F12) || IsButtonTriggered(0, BUTTON_SELECT)) stop++;
-	if (GetKeyboardTrigger(DIK_F11) || IsButtonTriggered(0, BUTTON_L3))
-	{
-		MasterVolumeChange(1);
-		Reinit();
-		fade->SetFade(FADE_OUT, SCENE_TITLE, SOUND_LABEL_BGM_title01);
-	}
+	//if (GetKeyboardTrigger(DIK_F12) || IsButtonTriggered(0, BUTTON_SELECT)) stop++;
+	//if (GetKeyboardTrigger(DIK_F11) || IsButtonTriggered(0, BUTTON_L3))
+	//{
+	//	MasterVolumeChange(1);
+	//	Reinit();
+	//	fade->SetFade(FADE_OUT, SCENE_TITLE, SOUND_LABEL_BGM_title01);
+	//}
 #endif
 
 	if (stop % 2 == 0)
@@ -175,7 +204,7 @@ void GAME_OBJECT::Update()
 
 		case SCENE_GAMECOUNTDOWN:
 			//カウントダウンの更新
-			countdown->Update(&this[0]);
+			countdown->Update(&this[0], NetGameStartFlag);
 			countdown->AddCountdown(-1);
 			break;
 
@@ -205,11 +234,34 @@ void GAME_OBJECT::Update()
 
 		case SCENE_NETMATCH:
 			netmatch->Update(&this[0], &fade[0]);
-			client();
-
+			//マッチング中
+			if (NetMatchFlag ==false)
+			{
+				NetMatch();
+			}
+			//マイナンバー取得中
+			if(NetMyNumberFlag==false)
+			{
+				if (NetMyNumber == -1) NetMyNumberGet();
+			}
+			//カウントダウン信号待ち中
+			else
+			{
+				NetCountdown();
+			}
+			//スタートフラグが送られてきて信号がONになったらカウントダウン開始
+			if (NetGameStartFlag == true)
+			{
+				fade->SetFade(FADE_OUT, SCENE_NETGAMECOUNTDOWN, SOUND_LABEL_BGM_boss01);
+			}
+			break;
+		case SCENE_NETGAMECOUNTDOWN:
+			//カウントダウンの更新
+			countdown->Update(&this[0], NetGameStartFlag);
+			countdown->AddCountdown(-1);
 			break;
 		case SCENE_NETGAME:
-			//パケットを受け取る
+			//パケットはマルチスレッドでロックされていないとき(Draw中はロックされている)に常に受け取る
 
 			// map更新
 			field->Update(&player[0], &item[0], &bullet[0], &explosion[0], &shadow[0]);//パケット有り
@@ -246,6 +298,12 @@ void GAME_OBJECT::Update()
 
 void GAME_OBJECT::Draw()
 {
+	//スレッド間の共有変数をロック
+	std::mutex m;
+	m.lock();
+
+
+
 	//四人分の画面分割設定
 	D3DVIEWPORT9 vp[]
 	{
@@ -297,10 +355,10 @@ void GAME_OBJECT::Draw()
 				shadow->Draw();
 
 				//2d画面上
-				damege->Draw();
-				status->Draw();
-				vitalgauge->Draw();
-				bulletgauge->Draw();
+				damege->Draw(NetGameStartFlag, NetMyNumber);
+				status->Draw(NetGameStartFlag, NetMyNumber);
+				vitalgauge->Draw(NetGameStartFlag, NetMyNumber);
+				bulletgauge->Draw(NetGameStartFlag, NetMyNumber);
 				tuto->Draw();
 			}
 			pD3DDevice->SetViewport(&VpMaster);
@@ -327,10 +385,10 @@ void GAME_OBJECT::Draw()
 				shadow->Draw();
 
 				//2d画面上
-				damege->Draw();
-				status->Draw();
-				vitalgauge->Draw();
-				bulletgauge->Draw();
+				damege->Draw(NetGameStartFlag, NetMyNumber);
+				status->Draw(NetGameStartFlag, NetMyNumber);
+				vitalgauge->Draw(NetGameStartFlag, NetMyNumber);
+				bulletgauge->Draw(NetGameStartFlag, NetMyNumber);
 			}
 			pD3DDevice->SetViewport(&VpMaster);
 			countdown->Draw();
@@ -364,10 +422,10 @@ void GAME_OBJECT::Draw()
 					shadow->Draw();
 
 					//2d画面上
-					damege->Draw();
-					status->Draw();
-					vitalgauge->Draw();
-					bulletgauge->Draw();
+					damege->Draw(NetGameStartFlag, NetMyNumber);
+					status->Draw(NetGameStartFlag, NetMyNumber);
+					vitalgauge->Draw(NetGameStartFlag, NetMyNumber);
+					bulletgauge->Draw(NetGameStartFlag, NetMyNumber);
 				}
 				else
 				{
@@ -390,10 +448,10 @@ void GAME_OBJECT::Draw()
 					shadow->Draw();
 
 					//2d画面上
-					damege->Draw();
-					status->Draw();
-					vitalgauge->Draw();
-					bulletgauge->Draw();
+					damege->Draw(NetGameStartFlag, NetMyNumber);
+					status->Draw(NetGameStartFlag, NetMyNumber);
+					vitalgauge->Draw(NetGameStartFlag, NetMyNumber);
+					bulletgauge->Draw(NetGameStartFlag, NetMyNumber);
 					rank->Draw();
 				}
 			}
@@ -405,7 +463,32 @@ void GAME_OBJECT::Draw()
 			netmatch->Draw();
 
 			break;
+		case SCENE_NETGAMECOUNTDOWN:
+		{
+			// カメラの設定
+			SetCamera(0);
 
+			// map描画
+			field->Draw();
+			sky->Draw();
+			wall->Draw();
+
+			//3D空間
+			player->Draw();
+			item->Draw();
+			bulletprediction->Draw(&player[0], 0);
+			explosion->Draw(0);
+			effect->Draw(0);
+			shadow->Draw();
+
+			//2d画面上
+			damege->Draw(NetGameStartFlag, NetMyNumber);
+			status->Draw(NetGameStartFlag, NetMyNumber);
+			vitalgauge->Draw(NetGameStartFlag, NetMyNumber);
+			bulletgauge->Draw(NetGameStartFlag, NetMyNumber);
+			countdown->Draw();
+			break;
+		}
 		case SCENE_NETGAME:
 		{
 			bool puseNet = player[0].GetUse();
@@ -431,10 +514,10 @@ void GAME_OBJECT::Draw()
 				shadow->Draw();
 
 				//2d画面上
-				damege->Draw();
-				status->Draw();
-				vitalgauge->Draw();
-				bulletgauge->Draw();
+				damege->Draw(NetGameStartFlag, NetMyNumber);
+				status->Draw(NetGameStartFlag, NetMyNumber);
+				vitalgauge->Draw(NetGameStartFlag, NetMyNumber);
+				bulletgauge->Draw(NetGameStartFlag, NetMyNumber);
 			}
 			else
 			{
@@ -457,12 +540,13 @@ void GAME_OBJECT::Draw()
 				shadow->Draw();
 
 				//2d画面上
-				damege->Draw();
-				status->Draw();
-				vitalgauge->Draw();
-				bulletgauge->Draw();
+				damege->Draw(NetGameStartFlag, NetMyNumber);
+				status->Draw(NetGameStartFlag, NetMyNumber);
+				vitalgauge->Draw(NetGameStartFlag, NetMyNumber);
+				bulletgauge->Draw(NetGameStartFlag, NetMyNumber);
 				rank->Draw();
 			}
+
 			break;
 		}
 		case SCENE_RESULT:
@@ -472,18 +556,22 @@ void GAME_OBJECT::Draw()
 		}
 
 		// フェード描画
-			fade->Draw();
+		fade->Draw();
 
-			// デバッグ表示
-			//DrawTextType();
+		// デバッグ表示
+		DrawTextType();
 #ifdef _DEBUG
-			//DrawDebugProc();
+		DrawDebugProc();
 #endif
 	}
 	// Direct3Dによる描画の終了
 	pD3DDevice->EndScene();
 	// バックバッファとフロントバッファの入れ替え
 	pD3DDevice->Present(NULL, NULL, NULL, NULL);
+
+
+	//スレッド間の共有変数を解除
+	m.unlock();
 
 }
 
