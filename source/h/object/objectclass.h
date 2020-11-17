@@ -86,6 +86,7 @@ public:
 	void Create();
 	void Init();
 	void Reinit();
+	void ReinitNet();//ネット対戦前の初期化(主にUI調整)
 	void Uninit();
 	void Update();
 	void Draw();

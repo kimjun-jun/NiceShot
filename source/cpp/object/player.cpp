@@ -19,7 +19,7 @@ static D3DXCOLOR PLAYER_COLOR[] = {
 	D3DXCOLOR(1.0f, 1.0f, 0.1f, 1.0f),//p1カラー
 	D3DXCOLOR(0.2f, 0.2f, 1.0f, 1.0f),//p2カラー
 	D3DXCOLOR(1.0f, 0.2f, 0.2f, 1.0f),//p3カラー
-	D3DXCOLOR(0.2f, 1.0f, 0.2f, 1.0f),//p4カラー
+	D3DXCOLOR(0.2f, 1.0f, 1.0f, 1.0f),//p4カラー
 };
 
 //=============================================================================
@@ -170,7 +170,7 @@ void PLAYER_HONTAI::Init(FIELD *field)
 		this[CntPlayer].SetPos(SetPos);
 		this[CntPlayer].SetFieldNorVec(FieldNorVec);
 		this[CntPlayer].SetQ(CntPlayer);
-		this[CntPlayer].SetCamera(CntPlayer);
+		this[CntPlayer].SetCamera(CntPlayer, false);
 
 		D3DXVECTOR3 HoudaiRot = this[CntPlayer].GetRot();
 		D3DXVECTOR3 HoutouRot = this[CntPlayer].parts[PARTSTYPE_HOUTOU].GetRot();
@@ -272,7 +272,7 @@ void PLAYER_HONTAI::Reinit(FIELD *field)
 		this[CntPlayer].SetPos(SetPos);
 		this[CntPlayer].SetFieldNorVec(FieldNorVec);
 		this[CntPlayer].SetQ(CntPlayer);
-		this[CntPlayer].SetCamera(CntPlayer);
+		this[CntPlayer].SetCamera(CntPlayer,false);
 
 		D3DXVECTOR3 HoudaiRot = this[CntPlayer].GetRot();
 		D3DXVECTOR3 HoutouRot = this[CntPlayer].parts[PARTSTYPE_HOUTOU].GetRot();
@@ -291,6 +291,14 @@ void PLAYER_HONTAI::Reinit(FIELD *field)
 }
 
 //=============================================================================
+// 再初期化処理 ネット対戦前
+//=============================================================================
+void PLAYER_HONTAI::ReinitNet(int MyNumber)
+{
+
+}
+
+//=============================================================================
 // 終了処理
 //=============================================================================
 void PLAYER_HONTAI::Uninit(void)
@@ -301,7 +309,7 @@ void PLAYER_HONTAI::Uninit(void)
 //=============================================================================
 // プレイヤー更新処理
 //=============================================================================
-void PLAYER_HONTAI::Update(EFFECT*effect,BULLET*bullet, SHADOW*shadow,FADE *fade)
+void PLAYER_HONTAI::Update(EFFECT*effect, BULLET*bullet, SHADOW*shadow, FADE *fade, bool Netflag, int MyNumber)
 {
 	//何人死んだか計算。三人死んだらゲーム終了。次のシーンへ
 	int deadcnt = 0;
@@ -314,41 +322,82 @@ void PLAYER_HONTAI::Update(EFFECT*effect,BULLET*bullet, SHADOW*shadow,FADE *fade
 	}
 
 	//プレイヤー制御
-	//プレイヤー人数分ループ
-	for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
+	//プレイヤー人数分ループ ローカル対戦
+	if (Netflag == false)
 	{
-		bool use = this[CntPlayer].GetUse();
+		for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
+		{
+			bool use = this[CntPlayer].GetUse();
+			//生きていれば制御可能
+			if (use)
+			{
+				//this[CntPlayer].SetMoveL2R2(CntPlayer, Netflag);
+				this[0].SetMoveL(CntPlayer, &effect[0], Netflag);
+				this[0].SetQ(CntPlayer);
+				this[0].SetCamera(CntPlayer, Netflag);
+				//this[CntPlayer].SetBulletALLMoveL2R2Ver(CntPlayer);
+				this[0].SetBulletALL(CntPlayer, &bullet[0], shadow, Netflag);
+				this[0].SetKiri(CntPlayer);
+				this[0].SetMorphing(CntPlayer);
+			}
+
+			//それ以外はカメラだけ制御
+			else
+			{
+				this[CntPlayer].SetQ(CntPlayer);
+
+				D3DXVECTOR3 SetPos = this[CntPlayer].GetPos();
+				D3DXVECTOR3 HoudaiRot = this[CntPlayer].GetRot();
+				D3DXVECTOR3 HoutouRot = this[CntPlayer].parts[PARTSTYPE_HOUTOU].GetRot();
+				D3DXVECTOR3 HousinRot = this[CntPlayer].parts[PARTSTYPE_HOUSIN].GetRot();
+
+				CAMERA *cam = GetCamera();
+				cam[CntPlayer].at.x = SetPos.x - (AT_W_CAM * sinf(HoudaiRot.y + HoutouRot.y));
+				cam[CntPlayer].at.y = SetPos.y + (HousinRot.x*100.0f);
+				cam[CntPlayer].at.z = SetPos.z - (AT_W_CAM * cosf(HoudaiRot.y + HoutouRot.y));
+
+				cam[CntPlayer].pos.x = SetPos.x + sinf(HoudaiRot.y + HoutouRot.y) * cam[CntPlayer].len;
+				cam[CntPlayer].pos.y = SetPos.y + POS_H_CAM;
+				cam[CntPlayer].pos.z = SetPos.z + cosf(HoudaiRot.y + HoutouRot.y) * cam[CntPlayer].len;
+			}
+		}
+	}
+
+	//ネット対戦
+	else
+	{
+		bool use = this[MyNumber].GetUse();
 		//生きていれば制御可能
 		if (use)
 		{
-			//this[CntPlayer].SetMoveL2R2(CntPlayer);
-			this[0].SetMoveL(CntPlayer, &effect[0]);
-			this[0].SetQ(CntPlayer);
-			this[0].SetCamera(CntPlayer);
-			//this[CntPlayer].SetBulletALLMoveL2R2Ver(CntPlayer);
-			this[0].SetBulletALL(CntPlayer,&bullet[0], shadow);
-			this[0].SetKiri(CntPlayer);
-			this[0].SetMorphing(CntPlayer);
+			//this[MyNumber].SetMoveL2R2(MyNumber, Netflag);
+			this[0].SetMoveL(MyNumber, &effect[0], Netflag);
+			this[0].SetQ(MyNumber);
+			this[0].SetCamera(MyNumber, Netflag);
+			//this[MyNumber].SetBulletALLMoveL2R2Ver(MyNumber);
+			this[0].SetBulletALL(MyNumber, &bullet[0], shadow, Netflag);
+			this[0].SetKiri(MyNumber);
+			this[0].SetMorphing(MyNumber);
 		}
 
 		//それ以外はカメラだけ制御
 		else
 		{
-			this[CntPlayer].SetQ(CntPlayer);
+			this[MyNumber].SetQ(MyNumber);
 
-			D3DXVECTOR3 SetPos = this[CntPlayer].GetPos();
-			D3DXVECTOR3 HoudaiRot = this[CntPlayer].GetRot();
-			D3DXVECTOR3 HoutouRot = this[CntPlayer].parts[PARTSTYPE_HOUTOU].GetRot();
-			D3DXVECTOR3 HousinRot = this[CntPlayer].parts[PARTSTYPE_HOUSIN].GetRot();
+			D3DXVECTOR3 SetPos = this[MyNumber].GetPos();
+			D3DXVECTOR3 HoudaiRot = this[MyNumber].GetRot();
+			D3DXVECTOR3 HoutouRot = this[MyNumber].parts[PARTSTYPE_HOUTOU].GetRot();
+			D3DXVECTOR3 HousinRot = this[MyNumber].parts[PARTSTYPE_HOUSIN].GetRot();
 
 			CAMERA *cam = GetCamera();
-			cam[CntPlayer].at.x = SetPos.x - (AT_W_CAM * sinf(HoudaiRot.y + HoutouRot.y));
-			cam[CntPlayer].at.y = SetPos.y + (HousinRot.x*100.0f);
-			cam[CntPlayer].at.z = SetPos.z - (AT_W_CAM * cosf(HoudaiRot.y + HoutouRot.y));
+			cam[MyNumber].at.x = SetPos.x - (AT_W_CAM * sinf(HoudaiRot.y + HoutouRot.y));
+			cam[MyNumber].at.y = SetPos.y + (HousinRot.x*100.0f);
+			cam[MyNumber].at.z = SetPos.z - (AT_W_CAM * cosf(HoudaiRot.y + HoutouRot.y));
 
-			cam[CntPlayer].pos.x = SetPos.x + sinf(HoudaiRot.y + HoutouRot.y) * cam[CntPlayer].len;
-			cam[CntPlayer].pos.y = SetPos.y + POS_H_CAM;
-			cam[CntPlayer].pos.z = SetPos.z + cosf(HoudaiRot.y + HoutouRot.y) * cam[CntPlayer].len;
+			cam[MyNumber].pos.x = SetPos.x + sinf(HoudaiRot.y + HoutouRot.y) * cam[MyNumber].len;
+			cam[MyNumber].pos.y = SetPos.y + POS_H_CAM;
+			cam[MyNumber].pos.z = SetPos.z + cosf(HoudaiRot.y + HoutouRot.y) * cam[MyNumber].len;
 		}
 	}
 }
@@ -758,61 +807,120 @@ void PLAYER_HONTAI::SetMoveABL(int CntPlayer, EFFECT *effect)
 }
 
 //=============================================================================
-// カメラ制御(ABボタンLスティックで移動制御)
+// カメラ制御(Lスティックで移動制御)
 //=============================================================================
-void PLAYER_HONTAI::SetCamera(int CntPlayer)
+void PLAYER_HONTAI::SetCamera(int CntPlayer, bool Netflag)
 {
-	//---------------------------------------------------------オブジェクト値呼び出し
-	D3DXVECTOR3 pos = this[CntPlayer].GetPos();
-	D3DXVECTOR3 HoudaiRot = this[CntPlayer].GetRot();
-	D3DXVECTOR3 HoutouRot = this[CntPlayer].parts[PARTSTYPE_HOUTOU].GetRot();
-	D3DXVECTOR3 HousinRot = this[CntPlayer].parts[PARTSTYPE_HOUSIN].GetRot();
-
-	CAMERA *cam = GetCamera();
-	//バックカメラ処理
-	//バックカメラオン　カメラ視点、注視点
-	//Yボタンを押しているもしくは、バックカメラアイテムがONになっているときはカメラ反転
-	if (IsButtonPressed(CntPlayer, BUTTON_Y) || this[CntPlayer].BackCameraItemSignal == true)
+	if (Netflag == false)
 	{
-		cam[CntPlayer].at.x = pos.x + (AT_W_CAM * sinf(HoudaiRot.y + HoutouRot.y));
-		cam[CntPlayer].at.y = pos.y + (HousinRot.x*100.0f);
-		cam[CntPlayer].at.z = pos.z + (AT_W_CAM * cosf(HoudaiRot.y + HoutouRot.y));
+		//---------------------------------------------------------オブジェクト値呼び出し
+		D3DXVECTOR3 pos = this[CntPlayer].GetPos();
+		D3DXVECTOR3 HoudaiRot = this[CntPlayer].GetRot();
+		D3DXVECTOR3 HoutouRot = this[CntPlayer].parts[PARTSTYPE_HOUTOU].GetRot();
+		D3DXVECTOR3 HousinRot = this[CntPlayer].parts[PARTSTYPE_HOUSIN].GetRot();
 
-		cam[CntPlayer].pos.x = pos.x - sinf(HoudaiRot.y + HoutouRot.y) * cam[CntPlayer].len;
-		cam[CntPlayer].pos.y = pos.y + POS_H_CAM;
-		cam[CntPlayer].pos.z = pos.z - cosf(HoudaiRot.y + HoutouRot.y) * cam[CntPlayer].len;
+		CAMERA *cam = GetCamera();
+		//バックカメラ処理
+		//バックカメラオン　カメラ視点、注視点
+		//Yボタンを押しているもしくは、バックカメラアイテムがONになっているときはカメラ反転
+		if (IsButtonPressed(CntPlayer, BUTTON_Y) || this[CntPlayer].BackCameraItemSignal == true)
+		{
+			cam[CntPlayer].at.x = pos.x + (AT_W_CAM * sinf(HoudaiRot.y + HoutouRot.y));
+			cam[CntPlayer].at.y = pos.y + (HousinRot.x*100.0f);
+			cam[CntPlayer].at.z = pos.z + (AT_W_CAM * cosf(HoudaiRot.y + HoutouRot.y));
+
+			cam[CntPlayer].pos.x = pos.x - sinf(HoudaiRot.y + HoutouRot.y) * cam[CntPlayer].len;
+			cam[CntPlayer].pos.y = pos.y + POS_H_CAM;
+			cam[CntPlayer].pos.z = pos.z - cosf(HoudaiRot.y + HoutouRot.y) * cam[CntPlayer].len;
+		}
+		//バックカメラオフ　カメラ視点、注視点
+		//それ以外は通常カメラ
+		else
+		{
+			cam[CntPlayer].at.x = pos.x - (AT_W_CAM * sinf(HoudaiRot.y + HoutouRot.y));
+			cam[CntPlayer].at.y = pos.y + (HousinRot.x*100.0f);
+			cam[CntPlayer].at.z = pos.z - (AT_W_CAM * cosf(HoudaiRot.y + HoutouRot.y));
+
+			cam[CntPlayer].pos.x = pos.x + sinf(HoudaiRot.y + HoutouRot.y) * cam[CntPlayer].len;
+			cam[CntPlayer].pos.y = pos.y + POS_H_CAM;
+			cam[CntPlayer].pos.z = pos.z + cosf(HoudaiRot.y + HoutouRot.y) * cam[CntPlayer].len;
+		}
+		//もし、バックカメラアイテムがONの時にYを押すと通常カメラになる
+		if (this[CntPlayer].BackCameraItemSignal == true && IsButtonPressed(CntPlayer, BUTTON_Y))
+		{
+			cam[CntPlayer].at.x = pos.x - (AT_W_CAM * sinf(HoudaiRot.y + HoutouRot.y));
+			cam[CntPlayer].at.y = pos.y + (HousinRot.x*100.0f);
+			cam[CntPlayer].at.z = pos.z - (AT_W_CAM * cosf(HoudaiRot.y + HoutouRot.y));
+
+			cam[CntPlayer].pos.x = pos.x + sinf(HoudaiRot.y + HoutouRot.y) * cam[CntPlayer].len;
+			cam[CntPlayer].pos.y = pos.y + POS_H_CAM;
+			cam[CntPlayer].pos.z = pos.z + cosf(HoudaiRot.y + HoutouRot.y) * cam[CntPlayer].len;
+		}
+		//バックカメラの時間処理
+		if (this[CntPlayer].BackCameraItemSignal == true)
+		{
+			this[CntPlayer].BackCameraItemTime += 1.0f;
+			if (this[CntPlayer].BackCameraItemTime >= BACKCAMERA_TIME)
+			{
+				this[CntPlayer].BackCameraItemTime = 0.0f;
+				this[CntPlayer].BackCameraItemSignal = false;
+			}
+		}
 	}
-	//バックカメラオフ　カメラ視点、注視点
-	//それ以外は通常カメラ
 	else
 	{
-		cam[CntPlayer].at.x = pos.x - (AT_W_CAM * sinf(HoudaiRot.y + HoutouRot.y));
-		cam[CntPlayer].at.y = pos.y + (HousinRot.x*100.0f);
-		cam[CntPlayer].at.z = pos.z - (AT_W_CAM * cosf(HoudaiRot.y + HoutouRot.y));
+		//---------------------------------------------------------オブジェクト値呼び出し
+		D3DXVECTOR3 pos = this[CntPlayer].GetPos();
+		D3DXVECTOR3 HoudaiRot = this[CntPlayer].GetRot();
+		D3DXVECTOR3 HoutouRot = this[CntPlayer].parts[PARTSTYPE_HOUTOU].GetRot();
+		D3DXVECTOR3 HousinRot = this[CntPlayer].parts[PARTSTYPE_HOUSIN].GetRot();
 
-		cam[CntPlayer].pos.x = pos.x + sinf(HoudaiRot.y + HoutouRot.y) * cam[CntPlayer].len;
-		cam[CntPlayer].pos.y = pos.y + POS_H_CAM;
-		cam[CntPlayer].pos.z = pos.z + cosf(HoudaiRot.y + HoutouRot.y) * cam[CntPlayer].len;
-	}
-	//もし、バックカメラアイテムがONの時にYを押すと通常カメラになる
-	if (this[CntPlayer].BackCameraItemSignal == true && IsButtonPressed(CntPlayer, BUTTON_Y))
-	{
-		cam[CntPlayer].at.x = pos.x - (AT_W_CAM * sinf(HoudaiRot.y + HoutouRot.y));
-		cam[CntPlayer].at.y = pos.y + (HousinRot.x*100.0f);
-		cam[CntPlayer].at.z = pos.z - (AT_W_CAM * cosf(HoudaiRot.y + HoutouRot.y));
-
-		cam[CntPlayer].pos.x = pos.x + sinf(HoudaiRot.y + HoutouRot.y) * cam[CntPlayer].len;
-		cam[CntPlayer].pos.y = pos.y + POS_H_CAM;
-		cam[CntPlayer].pos.z = pos.z + cosf(HoudaiRot.y + HoutouRot.y) * cam[CntPlayer].len;
-	}
-	//バックカメラの時間処理
-	if (this[CntPlayer].BackCameraItemSignal == true)
-	{
-		this[CntPlayer].BackCameraItemTime += 1.0f;
-		if (this[CntPlayer].BackCameraItemTime >= BACKCAMERA_TIME)
+		CAMERA *cam = GetCamera();
+		//バックカメラ処理
+		//バックカメラオン　カメラ視点、注視点
+		//Yボタンを押しているもしくは、バックカメラアイテムがONになっているときはカメラ反転
+		if (IsButtonPressed(0, BUTTON_Y) || this[CntPlayer].BackCameraItemSignal == true)
 		{
-			this[CntPlayer].BackCameraItemTime = 0.0f;
-			this[CntPlayer].BackCameraItemSignal = false;
+			cam[CntPlayer].at.x = pos.x + (AT_W_CAM * sinf(HoudaiRot.y + HoutouRot.y));
+			cam[CntPlayer].at.y = pos.y + (HousinRot.x*100.0f);
+			cam[CntPlayer].at.z = pos.z + (AT_W_CAM * cosf(HoudaiRot.y + HoutouRot.y));
+
+			cam[CntPlayer].pos.x = pos.x - sinf(HoudaiRot.y + HoutouRot.y) * cam[CntPlayer].len;
+			cam[CntPlayer].pos.y = pos.y + POS_H_CAM;
+			cam[CntPlayer].pos.z = pos.z - cosf(HoudaiRot.y + HoutouRot.y) * cam[CntPlayer].len;
+		}
+		//バックカメラオフ　カメラ視点、注視点
+		//それ以外は通常カメラ
+		else
+		{
+			cam[CntPlayer].at.x = pos.x - (AT_W_CAM * sinf(HoudaiRot.y + HoutouRot.y));
+			cam[CntPlayer].at.y = pos.y + (HousinRot.x*100.0f);
+			cam[CntPlayer].at.z = pos.z - (AT_W_CAM * cosf(HoudaiRot.y + HoutouRot.y));
+
+			cam[CntPlayer].pos.x = pos.x + sinf(HoudaiRot.y + HoutouRot.y) * cam[CntPlayer].len;
+			cam[CntPlayer].pos.y = pos.y + POS_H_CAM;
+			cam[CntPlayer].pos.z = pos.z + cosf(HoudaiRot.y + HoutouRot.y) * cam[CntPlayer].len;
+		}
+		//もし、バックカメラアイテムがONの時にYを押すと通常カメラになる
+		if (this[CntPlayer].BackCameraItemSignal == true && IsButtonPressed(CntPlayer, BUTTON_Y))
+		{
+			cam[CntPlayer].at.x = pos.x - (AT_W_CAM * sinf(HoudaiRot.y + HoutouRot.y));
+			cam[CntPlayer].at.y = pos.y + (HousinRot.x*100.0f);
+			cam[CntPlayer].at.z = pos.z - (AT_W_CAM * cosf(HoudaiRot.y + HoutouRot.y));
+
+			cam[CntPlayer].pos.x = pos.x + sinf(HoudaiRot.y + HoutouRot.y) * cam[CntPlayer].len;
+			cam[CntPlayer].pos.y = pos.y + POS_H_CAM;
+			cam[CntPlayer].pos.z = pos.z + cosf(HoudaiRot.y + HoutouRot.y) * cam[CntPlayer].len;
+		}
+		//バックカメラの時間処理
+		if (this[CntPlayer].BackCameraItemSignal == true)
+		{
+			this[CntPlayer].BackCameraItemTime += 1.0f;
+			if (this[CntPlayer].BackCameraItemTime >= BACKCAMERA_TIME)
+			{
+				this[CntPlayer].BackCameraItemTime = 0.0f;
+				this[CntPlayer].BackCameraItemSignal = false;
+			}
 		}
 	}
 }
@@ -820,257 +928,497 @@ void PLAYER_HONTAI::SetCamera(int CntPlayer)
 //=============================================================================
 // 移動制御(Lスティックで移動制御)
 //=============================================================================
-void PLAYER_HONTAI::SetMoveL(int CntPlayer, EFFECT *effect)
+void PLAYER_HONTAI::SetMoveL(int CntPlayer, EFFECT *effect, bool Netflag)
 {
-	//---------------------------------------------------------オブジェクト値呼び出し
-	D3DXVECTOR3 pos = this[CntPlayer].GetPos();
-	D3DXVECTOR3 move = this[CntPlayer].GetMove();
-	D3DXVECTOR3 HoudaiRot = this[CntPlayer].GetRot();
-
-	//座標を保存
-	this[CntPlayer].SetOldPos(pos);
-
-	int dir = FRONT_VEC;
-
-	//移動変化はLスティックアナログ値を使用
-	float LAnalogX = 0.0f;		//縦入力
-	float LAnalogY = 0.0f;		//横入力
-	float DashRate = 1.0f;		//スピードアップレート
-
-	//ダッシュ判定
-	if (this[CntPlayer].speedbuffsignal == true)
+	if (Netflag == false)
 	{
-		//スピードバフ時間減少
-		this[CntPlayer].speedbufftime -= VALUE_SPEEDBUFF_SUB;
-		this[CntPlayer].dashFlag = true;
+		//---------------------------------------------------------オブジェクト値呼び出し
+		D3DXVECTOR3 pos = this[CntPlayer].GetPos();
+		D3DXVECTOR3 move = this[CntPlayer].GetMove();
+		D3DXVECTOR3 HoudaiRot = this[CntPlayer].GetRot();
 
-		// エフェクトスピードアップの生成
-		D3DXVECTOR3 EffctSpeedupPos = pos;
-		effect->SetEffect(EffctSpeedupPos, D3DXVECTOR3(0.0f, 0.0f, 0.0f), PLAYER_COLOR[CntPlayer], EFFECT_SPEEDUP_SIZE_X, EFFECT_SPEEDUP_SIZE_Y, EFFECT_SPEEDUP_TIME);
+		//座標を保存
+		this[CntPlayer].SetOldPos(pos);
 
-		if (this[CntPlayer].speedbufftime <= 0.0f)
+		int dir = FRONT_VEC;
+
+		//移動変化はLスティックアナログ値を使用
+		float LAnalogX = 0.0f;		//縦入力
+		float LAnalogY = 0.0f;		//横入力
+		float DashRate = 1.0f;		//スピードアップレート
+
+		//ダッシュ判定
+		if (this[CntPlayer].speedbuffsignal == true)
+		{
+			//スピードバフ時間減少
+			this[CntPlayer].speedbufftime -= VALUE_SPEEDBUFF_SUB;
+			this[CntPlayer].dashFlag = true;
+
+			// エフェクトスピードアップの生成
+			D3DXVECTOR3 EffctSpeedupPos = pos;
+			effect->SetEffect(EffctSpeedupPos, D3DXVECTOR3(0.0f, 0.0f, 0.0f), PLAYER_COLOR[CntPlayer], EFFECT_SPEEDUP_SIZE_X, EFFECT_SPEEDUP_SIZE_Y, EFFECT_SPEEDUP_TIME);
+
+			if (this[CntPlayer].speedbufftime <= 0.0f)
+			{
+				this[CntPlayer].dashFlag = false;
+				this[CntPlayer].speedbuffsignal = false;
+			}
+		}
+
+
+		if (this[CntPlayer].dashFlag == true)
+		{
+			DashRate = PLAYER_VALUE_DASHRATE;
+		}
+
+		//移動処理
+		if (IsButtonPressed(CntPlayer, BUTTON_ANALOG_L_UP) || IsButtonPressed(CntPlayer, BUTTON_ANALOG_L_DOWN) ||
+			IsButtonPressed(CntPlayer, BUTTON_ANALOG_L_LEFT) || IsButtonPressed(CntPlayer, BUTTON_ANALOG_L_RIGHT))
+		{
+			DIJOYSTATE2 *Button = GetIsButton(CntPlayer);
+
+			LAnalogX = float(Button->lX * PLAYER_MOVE_RATE_X);
+			LAnalogY = float(Button->lY * PLAYER_MOVE_RATE_Y * DashRate);
+			dir = FRONT_VEC;
+		}
+		//旋回入力は後退中に限りリバースする
+		if (IsButtonPressed(CntPlayer, BUTTON_ANALOG_L_DOWN))
+		{
+			dir = BACK_VEC;
+		}
+		// 無移動時は移動量に慣性をかける
+		else
 		{
 			this[CntPlayer].dashFlag = false;
-			this[CntPlayer].speedbuffsignal = false;
 		}
-	}
+		if (LAnalogY > 0.0f) LAnalogX *= -1;
 
+		//移動量を反映
+		HoudaiRot.y += LAnalogX * dir;
+		move.x = LAnalogY * sinf(HoudaiRot.y);
+		move.z = LAnalogY * cosf(HoudaiRot.y);
 
-	if (this[CntPlayer].dashFlag == true)
-	{
-		DashRate = PLAYER_VALUE_DASHRATE;
-	}
+		//プレイヤー座標を更新
+		pos += move;
 
-	//移動処理
-	if (IsButtonPressed(CntPlayer, BUTTON_ANALOG_L_UP) || IsButtonPressed(CntPlayer, BUTTON_ANALOG_L_DOWN) ||
-		IsButtonPressed(CntPlayer, BUTTON_ANALOG_L_LEFT) || IsButtonPressed(CntPlayer, BUTTON_ANALOG_L_RIGHT))
-	{
-		DIJOYSTATE2 *Button = GetIsButton(CntPlayer);
+		//---------------------------------------------------------オブジェクト値セット
+		this[CntPlayer].SetPos(pos);
+		this[CntPlayer].SetRot(HoudaiRot);
 
-		LAnalogX = float(Button->lX * PLAYER_MOVE_RATE_X);
-		LAnalogY = float(Button->lY * PLAYER_MOVE_RATE_Y * DashRate);
-		dir = FRONT_VEC;
+		SetCameraR(CntPlayer, Netflag);
 	}
-	//旋回入力は後退中に限りリバースする
-	if (IsButtonPressed(CntPlayer, BUTTON_ANALOG_L_DOWN))
-	{
-		dir = BACK_VEC;
-	}
-	// 無移動時は移動量に慣性をかける
 	else
 	{
-		this[CntPlayer].dashFlag = false;
+		//---------------------------------------------------------オブジェクト値呼び出し
+		D3DXVECTOR3 pos = this[CntPlayer].GetPos();
+		D3DXVECTOR3 move = this[CntPlayer].GetMove();
+		D3DXVECTOR3 HoudaiRot = this[CntPlayer].GetRot();
+
+		//座標を保存
+		this[CntPlayer].SetOldPos(pos);
+
+		int dir = FRONT_VEC;
+
+		//移動変化はLスティックアナログ値を使用
+		float LAnalogX = 0.0f;		//縦入力
+		float LAnalogY = 0.0f;		//横入力
+		float DashRate = 1.0f;		//スピードアップレート
+
+		//ダッシュ判定
+		if (this[CntPlayer].speedbuffsignal == true)
+		{
+			//スピードバフ時間減少
+			this[CntPlayer].speedbufftime -= VALUE_SPEEDBUFF_SUB;
+			this[CntPlayer].dashFlag = true;
+
+			// エフェクトスピードアップの生成
+			D3DXVECTOR3 EffctSpeedupPos = pos;
+			effect->SetEffect(EffctSpeedupPos, D3DXVECTOR3(0.0f, 0.0f, 0.0f), PLAYER_COLOR[CntPlayer], EFFECT_SPEEDUP_SIZE_X, EFFECT_SPEEDUP_SIZE_Y, EFFECT_SPEEDUP_TIME);
+
+			if (this[CntPlayer].speedbufftime <= 0.0f)
+			{
+				this[CntPlayer].dashFlag = false;
+				this[CntPlayer].speedbuffsignal = false;
+			}
+		}
+
+
+		if (this[CntPlayer].dashFlag == true)
+		{
+			DashRate = PLAYER_VALUE_DASHRATE;
+		}
+
+		//移動処理
+		if (IsButtonPressed(0, BUTTON_ANALOG_L_UP) || IsButtonPressed(0, BUTTON_ANALOG_L_DOWN) ||
+			IsButtonPressed(0, BUTTON_ANALOG_L_LEFT) || IsButtonPressed(0, BUTTON_ANALOG_L_RIGHT))
+		{
+			DIJOYSTATE2 *Button = GetIsButton(0);
+
+			LAnalogX = float(Button->lX * PLAYER_MOVE_RATE_X);
+			LAnalogY = float(Button->lY * PLAYER_MOVE_RATE_Y * DashRate);
+			dir = FRONT_VEC;
+		}
+		//旋回入力は後退中に限りリバースする
+		if (IsButtonPressed(0, BUTTON_ANALOG_L_DOWN))
+		{
+			dir = BACK_VEC;
+		}
+		// 無移動時は移動量に慣性をかける
+		else
+		{
+			this[CntPlayer].dashFlag = false;
+		}
+		if (LAnalogY > 0.0f) LAnalogX *= -1;
+
+		//移動量を反映
+		HoudaiRot.y += LAnalogX * dir;
+		move.x = LAnalogY * sinf(HoudaiRot.y);
+		move.z = LAnalogY * cosf(HoudaiRot.y);
+
+		//プレイヤー座標を更新
+		pos += move;
+
+		//---------------------------------------------------------オブジェクト値セット
+		this[CntPlayer].SetPos(pos);
+		this[CntPlayer].SetRot(HoudaiRot);
+
+		SetCameraR(CntPlayer, Netflag);
+
 	}
-	if (LAnalogY > 0.0f) LAnalogX *= -1;
-
-	//移動量を反映
-	HoudaiRot.y += LAnalogX * dir;
-	move.x = LAnalogY * sinf(HoudaiRot.y);
-	move.z = LAnalogY * cosf(HoudaiRot.y);
-
-	//プレイヤー座標を更新
-	pos += move;
-
-	//---------------------------------------------------------オブジェクト値セット
-	this[CntPlayer].SetPos(pos);
-	this[CntPlayer].SetRot(HoudaiRot);
-
-	SetCameraR(CntPlayer);
 }
 
 //=============================================================================
 // カメラ制御(Rスティックで制御)
 //=============================================================================
-void PLAYER_HONTAI::SetCameraR(int CntPlayer)
+void PLAYER_HONTAI::SetCameraR(int CntPlayer, bool Netflag)
 {
-	//---------------------------------------------------------オブジェクト値呼び出し
-	D3DXVECTOR3 HoutouRot = this[CntPlayer].parts[PARTSTYPE_HOUTOU].GetRot();
-	D3DXVECTOR3 HousinRot = this[CntPlayer].parts[PARTSTYPE_HOUSIN].GetRot();
-
-	CAMERA *cam = GetCamera();
-
-	//視野角変化はRスティックアナログ値を使用
-	float RAnalogX = 0.0f;		//縦入力
-	float RAnalogY = 0.0f;		//横入力
-
-	//視野角処理
-	if (IsButtonPressed(CntPlayer, BUTTON_ANALOG_R_UP) || IsButtonPressed(CntPlayer, BUTTON_ANALOG_R_DOWN) ||
-		IsButtonPressed(CntPlayer, BUTTON_ANALOG_R_LEFT) || IsButtonPressed(CntPlayer, BUTTON_ANALOG_R_RIGHT))
+	if (Netflag == false)
 	{
-		DIJOYSTATE2 *Button = GetIsButton(CntPlayer);
-		//入力中央値32000　最小0　最大64000
-		//なので-32000することで　中央値0　最小-32000　最大32000にしている
-		//rotに32000とかバカ高い数値を入れるとぶっ飛ぶので、さらに入力値を小さくする
-		//最大0.03くらいになるよう調整　/1000000する(操作しやすい値でいい)
-		RAnalogX = float(Button->lRx) - 32000.0f;
-		RAnalogY = float(Button->lRy) - 32800.0f;
+		//---------------------------------------------------------オブジェクト値呼び出し
+		D3DXVECTOR3 HoutouRot = this[CntPlayer].parts[PARTSTYPE_HOUTOU].GetRot();
+		D3DXVECTOR3 HousinRot = this[CntPlayer].parts[PARTSTYPE_HOUSIN].GetRot();
 
-		RAnalogX = RAnalogX / 1000000.0f;
-		RAnalogY = RAnalogY / 1000000.0f;
+		CAMERA *cam = GetCamera();
 
+		//視野角変化はRスティックアナログ値を使用
+		float RAnalogX = 0.0f;		//縦入力
+		float RAnalogY = 0.0f;		//横入力
+
+		//視野角処理
+		if (IsButtonPressed(CntPlayer, BUTTON_ANALOG_R_UP) || IsButtonPressed(CntPlayer, BUTTON_ANALOG_R_DOWN) ||
+			IsButtonPressed(CntPlayer, BUTTON_ANALOG_R_LEFT) || IsButtonPressed(CntPlayer, BUTTON_ANALOG_R_RIGHT))
+		{
+			DIJOYSTATE2 *Button = GetIsButton(CntPlayer);
+			//入力中央値32000　最小0　最大64000
+			//なので-32000することで　中央値0　最小-32000　最大32000にしている
+			//rotに32000とかバカ高い数値を入れるとぶっ飛ぶので、さらに入力値を小さくする
+			//最大0.03くらいになるよう調整　/1000000する(操作しやすい値でいい)
+			RAnalogX = float(Button->lRx) - 32000.0f;
+			RAnalogY = float(Button->lRy) - 32800.0f;
+
+			RAnalogX = RAnalogX / 1000000.0f;
+			RAnalogY = RAnalogY / 1000000.0f;
+
+		}
+
+		//回転量を反映
+		D3DXVECTOR3 moverot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		moverot.y = RAnalogX;
+		moverot.x = -RAnalogY;
+
+
+		HoutouRot.y += moverot.y;
+		HousinRot.x += moverot.x;
+
+		//角度の制限値
+		{
+			if (HousinRot.x >= 0.3f)
+			{
+				HousinRot.x = 0.3f;
+			}
+			else if (HousinRot.x <= -0.3f)
+			{
+				HousinRot.x = -0.3f;
+			}
+		}
+
+		//---------------------------------------------------------オブジェクト値セット
+		this[CntPlayer].parts[PARTSTYPE_HOUTOU].SetRot(HoutouRot);
+		this[CntPlayer].parts[PARTSTYPE_HOUSIN].SetRot(HousinRot);
+
+
+		////カメラの視点更新
+		//cam[CntPlayer].pos.x = this[CntPlayer].pos.x - (POS_W_CAM * cosf(-this[CntPlayer].rot.y));
+		//cam[CntPlayer].pos.y = this[CntPlayer].pos.y + (POS_H_CAM);
+		//cam[CntPlayer].pos.z = this[CntPlayer].pos.z - (POS_W_CAM * sinf(-this[CntPlayer].rot.y));
+		////カメラの注視点を更新
+		////テクニック　カメラ注視点制御で回転軸atrotXを上げまくっても、それだけでは真上を向かない。
+		////atrotXの増減に比例してatXZ値も減少させていかないと真下真上を見るような注視点を制御できない
+		//cam[CntPlayer].at.x = cam[CntPlayer].pos.x + (POS_W_CAM * sinf(this[CntPlayer].rot.y));
+		//cam[CntPlayer].at.y = cam[CntPlayer].pos.y - (POS_H_CAM * sinf(this[CntPlayer].atrot.x));
+		//cam[CntPlayer].at.z = cam[CntPlayer].pos.z + (POS_W_CAM * cosf(this[CntPlayer].rot.y));
 	}
-
-	//回転量を反映
-	D3DXVECTOR3 moverot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-	moverot.y = RAnalogX;
-	moverot.x = -RAnalogY;
-
-
-	HoutouRot.y += moverot.y;
-	HousinRot.x += moverot.x;
-
-	//角度の制限値
+	else
 	{
-		if (HousinRot.x >= 0.3f)
+		//---------------------------------------------------------オブジェクト値呼び出し
+		D3DXVECTOR3 HoutouRot = this[CntPlayer].parts[PARTSTYPE_HOUTOU].GetRot();
+		D3DXVECTOR3 HousinRot = this[CntPlayer].parts[PARTSTYPE_HOUSIN].GetRot();
+
+		CAMERA *cam = GetCamera();
+
+		//視野角変化はRスティックアナログ値を使用
+		float RAnalogX = 0.0f;		//縦入力
+		float RAnalogY = 0.0f;		//横入力
+
+		//視野角処理
+		if (IsButtonPressed(0, BUTTON_ANALOG_R_UP) || IsButtonPressed(0, BUTTON_ANALOG_R_DOWN) ||
+			IsButtonPressed(0, BUTTON_ANALOG_R_LEFT) || IsButtonPressed(0, BUTTON_ANALOG_R_RIGHT))
 		{
-			HousinRot.x = 0.3f;
+			DIJOYSTATE2 *Button = GetIsButton(0);
+			//入力中央値32000　最小0　最大64000
+			//なので-32000することで　中央値0　最小-32000　最大32000にしている
+			//rotに32000とかバカ高い数値を入れるとぶっ飛ぶので、さらに入力値を小さくする
+			//最大0.03くらいになるよう調整　/1000000する(操作しやすい値でいい)
+			RAnalogX = float(Button->lRx) - 32000.0f;
+			RAnalogY = float(Button->lRy) - 32800.0f;
+
+			RAnalogX = RAnalogX / 1000000.0f;
+			RAnalogY = RAnalogY / 1000000.0f;
+
 		}
-		else if (HousinRot.x <= -0.3f)
+
+		//回転量を反映
+		D3DXVECTOR3 moverot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		moverot.y = RAnalogX;
+		moverot.x = -RAnalogY;
+
+
+		HoutouRot.y += moverot.y;
+		HousinRot.x += moverot.x;
+
+		//角度の制限値
 		{
-			HousinRot.x = -0.3f;
+			if (HousinRot.x >= 0.3f)
+			{
+				HousinRot.x = 0.3f;
+			}
+			else if (HousinRot.x <= -0.3f)
+			{
+				HousinRot.x = -0.3f;
+			}
 		}
+
+		//---------------------------------------------------------オブジェクト値セット
+		this[CntPlayer].parts[PARTSTYPE_HOUTOU].SetRot(HoutouRot);
+		this[CntPlayer].parts[PARTSTYPE_HOUSIN].SetRot(HousinRot);
 	}
-
-	//---------------------------------------------------------オブジェクト値セット
-	this[CntPlayer].parts[PARTSTYPE_HOUTOU].SetRot(HoutouRot);
-	this[CntPlayer].parts[PARTSTYPE_HOUSIN].SetRot(HousinRot);
-
-
-	////カメラの視点更新
-	//cam[CntPlayer].pos.x = this[CntPlayer].pos.x - (POS_W_CAM * cosf(-this[CntPlayer].rot.y));
-	//cam[CntPlayer].pos.y = this[CntPlayer].pos.y + (POS_H_CAM);
-	//cam[CntPlayer].pos.z = this[CntPlayer].pos.z - (POS_W_CAM * sinf(-this[CntPlayer].rot.y));
-	////カメラの注視点を更新
-	////テクニック　カメラ注視点制御で回転軸atrotXを上げまくっても、それだけでは真上を向かない。
-	////atrotXの増減に比例してatXZ値も減少させていかないと真下真上を見るような注視点を制御できない
-	////対策はまだ思いついてない。atrotXの値が大きいほどrotYの影響を小さくする。
-	//cam[CntPlayer].at.x = cam[CntPlayer].pos.x + (POS_W_CAM * sinf(this[CntPlayer].rot.y));
-	//cam[CntPlayer].at.y = cam[CntPlayer].pos.y - (POS_H_CAM * sinf(this[CntPlayer].atrot.x));
-	//cam[CntPlayer].at.z = cam[CntPlayer].pos.z + (POS_W_CAM * cosf(this[CntPlayer].rot.y));
 }
 
 //=============================================================================
 // 移動制御(LRスティックでキャタピラ移動制御)
 //=============================================================================
-void PLAYER_HONTAI::SetMoveL2R2(int CntPlayer, EFFECT *effect)
+void PLAYER_HONTAI::SetMoveL2R2(int CntPlayer, EFFECT *effect, bool Netflag)
 {
-	//---------------------------------------------------------オブジェクト値呼び出し
-	D3DXVECTOR3 pos = this[CntPlayer].GetPos();
-	D3DXVECTOR3 move = this[CntPlayer].GetMove();
-	D3DXVECTOR3 HoudaiRot = this[CntPlayer].GetRot();
-
-	//座標を保存
-	this[CntPlayer].SetOldPos(pos);
-
-	//移動変化はLスティックアナログ値を使用
-	float L2 = 0.0f;		//縦入力
-	float R2 = 0.0f;		//横入力
-	float DashRate = 1.0f;		//スピードアップレート
-
-	//ダッシュ判定
-	if (this[CntPlayer].speedbuffsignal == true)
+	if (Netflag==false)
 	{
-		//スピードバフ時間減少
-		this[CntPlayer].speedbufftime -= VALUE_SPEEDBUFF_SUB;
-		this[CntPlayer].dashFlag = true;
+		//---------------------------------------------------------オブジェクト値呼び出し
+		D3DXVECTOR3 pos = this[CntPlayer].GetPos();
+		D3DXVECTOR3 move = this[CntPlayer].GetMove();
+		D3DXVECTOR3 HoudaiRot = this[CntPlayer].GetRot();
 
-		// エフェクトスピードアップの生成
-		D3DXVECTOR3 EffctSpeedupPos = pos;
-		effect->SetEffect(EffctSpeedupPos, D3DXVECTOR3(0.0f, 0.0f, 0.0f), PLAYER_COLOR[CntPlayer], EFFECT_SPEEDUP_SIZE_X, EFFECT_SPEEDUP_SIZE_Y, EFFECT_SPEEDUP_TIME);
+		//座標を保存
+		this[CntPlayer].SetOldPos(pos);
 
-		if (this[CntPlayer].speedbufftime <= 0.0f)
+		//移動変化はLスティックアナログ値を使用
+		float L2 = 0.0f;		//縦入力
+		float R2 = 0.0f;		//横入力
+		float DashRate = 1.0f;		//スピードアップレート
+
+		//ダッシュ判定
+		if (this[CntPlayer].speedbuffsignal == true)
+		{
+			//スピードバフ時間減少
+			this[CntPlayer].speedbufftime -= VALUE_SPEEDBUFF_SUB;
+			this[CntPlayer].dashFlag = true;
+
+			// エフェクトスピードアップの生成
+			D3DXVECTOR3 EffctSpeedupPos = pos;
+			effect->SetEffect(EffctSpeedupPos, D3DXVECTOR3(0.0f, 0.0f, 0.0f), PLAYER_COLOR[CntPlayer], EFFECT_SPEEDUP_SIZE_X, EFFECT_SPEEDUP_SIZE_Y, EFFECT_SPEEDUP_TIME);
+
+			if (this[CntPlayer].speedbufftime <= 0.0f)
+			{
+				this[CntPlayer].dashFlag = false;
+				this[CntPlayer].speedbuffsignal = false;
+			}
+		}
+
+		if (this[CntPlayer].dashFlag == true)
+		{
+			DashRate = PLAYER_VALUE_DASHRATE;
+		}
+
+		//左右のキャタピラを前進交代どちらかのフラグ
+		//両キャタピラ前進方向=0、左キャタピラのみ前進=3.925f、右キャタピラのみ前進=-3.925f、左キャタピラのみ後退=-0.785f、右キャタピラのみ後退=0.785f、
+		float Lrot = 3.925f;
+		float Rrot = -3.925f;
+		int Ldir = 1;
+		int Rdir = 1;
+		//移動処理
+		if (IsButtonPressed(CntPlayer, BUTTON_L1))
+		{
+			Lrot = -0.785f;
+			Ldir *= -1;
+		}
+		if (IsButtonPressed(CntPlayer, BUTTON_R1))
+		{
+			Rrot = 0.785f;
+			Rdir *= -1;
+		}
+
+		//両キャタピラ使用
+		if (IsButtonPressed(CntPlayer, BUTTON_L2) && IsButtonPressed(CntPlayer, BUTTON_R2))
+		{
+			DIJOYSTATE2 *Button = GetIsButton(CntPlayer);
+			//入力中央値32767　R2最小0　L2最大64000
+			L2 = float(Button->lZ * PLAYER_MOVE_RATE_LR2);
+			R2 = L2;
+
+		}
+		//左キャタピラのみ使用
+		else if (IsButtonPressed(CntPlayer, BUTTON_L2))
+		{
+			DIJOYSTATE2 *Button = GetIsButton(CntPlayer);
+			L2 = float(Button->lZ * PLAYER_MOVE_RATE_LR2);
+			HoudaiRot.y += 0.1f*Ldir;
+		}
+		//右キャタピラのみ使用
+		else if (IsButtonPressed(CntPlayer, BUTTON_R2))
+		{
+			DIJOYSTATE2 *Button = GetIsButton(CntPlayer);
+			float IZbuf = Button->lZ * PLAYER_MOVE_RATE_LR2;
+			R2 = IZbuf;
+			R2 = 32767 * PLAYER_MOVE_RATE_LR2 + (-R2) + 32767 * PLAYER_MOVE_RATE_LR2;
+			HoudaiRot.y -= 0.1f*Rdir;
+		}
+		// 無移動時は移動量に慣性をかける
+		else
 		{
 			this[CntPlayer].dashFlag = false;
-			this[CntPlayer].speedbuffsignal = false;
 		}
-	}
 
-	if (this[CntPlayer].dashFlag == true)
-	{
-		DashRate = PLAYER_VALUE_DASHRATE;
-	}
+		//移動量を反映
+		move.x = R2 * sinf(HoudaiRot.y + Rrot) + L2 * sinf(HoudaiRot.y + Lrot);
+		move.z = R2 * cosf(HoudaiRot.y + Rrot) + L2 * cosf(HoudaiRot.y + Lrot);
 
-	//左右のキャタピラを前進交代どちらかのフラグ
-	//両キャタピラ前進方向=0、左キャタピラのみ前進=3.925f、右キャタピラのみ前進=-3.925f、左キャタピラのみ後退=-0.785f、右キャタピラのみ後退=0.785f、
-	float Lrot = 3.925f;
-	float Rrot = -3.925f;
-	int Ldir = 1;
-	int Rdir = 1;
-	//移動処理
-	if (IsButtonPressed(CntPlayer, BUTTON_L1))
-	{
-		Lrot = -0.785f;
-		Ldir *= -1;
-	}
-	if (IsButtonPressed(CntPlayer, BUTTON_R1))
-	{
-		Rrot = 0.785f;
-		Rdir *= -1;
-	}
+		//プレイヤー座標を更新
+		pos += move;
 
-	//両キャタピラ使用
-	if (IsButtonPressed(CntPlayer, BUTTON_L2) && IsButtonPressed(CntPlayer, BUTTON_R2))
-	{
-		DIJOYSTATE2 *Button = GetIsButton(CntPlayer);
-		//入力中央値32767　R2最小0　L2最大64000
-		L2 = float(Button->lZ * PLAYER_MOVE_RATE_LR2);
-		R2 = L2;
-		
+		//---------------------------------------------------------オブジェクト値セット
+		this[CntPlayer].SetPos(pos);
+		this[CntPlayer].SetRot(HoudaiRot);
+
+		SetCameraR(CntPlayer, Netflag);
 	}
-	//左キャタピラのみ使用
-	else if (IsButtonPressed(CntPlayer, BUTTON_L2))
-	{
-		DIJOYSTATE2 *Button = GetIsButton(CntPlayer);
-		L2 = float(Button->lZ * PLAYER_MOVE_RATE_LR2);
-		HoudaiRot.y += 0.1f*Ldir;
-	}
-	//右キャタピラのみ使用
-	else if (IsButtonPressed(CntPlayer, BUTTON_R2))
-	{
-		DIJOYSTATE2 *Button = GetIsButton(CntPlayer);
-		float IZbuf = Button->lZ * PLAYER_MOVE_RATE_LR2;
-		R2 = IZbuf;
-		R2 = 32767 * PLAYER_MOVE_RATE_LR2 + (-R2)+ 32767 * PLAYER_MOVE_RATE_LR2;
-		HoudaiRot.y -= 0.1f*Rdir;
-	}
-	// 無移動時は移動量に慣性をかける
 	else
 	{
-		this[CntPlayer].dashFlag = false;
+		//---------------------------------------------------------オブジェクト値呼び出し
+		D3DXVECTOR3 pos = this[CntPlayer].GetPos();
+		D3DXVECTOR3 move = this[CntPlayer].GetMove();
+		D3DXVECTOR3 HoudaiRot = this[CntPlayer].GetRot();
+
+		//座標を保存
+		this[CntPlayer].SetOldPos(pos);
+
+		//移動変化はLスティックアナログ値を使用
+		float L2 = 0.0f;		//縦入力
+		float R2 = 0.0f;		//横入力
+		float DashRate = 1.0f;		//スピードアップレート
+
+		//ダッシュ判定
+		if (this[CntPlayer].speedbuffsignal == true)
+		{
+			//スピードバフ時間減少
+			this[CntPlayer].speedbufftime -= VALUE_SPEEDBUFF_SUB;
+			this[CntPlayer].dashFlag = true;
+
+			// エフェクトスピードアップの生成
+			D3DXVECTOR3 EffctSpeedupPos = pos;
+			effect->SetEffect(EffctSpeedupPos, D3DXVECTOR3(0.0f, 0.0f, 0.0f), PLAYER_COLOR[CntPlayer], EFFECT_SPEEDUP_SIZE_X, EFFECT_SPEEDUP_SIZE_Y, EFFECT_SPEEDUP_TIME);
+
+			if (this[CntPlayer].speedbufftime <= 0.0f)
+			{
+				this[CntPlayer].dashFlag = false;
+				this[CntPlayer].speedbuffsignal = false;
+			}
+		}
+
+		if (this[CntPlayer].dashFlag == true)
+		{
+			DashRate = PLAYER_VALUE_DASHRATE;
+		}
+
+		//左右のキャタピラを前進交代どちらかのフラグ
+		//両キャタピラ前進方向=0、左キャタピラのみ前進=3.925f、右キャタピラのみ前進=-3.925f、左キャタピラのみ後退=-0.785f、右キャタピラのみ後退=0.785f、
+		float Lrot = 3.925f;
+		float Rrot = -3.925f;
+		int Ldir = 1;
+		int Rdir = 1;
+		//移動処理
+		if (IsButtonPressed(0, BUTTON_L1))
+		{
+			Lrot = -0.785f;
+			Ldir *= -1;
+		}
+		if (IsButtonPressed(0, BUTTON_R1))
+		{
+			Rrot = 0.785f;
+			Rdir *= -1;
+		}
+
+		//両キャタピラ使用
+		if (IsButtonPressed(0, BUTTON_L2) && IsButtonPressed(0, BUTTON_R2))
+		{
+			DIJOYSTATE2 *Button = GetIsButton(0);
+			//入力中央値32767　R2最小0　L2最大64000
+			L2 = float(Button->lZ * PLAYER_MOVE_RATE_LR2);
+			R2 = L2;
+
+		}
+		//左キャタピラのみ使用
+		else if (IsButtonPressed(0, BUTTON_L2))
+		{
+			DIJOYSTATE2 *Button = GetIsButton(0);
+			L2 = float(Button->lZ * PLAYER_MOVE_RATE_LR2);
+			HoudaiRot.y += 0.1f*Ldir;
+		}
+		//右キャタピラのみ使用
+		else if (IsButtonPressed(0, BUTTON_R2))
+		{
+			DIJOYSTATE2 *Button = GetIsButton(0);
+			float IZbuf = Button->lZ * PLAYER_MOVE_RATE_LR2;
+			R2 = IZbuf;
+			R2 = 32767 * PLAYER_MOVE_RATE_LR2 + (-R2) + 32767 * PLAYER_MOVE_RATE_LR2;
+			HoudaiRot.y -= 0.1f*Rdir;
+		}
+		// 無移動時は移動量に慣性をかける
+		else
+		{
+			this[CntPlayer].dashFlag = false;
+		}
+
+		//移動量を反映
+		move.x = R2 * sinf(HoudaiRot.y + Rrot) + L2 * sinf(HoudaiRot.y + Lrot);
+		move.z = R2 * cosf(HoudaiRot.y + Rrot) + L2 * cosf(HoudaiRot.y + Lrot);
+
+		//プレイヤー座標を更新
+		pos += move;
+
+		//---------------------------------------------------------オブジェクト値セット
+		this[CntPlayer].SetPos(pos);
+		this[CntPlayer].SetRot(HoudaiRot);
+
+		SetCameraR(CntPlayer, Netflag);
 	}
-
-	//移動量を反映
-	move.x = R2 * sinf(HoudaiRot.y + Rrot) + L2 * sinf(HoudaiRot.y + Lrot);
-	move.z = R2 * cosf(HoudaiRot.y + Rrot) + L2 * cosf(HoudaiRot.y + Lrot);
-
-	//プレイヤー座標を更新
-	pos += move;
-
-	//---------------------------------------------------------オブジェクト値セット
-	this[CntPlayer].SetPos(pos);
-	this[CntPlayer].SetRot(HoudaiRot);
-
-	SetCameraR(CntPlayer);
 }
 
 //=============================================================================
@@ -1107,103 +1455,196 @@ void PLAYER_HONTAI::SetQ(int CntPlayer)
 //=============================================================================
 // バレット関連制御
 //=============================================================================
-void PLAYER_HONTAI::SetBulletALL(int CntPlayer, BULLET *bullet, SHADOW *shadow)
+void PLAYER_HONTAI::SetBulletALL(int CntPlayer, BULLET *bullet, SHADOW *shadow, bool Netflag)
 {
-	//---------------------------------------------------------オブジェクト値呼び出し
-	D3DXVECTOR3 pos = this[CntPlayer].GetPos();
-	D3DXVECTOR3 HoudaiRot = this[CntPlayer].GetRot();
-	D3DXVECTOR3 HoutouRot = this[CntPlayer].parts[PARTSTYPE_HOUTOU].GetRot();
-	D3DXVECTOR3 HousinRot = this[CntPlayer].parts[PARTSTYPE_HOUSIN].GetRot();
-
-	D3DXVECTOR3 FieldNorVec = this[CntPlayer].GetFieldNorVec();
-	//D3DXVECTOR3 FieldNorUpNorCross = this[CntPlayer].GetFieldNorUpNorCross();
-
-	D3DXVECTOR3 Frontvec;
-	Frontvec.x = sinf(HoudaiRot.y + HoutouRot.y);
-	Frontvec.y = 0.0f;
-	Frontvec.z = cosf(HoudaiRot.y + HoutouRot.y);
-
-	//地形の角度とプレイヤーの角度を計算。バレット発射方向で使う
-	D3DXVec3Cross(&this[CntPlayer].FrontRotTOaxis, &FieldNorVec, &Frontvec);
-	float Bkakezan = D3DXVec3Dot(&FieldNorVec, &Frontvec);
-	if (Bkakezan != 0)
+	if (Netflag == false)
 	{
-		float cossita = Bkakezan /
-			sqrtf(FieldNorVec.x*FieldNorVec.x +
-				FieldNorVec.y *FieldNorVec.y +
-				FieldNorVec.z * FieldNorVec.z)
-			*
-			sqrtf(Frontvec.x*Frontvec.x +
-				Frontvec.y *Frontvec.y +
-				Frontvec.z * Frontvec.z);
-		this[CntPlayer].Brot = acosf(cossita);
+		//---------------------------------------------------------オブジェクト値呼び出し
+		D3DXVECTOR3 pos = this[CntPlayer].GetPos();
+		D3DXVECTOR3 HoudaiRot = this[CntPlayer].GetRot();
+		D3DXVECTOR3 HoutouRot = this[CntPlayer].parts[PARTSTYPE_HOUTOU].GetRot();
+		D3DXVECTOR3 HousinRot = this[CntPlayer].parts[PARTSTYPE_HOUSIN].GetRot();
+
+		D3DXVECTOR3 FieldNorVec = this[CntPlayer].GetFieldNorVec();
+		//D3DXVECTOR3 FieldNorUpNorCross = this[CntPlayer].GetFieldNorUpNorCross();
+
+		D3DXVECTOR3 Frontvec;
+		Frontvec.x = sinf(HoudaiRot.y + HoutouRot.y);
+		Frontvec.y = 0.0f;
+		Frontvec.z = cosf(HoudaiRot.y + HoutouRot.y);
+
+		//地形の角度とプレイヤーの角度を計算。バレット発射方向で使う
+		D3DXVec3Cross(&this[CntPlayer].FrontRotTOaxis, &FieldNorVec, &Frontvec);
+		float Bkakezan = D3DXVec3Dot(&FieldNorVec, &Frontvec);
+		if (Bkakezan != 0)
+		{
+			float cossita = Bkakezan /
+				sqrtf(FieldNorVec.x*FieldNorVec.x +
+					FieldNorVec.y *FieldNorVec.y +
+					FieldNorVec.z * FieldNorVec.z)
+				*
+				sqrtf(Frontvec.x*Frontvec.x +
+					Frontvec.y *Frontvec.y +
+					Frontvec.z * Frontvec.z);
+			this[CntPlayer].Brot = acosf(cossita);
+		}
+		else
+		{
+			this[CntPlayer].Brot = 1.57f;		//下方向ベクトルrot=0.0f、上方向ベクトルrot=3.14、に対しての前方向ベクトルはrot=1.57f。
+		}
+		this[CntPlayer].Brot -= 1.57f;
+
+		//プレイヤーposから発射方向に少しずらした値
+		//地面の傾きに沿って発射するときは問題ない。その傾きから左右に回転してる時だけposがおかしい
+		D3DXVECTOR3 BposStart;
+		BposStart.x = pos.x - (sinf(HoutouRot.y + HoudaiRot.y) * VALUE_LEN_BULLET);
+		BposStart.y = pos.y + (sinf(this[CntPlayer].Brot - HousinRot.x) * VALUE_LEN_BULLET) + 20.0f;
+		BposStart.z = pos.z - (cosf(HoutouRot.y + HoudaiRot.y) * VALUE_LEN_BULLET);
+
+		D3DXVECTOR3 BmoveRot;
+		BmoveRot.x = -sinf(HoutouRot.y + HoudaiRot.y);
+		BmoveRot.y = sinf(this[CntPlayer].Brot - HousinRot.x);
+		BmoveRot.z = -cosf(HoutouRot.y + HoudaiRot.y);
+
+		D3DXVECTOR3 bulletmove;
+		bulletmove.x = (BmoveRot.x) *VALUE_MOVE_BULLET;
+		bulletmove.y = (BmoveRot.y) *VALUE_MOVE_BULLET;
+		bulletmove.z = (BmoveRot.z) *VALUE_MOVE_BULLET;
+
+		// 弾発射
+		if (this[CntPlayer].AmmoCnt > 0)
+		{
+			//if (IsButtonTriggered(CntPlayer, BUTTON_X))
+			//{
+			if (IsButtonTriggered(CntPlayer, BUTTON_R1))
+			{
+				//-----------------------------------オブジェクト先頭アドレスを読み込み
+				bullet->SetBullet(BposStart, bulletmove, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer, shadow);
+
+				//拡散弾処理
+				if (this[CntPlayer].ModelType == PLAYER_MODEL_ATTACK)
+				{
+					D3DXVECTOR3 leftB, rightB;
+					leftB = D3DXVECTOR3(-sinf(HoutouRot.y + HoudaiRot.y + 0.3f)*VALUE_MOVE_BULLET,
+						bulletmove.y,
+						-cosf(HoutouRot.y + HoudaiRot.y + 0.3f) *VALUE_MOVE_BULLET);
+					rightB = D3DXVECTOR3(-sinf(HoutouRot.y + HoudaiRot.y - 0.3f)*VALUE_MOVE_BULLET,
+						bulletmove.y,
+						-cosf(HoutouRot.y + HoudaiRot.y - 0.3f) *VALUE_MOVE_BULLET);
+					bullet->SetBullet(BposStart, leftB, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer, shadow);
+					bullet->SetBullet(BposStart, rightB, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer, shadow);
+
+				}
+				//残弾を減らす
+				this[CntPlayer].AmmoCnt -= 1;
+
+				// SE再生
+				PlaySound(SOUND_LABEL_SE_attack03);
+			}
+		}
+		//残弾復活 一定時間経過で1個づつ自動回復
+		if (this[CntPlayer].AmmoCnt < PLAYER_AMMOPOWER_NORMAL) this[CntPlayer].AmmoBornTime += BORN_AMMO_ADDTIME;
+		if (this[CntPlayer].AmmoBornTime >= BORN_AMMO_MAXTIME)
+		{
+			this[CntPlayer].AmmoCnt++;
+			this[CntPlayer].AmmoBornTime = 0.0f;
+		}
 	}
 	else
 	{
-		this[CntPlayer].Brot = 1.57f;		//下方向ベクトルrot=0.0f、上方向ベクトルrot=3.14、に対しての前方向ベクトルはrot=1.57f。
-	}
-	this[CntPlayer].Brot -= 1.57f;
+		//---------------------------------------------------------オブジェクト値呼び出し
+		D3DXVECTOR3 pos = this[CntPlayer].GetPos();
+		D3DXVECTOR3 HoudaiRot = this[CntPlayer].GetRot();
+		D3DXVECTOR3 HoutouRot = this[CntPlayer].parts[PARTSTYPE_HOUTOU].GetRot();
+		D3DXVECTOR3 HousinRot = this[CntPlayer].parts[PARTSTYPE_HOUSIN].GetRot();
 
+		D3DXVECTOR3 FieldNorVec = this[CntPlayer].GetFieldNorVec();
+		//D3DXVECTOR3 FieldNorUpNorCross = this[CntPlayer].GetFieldNorUpNorCross();
 
-	//プレイヤーposから発射方向に少しずらした値
-	//地面の傾きに沿って発射するときは問題ない。その傾きから左右に回転してる時だけposがおかしい
-	D3DXVECTOR3 BposStart;
-	BposStart.x = pos.x - (sinf(HoutouRot.y + HoudaiRot.y) * VALUE_LEN_BULLET);
-	BposStart.y = pos.y + (sinf(this[CntPlayer].Brot - HousinRot.x) * VALUE_LEN_BULLET) + 20.0f;
-	BposStart.z = pos.z - (cosf(HoutouRot.y + HoudaiRot.y) * VALUE_LEN_BULLET);
+		D3DXVECTOR3 Frontvec;
+		Frontvec.x = sinf(HoudaiRot.y + HoutouRot.y);
+		Frontvec.y = 0.0f;
+		Frontvec.z = cosf(HoudaiRot.y + HoutouRot.y);
 
-
-	D3DXVECTOR3 BmoveRot;
-	BmoveRot.x = -sinf(HoutouRot.y + HoudaiRot.y);
-	BmoveRot.y = sinf(this[CntPlayer].Brot - HousinRot.x);
-	BmoveRot.z = -cosf(HoutouRot.y + HoudaiRot.y);
-
-	D3DXVECTOR3 bulletmove;
-	bulletmove.x = (BmoveRot.x) *VALUE_MOVE_BULLET;
-	bulletmove.y = (BmoveRot.y) *VALUE_MOVE_BULLET;
-	bulletmove.z = (BmoveRot.z) *VALUE_MOVE_BULLET;
-
-	// 弾発射
-	if (this[CntPlayer].AmmoCnt > 0)
-	{
-		//if (IsButtonTriggered(CntPlayer, BUTTON_X))
-		//{
-		if (IsButtonTriggered(CntPlayer, BUTTON_R1))
+		//地形の角度とプレイヤーの角度を計算。バレット発射方向で使う
+		D3DXVec3Cross(&this[CntPlayer].FrontRotTOaxis, &FieldNorVec, &Frontvec);
+		float Bkakezan = D3DXVec3Dot(&FieldNorVec, &Frontvec);
+		if (Bkakezan != 0)
 		{
-			//-----------------------------------オブジェクト先頭アドレスを読み込み
-			bullet->SetBullet(BposStart, bulletmove, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer,shadow);
+			float cossita = Bkakezan /
+				sqrtf(FieldNorVec.x*FieldNorVec.x +
+					FieldNorVec.y *FieldNorVec.y +
+					FieldNorVec.z * FieldNorVec.z)
+				*
+				sqrtf(Frontvec.x*Frontvec.x +
+					Frontvec.y *Frontvec.y +
+					Frontvec.z * Frontvec.z);
+			this[CntPlayer].Brot = acosf(cossita);
+		}
+		else
+		{
+			this[CntPlayer].Brot = 1.57f;		//下方向ベクトルrot=0.0f、上方向ベクトルrot=3.14、に対しての前方向ベクトルはrot=1.57f。
+		}
+		this[CntPlayer].Brot -= 1.57f;
 
-			//拡散弾処理
-			if (this[CntPlayer].ModelType == PLAYER_MODEL_ATTACK)
+
+		//プレイヤーposから発射方向に少しずらした値
+		//地面の傾きに沿って発射するときは問題ない。その傾きから左右に回転してる時だけposがおかしい
+		D3DXVECTOR3 BposStart;
+		BposStart.x = pos.x - (sinf(HoutouRot.y + HoudaiRot.y) * VALUE_LEN_BULLET);
+		BposStart.y = pos.y + (sinf(this[CntPlayer].Brot - HousinRot.x) * VALUE_LEN_BULLET) + 20.0f;
+		BposStart.z = pos.z - (cosf(HoutouRot.y + HoudaiRot.y) * VALUE_LEN_BULLET);
+
+
+		D3DXVECTOR3 BmoveRot;
+		BmoveRot.x = -sinf(HoutouRot.y + HoudaiRot.y);
+		BmoveRot.y = sinf(this[CntPlayer].Brot - HousinRot.x);
+		BmoveRot.z = -cosf(HoutouRot.y + HoudaiRot.y);
+
+		D3DXVECTOR3 bulletmove;
+		bulletmove.x = (BmoveRot.x) *VALUE_MOVE_BULLET;
+		bulletmove.y = (BmoveRot.y) *VALUE_MOVE_BULLET;
+		bulletmove.z = (BmoveRot.z) *VALUE_MOVE_BULLET;
+
+		// 弾発射
+		if (this[CntPlayer].AmmoCnt > 0)
+		{
+			//if (IsButtonTriggered(CntPlayer, BUTTON_X))
+			//{
+			if (IsButtonTriggered(0, BUTTON_R1))
 			{
-				D3DXVECTOR3 leftB, rightB;
-				leftB = D3DXVECTOR3(-sinf(HoutouRot.y + HoudaiRot.y + 0.3f)*VALUE_MOVE_BULLET,
-					bulletmove.y,
-					-cosf(HoutouRot.y + HoudaiRot.y + 0.3f) *VALUE_MOVE_BULLET);
-				rightB = D3DXVECTOR3(-sinf(HoutouRot.y + HoudaiRot.y - 0.3f)*VALUE_MOVE_BULLET,
-					bulletmove.y,
-					-cosf(HoutouRot.y + HoudaiRot.y - 0.3f) *VALUE_MOVE_BULLET);
-				bullet->SetBullet(BposStart, leftB, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer, shadow);
-				bullet->SetBullet(BposStart, rightB, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer, shadow);
+				//-----------------------------------オブジェクト先頭アドレスを読み込み
+				bullet->SetBullet(BposStart, bulletmove, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer, shadow);
 
+				//拡散弾処理
+				if (this[CntPlayer].ModelType == PLAYER_MODEL_ATTACK)
+				{
+					D3DXVECTOR3 leftB, rightB;
+					leftB = D3DXVECTOR3(-sinf(HoutouRot.y + HoudaiRot.y + 0.3f)*VALUE_MOVE_BULLET,
+						bulletmove.y,
+						-cosf(HoutouRot.y + HoudaiRot.y + 0.3f) *VALUE_MOVE_BULLET);
+					rightB = D3DXVECTOR3(-sinf(HoutouRot.y + HoudaiRot.y - 0.3f)*VALUE_MOVE_BULLET,
+						bulletmove.y,
+						-cosf(HoutouRot.y + HoudaiRot.y - 0.3f) *VALUE_MOVE_BULLET);
+					bullet->SetBullet(BposStart, leftB, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer, shadow);
+					bullet->SetBullet(BposStart, rightB, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer, shadow);
+
+				}
+				//残弾を減らす
+				this[CntPlayer].AmmoCnt -= 1;
+
+				// SE再生
+				PlaySound(SOUND_LABEL_SE_attack03);
 			}
-			//残弾を減らす
-			this[CntPlayer].AmmoCnt -= 1;
-
-			// SE再生
-			PlaySound(SOUND_LABEL_SE_attack03);
+		}
+		//残弾復活 一定時間経過で1個づつ自動回復
+		if (this[CntPlayer].AmmoCnt < PLAYER_AMMOPOWER_NORMAL) this[CntPlayer].AmmoBornTime += BORN_AMMO_ADDTIME;
+		if (this[CntPlayer].AmmoBornTime >= BORN_AMMO_MAXTIME)
+		{
+			this[CntPlayer].AmmoCnt++;
+			this[CntPlayer].AmmoBornTime = 0.0f;
 		}
 	}
-
-
-	//残弾復活 一定時間経過で1個づつ自動回復
-	if (this[CntPlayer].AmmoCnt < PLAYER_AMMOPOWER_NORMAL) this[CntPlayer].AmmoBornTime += BORN_AMMO_ADDTIME;
-	if (this[CntPlayer].AmmoBornTime >= BORN_AMMO_MAXTIME)
-	{
-		this[CntPlayer].AmmoCnt++;
-		this[CntPlayer].AmmoBornTime = 0.0f;
-	}
-
 }
 
 //=============================================================================

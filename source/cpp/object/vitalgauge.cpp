@@ -27,6 +27,8 @@
 #define VITALGAUGE_P3_POS_Y		SCREEN_H - SCREEN_SEPARATE_BUFF - VITALGAUGE_POS_Y
 #define VITALGAUGE_P4_POS_X		SCREEN_W - SCREEN_SEPARATE_BUFF - VITALGAUGE_POS_X
 #define VITALGAUGE_P4_POS_Y		SCREEN_H - SCREEN_SEPARATE_BUFF - VITALGAUGE_POS_Y
+#define VITALGAUGE_NET_POS_X	SCREEN_W - SCREEN_SEPARATE_BUFF - 30.0f
+#define VITALGAUGE_NET_POS_Y	SCREEN_H - SCREEN_SEPARATE_BUFF - 150.0f
 
 //=============================================================================
 // 初期化処理
@@ -100,6 +102,37 @@ void VITALGAUGE::Reinit(void)
 }
 
 //=============================================================================
+// 再初期化処理　ネット対戦前
+//=============================================================================
+void VITALGAUGE::ReinitNet(int MyNumber)
+{
+
+	this[MyNumber].SetPos(D3DXVECTOR3(VITALGAUGE_NET_POS_X, VITALGAUGE_NET_POS_Y, 0.0f));
+
+	{//頂点バッファの中身を埋める
+		VERTEX_2D *pVtx;
+
+		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
+		this[MyNumber].tex2DVB.pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+
+		for (int nCntPlace = 0; nCntPlace < PLAYER_VITAL; nCntPlace++, pVtx += 4)
+		{
+			//--------------------------------オブジェクト値読み込み
+			D3DXVECTOR3 pos = this[MyNumber].GetPos();
+			float sizebuff = 2.0f;
+			// 頂点座標の設定
+			pVtx[1].vtx = D3DXVECTOR3(-nCntPlace * VITALGAUGE_SIZE_X * sizebuff - VITALGAUGE_SIZE_X* sizebuff, 2.0f*-VITALGAUGE_SIZE_Y / 2, 0.0f) + pos;
+			pVtx[0].vtx = D3DXVECTOR3(-nCntPlace * VITALGAUGE_SIZE_X * sizebuff - VITALGAUGE_SIZE_X * 2.0f*sizebuff, 2.0f*-VITALGAUGE_SIZE_Y / 2, 0.0f) + pos;
+			pVtx[3].vtx = D3DXVECTOR3(-nCntPlace * VITALGAUGE_SIZE_X * sizebuff - VITALGAUGE_SIZE_X * sizebuff, 2.0f*VITALGAUGE_SIZE_Y / 2, 0.0f) + pos;
+			pVtx[2].vtx = D3DXVECTOR3(-nCntPlace * VITALGAUGE_SIZE_X * sizebuff - VITALGAUGE_SIZE_X * 2.0f*sizebuff, 2.0f*VITALGAUGE_SIZE_Y / 2, 0.0f) + pos;
+		}
+		// 頂点データをアンロックする
+		this[MyNumber].tex2DVB.pD3DVtxBuff->Unlock();
+	}
+
+}
+
+//=============================================================================
 // 終了処理
 //=============================================================================
 void VITALGAUGE::Uninit(void)
@@ -123,6 +156,7 @@ void VITALGAUGE::Update(PLAYER_HONTAI *p,RANK *rank)
 				rank->SetRank(CntPlayer);
 			}
 		}
+		
 		this[CntPlayer].VitalPower = p[CntPlayer].vital;
 		//体力一定以上で緑色
 		if (this[CntPlayer].VitalPower >= PLAYER_VITAL * (0.2f))
@@ -197,13 +231,13 @@ void VITALGAUGE::Draw(bool Netflag, int NetMyNumber)
 	else
 	{
 		// 頂点バッファをデバイスのデータストリームにバインド
-		pDevice->SetStreamSource(0, this[0].tex2DVB.pD3DVtxBuff, 0, sizeof(VERTEX_2D));//ここは座標だから0
+		pDevice->SetStreamSource(0, this[NetMyNumber].tex2DVB.pD3DVtxBuff, 0, sizeof(VERTEX_2D));
 
 		// 頂点フォーマットの設定
 		pDevice->SetFVF(FVF_VERTEX_2D);
 
 		// テクスチャの設定
-		pDevice->SetTexture(0, this[0].tex2DVB.pD3DTexture);
+		pDevice->SetTexture(0, this[NetMyNumber].tex2DVB.pD3DTexture);
 
 		// ポリゴンの描画
 		for (int nCntPlace = 0; nCntPlace < this[NetMyNumber].VitalPower; nCntPlace++)//サーバーから受け取った自分番号

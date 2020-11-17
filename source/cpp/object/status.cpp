@@ -84,6 +84,32 @@ void STATUS::Reinit(void)
 }
 
 //=============================================================================
+// 再初期化処理
+//=============================================================================
+void STATUS::ReinitNet(int MyNumber)
+{
+
+	float buffsize = 48.0f;
+	this[MyNumber].obj[STATUSTYPE_SPEED].SetPos(D3DXVECTOR3(STATUS_POS_X * 2 - STATUS_POS_X_OFFSET * 2 + buffsize, STATUS_POS_Y * 2 - STATUS_POS_Y_OFFSET * 2, 0.0f));
+	this[MyNumber].obj[STATUSTYPE_SENSYA].SetPos(D3DXVECTOR3(STATUS_POS_X * 2 - STATUS_POS_X_OFFSET * 2 + buffsize, STATUS_POS_Y * 2 - STATUS_POS_Y_OFFSET * 2, 0.0f));
+	this[MyNumber].obj[STATUSTYPE_CAMERA].SetPos(D3DXVECTOR3(STATUS_POS_X * 2 - STATUS_POS_X_OFFSET * 2 + buffsize, STATUS_POS_Y * 2 - STATUS_POS_Y_OFFSET * 2, 0.0f));
+	this[MyNumber].obj[STATUSTYPE_KIRI].SetPos(D3DXVECTOR3(STATUS_POS_X * 2 - STATUS_POS_X_OFFSET * 2 + buffsize, STATUS_POS_Y * 2 - STATUS_POS_Y_OFFSET * 2, 0.0f));
+
+	for (int CntStatus = 0; CntStatus < STATUSTYPE_MAX; CntStatus++)
+	{
+		//-----------------------------------オブジェクト値読み込み
+		D3DXVECTOR3 pos = this[MyNumber].obj[CntStatus].GetPos();
+
+		// 頂点座標の設定
+		this[MyNumber].obj[CntStatus].tex2D.textureVTX[0].vtx = D3DXVECTOR3(pos.x - STATUS_SIZE_X*2.0f + (CntStatus*STATUS_SIZE_X * 2 * 2.0f), pos.y - STATUS_SIZE_Y * 2.0f, 0.0f);
+		this[MyNumber].obj[CntStatus].tex2D.textureVTX[1].vtx = D3DXVECTOR3(pos.x + STATUS_SIZE_X * 2.0f + (CntStatus*STATUS_SIZE_X * 2 * 2.0f), pos.y - STATUS_SIZE_Y * 2.0f, 0.0f);
+		this[MyNumber].obj[CntStatus].tex2D.textureVTX[2].vtx = D3DXVECTOR3(pos.x - STATUS_SIZE_X * 2.0f + (CntStatus*STATUS_SIZE_X * 2 * 2.0f), pos.y + STATUS_SIZE_Y * 2.0f, 0.0f);
+		this[MyNumber].obj[CntStatus].tex2D.textureVTX[3].vtx = D3DXVECTOR3(pos.x + STATUS_SIZE_X * 2.0f + (CntStatus*STATUS_SIZE_X * 2 * 2.0f), pos.y + STATUS_SIZE_Y * 2.0f, 0.0f);
+	}
+
+}
+
+//=============================================================================
 // 終了処理
 //=============================================================================
 void STATUS::Uninit(void)

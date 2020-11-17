@@ -57,7 +57,7 @@ static D3DXCOLOR PLAYER_COLOR[] = {
 	D3DXCOLOR(1.0f, 1.0f, 0.1f, 1.0f),//p1カラー
 	D3DXCOLOR(0.2f, 0.2f, 1.0f, 1.0f),//p2カラー
 	D3DXCOLOR(1.0f, 0.2f, 0.2f, 1.0f),//p3カラー
-	D3DXCOLOR(0.2f, 1.0f, 0.2f, 1.0f),//p4カラー
+	D3DXCOLOR(0.2f, 1.0f, 1.0f, 1.0f),//p4カラー
 };
 
 void GAME_OBJECT::Create()
@@ -151,6 +151,24 @@ void GAME_OBJECT::Reinit()
 	fade->Reinit();
 }
 
+void GAME_OBJECT::ReinitNet()
+{
+	player->ReinitNet(NetMyNumber);
+	//effect->Reinit();
+	//bullet->Reinit();
+	//shadow->Reinit();
+	//countdown->Reinit();
+	status->ReinitNet(NetMyNumber);
+	vitalgauge->ReinitNet(NetMyNumber);
+	bulletgauge->ReinitNet(NetMyNumber);
+	//damege->Reinit();
+	//explosion->Reinit();
+	//rank->Reinit();
+	//result->Reinit();
+	//item->Reinit();
+	//field->Reinit();
+}
+
 void GAME_OBJECT::Update()
 {
 	LPDIRECT3DDEVICE9 pD3DDevice = GetDevice();
@@ -176,7 +194,7 @@ void GAME_OBJECT::Update()
 		{
 		case SCENE_TITLE:
 			//タイトル更新
-			title->Update(&fade[0]);
+			title->Update(&this[0], &fade[0]);
 			break;
 		case SCENE_TUTORIAL:
 			//チュートリアル更新
@@ -186,7 +204,7 @@ void GAME_OBJECT::Update()
 			sky->Update();
 
 			//3D空間
-			player->Update(&effect[0],&bullet[0],&shadow[0], &fade[0]);
+			player->Update(&effect[0],&bullet[0],&shadow[0], &fade[0],NetGameStartFlag, NetMyNumber);
 			bullet->Update(&shadow[0], &effect[0]);
 			bulletprediction->Update(&player[0]);
 			effect->Update();
@@ -214,7 +232,7 @@ void GAME_OBJECT::Update()
 			sky->Update();
 
 			//オブジェクトの更新
-			player->Update(&effect[0], &bullet[0], &shadow[0], &fade[0]);
+			player->Update(&effect[0], &bullet[0], &shadow[0], &fade[0], NetGameStartFlag, NetMyNumber);
 			bullet->Update(&shadow[0],&effect[0]);
 			bulletprediction->Update(&player[0]);
 			effect->Update();
@@ -247,6 +265,7 @@ void GAME_OBJECT::Update()
 			//カウントダウン信号待ち中
 			else
 			{
+				this[0].ReinitNet();
 				NetCountdown();
 			}
 			//スタートフラグが送られてきて信号がONになったらカウントダウン開始
@@ -268,7 +287,7 @@ void GAME_OBJECT::Update()
 			sky->Update();
 
 			//オブジェクトの更新
-			player->Update(&effect[0], &bullet[0], &shadow[0], &fade[0]);//パケット有り
+			player->Update(&effect[0], &bullet[0], &shadow[0], &fade[0], NetGameStartFlag, NetMyNumber);//パケット有り
 			bullet->Update(&shadow[0], &effect[0]);//パケット有り
 			bulletprediction->Update(&player[0]);
 			effect->Update();//パケット有り
@@ -317,7 +336,7 @@ void GAME_OBJECT::Draw()
 	LPDIRECT3DDEVICE9 pD3DDevice = GetDevice();
 
 	// バックバッファ＆Ｚバッファのクリア
-	pD3DDevice->Clear(0, NULL, (D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER), D3DCOLOR_RGBA(100, 200, 100, 150), 1.0f, 0);
+	pD3DDevice->Clear(0, NULL, (D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER), D3DCOLOR_RGBA(200, 100, 100, 150), 1.0f, 0);
 
 	// Direct3Dによる描画の開始
 	if (SUCCEEDED(pD3DDevice->BeginScene()))
@@ -333,7 +352,7 @@ void GAME_OBJECT::Draw()
 			for (int CntPlayer = 0, vpCnt = sizeof(vp) / sizeof(vp[0]); CntPlayer < vpCnt; CntPlayer++)
 			{
 				pD3DDevice->SetViewport(&vp[CntPlayer]);
-				pD3DDevice->Clear(0, NULL, (D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER), D3DCOLOR_RGBA(100, 200, 100, 150), 1.0f, 0);
+				pD3DDevice->Clear(0, NULL, (D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER), D3DCOLOR_RGBA(200, 100, 100, 150), 1.0f, 0);
 
 				if (player[CntPlayer].KiriSignal == true) pD3DDevice->SetRenderState(D3DRS_FOGENABLE, TRUE); //フォグ：ON
 				else pD3DDevice->SetRenderState(D3DRS_FOGENABLE, FALSE); //フォグ：OFF
@@ -367,7 +386,7 @@ void GAME_OBJECT::Draw()
 			for (int CntPlayer = 0, vpCnt = sizeof(vp) / sizeof(vp[0]); CntPlayer < vpCnt; CntPlayer++)
 			{
 				pD3DDevice->SetViewport(&vp[CntPlayer]);
-				pD3DDevice->Clear(0, NULL, (D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER), D3DCOLOR_RGBA(100, 200, 100, 150), 1.0f, 0);
+				pD3DDevice->Clear(0, NULL, (D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER), D3DCOLOR_RGBA(200, 100, 100, 150), 1.0f, 0);
 				// カメラの設定
 				SetCamera(CntPlayer);
 
@@ -397,7 +416,7 @@ void GAME_OBJECT::Draw()
 			for (int CntPlayer = 0, vpCnt = sizeof(vp) / sizeof(vp[0]); CntPlayer < vpCnt; CntPlayer++)
 			{
 				pD3DDevice->SetViewport(&vp[CntPlayer]);
-				pD3DDevice->Clear(0, NULL, (D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER), D3DCOLOR_RGBA(100, 200, 100, 150), 1.0f, 0);
+				pD3DDevice->Clear(0, NULL, (D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER), D3DCOLOR_RGBA(200, 100, 100, 150), 1.0f, 0);
 
 				bool puse = player[CntPlayer].GetUse();
 				if (puse == true)
@@ -466,7 +485,7 @@ void GAME_OBJECT::Draw()
 		case SCENE_NETGAMECOUNTDOWN:
 		{
 			// カメラの設定
-			SetCamera(0);
+			SetCamera(NetMyNumber);
 
 			// map描画
 			field->Draw();
@@ -476,7 +495,7 @@ void GAME_OBJECT::Draw()
 			//3D空間
 			player->Draw();
 			item->Draw();
-			bulletprediction->Draw(&player[0], 0);
+			bulletprediction->Draw(&player[NetMyNumber], 0);
 			explosion->Draw(0);
 			effect->Draw(0);
 			shadow->Draw();
@@ -491,14 +510,14 @@ void GAME_OBJECT::Draw()
 		}
 		case SCENE_NETGAME:
 		{
-			bool puseNet = player[0].GetUse();
+			bool puseNet = player[NetMyNumber].GetUse();
 			if (puseNet == true)
 			{
-				if (player[0].KiriSignal == true) pD3DDevice->SetRenderState(D3DRS_FOGENABLE, TRUE); //フォグ：ON
+				if (player[NetMyNumber].KiriSignal == true) pD3DDevice->SetRenderState(D3DRS_FOGENABLE, TRUE); //フォグ：ON
 				else pD3DDevice->SetRenderState(D3DRS_FOGENABLE, FALSE); //フォグ：OFF
 
 				// カメラの設定
-				SetCamera(0);
+				SetCamera(NetMyNumber);
 
 				// map描画
 				field->Draw();
@@ -508,9 +527,9 @@ void GAME_OBJECT::Draw()
 				//3D空間
 				player->Draw();
 				item->Draw();
-				bulletprediction->Draw(&player[0], 0);
-				explosion->Draw(0);
-				effect->Draw(0);
+				bulletprediction->Draw(&player[0], NetMyNumber);
+				explosion->Draw(NetMyNumber);
+				effect->Draw(NetMyNumber);
 				shadow->Draw();
 
 				//2d画面上
@@ -524,7 +543,7 @@ void GAME_OBJECT::Draw()
 				pD3DDevice->SetRenderState(D3DRS_FOGENABLE, FALSE); //フォグ：OFF
 
 				// カメラの設定
-				SetCamera(0);
+				SetCamera(NetMyNumber);
 
 				// map描画
 				field->Draw();
@@ -534,7 +553,7 @@ void GAME_OBJECT::Draw()
 				//3D空間
 				player->Draw();
 				item->Draw();
-				bulletprediction->Draw(&player[0], 0);
+				//bulletprediction->Draw(&player[NetMyNumber], 0);
 				explosion->Draw(0);
 				effect->Draw(0);
 				shadow->Draw();

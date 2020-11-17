@@ -94,7 +94,7 @@ void TITLE::Uninit(void)
 //=============================================================================
 // XVˆ—
 //=============================================================================
-void TITLE::Update(FADE *fade)
+void TITLE::Update(GAME_OBJECT* obj, FADE *fade)
 {
 		switch (this[0].HierarchyNum)
 		{
@@ -231,6 +231,7 @@ void TITLE::Update(FADE *fade)
 				if (GetKeyboardTrigger(DIK_RETURN) || IsButtonTriggered(0, BUTTON_A))
 				{
 					PlaySound(SOUND_LABEL_SE_enter01);
+					//obj->ReinitNet();
 					fade->SetFade(FADE_OUT, SCENE_NETMATCH, SOUND_LABEL_SE_damage);
 				}
 			}
