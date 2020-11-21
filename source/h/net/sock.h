@@ -8,5 +8,22 @@ void Packet(void);
 void SendPacket(void);
 void ReceivePacket(void);
 
+enum
+{
+	SetEnumPos = 0,
+	SetEnumHoudaiRot = 1,
+	SetEnumHoutouRot = 2,
+	SetEnumHousinRot = 3,
 
+};
+
+void MsgAnalys(char* argRMsg);
+
+//RMsgBlockはデータのブロック　TypeはPosやRotなどの種類
+void SetBuff(char* RMsgBlock,int Type, int PlayerNum);
+
+void NetSetPos(D3DXVECTOR3 buff, int PlayerNum);
+void NetSetHoudaiRot(D3DXVECTOR3 buff, int PlayerNum);
+void NetSetHoutouRot(D3DXVECTOR3 buff, int PlayerNum);
+void NetSetHousinRot(D3DXVECTOR3 buff, int PlayerNum);
 

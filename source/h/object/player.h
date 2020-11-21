@@ -42,8 +42,10 @@ public:
 		time = 0.0f;
 		MorphingSignal = 0;
 		vital = 0;
+		oldvital = 0;
 		AmmoCnt = 0;
 		ModelType = 0;
+		OldModelType = 0;
 		shadowIdx = 0;
 		Morphing = false;
 		MorphingEnd = false;
@@ -74,6 +76,8 @@ public:
 	void						SetKiri(int CntPlayer);					//!< フォグ制御
 	void						SetMorphing(int CntPlayer);				//!< モーフィング制御
 
+	D3DXVECTOR3					GetPosPlayer() { return this[0].GetPos(); };
+	D3DXVECTOR3					GetRotPlayer() { return this[0].GetRot(); };
 
 	D3DXVECTOR3					FrontRotTOaxis;							//!< 地形法線とプレイヤーFrontベクトルの外積値
 	float						Brot;									//!< Frontベクトルから地形法線への回転角度
@@ -87,8 +91,10 @@ public:
 	float						time;									//!< モーフィング時に補間タイムとして使用
 	int							MorphingSignal;							//!< 1,なにもしない　2,モーフィング中　3,モーフィング完了
 	int							vital;									//!< 体力
+	int							oldvital;								//!< 体力
 	int							AmmoCnt;								//!< 残弾数。
 	int							ModelType;								//!< どのモデル状態か判定
+	int							OldModelType;							//!< どのモデル状態か判定
 	int							shadowIdx;								//!< 影のインデックス番号
 	bool						Morphing;								//!< 変形判定
 	bool						MorphingEnd;							//!< 変形終了判定
@@ -96,6 +102,15 @@ public:
 	bool						BackCameraItemSignal;					//!< バックカメラアイテムを使用しているかどうか
 	bool						KiriSignal;								//!< 霧アイテムを使用しているかどうか
 	bool						dashFlag;								//!< ダッシュ判定　入力がある間true.それ以外はfalse
+
+	//変更したか確認
+	//チェック項目 pos,rot(砲台砲塔砲身),Morphing,vital
+	bool NetChkPos = false;
+	bool NetChkHoudaiRot = false;
+	bool NetChkHoutouRot = false;
+	bool NetChkHousinRot = false;
+	bool NetChkvital[4] = { false };
+	bool NetChkMorphing = false;
 
 };
 

@@ -84,6 +84,21 @@ DWORD				dwFrameCount;				//!< 時間計測用
 #endif
 HWND edit;
 
+bool EndGame = false;
+bool GetEndGame(void) 
+{
+	return EndGame;
+}
+
+//Send()用オブジェクト
+GAME_OBJECT *SendObject;
+
+GAME_OBJECT *GetSendObjectP(void)
+{
+	return &SendObject[0];
+}
+
+
 //-----------------------------------------------------------------オブジェクトの数を0で初期化
 int OBJECT_3D::Num = 0;
 int OBJECT_2D::Num = 0;
@@ -174,20 +189,22 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	ObjectAll = new GAME_OBJECT;
 	ObjectAll->Create();
 
+
+	//Send()オブジェクトにゲームで使用するオブジェクトのアドレスを格納
+	SendObject = ObjectAll;
+
 	//マルチスレッドで受信プログラム(受信関数)起動　細かく通信する　1/60じゃない　関数一つで出来る
-	//HANDLE thread;
-
+	//マルチスレッド開始
+	std::thread t1(Packet);
+	
 	//注意　メインで書き込む変数とマルチ変数　ぶつかるとやばい　資源の共有　タイミングぶつからないようにする
-
 	//ざっくりとした関数一つでいいから作る　書き換える可能性のある時にアクセス許可をとる
-
 	//同期化する変数だけ信号を待つ(ざっくりした関数のアクセス許可)　シンクロライズ?　
 
 	if (FAILED(Init(hInstance, hWnd, mode)))
 	{
 		return -1;
 	}
-	//DialogBox(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), HWND_DESKTOP, IDD_DIALOG);
 	//-----------------------------------------------------オブジェクト初期化
 	ObjectAll->Init();
 
@@ -264,6 +281,10 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 	//-----------------------------------------------------オブジェクト終了
 	ObjectAll->Uninit();
+	EndGame = true;
+
+	//スレッド破棄
+	t1.join();
 
 	timeEndPeriod(1);				// 分解能を戻す
 
@@ -585,4 +606,5 @@ void DrawFPS(void)
 
 }
 #endif
+
 

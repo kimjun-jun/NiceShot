@@ -357,3 +357,9 @@ void DrawTextTypeSo(void);
 LRESULT CALLBACK IDD_DIALOG(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 BOOL CALLBACK IP_DIALOG(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+
+bool GetEndGame(void);
+
+class GAME_OBJECT;
+GAME_OBJECT *GetSendObjectP(void);

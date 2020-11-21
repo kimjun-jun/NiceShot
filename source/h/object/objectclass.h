@@ -10,7 +10,10 @@
 void SetNetMatchFlag(bool flag);
 void SetNetMyNumberFlagFlag(bool flag);
 void SetNetMyNumber(int num);
+int GetNetMyNumber(void);
 void SetNetGameStartFlag(bool flag);
+void SetNetShareDateFlag(bool flag);
+bool GetNetShareDateFlag(void);
 
 class PLAYER_HONTAI;
 class EFFECT;
@@ -100,7 +103,6 @@ public:
 		return nScene;
 	}
 
-private:
 	void CheakHit(int scene);
 	PLAYER_HONTAI *player;
 	EFFECT *effect;
@@ -175,15 +177,17 @@ struct ALL_OBJECT_PARAMETER
 	ALL_OBJECT_PARAMETER() {
 		D3DXMatrixIdentity(&mtxWorld);
 		pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f); oldpos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-		rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f); scl = D3DXVECTOR3(1.0f, 1.0f, 1.0f);
-		move = D3DXVECTOR3(0.0f, 0.0f, 0.0f); FieldNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-		FieldNorUpNorCross = D3DXVECTOR3(0.0f, 0.0f, 0.0f); Qrot = 0.0f; col = D3DXCOLOR(DWORD(0)); use = false;
+		rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f); oldrot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		scl = D3DXVECTOR3(1.0f, 1.0f, 1.0f); move = D3DXVECTOR3(0.0f, 0.0f, 0.0f); 
+		FieldNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f); FieldNorUpNorCross = D3DXVECTOR3(0.0f, 0.0f, 0.0f); 
+		Qrot = 0.0f; col = D3DXCOLOR(DWORD(0)); use = false;
 	}
 
 	D3DXMATRIX					mtxWorld;			//!< ワールドマトリックス
 	D3DXVECTOR3					pos;				//!< 位置
 	D3DXVECTOR3					oldpos;				//!< 前回の位置
 	D3DXVECTOR3					rot;				//!< 向き(回転)
+	D3DXVECTOR3					oldrot;				//!< 前回の向き(回転)
 	D3DXVECTOR3					scl;				//!< 大きさ(スケール)
 	D3DXVECTOR3					move;				//!< 移動量
 	D3DXVECTOR3					FieldNorVec;		//!< くおの時に使う地形の法線ベクトル
@@ -353,6 +357,7 @@ public:
 	D3DXVECTOR3 GetPos();
 	D3DXVECTOR3 GetOldPos();
 	D3DXVECTOR3 GetRot();
+	D3DXVECTOR3 GetOldRot();
 	D3DXVECTOR3 GetScl();
 	D3DXVECTOR3 GetMove();
 	D3DXVECTOR3 GetFieldNorVec();//!< くおの時に使う地形の法線ベクトル
@@ -366,6 +371,7 @@ public:
 	void SetPos(D3DXVECTOR3 pos);
 	void SetOldPos(D3DXVECTOR3 oldpos);
 	void SetRot(D3DXVECTOR3 rot);
+	void SetOldRot(D3DXVECTOR3 rot);
 	void SetScl(D3DXVECTOR3 scl);
 	void SetMove(D3DXVECTOR3 move);
 	void SetFieldNorVec(D3DXVECTOR3 FieldNorVec);//!< くおの時に使う地形の法線ベクトル

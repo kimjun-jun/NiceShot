@@ -367,6 +367,18 @@ void PLAYER_HONTAI::Update(EFFECT*effect, BULLET*bullet, SHADOW*shadow, FADE *fa
 	else
 	{
 		bool use = this[MyNumber].GetUse();
+
+		//old保存
+		//D3DXVECTOR3 pos = this[MyNumber].GetPos();
+		//D3DXVECTOR3 HoudaiRot = this[MyNumber].GetRot();
+		//D3DXVECTOR3 HoutouRot = this[MyNumber].parts[PARTSTYPE_HOUTOU].GetRot();
+		//D3DXVECTOR3 HousinRot = this[MyNumber].parts[PARTSTYPE_HOUSIN].GetRot();
+		//座標を保存
+		//this[MyNumber].SetOldPos(pos);
+		//this[MyNumber].SetOldRot(HoudaiRot);
+		//this[MyNumber].parts[PARTSTYPE_HOUTOU].SetOldRot(HoutouRot);
+		//this[MyNumber].parts[PARTSTYPE_HOUSIN].SetOldRot(HousinRot);
+
 		//生きていれば制御可能
 		if (use)
 		{
@@ -399,6 +411,7 @@ void PLAYER_HONTAI::Update(EFFECT*effect, BULLET*bullet, SHADOW*shadow, FADE *fa
 			cam[MyNumber].pos.y = SetPos.y + POS_H_CAM;
 			cam[MyNumber].pos.z = SetPos.z + cosf(HoudaiRot.y + HoutouRot.y) * cam[MyNumber].len;
 		}
+
 	}
 }
 
@@ -937,8 +950,9 @@ void PLAYER_HONTAI::SetMoveL(int CntPlayer, EFFECT *effect, bool Netflag)
 		D3DXVECTOR3 move = this[CntPlayer].GetMove();
 		D3DXVECTOR3 HoudaiRot = this[CntPlayer].GetRot();
 
-		//座標を保存
+		//保存
 		this[CntPlayer].SetOldPos(pos);
+		this[CntPlayer].SetOldRot(HoudaiRot);
 
 		int dir = FRONT_VEC;
 
@@ -1016,6 +1030,7 @@ void PLAYER_HONTAI::SetMoveL(int CntPlayer, EFFECT *effect, bool Netflag)
 
 		//座標を保存
 		this[CntPlayer].SetOldPos(pos);
+		this[CntPlayer].SetOldRot(HoudaiRot);
 
 		int dir = FRONT_VEC;
 
@@ -1098,6 +1113,10 @@ void PLAYER_HONTAI::SetCameraR(int CntPlayer, bool Netflag)
 		D3DXVECTOR3 HoutouRot = this[CntPlayer].parts[PARTSTYPE_HOUTOU].GetRot();
 		D3DXVECTOR3 HousinRot = this[CntPlayer].parts[PARTSTYPE_HOUSIN].GetRot();
 
+		//保存
+		this[CntPlayer].parts[PARTSTYPE_HOUTOU].SetOldRot(HoutouRot);
+		this[CntPlayer].parts[PARTSTYPE_HOUSIN].SetOldRot(HousinRot);
+
 		CAMERA *cam = GetCamera();
 
 		//視野角変化はRスティックアナログ値を使用
@@ -1163,6 +1182,10 @@ void PLAYER_HONTAI::SetCameraR(int CntPlayer, bool Netflag)
 		//---------------------------------------------------------オブジェクト値呼び出し
 		D3DXVECTOR3 HoutouRot = this[CntPlayer].parts[PARTSTYPE_HOUTOU].GetRot();
 		D3DXVECTOR3 HousinRot = this[CntPlayer].parts[PARTSTYPE_HOUSIN].GetRot();
+
+		//保存
+		this[CntPlayer].parts[PARTSTYPE_HOUTOU].SetOldRot(HoutouRot);
+		this[CntPlayer].parts[PARTSTYPE_HOUSIN].SetOldRot(HousinRot);
 
 		CAMERA *cam = GetCamera();
 
