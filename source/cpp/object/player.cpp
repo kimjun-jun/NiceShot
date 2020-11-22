@@ -42,7 +42,7 @@ void PLAYER_HONTAI::Init(FIELD *field)
 		this[CntPlayer].Parent = NULL;
 		this[CntPlayer].AmmoCnt = PLAYER_AMMOPOWER_NORMAL;
 		this[CntPlayer].ModelType = PLAYER_MODEL_NORMAL;
-		this[CntPlayer].vital = PLAYER_VITAL;
+		this[CntPlayer].vital = this[CntPlayer].oldvital = PLAYER_VITAL;
 		this[CntPlayer].MorphingSignal = NoMorphing;
 
 		// Xファイルの読み込み
@@ -212,6 +212,7 @@ void PLAYER_HONTAI::Reinit(FIELD *field)
 		this[CntPlayer].speedbuff = 1.0f;
 		this[CntPlayer].speedbufftime = 0.0f;
 		this[CntPlayer].Brot = 0.0f;
+		this[CntPlayer].GetMorphing = false;
 		this[CntPlayer].Morphing = false;
 		this[CntPlayer].MorphingTime = MORPHING_TIME;
 		this[CntPlayer].MorphingEnd = true;
@@ -224,7 +225,7 @@ void PLAYER_HONTAI::Reinit(FIELD *field)
 		this[CntPlayer].AmmoCnt = PLAYER_AMMOPOWER_NORMAL;
 		this[CntPlayer].AmmoBornTime = 0.0f;
 		this[CntPlayer].ModelType = PLAYER_MODEL_NORMAL;
-		this[CntPlayer].vital = PLAYER_VITAL;
+		this[CntPlayer].vital = this[CntPlayer].oldvital = PLAYER_VITAL;
 		this[CntPlayer].MorphingSignal = NoMorphing;
 
 		//砲塔
@@ -378,18 +379,29 @@ void PLAYER_HONTAI::Update(EFFECT*effect, BULLET*bullet, SHADOW*shadow, FADE *fa
 		//this[MyNumber].SetOldRot(HoudaiRot);
 		//this[MyNumber].parts[PARTSTYPE_HOUTOU].SetOldRot(HoutouRot);
 		//this[MyNumber].parts[PARTSTYPE_HOUSIN].SetOldRot(HousinRot);
-
 		//生きていれば制御可能
 		if (use)
 		{
+			//モーフィングアイテム取得フラグオフ
+			this[MyNumber].GetMorphing = false;
+			for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
+			{
+				this[CntPlayer].oldvital = this[CntPlayer].vital;
+			}
 			//this[MyNumber].SetMoveL2R2(MyNumber, Netflag);
 			this[0].SetMoveL(MyNumber, &effect[0], Netflag);
-			this[0].SetQ(MyNumber);
+			for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
+			{
+				this[0].SetQ(CntPlayer);
+			}
 			this[0].SetCamera(MyNumber, Netflag);
 			//this[MyNumber].SetBulletALLMoveL2R2Ver(MyNumber);
 			this[0].SetBulletALL(MyNumber, &bullet[0], shadow, Netflag);
 			this[0].SetKiri(MyNumber);
-			this[0].SetMorphing(MyNumber);
+			for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
+			{
+				this[0].SetMorphing(CntPlayer);
+			}
 		}
 
 		//それ以外はカメラだけ制御

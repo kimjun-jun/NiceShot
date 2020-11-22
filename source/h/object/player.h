@@ -47,6 +47,7 @@ public:
 		ModelType = 0;
 		OldModelType = 0;
 		shadowIdx = 0;
+		GetMorphing = false;
 		Morphing = false;
 		MorphingEnd = false;
 		speedbuffsignal = false;
@@ -96,6 +97,7 @@ public:
 	int							ModelType;								//!< どのモデル状態か判定
 	int							OldModelType;							//!< どのモデル状態か判定
 	int							shadowIdx;								//!< 影のインデックス番号
+	bool						GetMorphing;							//!< 変形判定
 	bool						Morphing;								//!< 変形判定
 	bool						MorphingEnd;							//!< 変形終了判定
 	bool						speedbuffsignal;						//!< スピードアップバフ判定
