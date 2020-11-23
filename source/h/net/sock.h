@@ -29,6 +29,8 @@ void NetSetHousinRot(D3DXVECTOR3 buff, int PlayerNum);
 void NetSetVital(int buff, int PlayerNum);
 void NetSetMorphing(int PlayerNum);
 
+void NetSetBulletType1(D3DXVECTOR3 buffpos, D3DXVECTOR3 buffmove, int PlayerNum);
+void NetSetBulletType3(D3DXVECTOR3 buffpos, D3DXVECTOR3 *buffmove, int PlayerNum);
 
 
 

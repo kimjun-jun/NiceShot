@@ -208,10 +208,13 @@ void PLAYER_HONTAI::Reinit(FIELD *field)
 		this[CntPlayer].SetQrot(0.0f);
 
 		this[CntPlayer].FrontRotTOaxis = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		this[CntPlayer].Bpos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		for(int i=0;i<3;i++) this[CntPlayer].Bmove[i] = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 		this[CntPlayer].speed = 0.0f;
 		this[CntPlayer].speedbuff = 1.0f;
 		this[CntPlayer].speedbufftime = 0.0f;
 		this[CntPlayer].Brot = 0.0f;
+		this[CntPlayer].BFlag = 0;
 		this[CntPlayer].GetMorphing = false;
 		this[CntPlayer].Morphing = false;
 		this[CntPlayer].MorphingTime = MORPHING_TIME;
@@ -382,10 +385,13 @@ void PLAYER_HONTAI::Update(EFFECT*effect, BULLET*bullet, SHADOW*shadow, FADE *fa
 		//生きていれば制御可能
 		if (use)
 		{
-			//モーフィングアイテム取得フラグオフ
+			//ネット用フラグ初期化　1フレーム中の変更を保存して変更があればサーバーにデータを送る
 			this[MyNumber].GetMorphing = false;
+			this[MyNumber].Bpos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+			for (int i = 0; i < 3; i++) this[MyNumber].Bmove[i] = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 			for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
 			{
+				this[CntPlayer].BFlag = 0;
 				this[CntPlayer].oldvital = this[CntPlayer].vital;
 			}
 			//this[MyNumber].SetMoveL2R2(MyNumber, Netflag);
@@ -1501,7 +1507,6 @@ void PLAYER_HONTAI::SetBulletALL(int CntPlayer, BULLET *bullet, SHADOW *shadow, 
 		D3DXVECTOR3 HousinRot = this[CntPlayer].parts[PARTSTYPE_HOUSIN].GetRot();
 
 		D3DXVECTOR3 FieldNorVec = this[CntPlayer].GetFieldNorVec();
-		//D3DXVECTOR3 FieldNorUpNorCross = this[CntPlayer].GetFieldNorUpNorCross();
 
 		D3DXVECTOR3 Frontvec;
 		Frontvec.x = sinf(HoudaiRot.y + HoutouRot.y);
@@ -1553,9 +1558,7 @@ void PLAYER_HONTAI::SetBulletALL(int CntPlayer, BULLET *bullet, SHADOW *shadow, 
 			//{
 			if (IsButtonTriggered(CntPlayer, BUTTON_R1))
 			{
-				//-----------------------------------オブジェクト先頭アドレスを読み込み
 				bullet->SetBullet(BposStart, bulletmove, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer, shadow);
-
 				//拡散弾処理
 				if (this[CntPlayer].ModelType == PLAYER_MODEL_ATTACK)
 				{
@@ -1650,6 +1653,9 @@ void PLAYER_HONTAI::SetBulletALL(int CntPlayer, BULLET *bullet, SHADOW *shadow, 
 			{
 				//-----------------------------------オブジェクト先頭アドレスを読み込み
 				bullet->SetBullet(BposStart, bulletmove, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer, shadow);
+				this[CntPlayer].Bpos = BposStart;
+				this[CntPlayer].Bmove[0] = bulletmove;
+				this[CntPlayer].BFlag = 1;
 
 				//拡散弾処理
 				if (this[CntPlayer].ModelType == PLAYER_MODEL_ATTACK)
@@ -1663,6 +1669,9 @@ void PLAYER_HONTAI::SetBulletALL(int CntPlayer, BULLET *bullet, SHADOW *shadow, 
 						-cosf(HoutouRot.y + HoudaiRot.y - 0.3f) *VALUE_MOVE_BULLET);
 					bullet->SetBullet(BposStart, leftB, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer, shadow);
 					bullet->SetBullet(BposStart, rightB, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer, shadow);
+					this[CntPlayer].Bmove[1] = leftB;
+					this[CntPlayer].Bmove[2] = rightB;
+					this[CntPlayer].BFlag = 3;
 
 				}
 				//残弾を減らす

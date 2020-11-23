@@ -31,7 +31,10 @@ class PLAYER_HONTAI : public OBJECT_3D
 public:
 	PLAYER_HONTAI()
 	{
-		FrontRotTOaxis = D3DXVECTOR3(0.0f, 0.0f, 0.0f), Brot = 0.0f;
+		FrontRotTOaxis = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		Bpos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		for (int i = 0; i < 3; i++) Bmove[i] = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		Brot = 0.0f;
 		speed = 0.0f;
 		speedbuff = 0.0f;
 		speedbufftime = 0.0f;
@@ -47,6 +50,7 @@ public:
 		ModelType = 0;
 		OldModelType = 0;
 		shadowIdx = 0;
+		BFlag = 0;
 		GetMorphing = false;
 		Morphing = false;
 		MorphingEnd = false;
@@ -81,6 +85,8 @@ public:
 	D3DXVECTOR3					GetRotPlayer() { return this[0].GetRot(); };
 
 	D3DXVECTOR3					FrontRotTOaxis;							//!< 地形法線とプレイヤーFrontベクトルの外積値
+	D3DXVECTOR3					Bpos;									//!< バレットの発射地点
+	D3DXVECTOR3					Bmove[3];								//!< バレットの移動量
 	float						Brot;									//!< Frontベクトルから地形法線への回転角度
 	float						speed;									//!< 移動スピード
 	float						speedbuff;								//!< 移動スピードアイテムバフ
@@ -97,7 +103,8 @@ public:
 	int							ModelType;								//!< どのモデル状態か判定
 	int							OldModelType;							//!< どのモデル状態か判定
 	int							shadowIdx;								//!< 影のインデックス番号
-	bool						GetMorphing;							//!< 変形判定
+	int							BFlag;								//!< 判定
+	bool						GetMorphing;							//!< 判定
 	bool						Morphing;								//!< 変形判定
 	bool						MorphingEnd;							//!< 変形終了判定
 	bool						speedbuffsignal;						//!< スピードアップバフ判定

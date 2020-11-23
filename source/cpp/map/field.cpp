@@ -212,6 +212,7 @@ void FIELD::Init(void)
 				if (pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx == pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX + 1].vtx)	continue;
 				else if (pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX + 1].vtx == pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX + 2].vtx) continue;
 				pVtx[(rand() % this[0].model.nNumVertex)].vtx.y = float((rand() % 200));
+				//pVtx[(rand() % this[0].model.nNumVertex)].vtx.y = 0.0f;
 			}
 		}
 
@@ -229,7 +230,10 @@ void FIELD::Init(void)
 				// í∏ì_ç¿ïWÇÃê›íË
 				//è„ë§
 				if (nCntVtxZ == 0 || nCntVtxX == 0 || nCntVtxZ == this[0].nNumBlockZField || nCntVtxX == this[0].nNumBlockZField)
+				{
 					pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = pVtxS[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = 50.0f;
+					//pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = pVtxS[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = 0.0f;
+				}
 				//íÜë§
 				else
 				{
