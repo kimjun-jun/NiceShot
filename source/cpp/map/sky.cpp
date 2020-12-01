@@ -329,7 +329,7 @@ void SKY::Update(void)
 				for (int nCntH = 0; nCntH < (this[0].nNumBlockH + 1); nCntH++, pVtx++)
 				{
 					// 頂点カラーの設定
-						pVtx->diffuse = D3DXCOLOR(1.0f*this[0].time, 1.0f*this[0].time, 1.0f*this[0].time, 1.0f);
+						//pVtx->diffuse = D3DXCOLOR(1.0f*this[0].time, 1.0f*this[0].time, 1.0f*this[0].time, 1.0f);
 				}
 			}
 
@@ -343,14 +343,14 @@ void SKY::Update(void)
 			pVtx->nor = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
 
 			// 頂点カラーの設定
-				pVtx->diffuse = D3DXCOLOR(1.0f*this[1].time, 1.0f*this[1].time, 1.0f*this[1].time, 1.0f);
+			//pVtx->diffuse = D3DXCOLOR(1.0f*this[1].time, 1.0f*this[1].time, 1.0f*this[1].time, 1.0f);
 
 			pVtx++;
 
 			for (int nCntH = 0; nCntH < this[0].nNumBlockH; nCntH++, pVtx++)
 			{
 				// 頂点カラーの設定
-					pVtx->diffuse = D3DXCOLOR(1.0f*this[1].time, 1.0f*this[1].time, 1.0f*this[1].time, 1.0f);
+					//pVtx->diffuse = D3DXCOLOR(1.0f*this[1].time, 1.0f*this[1].time, 1.0f*this[1].time, 1.0f);
 			}
 
 			// 頂点データをアンロックする

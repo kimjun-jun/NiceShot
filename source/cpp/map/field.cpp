@@ -211,8 +211,8 @@ void FIELD::Init(void)
 				//縮退ポリゴンよけなさい
 				if (pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx == pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX + 1].vtx)	continue;
 				else if (pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX + 1].vtx == pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX + 2].vtx) continue;
-				pVtx[(rand() % this[0].model.nNumVertex)].vtx.y = float((rand() % 200));
-				//pVtx[(rand() % this[0].model.nNumVertex)].vtx.y = 0.0f;
+				//pVtx[(rand() % this[0].model.nNumVertex)].vtx.y = float((rand() % 200));
+				pVtx[(rand() % this[0].model.nNumVertex)].vtx.y = 0.0f;
 			}
 		}
 
@@ -231,8 +231,8 @@ void FIELD::Init(void)
 				//上側
 				if (nCntVtxZ == 0 || nCntVtxX == 0 || nCntVtxZ == this[0].nNumBlockZField || nCntVtxX == this[0].nNumBlockZField)
 				{
-					pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = pVtxS[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = 50.0f;
-					//pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = pVtxS[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = 0.0f;
+					//pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = pVtxS[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = 50.0f;
+					pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = pVtxS[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = 0.0f;
 				}
 				//中側
 				else
@@ -344,6 +344,7 @@ void FIELD::Reinit(void)
 		}
 
 		//上限
+		
 		for (int nCntVtxZ = 0; nCntVtxZ < (this[0].nNumBlockZField + 1) / 2; nCntVtxZ++)
 		{
 			for (int nCntVtxX = 0; nCntVtxX < (this[0].nNumBlockZField + 1) / 2; nCntVtxX++)
@@ -352,10 +353,11 @@ void FIELD::Reinit(void)
 				if (pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx == pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX + 1].vtx)	continue;
 				else if (pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX + 1].vtx == pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX + 2].vtx) continue;
 				//高さを仮決定
-				pVtx[(rand() % this[0].model.nNumVertex)].vtx.y = float((rand() % 200));
+				//pVtx[(rand() % this[0].model.nNumVertex)].vtx.y = float((rand() % 200));
+				pVtx[(rand() % this[0].model.nNumVertex)].vtx.y = 0.0f;
 			}
 		}
-
+		
 		//縮退ポリゴンの座標を調整
 		//SetDegenerationPoly();
 
@@ -370,7 +372,10 @@ void FIELD::Reinit(void)
 				// 頂点座標の設定
 				//上側
 				if (nCntVtxZ == 0 || nCntVtxX == 0 || nCntVtxZ == this[0].nNumBlockZField || nCntVtxX == this[0].nNumBlockZField)
-					pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = pVtxS[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = 50.0f;
+				{
+					//pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = pVtxS[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = 50.0f;
+					pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = pVtxS[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = 0.0f;
+				}
 				//中側
 				else
 				{
@@ -794,7 +799,6 @@ void FIELD::SetFieldType03(PLAYER_HONTAI *player)
 		{
 			//高さを決める頂点を決定
 			int YTXrandNum(rand() % this[0].model.nNumVertex);
-
 			//高さを決め代入
 			int VTXrandY(rand() % 200);
 			VTXrandY += 20;//オフセット

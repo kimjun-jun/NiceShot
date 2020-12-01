@@ -11,6 +11,8 @@ void SetNetMatchFlag(bool flag);
 void SetNetMyNumberFlagFlag(bool flag);
 void SetNetMyNumber(int num);
 int GetNetMyNumber(void);
+void SetNetItemFlag(bool flag);
+bool GetNetItemFlag(void);
 void SetNetGameStartFlag(bool flag);
 void SetNetShareDateFlag(bool flag);
 bool GetNetShareDateFlag(void);

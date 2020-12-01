@@ -14,6 +14,7 @@
 #include "../../h/other/input.h"
 #include "../../h/object/objectclass.h"
 #include "../../h/object/player.h"
+#include "../../h/object/item.h"
 #include "../../h/object/bullet/bullet.h"
 #include "../../h/net/sock.h"
 
@@ -43,6 +44,36 @@ char toSendText[1024] = "Entry";
 
 bool MultThreadFlag = false;
 
+
+
+//通信データのバッファ　この値とクライアント現在の値を比較して変更があれば最新データを送信する
+//これまでだと1フレームで何回も同じデータを送信しているので、変更があったときに一度だけ送信する
+struct SENDMSG_BUFF
+{
+	SENDMSG_BUFF() {
+		PlayerPos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		HoudaiRot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		HoutouRot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		HousinRot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		BPos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		ItemSyncUse = false;
+	}
+
+	//プレイヤーデータ
+	D3DXVECTOR3 PlayerPos;
+	D3DXVECTOR3 HoudaiRot;
+	D3DXVECTOR3 HoutouRot;
+	D3DXVECTOR3 HousinRot;
+	int Vital;
+	bool Morphing;
+	D3DXVECTOR3 BPos;
+
+	//アイテムデータ
+	bool ItemSyncUse;
+
+};
+SENDMSG_BUFF g_SendMsgBuff;
+
 int NetClientSocketCreate(void)
 {
 	SendObjectP = NULL;
@@ -54,6 +85,13 @@ int NetClientSocketCreate(void)
 
 	dstAddr = { NULL };
 	MultThreadFlag = false;
+
+	g_SendMsgBuff.PlayerPos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	g_SendMsgBuff.HoudaiRot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	g_SendMsgBuff.HoutouRot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	g_SendMsgBuff.HousinRot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	g_SendMsgBuff.BPos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	g_SendMsgBuff.ItemSyncUse = false;
 
 	/* Windows 独自の設定 */
 	WSADATA data;
@@ -255,6 +293,105 @@ void NetMyNumberGet(void)
 //}
 }
 
+void NetItemGet(void)
+{
+	//実際のゲームで扱っているアドレスを取得
+	SendObjectP = GetSendObjectP();
+
+	//アイテム情報取得
+	int ItemChk = 0;
+	char ItemChkRMsg[BUFFER_SIZE]; //送られてくるデータ内容
+	ItemChkRMsg[0] = NULL;
+	//printf("アイテム情報取得中\n");
+	numrcv = recv(dstSocket, ItemChkRMsg, BUFFER_SIZE, 0);
+	if (numrcv < 1)
+	{
+		if (WSAGetLastError() == WSAEWOULDBLOCK)
+		{
+			// まだ来ない。
+			//printf("ただ今の接続人数%s\n", buffer);
+		}
+		else
+		{
+			printf("error : 0x%x\n", WSAGetLastError());
+		}
+	}
+	else
+	{
+		char *RMsgBlock;
+		char *next = NULL;
+		char *next2 = NULL;
+
+		/* スペース.を区切りに文字列を抽出 */
+		RMsgBlock = strtok_s(ItemChkRMsg, ",", &next);
+
+		if (strcmp(RMsgBlock, "@I") == 0)
+		{
+			next2 = next;
+			//アイテムメッセージ解析 "@Item,%d,%d,X%d,Z%d&"
+			for (int nCntItem = 0; nCntItem < OBJECT_ITEM_MAX; nCntItem++)
+			{
+				char *Index;
+				Index = strtok_s(next2, "N.", &next);
+				char *Type;
+				Type = strtok_s(NULL, "T,", &next);
+
+				RMsgBlock = strtok_s(NULL, "&", &next);
+				D3DXVECTOR3 buff;
+				char *XYZnext = RMsgBlock;
+				for (int CntXZ = 0; CntXZ < 2; CntXZ++)
+				{
+					char *GetVal = NULL;
+					char *SetVal = NULL;
+					char *nullp = NULL;
+					//XZの数値部分を取得する
+					GetVal = strtok_s(XYZnext, ",", &XYZnext);
+					if (CntXZ == 0) SetVal = strtok_s(GetVal, "X", &nullp);//SetVal=000.000 nullp=NULL
+					else if (CntXZ == 1) SetVal = strtok_s(GetVal, "Z", &nullp);//SetVal=000.000 nullp=NULL
+					switch (CntXZ)
+					{
+					case 0:
+						buff.x = strtof(SetVal, NULL);
+						break;
+					case 1:
+						buff.y = ITEM_INIT_POSY;
+						buff.z = strtof(SetVal, NULL);
+						//データを格納
+						int iIndex = atoi(Index);
+						int iType = atoi(Type);
+						NetSetItem(buff, iIndex, iType);
+						if (next[0] != NULL)
+						{
+							next2 = strtok_s(next, "#", &next);
+							strtok_s(next2, ",", &next);
+							next2 = next;
+						}
+						break;
+					}
+				}
+			}
+		}
+
+		//全アイテム情報を取得したか確認
+		for (int ItemChkCnt = 0; ItemChkCnt < OBJECT_ITEM_MAX; ItemChkCnt++)
+		{
+			if (SendObjectP->item[ItemChkCnt].NetUse == true)
+			{
+				ItemChk++;
+			}
+		}
+		//アイテム情報を確認できた
+		if (ItemChk == 20)
+		{
+			//受信完了メッセージ送信
+			toSendText[0] = NULL;
+			sprintf_s(toSendText, "OK");
+			send(dstSocket, toSendText, strlen(toSendText) + 1, 0);
+			SetNetItemFlag(true);
+		}
+	}
+}
+
 void NetCountdown(void)
 {
 	char CountChkRMsg[BUFFER_SIZE]; //送られてくるデータ内容
@@ -312,18 +449,12 @@ void Packet(void)
 
 void SendPacket(void)
 {
-	//信号がON(変更があった時)に[変化するインスタンス1][変化後のパラメータ2]を送る
-	/*
-	アイテム->Updateすべてサーバー.use,pos,rot,scl,FieldNorUpNorCross,Qrot
-	フィールド->地形アイテム取得信号からサーバー上で次の地形を生成。そのデータをクライアントに送り、補間させながら地形変形、pD3DVtxBuffFieldDraw
-	*/
-
-
-
 	//実際のゲームで扱っているアドレスを取得
 	SendObjectP = GetSendObjectP();
 	int MyNum = GetNetMyNumber();
 	char SMsg[BUFFER_SIZE] = { NULL }; //送るデータ内容
+	char ItemSMsg[BUFFER_SIZE] = { NULL }; //送るデータ内容
+	char ItemUseSMsg[BUFFER_SIZE] = { NULL }; //送るデータ内容
 
 	//---------------------------プレイヤー
 	//変更したか確認　変更箇所があればsend()する
@@ -339,20 +470,19 @@ void SendPacket(void)
 	D3DXVECTOR3 OldPos = SendObjectP->player[MyNum].GetOldPos();
 	if (Pos != OldPos)
 	{
-		//if (Pos.y >= OldPos.y + 0.01f || Pos.y <= OldPos.y - 0.01f)
-		//{
-			//SendObjectP->player[MyNum].NetChkPos = true;
-			//変更があるので送信用メッセージに書き込む
-			char NewSMsg[BUFFER_SIZE] = { NULL }; //送るデータ内容
-			sprintf_s(NewSMsg, "@P%d,Pos,X%4.3f,Y%4.3f,Z%4.3f&", MyNum, Pos.x, Pos.y, Pos.z);
-			sprintf_s(SMsg, "%s%s", SMsg, NewSMsg);
-		//}
+		g_SendMsgBuff.PlayerPos = Pos;
+		//SendObjectP->player[MyNum].NetChkPos = true;
+		//変更があるので送信用メッセージに書き込む
+		char NewSMsg[BUFFER_SIZE] = { NULL }; //送るデータ内容
+		sprintf_s(NewSMsg, "@P%d,Pos,X%4.3f,Y%4.3f,Z%4.3f&", MyNum, Pos.x, Pos.y, Pos.z);
+		sprintf_s(SMsg, "%s%s", SMsg, NewSMsg);
 	}
 	//回転
 	D3DXVECTOR3 HoudaiRot = SendObjectP->player[MyNum].GetRot();
 	D3DXVECTOR3 HoudaiOldRot = SendObjectP->player[MyNum].GetOldRot();
 	if (HoudaiRot != HoudaiOldRot)
 	{
+		g_SendMsgBuff.HoudaiRot = HoudaiRot;
 		SendObjectP->player[MyNum].NetChkHoudaiRot = true;
 		//変更があるので送信用メッセージに書き込む
 		char NewSMsg[BUFFER_SIZE] = { NULL }; //送るデータ内容
@@ -363,16 +493,18 @@ void SendPacket(void)
 	D3DXVECTOR3 HoutouOldRot = SendObjectP->player[MyNum].parts[PARTSTYPE_HOUTOU].GetOldRot();
 	if (HoutouRot != HoutouOldRot)
 	{
+		g_SendMsgBuff.HoutouRot = HoutouRot;
 		SendObjectP->player[MyNum].NetChkHoutouRot = true;
 		//変更があるので送信用メッセージに書き込む
 		char NewSMsg[BUFFER_SIZE] = { NULL }; //送るデータ内容
-		sprintf_s(NewSMsg,"@P%d,HoutouRot,X%4.3f,Y%4.3f,Z%4.3f&", MyNum, HoutouRot.x, HoutouRot.y, HoutouRot.z);
+		sprintf_s(NewSMsg, "@P%d,HoutouRot,X%4.3f,Y%4.3f,Z%4.3f&", MyNum, HoutouRot.x, HoutouRot.y, HoutouRot.z);
 		sprintf_s(SMsg, "%s%s", SMsg, NewSMsg);
 	}
 	D3DXVECTOR3 HousinRot = SendObjectP->player[MyNum].parts[PARTSTYPE_HOUSIN].GetRot();
 	D3DXVECTOR3 HousinOldRot = SendObjectP->player[MyNum].parts[PARTSTYPE_HOUSIN].GetOldRot();
 	if (HousinRot != HousinOldRot)
 	{
+		g_SendMsgBuff.HousinRot = HousinRot;
 		SendObjectP->player[MyNum].NetChkHousinRot = true;
 		//変更があるので送信用メッセージに書き込む
 		char NewSMsg[BUFFER_SIZE] = { NULL }; //送るデータ内容
@@ -384,6 +516,7 @@ void SendPacket(void)
 	{
 		if (SendObjectP->player[CntPlayer].vital != SendObjectP->player[CntPlayer].oldvital)
 		{
+			g_SendMsgBuff.Vital = SendObjectP->player[CntPlayer].vital;
 			int Vital = SendObjectP->player[CntPlayer].vital;
 			SendObjectP->player[MyNum].NetChkvital[CntPlayer] = true;
 			//変更があるので送信用メッセージに書き込む
@@ -395,6 +528,7 @@ void SendPacket(void)
 	//モーフィング モーフィング信号ON(アタックモデルの時、常時ON)のときメッセージ送信。receive側は1を受け続ける。
 	if (SendObjectP->player[MyNum].GetMorphing == true)
 	{
+		g_SendMsgBuff.Morphing = SendObjectP->player[MyNum].GetMorphing;
 		SendObjectP->player[MyNum].NetChkMorphing = true;
 		//変更があるので送信用メッセージに書き込む
 		char NewSMsg[BUFFER_SIZE] = { NULL }; //送るデータ内容
@@ -411,6 +545,7 @@ void SendPacket(void)
 		break;
 	case 1:
 	{
+		g_SendMsgBuff.BPos = SendObjectP->player[MyNum].Bpos;
 		D3DXVECTOR3 BPos = SendObjectP->player[MyNum].Bpos;
 		D3DXVECTOR3 BMove = SendObjectP->player[MyNum].Bmove[0];
 		//変更があるので送信用メッセージに書き込む
@@ -422,35 +557,79 @@ void SendPacket(void)
 	}
 	case 3:
 	{
+		g_SendMsgBuff.BPos = SendObjectP->player[MyNum].Bpos;
 		D3DXVECTOR3 BPos = SendObjectP->player[MyNum].Bpos;
 		D3DXVECTOR3 BMove[3];
 		BMove[0] = SendObjectP->player[MyNum].Bmove[0];
 		BMove[1] = SendObjectP->player[MyNum].Bmove[1];
 		BMove[2] = SendObjectP->player[MyNum].Bmove[2];
-			//変更があるので送信用メッセージに書き込む
-			char NewSMsg[BUFFER_SIZE] = { NULL }; //送るデータ内容
-			sprintf_s(NewSMsg,
-				"@P%d,BulletB,PX%4.3f,PY%4.3f,PZ%4.3f,MX%4.3f,MY%4.3f,MZ%4.3f,MX%4.3f,MY%4.3f,MZ%4.3f,MX%4.3f,MY%4.3f,MZ%4.3f&"
-				, MyNum, BPos.x, BPos.y, BPos.z, BMove[0].x, BMove[0].y, BMove[0].z
-				, BMove[1].x, BMove[1].y, BMove[1].z, BMove[2].x, BMove[2].y, BMove[2].z);
-			sprintf_s(SMsg, "%s%s", SMsg, NewSMsg);
+		//変更があるので送信用メッセージに書き込む
+		char NewSMsg[BUFFER_SIZE] = { NULL }; //送るデータ内容
+		sprintf_s(NewSMsg,
+			"@P%d,BulletB,PX%4.3f,PY%4.3f,PZ%4.3f,MX%4.3f,MY%4.3f,MZ%4.3f,MX%4.3f,MY%4.3f,MZ%4.3f,MX%4.3f,MY%4.3f,MZ%4.3f&"
+			, MyNum, BPos.x, BPos.y, BPos.z, BMove[0].x, BMove[0].y, BMove[0].z
+			, BMove[1].x, BMove[1].y, BMove[1].z, BMove[2].x, BMove[2].y, BMove[2].z);
+		sprintf_s(SMsg, "%s%s", SMsg, NewSMsg);
 		break;
 	}
 	}
 
 
+	//---------------------------アイテム取得信号
+
+	for (int CntItem = 0; CntItem < OBJECT_ITEM_MAX; CntItem++)
+	{
+		if (SendObjectP->item[CntItem].NetGetItemFlag == true &&
+			SendObjectP->item[CntItem].GetPlayerType == MyNum)
+		{
+			bool use = SendObjectP->item[CntItem].GetUse();
+			//if (g_SendMsgBuff.ItemSyncUse != use)
+			//{
+			g_SendMsgBuff.ItemSyncUse = use;
+			//int ItemN = SendObjectP->item[CntItem].GetPlayerType;
+			int ItemT = SendObjectP->item[CntItem].nType;
+			D3DXVECTOR3 ItemPos = SendObjectP->item[CntItem].GetPos();
+			//変更があるので送信用メッセージに書き込む
+			char NewSMsg[BUFFER_SIZE] = { NULL }; //送るデータ内容
+			sprintf_s(NewSMsg, "@I,N%d,T%d,X%4.3f,Y%4.3f,Z%4.3f&"
+				, CntItem, ItemT, ItemPos.x, ItemPos.y, ItemPos.z);
+			sprintf_s(ItemSMsg, "%s%s", ItemSMsg, NewSMsg);
+			//}
+		}
+	}
+
+	//---------------------------アイテム使用信号
+	/*
+	for (int CntItem = 0; CntItem < OBJECT_ITEM_MAX; CntItem++)
+	{
+		//情報取得
+		bool ItemUse = SendObjectP->item[CntItem].GetUse();
+		int ItemT = SendObjectP->item[CntItem].nType;
+		//送信用メッセージに書き込む
+		char NewSMsg[BUFFER_SIZE] = { NULL };
+		sprintf_s(NewSMsg, "@UI,N%d,T%d,U%d&"
+			, CntItem, ItemT, ItemUse);
+		sprintf_s(ItemUseSMsg, "%s%s", ItemUseSMsg, NewSMsg);
+	}
+
+	*/
 
 
 
-
-
-
-
-	//変更があった場合send()する
-	if(SMsg[0]!=NULL)
+	//変更があった場合send()する　基本情報
+	if (SMsg[0] != NULL)
 	{
 		send(dstSocket, SMsg, strlen(SMsg) + 1, 0);
 	}
+
+	//変更があった場合send()する　アイテム取得情報
+	if (ItemSMsg[0] != NULL)
+	{
+		send(dstSocket, ItemSMsg, strlen(ItemSMsg) + 1, 0);
+	}
+
+	//常時send()する　アイテム使用情報
+	//send(dstSocket, ItemUseSMsg, strlen(ItemUseSMsg) + 1, 0);
 }
 
 void ReceivePacket(void)
@@ -1769,7 +1948,52 @@ void MsgAnalys(char* argRMsg)
 		}
 	}
 
+	//アイテム情報はここ
+	if (strcmp(RMsgBlock, "@I") == 0)
+	{
+		char *next2 = NULL;
+		next2 = next;
+		//アイテムメッセージ解析 "@Item,%d,%d,X%d,Z%d&"
+		char *Index;
+		Index = strtok_s(next2, "N.", &next);
+		char *Type;
+		Type = strtok_s(NULL, "T,", &next);
 
+		RMsgBlock = strtok_s(NULL, "&", &next);
+		D3DXVECTOR3 buff;
+		char *XYZnext = RMsgBlock;
+		for (int CntXZ = 0; CntXZ < 2; CntXZ++)
+		{
+			char *GetVal = NULL;
+			char *SetVal = NULL;
+			char *nullp = NULL;
+			//XZの数値部分を取得する
+			GetVal = strtok_s(XYZnext, ",", &XYZnext);
+			if (CntXZ == 0) SetVal = strtok_s(GetVal, "X", &nullp);//SetVal=000.000 nullp=NULL
+			else if (CntXZ == 1) SetVal = strtok_s(GetVal, "Z", &nullp);//SetVal=000.000 nullp=NULL
+			switch (CntXZ)
+			{
+			case 0:
+				buff.x = strtof(SetVal, NULL);
+				break;
+			case 1:
+				buff.y = ITEM_INIT_POSY;
+				buff.z = strtof(SetVal, NULL);
+				//データを格納
+				int iIndex = atoi(Index);
+				int iType = atoi(Type);
+				NetSetItem(buff, iIndex, iType);
+				PlaySound(SOUND_LABEL_SE_nyu);
+				if (next[0] != NULL)
+				{
+					next2 = strtok_s(next, "#", &next);
+					strtok_s(next2, ",", &next);
+					next2 = next;
+				}
+				break;
+			}
+		}
+	}
 }
 
 void SetBuff(char* RMsgBlock, int SetEnumType,int PlayerNum)
@@ -1813,6 +2037,17 @@ void SetBuff(char* RMsgBlock, int SetEnumType,int PlayerNum)
 			}
 			break;
 		}
+	}
+}
+
+void NetSetItem(D3DXVECTOR3 buff, int index, int type)
+{
+	SendObjectP = GetSendObjectP();
+	if (SendObjectP->item[index].GetUse() == false)
+	{
+		SendObjectP->item[index].SetItem(buff, D3DXVECTOR3(2.0f, 2.0f, 2.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), type);
+		SendObjectP->item[index].NetUse = true;
+		g_SendMsgBuff.ItemSyncUse = false;
 	}
 }
 

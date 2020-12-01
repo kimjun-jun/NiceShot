@@ -85,36 +85,40 @@ void ITEM::Init(void)
 		this[nCntItem].SetScl(D3DXVECTOR3(2.0f, 2.0f, 2.0f));
 		this[nCntItem].nIdxShadow = -1;
 		this[nCntItem].nType = -1;
+		this[nCntItem].NetUse = false;
+		this[nCntItem].SetUse(false);
+		this[nCntItem].NetGetItemFlag = false;
+		this[nCntItem].NetGetItemFlagOld = false;
 	}
-	for (int nCntItem = 0; nCntItem < DROP_ITEM_MAX; nCntItem++)
-	{
-		D3DXVECTOR3 pos = D3DXVECTOR3(float(rand() % int(WALL_SIZE_X/4)) + 100.0f, ITEM_INIT_POSY, float(rand() % int(WALL_SIZE_X / 4)) + 100.0f);
-		int x = rand() % 2;
-		int z = rand() % 2;
-		if (x == 1) pos.x *= -1;
-		if (z == 1) pos.z *= -1;
+	//for (int nCntItem = 0; nCntItem < DROP_ITEM_MAX; nCntItem++)
+	//{
+	//	D3DXVECTOR3 pos = D3DXVECTOR3(float(rand() % int(WALL_SIZE_X/4)) + 100.0f, ITEM_INIT_POSY, float(rand() % int(WALL_SIZE_X / 4)) + 100.0f);
+	//	int x = rand() % 2;
+	//	int z = rand() % 2;
+	//	if (x == 1) pos.x *= -1;
+	//	if (z == 1) pos.z *= -1;
 
-		/*
-		enum
-		{
-			ITEMTYPE_TIKEI = 0,		// 地形
-			ITEMTYPE_LIFE,			// ライフ
-			ITEMTYPE_SENSYA,		// 戦車
-			ITEMTYPE_BULLET,		// バレット
-			ITEMTYPE_SPEEDUP,		// スピードアップ
-			ITEMTYPE_CAMERA,		// お邪魔アイテム　強制バックカメラ
-			ITEMTYPE_KIRI,			// お邪魔アイテム　霧
-			ITEMTYPE_MAX
-		};
-		*/
-		int ItemTypeNum = rand() % ITEMTYPE_MAX;
-		//ライフ、カメラ、霧アイテムの時はもう一度抽選
-		if (ItemTypeNum == ITEMTYPE_LIFE && ItemTypeNum == ITEMTYPE_CAMERA && ItemTypeNum == ITEMTYPE_KIRI) ItemTypeNum = rand() % ITEMTYPE_MAX;
-		//this[0].SetItem(pos, D3DXVECTOR3(2.0f, 2.0f, 2.0f),D3DXVECTOR3(0.0f, 0.0f, 0.0f), ItemTypeNum);
-		this[0].SetItem(pos, D3DXVECTOR3(2.0f, 2.0f, 2.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ITEMTYPE_SENSYA);
-		this[nCntItem].SetUse(true);
+	//	/*
+	//	enum
+	//	{
+	//		ITEMTYPE_TIKEI = 0,		// 地形
+	//		ITEMTYPE_LIFE,			// ライフ
+	//		ITEMTYPE_SENSYA,		// 戦車
+	//		ITEMTYPE_BULLET,		// バレット
+	//		ITEMTYPE_SPEEDUP,		// スピードアップ
+	//		ITEMTYPE_CAMERA,		// お邪魔アイテム　強制バックカメラ
+	//		ITEMTYPE_KIRI,			// お邪魔アイテム　霧
+	//		ITEMTYPE_MAX
+	//	};
+	//	*/
+	//	int ItemTypeNum = rand() % ITEMTYPE_MAX;
+	//	//ライフ、カメラ、霧アイテムの時はもう一度抽選
+	//	if (ItemTypeNum == ITEMTYPE_LIFE && ItemTypeNum == ITEMTYPE_CAMERA && ItemTypeNum == ITEMTYPE_KIRI) ItemTypeNum = rand() % ITEMTYPE_MAX;
+	//	//this[0].SetItem(pos, D3DXVECTOR3(2.0f, 2.0f, 2.0f),D3DXVECTOR3(0.0f, 0.0f, 0.0f), ItemTypeNum);
+	//	this[0].SetItem(pos, D3DXVECTOR3(2.0f, 2.0f, 2.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ITEMTYPE_SENSYA);
+	//	this[nCntItem].SetUse(true);
 
-	}
+	//}
 	this[0].GoukeiDrop = DROP_ITEM_MAX;
 
 }
@@ -124,7 +128,6 @@ void ITEM::Init(void)
 //=============================================================================
 void ITEM::Reinit(void)
 {
-
 	for (int nCntItem = 0; nCntItem < OBJECT_ITEM_MAX; nCntItem++)
 	{
 		this[nCntItem].SetPos(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
@@ -140,6 +143,8 @@ void ITEM::Reinit(void)
 		this[nCntItem].GettingSignal = false;
 		this[nCntItem].GettingSignalEnd = false;
 		this[nCntItem].CollisionFieldEnd = false;
+		this[nCntItem].NetGetItemFlag = false;
+		this[nCntItem].NetGetItemFlagOld = false;
 	}
 	for (int nCntItem = 0; nCntItem < DROP_ITEM_MAX; nCntItem++)
 	{
@@ -172,6 +177,31 @@ void ITEM::Reinit(void)
 }
 
 //=============================================================================
+// 再初期化処理
+//=============================================================================
+void ITEM::ReinitNet(void)
+{
+	for (int nCntItem = 0; nCntItem < OBJECT_ITEM_MAX; nCntItem++)
+	{
+		this[nCntItem].SetPos(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+		this[nCntItem].SetScl(D3DXVECTOR3(2.0f, 2.0f, 2.0f));
+		this[nCntItem].SetRot(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+		this[nCntItem].SetFieldNorVec(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+		this[nCntItem].SetFieldNorUpNorCross(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+		this[nCntItem].SetQrot(0.0f);
+		this[nCntItem].SetUse(false);
+		this[nCntItem].Droptime = 0.0f;
+		this[nCntItem].nIdxShadow = -1;
+		this[nCntItem].nType = -1;
+		this[nCntItem].GettingSignal = false;
+		this[nCntItem].GettingSignalEnd = false;
+		this[nCntItem].CollisionFieldEnd = false;
+		this[nCntItem].NetGetItemFlag = false;
+		this[nCntItem].NetGetItemFlagOld = false;
+	}
+}
+
+//=============================================================================
 // 終了処理
 //=============================================================================
 void ITEM::Uninit(void)
@@ -201,10 +231,12 @@ void ITEM::Uninit(void)
 //=============================================================================
 // 更新処理
 //=============================================================================
-void ITEM::Update(PLAYER_HONTAI *p)
+void ITEM::Update(PLAYER_HONTAI *p, bool NetGameStartFlag)
 {
 	for (int nCntItem = 0; nCntItem < OBJECT_ITEM_MAX; nCntItem++)
 	{
+		this[nCntItem].NetGetItemFlagOld = this[nCntItem].NetGetItemFlag;
+		this[nCntItem].NetGetItemFlag = false;
 		bool use = this[nCntItem].GetUse();
 		if (use == true)
 		{
@@ -254,33 +286,36 @@ void ITEM::Update(PLAYER_HONTAI *p)
 
 	}
 
-
-	//アイテムを復活させる制御。
-	for (int nCntItem = 0; nCntItem < OBJECT_ITEM_MAX; nCntItem++)
+	//ローカル対戦ならここでリスポーン処理
+	if (NetGameStartFlag == false)
 	{
-		if (this[0].GoukeiDrop > DROP_ITEM_MAX) break;
-		bool use = this[nCntItem].GetUse();
-		if (use == true)
+		//アイテムを復活させる制御。
+		for (int nCntItem = 0; nCntItem < OBJECT_ITEM_MAX; nCntItem++)
 		{
-			this[nCntItem].Droptime += DROP_ITEM_CHARGE_ADDTIME;
-			if (this[nCntItem].Droptime >= DROP_ITEM_CHARGE_CNT)
+			if (this[0].GoukeiDrop > DROP_ITEM_MAX) break;
+			bool use = this[nCntItem].GetUse();
+			if (use == true)
 			{
-				D3DXVECTOR3 pos = D3DXVECTOR3(float(rand() % int(WALL_SIZE_X / 4)) + 100.0f, ITEM_INIT_POSY, float(rand() % int(WALL_SIZE_X / 4)) + 100.0f);
-				int x = rand() % 2;
-				int z = rand() % 2;
-				if (x == 1) pos.x *= -1;
-				if (z == 1) pos.z *= -1;
-				int ItemNum = rand() % ITEMTYPE_MAX;
-				//ライフ、カメラ、霧アイテムの時はもう一度抽選
-				if (ItemNum == ITEMTYPE_LIFE && ItemNum == ITEMTYPE_CAMERA && ItemNum == ITEMTYPE_KIRI) ItemNum = rand() % ITEMTYPE_MAX;
-				this[0].SetItem(pos, D3DXVECTOR3(2.0f, 2.0f, 2.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ItemNum);
-				//this[0].SetItem(pos, D3DXVECTOR3(1.0f, 1.0f, 1.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ITEMTYPE_TIKEI);
-				this[nCntItem].CollisionFieldEnd = false;
-				this[nCntItem].Droptime = 0.0f;
-				this[0].GoukeiDrop++;
-				PlaySound(SOUND_LABEL_SE_nyu);
+				this[nCntItem].Droptime += DROP_ITEM_CHARGE_ADDTIME;
+				if (this[nCntItem].Droptime >= DROP_ITEM_CHARGE_CNT)
+				{
+					D3DXVECTOR3 pos = D3DXVECTOR3(float(rand() % int(WALL_SIZE_X / 4)) + 100.0f, ITEM_INIT_POSY, float(rand() % int(WALL_SIZE_X / 4)) + 100.0f);
+					int x = rand() % 2;
+					int z = rand() % 2;
+					if (x == 1) pos.x *= -1;
+					if (z == 1) pos.z *= -1;
+					int ItemNum = rand() % ITEMTYPE_MAX;
+					//ライフ、カメラ、霧アイテムの時はもう一度抽選
+					if (ItemNum == ITEMTYPE_LIFE && ItemNum == ITEMTYPE_CAMERA && ItemNum == ITEMTYPE_KIRI) ItemNum = rand() % ITEMTYPE_MAX;
+					this[0].SetItem(pos, D3DXVECTOR3(2.0f, 2.0f, 2.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ItemNum);
+					//this[0].SetItem(pos, D3DXVECTOR3(1.0f, 1.0f, 1.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ITEMTYPE_TIKEI);
+					this[nCntItem].CollisionFieldEnd = false;
+					this[nCntItem].Droptime = 0.0f;
+					this[0].GoukeiDrop++;
+					PlaySound(SOUND_LABEL_SE_nyu);
+				}
+				break;
 			}
-			break;
 		}
 	}
 }

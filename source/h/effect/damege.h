@@ -25,6 +25,7 @@ public:
 	DAMEGE() { alpha = 0, time = 0.0f; }
 	virtual void				Init(void);					//!< ‰Šú‰»
 	virtual void				Reinit(void);				//!< Ä‰Šú‰»
+	virtual void				ReinitNet(void);				//!< Ä‰Šú‰»
 	virtual void				Uninit(void);				//!< I—¹
 	virtual void				Update(void);				//!< XV
 	virtual void				Draw(bool Netflag, int NetMyNumber);					//!< •`‰æ

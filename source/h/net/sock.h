@@ -3,6 +3,7 @@ int NetClientSocketCreate(void);
 int NetClientSocketDelete(void);
 void NetMatch(void);
 void NetMyNumberGet(void);
+void NetItemGet(void);
 void NetCountdown(void);
 void Packet(void);
 void SendPacket(void);
@@ -22,6 +23,7 @@ void MsgAnalys(char* argRMsg);
 //RMsgBlockはデータのブロック　TypeはPosやRotなどの種類
 void SetBuff(char* RMsgBlock,int Type, int PlayerNum);
 
+void NetSetItem(D3DXVECTOR3 buff, int index, int type);
 void NetSetPos(D3DXVECTOR3 buff, int PlayerNum);
 void NetSetHoudaiRot(D3DXVECTOR3 buff, int PlayerNum);
 void NetSetHoutouRot(D3DXVECTOR3 buff, int PlayerNum);

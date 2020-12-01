@@ -49,6 +49,11 @@ void SetNetMyNumberFlagFlag(bool flag) { NetMyNumberFlag = flag; }
 void SetNetMyNumber(int num) { NetMyNumber = num; }
 int GetNetMyNumber(void) { return NetMyNumber; }
 
+//アイテムフラグ　trueでアイテム情報取得完了、カウントダウン信号を受け取り始める
+bool NetItemFlag = false;
+void SetNetItemFlag(bool flag) { NetItemFlag = flag; }
+bool GetNetItemFlag(void) { return NetItemFlag; }
+
 //ネットフラグ　trueでネット対戦始める
 bool NetGameStartFlag = false;
 void SetNetGameStartFlag(bool flag) { NetGameStartFlag = flag; }
@@ -168,9 +173,9 @@ void GAME_OBJECT::ReinitNet()
 	status->ReinitNet(NetMyNumber);
 	vitalgauge->ReinitNet(NetMyNumber);
 	bulletgauge->ReinitNet(NetMyNumber);
-	//damege->Reinit();
+	damege->ReinitNet();
 	//explosion->Reinit();
-	//rank->Reinit();
+	//rank->ReinitNet();
 	//result->Reinit();
 	//item->Reinit();
 	//field->Reinit();
@@ -191,7 +196,7 @@ void GAME_OBJECT::Update()
 	//{
 	//	MasterVolumeChange(1);
 	//	Reinit();
-	//	fade->SetFade(FADE_OUT, SCENE_TITLE, SOUND_LABEL_BGM_title01);
+	//	fade->SetFade(FADE_OUT, SCENE_RESULT, SOUND_LABEL_BGM_title01);
 	//}
 #endif
 
@@ -219,7 +224,7 @@ void GAME_OBJECT::Update()
 			bulletprediction->Update(&player[0]);
 			effect->Update();
 			explosion->Update();
-			item->Update(&player[0]);
+			item->Update(&player[0], NetGameStartFlag);
 			shadow->Update();
 
 			CheakHit(0);
@@ -247,7 +252,7 @@ void GAME_OBJECT::Update()
 			bulletprediction->Update(&player[0]);
 			effect->Update();
 			explosion->Update();
-			item->Update(&player[0]);
+			item->Update(&player[0], NetGameStartFlag);
 			shadow->Update();
 
 			//当たり判定
@@ -257,7 +262,7 @@ void GAME_OBJECT::Update()
 			bulletgauge->Update(&player[0]);
 			damege->Update();
 			status->Update(&player[0]);
-			vitalgauge->Update(&player[0], &rank[0]);
+			vitalgauge->Update(&player[0], &rank[0], NetGameStartFlag, NetMyNumber);
 			break;
 
 		case SCENE_NETMATCH:
@@ -271,6 +276,11 @@ void GAME_OBJECT::Update()
 			if (NetMyNumberFlag == false)
 			{
 				if (NetMyNumber == -1) NetMyNumberGet();
+			}
+			//アイテム情報取得中
+			else if (NetItemFlag==false)
+			{
+				NetItemGet();
 			}
 			//カウントダウン信号待ち中
 			else
@@ -302,7 +312,7 @@ void GAME_OBJECT::Update()
 			bulletprediction->Update(&player[0]);
 			effect->Update();//パケット有り
 			explosion->Update();//パケット有り
-			item->Update(&player[0]);//パケット有り
+			item->Update(&player[0], NetGameStartFlag);//パケット有り
 			shadow->Update();//パケット有り
 
 			//当たり判定
@@ -312,7 +322,7 @@ void GAME_OBJECT::Update()
 			bulletgauge->Update(&player[0]);
 			damege->Update();//パケット有り
 			status->Update(&player[0]);
-			vitalgauge->Update(&player[0], &rank[0]);
+			vitalgauge->Update(&player[0], &rank[0], NetGameStartFlag, NetMyNumber);
 			break;
 		case SCENE_RESULT:
 			//リザルトの更新
@@ -474,7 +484,7 @@ void GAME_OBJECT::Draw()
 					status->Draw(NetGameStartFlag, NetMyNumber);
 					vitalgauge->Draw(NetGameStartFlag, NetMyNumber);
 					bulletgauge->Draw(NetGameStartFlag, NetMyNumber);
-					rank->Draw();
+					rank->Draw(NetGameStartFlag);
 				}
 			}
 			pD3DDevice->SetViewport(&VpMaster);
@@ -566,7 +576,7 @@ void GAME_OBJECT::Draw()
 				status->Draw(NetGameStartFlag, NetMyNumber);
 				vitalgauge->Draw(NetGameStartFlag, NetMyNumber);
 				bulletgauge->Draw(NetGameStartFlag, NetMyNumber);
-				rank->Draw();
+				rank->Draw(NetGameStartFlag);
 			}
 
 			break;
@@ -831,6 +841,7 @@ void GAME_OBJECT::CheakHit(int scene)
 					PlaySound(SOUND_LABEL_SE_kurukuru);
 					item[CntItem].GettingSignal = true;
 					item[CntItem].GetPlayerType = CntPlayer;
+					item[CntItem].NetGetItemFlag = true;
 				}
 			}
 		}

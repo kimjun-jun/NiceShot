@@ -43,9 +43,11 @@ void RANK::Init(void)
 //=============================================================================
 void RANK::Reinit(void)
 {
-	this[0].SetUse(false);
-	this[1].SetUse(false);
-	this[2].SetUse(false);
+	for (int CntRank = 0; CntRank < OBJECT_RANK_MAX; CntRank++)
+	{
+		this[CntRank].SetUse(false);
+		this[CntRank].NetUse = false;
+	}
 }
 
 //=============================================================================
@@ -66,18 +68,33 @@ void RANK::Update(void)
 //=============================================================================
 // 描画処理
 //=============================================================================
-void RANK::Draw(void)
+void RANK::Draw(bool Netflag)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 
-	for (int CntRank = 0; CntRank < OBJECT_RANK_MAX; CntRank++)
+	if (Netflag == false)
 	{
-		bool use = this[CntRank].GetUse();
-		if (use == true)
+		for (int CntRank = 0; CntRank < OBJECT_RANK_MAX; CntRank++)
 		{
-			pDevice->SetFVF(FVF_VERTEX_2D);
-			pDevice->SetTexture(0, this[CntRank].tex2D.pD3DTexture);
-			pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, POLYGON_2D_NUM, this[CntRank].tex2D.textureVTX, sizeof(VERTEX_2D));
+			bool use = this[CntRank].GetUse();
+			if (use == true)
+			{
+				pDevice->SetFVF(FVF_VERTEX_2D);
+				pDevice->SetTexture(0, this[CntRank].tex2D.pD3DTexture);
+				pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, POLYGON_2D_NUM, this[CntRank].tex2D.textureVTX, sizeof(VERTEX_2D));
+			}
+		}
+	}
+	else
+	{
+		for (int CntRank = 0; CntRank < OBJECT_RANK_MAX; CntRank++)
+		{
+			if (this[CntRank].NetUse == true)
+			{
+				pDevice->SetFVF(FVF_VERTEX_2D);
+				pDevice->SetTexture(0, this[CntRank].tex2D.pD3DTexture);
+				pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, POLYGON_2D_NUM, this[CntRank].tex2D.textureVTX, sizeof(VERTEX_2D));
+			}
 		}
 	}
 }
@@ -150,6 +167,27 @@ void RANK::SetRank(int PlayerNum)
 				break;
 			}
 			this[CntRank].SetUse(true);
+			break;
+		}
+	}
+}
+
+//=============================================================================
+// ランクをセット
+//=============================================================================
+void RANK::SetRankNet(int PlayerNum, int NetMyNumber)
+{
+	for (int CntRank = 0; CntRank < OBJECT_RANK_MAX; CntRank++)
+	{
+		bool use = this[CntRank].GetUse();
+		if (use != true)
+		{
+			this[CntRank].tex2D.textureVTX[0].vtx = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+			this[CntRank].tex2D.textureVTX[1].vtx = D3DXVECTOR3(SCREEN_W, 0.0f, 0.0f);
+			this[CntRank].tex2D.textureVTX[2].vtx = D3DXVECTOR3(0.0f, SCREEN_H, 0.0f);
+			this[CntRank].tex2D.textureVTX[3].vtx = D3DXVECTOR3(SCREEN_W, SCREEN_H, 0.0f);
+			this[CntRank].SetUse(true);
+			if (PlayerNum == NetMyNumber) this[CntRank].NetUse = true;
 			break;
 		}
 	}

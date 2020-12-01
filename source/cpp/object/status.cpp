@@ -59,27 +59,44 @@ void STATUS::Init(void)
 //=============================================================================
 void STATUS::Reinit(void)
 {
-	for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
+	this[0].obj[STATUSTYPE_SPEED].SetPos(D3DXVECTOR3(STATUS_POS_X - STATUS_POS_X_OFFSET, STATUS_POS_Y - STATUS_POS_Y_OFFSET, 0.0f));
+	this[0].obj[STATUSTYPE_SENSYA].SetPos(D3DXVECTOR3(STATUS_POS_X - STATUS_POS_X_OFFSET, STATUS_POS_Y - STATUS_POS_Y_OFFSET, 0.0f));
+	this[0].obj[STATUSTYPE_CAMERA].SetPos(D3DXVECTOR3(STATUS_POS_X - STATUS_POS_X_OFFSET, STATUS_POS_Y - STATUS_POS_Y_OFFSET, 0.0f));
+	this[0].obj[STATUSTYPE_KIRI].SetPos(D3DXVECTOR3(STATUS_POS_X - STATUS_POS_X_OFFSET, STATUS_POS_Y - STATUS_POS_Y_OFFSET, 0.0f));
+
+	this[1].obj[STATUSTYPE_SPEED].SetPos(D3DXVECTOR3(STATUS_POS_X * 2 - STATUS_POS_X_OFFSET, STATUS_POS_Y - STATUS_POS_Y_OFFSET, 0.0f));
+	this[1].obj[STATUSTYPE_SENSYA].SetPos(D3DXVECTOR3(STATUS_POS_X * 2 - STATUS_POS_X_OFFSET, STATUS_POS_Y - STATUS_POS_Y_OFFSET, 0.0f));
+	this[1].obj[STATUSTYPE_CAMERA].SetPos(D3DXVECTOR3(STATUS_POS_X * 2 - STATUS_POS_X_OFFSET, STATUS_POS_Y - STATUS_POS_Y_OFFSET, 0.0f));
+	this[1].obj[STATUSTYPE_KIRI].SetPos(D3DXVECTOR3(STATUS_POS_X * 2 - STATUS_POS_X_OFFSET, STATUS_POS_Y - STATUS_POS_Y_OFFSET, 0.0f));
+
+	this[2].obj[STATUSTYPE_SPEED].SetPos(D3DXVECTOR3(STATUS_POS_X - STATUS_POS_X_OFFSET, STATUS_POS_Y * 2 - STATUS_POS_Y_OFFSET, 0.0f));
+	this[2].obj[STATUSTYPE_SENSYA].SetPos(D3DXVECTOR3(STATUS_POS_X - STATUS_POS_X_OFFSET, STATUS_POS_Y * 2 - STATUS_POS_Y_OFFSET, 0.0f));
+	this[2].obj[STATUSTYPE_CAMERA].SetPos(D3DXVECTOR3(STATUS_POS_X - STATUS_POS_X_OFFSET, STATUS_POS_Y * 2 - STATUS_POS_Y_OFFSET, 0.0f));
+	this[2].obj[STATUSTYPE_KIRI].SetPos(D3DXVECTOR3(STATUS_POS_X - STATUS_POS_X_OFFSET, STATUS_POS_Y * 2 - STATUS_POS_Y_OFFSET, 0.0f));
+
+	this[3].obj[STATUSTYPE_SPEED].SetPos(D3DXVECTOR3(STATUS_POS_X * 2 - STATUS_POS_X_OFFSET, STATUS_POS_Y * 2 - STATUS_POS_Y_OFFSET, 0.0f));
+	this[3].obj[STATUSTYPE_SENSYA].SetPos(D3DXVECTOR3(STATUS_POS_X * 2 - STATUS_POS_X_OFFSET, STATUS_POS_Y * 2 - STATUS_POS_Y_OFFSET, 0.0f));
+	this[3].obj[STATUSTYPE_CAMERA].SetPos(D3DXVECTOR3(STATUS_POS_X * 2 - STATUS_POS_X_OFFSET, STATUS_POS_Y * 2 - STATUS_POS_Y_OFFSET, 0.0f));
+	this[3].obj[STATUSTYPE_KIRI].SetPos(D3DXVECTOR3(STATUS_POS_X * 2 - STATUS_POS_X_OFFSET, STATUS_POS_Y * 2 - STATUS_POS_Y_OFFSET, 0.0f));
+	for (int CntPlayer = 0; CntPlayer < OBJECT_STATUS_MAX; CntPlayer++)
 	{
-		this[CntPlayer].obj[STATUSTYPE_SPEED].tex2D.textureVTX[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
-		this[CntPlayer].obj[STATUSTYPE_SPEED].tex2D.textureVTX[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
-		this[CntPlayer].obj[STATUSTYPE_SPEED].tex2D.textureVTX[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
-		this[CntPlayer].obj[STATUSTYPE_SPEED].tex2D.textureVTX[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
+		for (int CntStatus = 0; CntStatus < STATUSTYPE_MAX; CntStatus++)
+		{
+			//-----------------------------------オブジェクト値読み込み
+			D3DXVECTOR3 pos = this[CntPlayer].obj[CntStatus].GetPos();
 
-		this[CntPlayer].obj[STATUSTYPE_SENSYA].tex2D.textureVTX[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
-		this[CntPlayer].obj[STATUSTYPE_SENSYA].tex2D.textureVTX[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
-		this[CntPlayer].obj[STATUSTYPE_SENSYA].tex2D.textureVTX[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
-		this[CntPlayer].obj[STATUSTYPE_SENSYA].tex2D.textureVTX[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
+			// 頂点座標の設定
+			this[CntPlayer].obj[CntStatus].tex2D.textureVTX[0].vtx = D3DXVECTOR3(pos.x - STATUS_SIZE_X + (CntStatus*STATUS_SIZE_X * 2), pos.y - STATUS_SIZE_Y, 0.0f);
+			this[CntPlayer].obj[CntStatus].tex2D.textureVTX[1].vtx = D3DXVECTOR3(pos.x + STATUS_SIZE_X + (CntStatus*STATUS_SIZE_X * 2), pos.y - STATUS_SIZE_Y, 0.0f);
+			this[CntPlayer].obj[CntStatus].tex2D.textureVTX[2].vtx = D3DXVECTOR3(pos.x - STATUS_SIZE_X + (CntStatus*STATUS_SIZE_X * 2), pos.y + STATUS_SIZE_Y, 0.0f);
+			this[CntPlayer].obj[CntStatus].tex2D.textureVTX[3].vtx = D3DXVECTOR3(pos.x + STATUS_SIZE_X + (CntStatus*STATUS_SIZE_X * 2), pos.y + STATUS_SIZE_Y, 0.0f);
 
-		this[CntPlayer].obj[STATUSTYPE_CAMERA].tex2D.textureVTX[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
-		this[CntPlayer].obj[STATUSTYPE_CAMERA].tex2D.textureVTX[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
-		this[CntPlayer].obj[STATUSTYPE_CAMERA].tex2D.textureVTX[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
-		this[CntPlayer].obj[STATUSTYPE_CAMERA].tex2D.textureVTX[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
-
-		this[CntPlayer].obj[STATUSTYPE_KIRI].tex2D.textureVTX[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
-		this[CntPlayer].obj[STATUSTYPE_KIRI].tex2D.textureVTX[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
-		this[CntPlayer].obj[STATUSTYPE_KIRI].tex2D.textureVTX[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
-		this[CntPlayer].obj[STATUSTYPE_KIRI].tex2D.textureVTX[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
+			// 反射光の設定
+			this[CntPlayer].obj[CntStatus].tex2D.textureVTX[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
+			this[CntPlayer].obj[CntStatus].tex2D.textureVTX[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
+			this[CntPlayer].obj[CntStatus].tex2D.textureVTX[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
+			this[CntPlayer].obj[CntStatus].tex2D.textureVTX[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 100);
+		}
 	}
 }
 

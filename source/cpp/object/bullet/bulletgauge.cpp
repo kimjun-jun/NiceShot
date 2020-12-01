@@ -68,6 +68,35 @@ void BULLETGAUGE::Init(void)
 //=============================================================================
 void BULLETGAUGE::Reinit(void)
 {
+	this[0].SetPos(D3DXVECTOR3(BULLETGAUGE_P1_POS_X, BULLETGAUGE_P1_POS_Y, 0.0f));
+	this[1].SetPos(D3DXVECTOR3(BULLETGAUGE_P2_POS_X, BULLETGAUGE_P2_POS_Y, 0.0f));
+	this[2].SetPos(D3DXVECTOR3(BULLETGAUGE_P3_POS_X, BULLETGAUGE_P3_POS_Y, 0.0f));
+	this[3].SetPos(D3DXVECTOR3(BULLETGAUGE_P4_POS_X, BULLETGAUGE_P4_POS_Y, 0.0f));
+
+	for (int CntBulletGauge = 0; CntBulletGauge < OBJECT_BULLETGAUGE_MAX; CntBulletGauge++)
+	{
+		{//頂点バッファの中身を埋める
+			VERTEX_2D *pVtx;
+
+			// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
+			this[CntBulletGauge].tex2DVB.pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+
+			for (int nCntPlace = 0; nCntPlace < PLAYER_AMMOPOWER_STRONG; nCntPlace++, pVtx += 4)
+			{
+				//---------------------------オブジェクト値読み込み
+				D3DXVECTOR3 pos = this[CntBulletGauge].GetPos();
+
+				// 頂点座標の設定
+				pVtx[1].vtx = D3DXVECTOR3(-nCntPlace * BULLETGAUGE_SIZE_X - BULLETGAUGE_SIZE_X, -BULLETGAUGE_SIZE_Y / 2, 0.0f) + pos;
+				pVtx[0].vtx = D3DXVECTOR3(-nCntPlace * BULLETGAUGE_SIZE_X - BULLETGAUGE_SIZE_X * 2, -BULLETGAUGE_SIZE_Y / 2, 0.0f) + pos;
+				pVtx[3].vtx = D3DXVECTOR3(-nCntPlace * BULLETGAUGE_SIZE_X - BULLETGAUGE_SIZE_X, BULLETGAUGE_SIZE_Y / 2, 0.0f) + pos;
+				pVtx[2].vtx = D3DXVECTOR3(-nCntPlace * BULLETGAUGE_SIZE_X - BULLETGAUGE_SIZE_X * 2, BULLETGAUGE_SIZE_Y / 2, 0.0f) + pos;
+
+			}
+			// 頂点データをアンロックする
+			this[CntBulletGauge].tex2DVB.pD3DVtxBuff->Unlock();
+		}
+	}
 	for (int CntBulletGauge = 0; CntBulletGauge < OBJECT_BULLETGAUGE_MAX; CntBulletGauge++)
 	{
 		// 弾薬の初期化

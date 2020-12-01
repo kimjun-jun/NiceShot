@@ -16,12 +16,8 @@
 //*****************************************************************************
 #define	TEXTURE_RESULT_OK		_T("../data/TEXTURE/result/result_gameclear.png")			// 読み込むテクスチャファイル名
 #define	TEXTURE_RESULT_NO		_T("../data/TEXTURE/result/result_gameover.png")		// 読み込むテクスチャファイル名
-#define	RESULT_OK_POS_X			(0)							// タイトルの表示位置
-#define	RESULT_OK_POS_Y			(0)							// タイトルの表示位置
 #define	RESULT_OK_SIZE_X		(SCREEN_W)						// タイトルの幅
 #define	RESULT_OK_SIZE_Y		(SCREEN_H)						// タイトルの高さ
-#define	RESULT_NO_POS_X			(0)						
-#define	RESULT_NO_POS_Y			(0)						
 #define	RESULT_NO_SIZE_X		(SCREEN_W)					
 #define	RESULT_NO_SIZE_Y		(SCREEN_H)					
 
@@ -61,7 +57,7 @@ void RESULT::Uninit(void)
 //=============================================================================
 void RESULT::Update(GAME_OBJECT* obj, FADE *fade)
 {
-	if (IsButtonTriggered(0, BUTTON_A))
+	if (IsButtonTriggered(0, BUTTON_A)|| GetKeyboardTrigger(DIK_RETURN))
 	{
 		obj->Reinit();				// ゲームの再初期化処理
 		fade->SetFade(FADE_OUT, SCENE_TITLE, SOUND_LABEL_BGM_title01);
@@ -76,7 +72,7 @@ void RESULT::Draw(void)
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 
 	{
-		// 頂点フォーマットの設定
+	// 頂点フォーマットの設定
 		pDevice->SetFVF(FVF_VERTEX_2D);
 
 		// テクスチャの設定
@@ -94,10 +90,10 @@ HRESULT RESULT::MakeVertexResult(void)
 {
 	{
 		// 頂点座標の設定
-		this[0].tex2D.textureVTX[0].vtx = D3DXVECTOR3(RESULT_OK_POS_X, RESULT_OK_POS_Y, 0.0f);
-		this[0].tex2D.textureVTX[1].vtx = D3DXVECTOR3(RESULT_OK_POS_X + RESULT_OK_SIZE_X, RESULT_OK_POS_Y, 0.0f);
-		this[0].tex2D.textureVTX[2].vtx = D3DXVECTOR3(RESULT_OK_POS_X, RESULT_OK_POS_Y + RESULT_OK_SIZE_Y, 0.0f);
-		this[0].tex2D.textureVTX[3].vtx = D3DXVECTOR3(RESULT_OK_POS_X + RESULT_OK_SIZE_X, RESULT_OK_POS_Y + RESULT_OK_SIZE_Y, 0.0f);
+		this[0].tex2D.textureVTX[0].vtx = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		this[0].tex2D.textureVTX[1].vtx = D3DXVECTOR3(RESULT_OK_SIZE_X, 0.0f, 0.0f);
+		this[0].tex2D.textureVTX[2].vtx = D3DXVECTOR3(0.0f,RESULT_OK_SIZE_Y, 0.0f);
+		this[0].tex2D.textureVTX[3].vtx = D3DXVECTOR3(RESULT_OK_SIZE_X, RESULT_OK_SIZE_Y, 0.0f);
 
 		// テクスチャのパースペクティブコレクト用
 		this[0].tex2D.textureVTX[0].rhw =
@@ -113,7 +109,7 @@ HRESULT RESULT::MakeVertexResult(void)
 
 		// テクスチャ座標の設定
 		this[0].tex2D.textureVTX[0].tex = D3DXVECTOR2(0.0f, 0.0f);
-		this[0].tex2D.textureVTX[1].tex = D3DXVECTOR2(0.5f, 0.0f);
+		this[0].tex2D.textureVTX[1].tex = D3DXVECTOR2(1.0f, 0.0f);
 		this[0].tex2D.textureVTX[2].tex = D3DXVECTOR2(0.0f, 1.0f);
 		this[0].tex2D.textureVTX[3].tex = D3DXVECTOR2(1.0f, 1.0f);
 
@@ -121,10 +117,10 @@ HRESULT RESULT::MakeVertexResult(void)
 
 	{
 		// 頂点座標の設定
-		this[1].tex2D.textureVTX[0].vtx = D3DXVECTOR3(RESULT_NO_POS_X, RESULT_NO_POS_Y, 0.0f);
-		this[1].tex2D.textureVTX[1].vtx = D3DXVECTOR3(RESULT_NO_POS_X + RESULT_NO_SIZE_X, RESULT_NO_POS_Y, 0.0f);
-		this[1].tex2D.textureVTX[2].vtx = D3DXVECTOR3(RESULT_NO_POS_X, RESULT_NO_POS_Y + RESULT_NO_SIZE_Y, 0.0f);
-		this[1].tex2D.textureVTX[3].vtx = D3DXVECTOR3(RESULT_NO_POS_X + RESULT_NO_SIZE_X, RESULT_NO_POS_Y + RESULT_NO_SIZE_Y, 0.0f);
+		this[1].tex2D.textureVTX[0].vtx = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		this[1].tex2D.textureVTX[1].vtx = D3DXVECTOR3(RESULT_NO_SIZE_X, 0.0f, 0.0f);
+		this[1].tex2D.textureVTX[2].vtx = D3DXVECTOR3(0.0f, RESULT_NO_SIZE_Y, 0.0f);
+		this[1].tex2D.textureVTX[3].vtx = D3DXVECTOR3(RESULT_NO_SIZE_X, RESULT_NO_SIZE_Y, 0.0f);
 
 		// テクスチャのパースペクティブコレクト用
 		this[1].tex2D.textureVTX[0].rhw =

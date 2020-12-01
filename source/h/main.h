@@ -218,7 +218,7 @@ enum OBJECT_COUNT
 #define	EFFECT_NORMALSET_SIZE_Y				(16.0f)																		//!< エフェクト標準の高さ
 #define	EFFECT_BULLET_SIZE_X				(16.0f)																		//!< エフェクトバレットの幅
 #define	EFFECT_BULLET_SIZE_Y				(16.0f)																		//!< エフェクトバレットの高さ
-#define	EFFECT_BULLET_TIME					(10)																		//!< エフェクトバレットの生存時間
+#define	EFFECT_BULLET_TIME					(12)																		//!< エフェクトバレットの生存時間
 #define	EFFECT_SPEEDUP_SIZE_X				(25.0f)																		//!< エフェクトスピードアップの幅
 #define	EFFECT_SPEEDUP_SIZE_Y				(10.0f)																		//!< エフェクトスピードアップの高さ
 #define	EFFECT_SPEEDUP_TIME					(10)																		//!< エフェクトスピードアップの生存時間

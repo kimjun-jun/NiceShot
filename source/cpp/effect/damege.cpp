@@ -42,6 +42,46 @@ void DAMEGE::Init(void)
 //=============================================================================
 void DAMEGE::Reinit(void)
 {
+	D3DXVECTOR3 pos[4];
+	pos[0] = D3DXVECTOR3(DAMEGE_POS_X - DAMEGE_SIZE_X, DAMEGE_POS_Y - DAMEGE_SIZE_Y, 0.0f);
+	pos[1] = D3DXVECTOR3(DAMEGE_POS_X + DAMEGE_SIZE_X, DAMEGE_POS_Y - DAMEGE_SIZE_Y, 0.0f);
+	pos[2] = D3DXVECTOR3(DAMEGE_POS_X - DAMEGE_SIZE_X, DAMEGE_POS_Y + DAMEGE_SIZE_Y, 0.0f);
+	pos[3] = D3DXVECTOR3(DAMEGE_POS_X + DAMEGE_SIZE_X, DAMEGE_POS_Y + DAMEGE_SIZE_Y, 0.0f);
+	this[0].SetPos(pos[0]);
+	this[1].SetPos(pos[1]);
+	this[2].SetPos(pos[2]);
+	this[3].SetPos(pos[3]);
+	for (int CntDamege = 0; CntDamege < OBJECT_DAMEGE_MAX; CntDamege++)
+	{
+		D3DXVECTOR3 Getpos = this[CntDamege].GetPos();
+		// 頂点座標の設定
+		this[CntDamege].tex2D.textureVTX[0].vtx = D3DXVECTOR3(Getpos.x - DAMEGE_SIZE_X, Getpos.y - DAMEGE_SIZE_Y, 0.0f);
+		this[CntDamege].tex2D.textureVTX[1].vtx = D3DXVECTOR3(Getpos.x + DAMEGE_SIZE_X, Getpos.y - DAMEGE_SIZE_Y, 0.0f);
+		this[CntDamege].tex2D.textureVTX[2].vtx = D3DXVECTOR3(Getpos.x - DAMEGE_SIZE_X, Getpos.y + DAMEGE_SIZE_Y, 0.0f);
+		this[CntDamege].tex2D.textureVTX[3].vtx = D3DXVECTOR3(Getpos.x + DAMEGE_SIZE_X, Getpos.y + DAMEGE_SIZE_Y, 0.0f);
+	}
+	for (int CntDamege = 0; CntDamege < OBJECT_DAMEGE_MAX; CntDamege++)
+	{
+		this[CntDamege].alpha = 0;
+		this[CntDamege].time = 0.0f;
+		this[CntDamege].SetUse(false);
+	}
+}
+
+//=============================================================================
+// 再初期化処理
+//=============================================================================
+void DAMEGE::ReinitNet(void)
+{
+	D3DXVECTOR3 pos;
+	pos = D3DXVECTOR3(DAMEGE_POS_X, DAMEGE_POS_Y, 0.0f);
+	this[0].SetPos(pos);
+	D3DXVECTOR3 Getpos = this[0].GetPos();
+	// 頂点座標の設定
+	this[0].tex2D.textureVTX[0].vtx = D3DXVECTOR3(Getpos.x - DAMEGE_POS_X, Getpos.y - DAMEGE_POS_Y, 0.0f);
+	this[0].tex2D.textureVTX[1].vtx = D3DXVECTOR3(Getpos.x + DAMEGE_POS_X, Getpos.y - DAMEGE_POS_Y, 0.0f);
+	this[0].tex2D.textureVTX[2].vtx = D3DXVECTOR3(Getpos.x - DAMEGE_POS_X, Getpos.y + DAMEGE_POS_Y, 0.0f);
+	this[0].tex2D.textureVTX[3].vtx = D3DXVECTOR3(Getpos.x + DAMEGE_POS_X, Getpos.y + DAMEGE_POS_Y, 0.0f);
 	for (int CntDamege = 0; CntDamege < OBJECT_DAMEGE_MAX; CntDamege++)
 	{
 		this[CntDamege].alpha = 0;
@@ -69,7 +109,6 @@ void DAMEGE::Update(void)
 		{
 			this[CntDamege].time += 1.0f;
 			this[CntDamege].alpha = int((this[CntDamege].time/ SCREENDAMEGE_TIME)*255.0f);
-
 
 			// 反射光の設定
 			this[CntDamege].tex2D.textureVTX[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, this[CntDamege].alpha);

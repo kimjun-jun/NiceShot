@@ -16,7 +16,9 @@ public:
 	virtual void						Reinit(void);				//!< Ä‰Šú‰»
 	virtual void						Uninit(void);				//!< I—¹
 	virtual void						Update(void);				//!< XV
-	virtual void						Draw(void);					//!< •`‰æ
-	void						SetRank(int PlayerNum);
-	HRESULT						MakeVertexRank(void);
+	virtual void						Draw(bool Netflag);					//!< •`‰æ
+	void								SetRank(int PlayerNum);
+	void								SetRankNet(int PlayerNum, int NetMyNumber);
+	HRESULT								MakeVertexRank(void);
+	bool								NetUse = false;
 };

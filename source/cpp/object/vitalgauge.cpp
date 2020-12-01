@@ -78,6 +78,10 @@ void VITALGAUGE::Init(void)
 //=============================================================================
 void VITALGAUGE::Reinit(void)
 {
+	this[0].SetPos(D3DXVECTOR3(VITALGAUGE_P1_POS_X, VITALGAUGE_P1_POS_Y, 0.0f));
+	this[1].SetPos(D3DXVECTOR3(VITALGAUGE_P2_POS_X, VITALGAUGE_P2_POS_Y, 0.0f));
+	this[2].SetPos(D3DXVECTOR3(VITALGAUGE_P3_POS_X, VITALGAUGE_P3_POS_Y, 0.0f));
+	this[3].SetPos(D3DXVECTOR3(VITALGAUGE_P4_POS_X, VITALGAUGE_P4_POS_Y, 0.0f));
 	for (int CntPlayer = 0; CntPlayer < OBJECT_VITAL_MAX; CntPlayer++)
 	{
 		// ライフの初期化
@@ -85,18 +89,37 @@ void VITALGAUGE::Reinit(void)
 
 		{//頂点バッファの中身を埋める
 			VERTEX_2D *pVtx;
+
 			// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
 			this[CntPlayer].tex2DVB.pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+
 			for (int nCntPlace = 0; nCntPlace < PLAYER_VITAL; nCntPlace++, pVtx += 4)
 			{
+				//--------------------------------オブジェクト値読み込み
+				D3DXVECTOR3 pos = this[CntPlayer].GetPos();
+				// 頂点座標の設定
+				pVtx[1].vtx = D3DXVECTOR3(-nCntPlace * VITALGAUGE_SIZE_X - VITALGAUGE_SIZE_X, -VITALGAUGE_SIZE_Y / 2, 0.0f) + pos;
+				pVtx[0].vtx = D3DXVECTOR3(-nCntPlace * VITALGAUGE_SIZE_X - VITALGAUGE_SIZE_X * 2, -VITALGAUGE_SIZE_Y / 2, 0.0f) + pos;
+				pVtx[3].vtx = D3DXVECTOR3(-nCntPlace * VITALGAUGE_SIZE_X - VITALGAUGE_SIZE_X, VITALGAUGE_SIZE_Y / 2, 0.0f) + pos;
+				pVtx[2].vtx = D3DXVECTOR3(-nCntPlace * VITALGAUGE_SIZE_X - VITALGAUGE_SIZE_X * 2, VITALGAUGE_SIZE_Y / 2, 0.0f) + pos;
+
+				// rhwの設定
+				pVtx[0].rhw =
+					pVtx[1].rhw =
+					pVtx[2].rhw =
+					pVtx[3].rhw = 1.0f;
+
 				// 反射光の設定
 				pVtx[0].diffuse = D3DXCOLOR(0.5f, 1.0f, 0.5f, 1.0f);
 				pVtx[1].diffuse = D3DXCOLOR(0.5f, 1.0f, 0.5f, 1.0f);
 				pVtx[2].diffuse = D3DXCOLOR(0.5f, 1.0f, 0.5f, 1.0f);
 				pVtx[3].diffuse = D3DXCOLOR(0.5f, 1.0f, 0.5f, 1.0f);
 			}
+
+
 			// 頂点データをアンロックする
 			this[CntPlayer].tex2DVB.pD3DVtxBuff->Unlock();
+
 		}
 	}
 }
@@ -142,7 +165,7 @@ void VITALGAUGE::Uninit(void)
 //=============================================================================
 // 更新処理
 //=============================================================================
-void VITALGAUGE::Update(PLAYER_HONTAI *p,RANK *rank)
+void VITALGAUGE::Update(PLAYER_HONTAI *p,RANK *rank, bool Netflag,int NetMyNumber)
 {
 	//-----------------------------------オブジェクト先頭アドレスを読み込み
 	for (int CntPlayer = 0; CntPlayer < OBJECT_VITAL_MAX; CntPlayer++)
@@ -153,7 +176,8 @@ void VITALGAUGE::Update(PLAYER_HONTAI *p,RANK *rank)
 			if (this[CntPlayer].VitalPower <= 0)
 			{
 				p[CntPlayer].SetUse(false);
-				rank->SetRank(CntPlayer);
+				if (Netflag == false) rank->SetRank(CntPlayer);
+				else if (Netflag == true) rank->SetRankNet(CntPlayer, NetMyNumber);
 			}
 		}
 		
