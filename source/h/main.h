@@ -363,3 +363,6 @@ bool GetEndGame(void);
 
 class GAME_OBJECT;
 GAME_OBJECT *GetSendObjectP(void);
+
+
+int MyRandFunc(int *X, int M);

@@ -38,9 +38,12 @@ public:
 		nNumBlockXField = nNumBlockZField = 0;
 		InterPolationFieldType = 0;
 		InterPolationFieldPlayerNum = 0;
+		TikeiSeed = OldTikeiSeed = 0;
+		GetPlayerNum = -1;
 		InterPolationFieldSignal = false;
 		InterPolationFieldSignalEnd = false;
 		Next = &this[0];
+		NetTikei = false;
 	}
 	~FIELD() { cnt--; SAFE_RELEASE(pD3DVtxBuffFieldDraw); SAFE_RELEASE(pD3DVtxBuffFieldEnd); SAFE_RELEASE(pD3DVtxBuffFieldStart);}
 	virtual void Init(void);
@@ -59,6 +62,10 @@ public:
 	void FieldHit(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVECTOR3 *vtxNor, float *posY);
 	void FieldHitGetSphereVec(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVECTOR3 *vtxNor, float *posY);
 	bool FieldHitItem(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVECTOR3 *vtxNor, float *posY);
+	int TikeiSeed;									// 地形変形ランダム値のseed値　通信の時に同期させる
+	int OldTikeiSeed;								// 地形変形ランダム値のseed値　通信の時に同期させる
+	int GetPlayerNum;								// 地形アイテムを取得したプレイヤー番号
+	bool NetTikei;									// 通信対戦中に地形変更をしているかどうか
 
 private:
 	static int cnt;								// インスタンス総数

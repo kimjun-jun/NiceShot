@@ -782,10 +782,23 @@ void GAME_OBJECT::CheakHit(int scene)
 					switch (item[CntItem].nType)
 					{
 					case ITEMTYPE_TIKEI:
-						field->SetFieldInterPolationFieldType(FIELD_TYPE_PLAYERADVANTAGE, CntPlayer, &item[0]);
-						//SetFieldInterPolationFieldType(0);
-						PlaySound(SOUND_LABEL_SE_enter03);
-						PlaySound(SOUND_LABEL_SE_quake);
+						if (NetGameStartFlag==true&& CntPlayer== NetMyNumber)
+						{
+							this[0].field->GetPlayerNum = CntPlayer;
+							//ランダム関数のseed値を決める
+							this[0].field->TikeiSeed = (rand() % 1000000);
+							//通信しているときはこのシード値を同期させて、これをもとに同じ地形を生成する
+							//srand(this[0].field->TikeiSeed);
+							//NetSetTikeiSeed(this[0].field->TikeiSeed, this[0].field->GetPlayerNum);
+						}
+						else if(NetGameStartFlag == false)
+						{
+							field->SetFieldInterPolationFieldType(FIELD_TYPE_PLAYERADVANTAGE, CntPlayer, &item[0]);
+							//SetFieldInterPolationFieldType(0);
+							PlaySound(SOUND_LABEL_SE_enter03);
+							PlaySound(SOUND_LABEL_SE_quake);
+
+						}
 						break;
 					case ITEMTYPE_LIFE:
 						player[CntPlayer].vital += PLAYER_ATTACK_NORMAL;

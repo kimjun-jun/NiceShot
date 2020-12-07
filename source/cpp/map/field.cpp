@@ -204,9 +204,9 @@ void FIELD::Init(void)
 		this[0].pD3DVtxBuffFieldStart->Lock(0, 0, (void**)&pVtxS, 0);
 
 		//上限
-		for (int nCntVtxZ = 0; nCntVtxZ < (this[0].nNumBlockZField + 1)/2; nCntVtxZ++)
+		for (int nCntVtxZ = 0; nCntVtxZ < (this[0].nNumBlockZField + 1); nCntVtxZ++)
 		{
-			for (int nCntVtxX = 0; nCntVtxX < (this[0].nNumBlockZField + 1)/2; nCntVtxX++)
+			for (int nCntVtxX = 0; nCntVtxX < (this[0].nNumBlockZField + 1); nCntVtxX++)
 			{
 				//縮退ポリゴンよけなさい
 				if (pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx == pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX + 1].vtx)	continue;
@@ -231,15 +231,15 @@ void FIELD::Init(void)
 				//上側
 				if (nCntVtxZ == 0 || nCntVtxX == 0 || nCntVtxZ == this[0].nNumBlockZField || nCntVtxX == this[0].nNumBlockZField)
 				{
-					//pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = pVtxS[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = 50.0f;
-					pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = pVtxS[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = 0.0f;
+					pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = pVtxS[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = 50.0f;
+					//pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = pVtxS[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = 0.0f;
 				}
 				//中側
 				else
 				{
 					float y = (pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX - 1].vtx.y + pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX + 1].vtx.y +
 						pVtx[(nCntVtxZ - 1) * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y + pVtx[(nCntVtxZ + 1) * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y) / 4;
-					pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = pVtxS[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = y;
+					pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = pVtxS[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = 20.0f;
 				}
 
 				// 反射光の設定
@@ -315,6 +315,10 @@ void FIELD::Reinit(void)
 	this[0].InterPolationFieldSignalEnd = false;
 	this[0].InterPolationFieldType = -1;
 	this[0].InterPolationFieldPlayerNum = -1;
+	this[0].TikeiSeed = 0;
+	this[0].OldTikeiSeed = 0;
+	this[0].GetPlayerNum = -1;
+	this[0].NetTikei = false;
 
 	//--------------------------------DRAWとSTARTのセット
 	//描画用
@@ -456,6 +460,8 @@ void FIELD::Uninit(void)
 //=============================================================================
 void FIELD::Update(PLAYER_HONTAI *player,ITEM *item, BULLET *bullet, EXPLOSION *explosion, SHADOW *shadow)
 {
+	this[0].OldTikeiSeed = this[0].TikeiSeed;
+
 	//アイテムを拾うとInterPolationFieldTypeが変わる。このスイッチ文SetFieldType関数最後に-1を入れる
 	switch (this[0].InterPolationFieldType)
 	{
@@ -797,10 +803,11 @@ void FIELD::SetFieldType03(PLAYER_HONTAI *player)
 		//上限　高さを設定
 		for (int nCntVtx = 0; nCntVtx < int(this[0].model.nNumVertex); nCntVtx++)
 		{
-			//高さを決める頂点を決定
-			int YTXrandNum(rand() % this[0].model.nNumVertex);
+			//高さを決める頂点を決定　あえて引数を中途半端な数にして出力に幅を持たせる
+			int YTXrandNum = MyRandFunc(&this[0].TikeiSeed, this[0].model.nNumVertex-103);
 			//高さを決め代入
-			int VTXrandY(rand() % 200);
+			int VTXrandY = MyRandFunc(&this[0].TikeiSeed, 200);
+
 			VTXrandY += 20;//オフセット
 			if (pVtx[YTXrandNum].vtx == pVtx[YTXrandNum + 1].vtx)
 			{
@@ -819,31 +826,6 @@ void FIELD::SetFieldType03(PLAYER_HONTAI *player)
 		//SetDegenerationPoly();
 
 		//隣接頂点の高さ平均値を(ダイアモンドスクエア、フラクタルを参考)
-
-		//for (int nCntVtx = 0; nCntVtx < this[0].model.nNumVertexIndex/2; nCntVtx++)
-		//{
-		//	//高さを決める頂点を決定
-		//	int YTXrandNum(rand() % this[0].model.nNumVertex);
-		//	//縮退ポリゴンのときはコンティニュー。最終ポリゴンの時はbreak;
-		//	if (YTXrandNum == this[0].model.nNumVertexIndex - 2) break;
-		//	else if (pIdx[YTXrandNum] == pIdx[YTXrandNum + 1]) continue;
-		//	else if (pIdx[YTXrandNum + 1] == pIdx[YTXrandNum + 2]) continue;
-		//	// 頂点座標の設定
-		//	//頂点最端の高さは固定。壁際の頂点のこと。
-		//	//上側
-		//	//if (nCntVtx == 0 || nCntVtxX == 0 || nCntVtxZ == this[0].nNumBlockZField || nCntVtxX == this[0].nNumBlockZField)
-		//	//	pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = 200.0f;
-		//	//中側　上下左右の平均値を算出
-		//	//隣接頂点の高さの平均値を求め、中心の頂点の高さとする。
-		//	else
-		//	{
-		//		float y = (pVtx[YTXrandNum - 1].vtx.y + pVtx[YTXrandNum + 1].vtx.y +
-		//			pVtx[(this[0].nNumBlockZField + 1) + YTXrandNum].vtx.y + pVtx[(this[0].nNumBlockZField - 1) + YTXrandNum].vtx.y) / 4.0f;
-		//		pVtx[YTXrandNum].vtx.y = fabsf(y);
-		//	}
-		//}
-
-
 		for (int nCntVtxZ = 0; nCntVtxZ < (this[0].nNumBlockZField + 1); nCntVtxZ++)
 		{
 			for (int nCntVtxX = 0; nCntVtxX < (this[0].nNumBlockZField + 1); nCntVtxX++)
@@ -854,7 +836,6 @@ void FIELD::SetFieldType03(PLAYER_HONTAI *player)
 				else if (pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX + 1].vtx == pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX + 2].vtx) continue;
 				// 頂点座標の設定
 				//頂点最端の高さは固定。壁際の頂点のこと。
-				//上側
 				if (nCntVtxZ == 0 || nCntVtxX == 0 || nCntVtxZ == this[0].nNumBlockZField || nCntVtxX == this[0].nNumBlockZField)
 					pVtx[nCntVtxZ * (this[0].nNumBlockZField + 1) + nCntVtxX].vtx.y = 200.0f;
 				//中側　上下左右の平均値を算出
@@ -1006,6 +987,7 @@ bool FIELD::InterPolationField(void)
 	{
 		this[0].InterPolationFieldSignalEnd = false;
 		StopSound(SOUND_LABEL_SE_quake);
+		this[0].NetTikei = false;
 		return true;
 	}
 	else

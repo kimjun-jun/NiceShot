@@ -113,7 +113,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 
 	srand((unsigned)time(NULL));
-
+	
 	UNREFERENCED_PARAMETER(hPrevInstance);	// 無くても良いけど、警告が出る（未使用宣言）
 	UNREFERENCED_PARAMETER(lpCmdLine);		// 無くても良いけど、警告が出る（未使用宣言）
 
@@ -608,3 +608,22 @@ void DrawFPS(void)
 #endif
 
 
+//=============================================================================
+// 自作乱数　線形合同法
+//=============================================================================
+int MyRandFunc(int *X, int Max)
+{
+	//Xのバッファ
+	int buff = *X;
+
+	//任意数AB
+	int A = 1664525;
+	int B = 1013904223;
+	int M = 2147483647;
+	//線形合同法で計算　結果を次のシード値とする
+	int ret = abs((A*buff + B) % M);
+	*X = ret;
+	//中途半端な数のあまりを使用する　%(Max)は上限値でもある
+	ret = abs(ret % Max);
+	return ret;
+}

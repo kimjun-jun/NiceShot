@@ -119,7 +119,8 @@ void ITEM::Init(void)
 	//	this[nCntItem].SetUse(true);
 
 	//}
-	this[0].GoukeiDrop = DROP_ITEM_MAX;
+	//this[0].GoukeiDrop = DROP_ITEM_MAX;
+	this[0].GoukeiDrop = 0;
 
 }
 
@@ -174,6 +175,7 @@ void ITEM::Reinit(void)
 		this[nCntItem].SetUse(true);
 	}
 	this[0].GoukeiDrop = DROP_ITEM_MAX;
+	//this[0].GoukeiDrop = 0;
 }
 
 //=============================================================================
@@ -294,7 +296,7 @@ void ITEM::Update(PLAYER_HONTAI *p, bool NetGameStartFlag)
 		{
 			if (this[0].GoukeiDrop > DROP_ITEM_MAX) break;
 			bool use = this[nCntItem].GetUse();
-			if (use == true)
+			if (use == false)
 			{
 				this[nCntItem].Droptime += DROP_ITEM_CHARGE_ADDTIME;
 				if (this[nCntItem].Droptime >= DROP_ITEM_CHARGE_CNT)

@@ -16,6 +16,7 @@
 #include "../../h/object/player.h"
 #include "../../h/object/item.h"
 #include "../../h/object/bullet/bullet.h"
+#include "../../h/map/field.h"
 #include "../../h/net/sock.h"
 
 
@@ -626,6 +627,14 @@ void SendPacket(void)
 	if (ItemSMsg[0] != NULL)
 	{
 		send(dstSocket, ItemSMsg, strlen(ItemSMsg) + 1, 0);
+
+		//地形アイテムが取得された時だけ追加のメッセージを送信する
+		if (SendObjectP->field->TikeiSeed != SendObjectP->field->OldTikeiSeed)
+		{
+			char SpecialSMsg[BUFFER_SIZE] = { NULL }; //送るデータ内容
+			sprintf_s(SpecialSMsg, "@T,S%d,N%d&", SendObjectP->field->TikeiSeed, SendObjectP->field->GetPlayerNum);
+			send(dstSocket, SpecialSMsg, strlen(SpecialSMsg) + 1, 0);
+		}
 	}
 
 	//常時send()する　アイテム使用情報
@@ -1994,6 +2003,22 @@ void MsgAnalys(char* argRMsg)
 			}
 		}
 	}
+
+	//地形情報はここ
+	if (strcmp(RMsgBlock, "@T") == 0)
+	{
+		char *next2 = NULL;
+		next2 = next;
+		//アイテムメッセージ解析 "@Item,%d,%d,X%d,Z%d&"
+		char *Seed;
+		Seed = strtok_s(next2, "S,", &next);
+		char *PlayerNum;
+		PlayerNum = strtok_s(NULL, "N", &next);
+		int iSeed = atoi(Seed);
+		int iPlayerNum = atoi(PlayerNum);
+
+		NetSetTikeiSeed(iSeed, iPlayerNum);
+	}
 }
 
 void SetBuff(char* RMsgBlock, int SetEnumType,int PlayerNum)
@@ -2048,6 +2073,21 @@ void NetSetItem(D3DXVECTOR3 buff, int index, int type)
 		SendObjectP->item[index].SetItem(buff, D3DXVECTOR3(2.0f, 2.0f, 2.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), type);
 		SendObjectP->item[index].NetUse = true;
 		g_SendMsgBuff.ItemSyncUse = false;
+	}
+}
+
+void NetSetTikeiSeed(int Seed, int PlayerNum)
+{
+	SendObjectP = GetSendObjectP();
+	if (SendObjectP->field->NetTikei == false)
+	{
+		srand(Seed);
+		SendObjectP->field->TikeiSeed = Seed;
+		SendObjectP->field->NetTikei = true;
+		SendObjectP->field->SetFieldInterPolationFieldType(FIELD_TYPE_PLAYERADVANTAGE, PlayerNum, &SendObjectP->item[0]);
+		//SetFieldInterPolationFieldType(0);
+		PlaySound(SOUND_LABEL_SE_enter03);
+		PlaySound(SOUND_LABEL_SE_quake);
 	}
 }
 
