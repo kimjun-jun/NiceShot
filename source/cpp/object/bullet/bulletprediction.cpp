@@ -14,7 +14,7 @@
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define	TEXTURE_BULLETPREDICTION		"../data/TEXTURE/effect000.jpg"	// 読み込むテクスチャファイル名
+#define	TEXTURE_BULLETPREDICTION		"../data/TEXTURE/effect/effect000.jpg"	// 読み込むテクスチャファイル名
 
 
 static D3DXCOLOR PLAYER_COLOR[] = {

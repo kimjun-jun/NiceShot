@@ -10,7 +10,7 @@
 //*****************************************************************************
 // クラス定義
 //*****************************************************************************
-class BULLETGAUGE : public OBJECT_2D_VERTEXBUFFER 
+class BULLETGAUGE : public OBJECT_2D
 {
 public:
 	BULLETGAUGE() { AmmoPower = 0; };
@@ -19,7 +19,9 @@ public:
 	virtual void						ReinitNet(int MyNumber);			//!< 再初期化ネット対戦前	
 	virtual void						Uninit(void);				//!< 終了
 	virtual void						Update(PLAYER_HONTAI *player);				//!< 更新
-	virtual void						Draw(bool Netflag, int NetMyNumber);					//!< 描画
+	virtual void						Draw(bool Netflag, int NetMyNumber, int CntPlayer);					//!< 描画
 	HRESULT						MakeVertexBulletGauge(LPDIRECT3DDEVICE9 pDevice, int CntPlayer);
 	int							AmmoPower;
+	TEXTURE_2D					TexEmpty[PLAYER_AMMOPOWER_NORMAL];
+	TEXTURE_2D					Tex[PLAYER_AMMOPOWER_NORMAL];
 };

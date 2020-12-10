@@ -387,10 +387,10 @@ void GAME_OBJECT::Draw()
 				shadow->Draw();
 
 				//2d‰æ–Êã
-				damege->Draw(NetGameStartFlag, NetMyNumber);
-				status->Draw(NetGameStartFlag, NetMyNumber);
-				vitalgauge->Draw(NetGameStartFlag, NetMyNumber);
-				bulletgauge->Draw(NetGameStartFlag, NetMyNumber);
+				damege->Draw(NetGameStartFlag, NetMyNumber, CntPlayer);
+				status->Draw(NetGameStartFlag, NetMyNumber, CntPlayer);
+				vitalgauge->Draw(NetGameStartFlag, NetMyNumber, CntPlayer);
+				bulletgauge->Draw(NetGameStartFlag, NetMyNumber, CntPlayer);
 				tuto->Draw();
 			}
 			pD3DDevice->SetViewport(&VpMaster);
@@ -417,10 +417,10 @@ void GAME_OBJECT::Draw()
 				shadow->Draw();
 
 				//2d‰æ–Êã
-				damege->Draw(NetGameStartFlag, NetMyNumber);
-				status->Draw(NetGameStartFlag, NetMyNumber);
-				vitalgauge->Draw(NetGameStartFlag, NetMyNumber);
-				bulletgauge->Draw(NetGameStartFlag, NetMyNumber);
+				damege->Draw(NetGameStartFlag, NetMyNumber, CntPlayer);
+				status->Draw(NetGameStartFlag, NetMyNumber, CntPlayer);
+				vitalgauge->Draw(NetGameStartFlag, NetMyNumber, CntPlayer);
+				bulletgauge->Draw(NetGameStartFlag, NetMyNumber, CntPlayer);
 			}
 			pD3DDevice->SetViewport(&VpMaster);
 			countdown->Draw();
@@ -454,10 +454,10 @@ void GAME_OBJECT::Draw()
 					shadow->Draw();
 
 					//2d‰æ–Êã
-					damege->Draw(NetGameStartFlag, NetMyNumber);
-					status->Draw(NetGameStartFlag, NetMyNumber);
-					vitalgauge->Draw(NetGameStartFlag, NetMyNumber);
-					bulletgauge->Draw(NetGameStartFlag, NetMyNumber);
+					damege->Draw(NetGameStartFlag, NetMyNumber, CntPlayer);
+					status->Draw(NetGameStartFlag, NetMyNumber, CntPlayer);
+					vitalgauge->Draw(NetGameStartFlag, NetMyNumber, CntPlayer);
+					bulletgauge->Draw(NetGameStartFlag, NetMyNumber, CntPlayer);
 				}
 				else
 				{
@@ -480,10 +480,10 @@ void GAME_OBJECT::Draw()
 					shadow->Draw();
 
 					//2d‰æ–Êã
-					damege->Draw(NetGameStartFlag, NetMyNumber);
-					status->Draw(NetGameStartFlag, NetMyNumber);
-					vitalgauge->Draw(NetGameStartFlag, NetMyNumber);
-					bulletgauge->Draw(NetGameStartFlag, NetMyNumber);
+					damege->Draw(NetGameStartFlag, NetMyNumber, CntPlayer);
+					status->Draw(NetGameStartFlag, NetMyNumber, CntPlayer);
+					vitalgauge->Draw(NetGameStartFlag, NetMyNumber, CntPlayer);
+					bulletgauge->Draw(NetGameStartFlag, NetMyNumber, CntPlayer);
 					rank->Draw(NetGameStartFlag);
 				}
 			}
@@ -514,10 +514,10 @@ void GAME_OBJECT::Draw()
 			shadow->Draw();
 
 			//2d‰æ–Êã
-			damege->Draw(NetGameStartFlag, NetMyNumber);
-			status->Draw(NetGameStartFlag, NetMyNumber);
-			vitalgauge->Draw(NetGameStartFlag, NetMyNumber);
-			bulletgauge->Draw(NetGameStartFlag, NetMyNumber);
+			damege->Draw(NetGameStartFlag, NetMyNumber, NetMyNumber);
+			status->Draw(NetGameStartFlag, NetMyNumber, NetMyNumber);
+			vitalgauge->Draw(NetGameStartFlag, NetMyNumber, NetMyNumber);
+			bulletgauge->Draw(NetGameStartFlag, NetMyNumber, NetMyNumber);
 			countdown->Draw();
 			break;
 		}
@@ -546,10 +546,10 @@ void GAME_OBJECT::Draw()
 				shadow->Draw();
 
 				//2d‰æ–Êã
-				damege->Draw(NetGameStartFlag, NetMyNumber);
-				status->Draw(NetGameStartFlag, NetMyNumber);
-				vitalgauge->Draw(NetGameStartFlag, NetMyNumber);
-				bulletgauge->Draw(NetGameStartFlag, NetMyNumber);
+				damege->Draw(NetGameStartFlag, NetMyNumber, NetMyNumber);
+				status->Draw(NetGameStartFlag, NetMyNumber, NetMyNumber);
+				vitalgauge->Draw(NetGameStartFlag, NetMyNumber, NetMyNumber);
+				bulletgauge->Draw(NetGameStartFlag, NetMyNumber, NetMyNumber);
 			}
 			else
 			{
@@ -572,10 +572,10 @@ void GAME_OBJECT::Draw()
 				shadow->Draw();
 
 				//2d‰æ–Êã
-				damege->Draw(NetGameStartFlag, NetMyNumber);
-				status->Draw(NetGameStartFlag, NetMyNumber);
-				vitalgauge->Draw(NetGameStartFlag, NetMyNumber);
-				bulletgauge->Draw(NetGameStartFlag, NetMyNumber);
+				damege->Draw(NetGameStartFlag, NetMyNumber, NetMyNumber);
+				status->Draw(NetGameStartFlag, NetMyNumber, NetMyNumber);
+				vitalgauge->Draw(NetGameStartFlag, NetMyNumber, NetMyNumber);
+				bulletgauge->Draw(NetGameStartFlag, NetMyNumber, NetMyNumber);
 				rank->Draw(NetGameStartFlag);
 			}
 

@@ -69,6 +69,7 @@ void Uninit(void);
 void DrawFPS(void);
 #endif
 
+
 //*****************************************************************************
 // グローバル変数:
 //*****************************************************************************
@@ -83,6 +84,7 @@ char				g_textSo[256] = { "aa" };		//!< 表示させるテキスト
 DWORD				dwFrameCount;				//!< 時間計測用
 #endif
 HWND edit;
+MSG msg;
 
 bool EndGame = false;
 bool GetEndGame(void) 
@@ -138,7 +140,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		NULL
 	};
 	HWND hWnd;
-	MSG msg;
 
 	// ウィンドウクラスの登録
 	RegisterClassEx(&wcex);
@@ -626,4 +627,13 @@ int MyRandFunc(int *X, int Max)
 	//中途半端な数のあまりを使用する　%(Max)は上限値でもある
 	ret = abs(ret % Max);
 	return ret;
+}
+
+
+
+
+//ピークメッセージのセット 終了するときにQuitを代入する
+void SetMsg(UINT Setmsg)
+{
+	msg.message = Setmsg;
 }

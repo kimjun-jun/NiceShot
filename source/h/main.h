@@ -66,13 +66,11 @@ using namespace std;
 //画像の参照名																											
 #define TEXTURE_GAME_SCORE			"../data/TEXTURE/BG/0-9.png"														//!< 読み込むテクスチャファイル名
 #define	TEXTURE_MEISAI				"../data/MODEL/28513607_p4_master1200.jpg"											//!< 読み込むテクスチャファイル名
-#define	TEXTURE_STATUS_TIKEI_ITEM	"../data/MODEL/landmark_aogashima.png"												//!< 地形変形アイテム
-#define	TEXTURE_STATUS_LIFE_ITEM	"../data/MODEL/life000.png"															//!< ライフ回復
-#define	TEXTURE_STATUS_SENSYA_ITEM	"../data/MODEL/war_sensya_noman.png"												//!< 戦車変形アイテム
-#define	TEXTURE_STATUS_BULLET_ITEM	"../data/MODEL/bullettex.png"														//!< バレットアイテム
-#define	TEXTURE_STATUS_SPEED_ITEM	"../data/MODEL/1213810.png"															//!< スピードアップアイテム
-#define	TEXTURE_STATUS_CAMERA_ITEM	"../data/MODEL/mark_camera_satsuei_ok.png"											//!< 強制バックカメラアイテム
-#define	TEXTURE_STATUS_KIRI_ITEM	"../data/MODEL/yama_kiri.png"														//!< 霧アイテム
+#define	TEXTURE_STATUS_EMPTY_ITEM	"../data/TEXTURE/UI/UI_Skill_Empty.png"												//!< 戦車変形アイテム
+#define	TEXTURE_STATUS_SENSYA_ITEM	"../data/TEXTURE/UI/UI_Skill_Power.png"												//!< 戦車変形アイテム
+#define	TEXTURE_STATUS_SPEED_ITEM	"../data/TEXTURE/UI/UI_Skill_Speed.png"															//!< スピードアップアイテム
+#define	TEXTURE_STATUS_CAMERA_ITEM	"../data/TEXTURE/UI/UI_Skill_Flash.png"											//!< 強制バックカメラアイテム
+#define	TEXTURE_STATUS_KIRI_ITEM	"../data/TEXTURE/UI/UI_Skill_Blind.png"														//!< 霧アイテム
 																													
 //モデルの参照																										
 #define	MODEL_HOUDAI				"../data/MODEL/PlayerSensyaHoudai.x"												//!< 読み込むモデル名
@@ -82,7 +80,7 @@ using namespace std;
 #define	MODEL_BULLETPOS				"../data/MODEL/PlayerSensyaBulletPos.x"												//!< 読み込むモデル名
 
 //キャラクターなどのパラメータ
-#define PLAYER_VITAL						(200)																		//!< プレイヤー体力
+#define PLAYER_VITAL_MAX					(200)																		//!< プレイヤー体力
 #define PLAYER_DEFENCE_STRONG				(15)																		//!< プレイヤー防御力強
 #define PLAYER_DEFENCE_NORMAL				(10)																		//!< プレイヤー防御力中
 #define PLAYER_DEFENCE_WEAK					(5)																			//!< プレイヤー防御力弱
@@ -132,7 +130,8 @@ enum OBJECT_COUNT
 	OBJECT_COUNTDOWN_MAX = 2,
 	OBJECT_RANK_MAX = 3,
 	OBJECT_RESULT_MAX = 2,
-	OBJECT_TITLE_MAX = 6,
+	OBJECT_TITLE_MAX = 7,
+	OBJECT_TITLEANIM_MAX = 4,
 	OBJECT_FIELD_MAX = 1,
 	OBJECT_SKY_MAX = 2,
 	OBJECT_WALL_MAX = 4,
@@ -200,7 +199,6 @@ enum OBJECT_COUNT
 #define	BULLETTEX_POS_Y						(LIFETEX_POS_Y+LIFETEX_SIZE_Y)												//!< ライフの表示基準位置Ｙ座標
 #define	EXPLOSION_COLLISIONPOS_BUFFSIZE		(5.0f)																		//!< 2D爆破を壁に当たった時の描画する座標を調整
 
-#define MAX_AMMO							(5)																			//!< 所持弾薬の最大値
 #define MAX_LIFE							(6)																			//!< 体力最大値
 #define BORN_AMMO_ADDTIME					(1.0f)																		//!< 弾薬復活させるための加算タイム
 #define BORN_AMMO_MAXTIME					(120.0f)																	//!< 1弾薬復活するのに必要なタイム
@@ -365,4 +363,8 @@ class GAME_OBJECT;
 GAME_OBJECT *GetSendObjectP(void);
 
 
+//線形合同法関数
 int MyRandFunc(int *X, int M);
+
+//ピークメッセージのセット
+void SetMsg(UINT msg);

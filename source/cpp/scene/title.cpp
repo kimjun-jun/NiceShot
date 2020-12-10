@@ -14,32 +14,40 @@
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define	TEXTURE_TITLE_BG				"../data/TEXTURE/title.png"		// 読み込むテクスチャファイル名
-#define	TEXTURE_LOGO_START				"../data/TEXTURE/press_enter.png"	// 読み込むテクスチャファイル名
-#define	TEXTURE_TITLE_SELECT_TUTORIAL	"../data/TEXTURE/rensyurogo.jpg"		// 読み込むテクスチャファイル名
-#define	TEXTURE_TITLE_SELECT_GAME		"../data/TEXTURE/taisenrogo.jpg"	// 読み込むテクスチャファイル名
-#define	TEXTURE_TITLE_SELECT_GAME_LOCAL	"../data/TEXTURE/local.png"	// 読み込むテクスチャファイル名
-#define	TEXTURE_TITLE_SELECT_GAME_NET	"../data/TEXTURE/network.png"	// 読み込むテクスチャファイル名
+#define	TEXTURE_TITLE_LOGO				"../data/TEXTURE/other/Title.png"		// 読み込むテクスチャファイル名
+#define	TEXTURE_TITLE_BG				"../data/TEXTURE/other/TItle_Background.png"		// 読み込むテクスチャファイル名
+#define	TEXTURE_TITLE_PRESS				"../data/TEXTURE/UI/UI_Press.png"	// 読み込むテクスチャファイル名
+#define	TEXTURE_TITLE_SELECT_TUTORIAL	"../data/TEXTURE/UI/UI_Tutorial.png"		// 読み込むテクスチャファイル名
+#define	TEXTURE_TITLE_SELECT_GAME_LOCAL	"../data/TEXTURE/UI/UI_LocalBattle.png"	// 読み込むテクスチャファイル名
+#define	TEXTURE_TITLE_SELECT_GAME_NET	"../data/TEXTURE/UI/UI_NetorkBattle.png"	// 読み込むテクスチャファイル名
+#define	TEXTURE_TITLE_SELECT_GAME_QUIT	"../data/TEXTURE/UI/UI_Quit.png"	// 読み込むテクスチャファイル名
 
 
-#define	TITLE_BG_WIDTH		(SCREEN_W/2)						// タイトルBGの幅
-#define	TITLE_BG_HEIGHT		(SCREEN_H/2)						// タイトルBGの高さ
-#define	TITLE_BG_POS_X		(SCREEN_CENTER_X)					// タイトルBGの位置(X座標)
-#define	TITLE_BG_POS_Y		(SCREEN_CENTER_Y)					// タイトルBGの位置(Y座標)
+#define	TITLE_BG_WIDTH						(SCREEN_W/2)				// タイトルBGの幅
+#define	TITLE_BG_HEIGHT						(SCREEN_H/2)				// タイトルBGの高さ
+#define	TITLE_BG_POS_X						(SCREEN_CENTER_X)			// タイトルBGの位置(X座標)
+#define	TITLE_BG_POS_Y						(SCREEN_CENTER_Y)			// タイトルBGの位置(Y座標)
 
-#define	TITLE_START_LOGO_POS_X				(TITLE_BG_POS_X)			// スタートロゴの位置(X座標)
-#define	TITLE_START_LOGO_POS_Y				(TITLE_BG_POS_Y+200)		// スタートロゴの位置(Y座標)
-#define	TITLE_START_LOGO_WIDTH				(100)						// スタートロゴの幅
-#define	TITLE_START_LOGO_HEIGHT				(100)						// スタートロゴの高さ
+#define	TITLE_LOGO_POS_X					(SCREEN_CENTER_X)			// タイトルロゴの位置(X座標)
+#define	TITLE_LOGO_POS_Y					(SCREEN_CENTER_Y-200.0f)	// タイトルロゴの位置(Y座標)
+#define	TITLE_LOGO_WIDTH					(400.0f)					// タイトルロゴの幅
+#define	TITLE_LOGO_HEIGHT					(250.0f)					// タイトルロゴの高さ
 
-#define	TITLE_SELECT_POS_X				(TITLE_BG_POS_X+200.0f)		// セレクトテクスチャの位置(X座標)
-#define	TITLE_SELECT_POS_Y				(TITLE_BG_POS_Y-100.0f)		// セレクトテクスチャの位置(Y座標)
-#define	TITLE_SELECT_WIDTH				(150)						// セレクトテクスチャの幅
-#define	TITLE_SELECT_HEIGHT				(150)						// セレクトテクスチャの高さ
+#define	TITLE_PRESS_LOGO_POS_X				(SCREEN_CENTER_X)			// PRESSロゴの位置(X座標)
+#define	TITLE_PRESS_LOGO_POS_Y				(SCREEN_CENTER_Y+200.0f)	// PRESSロゴの位置(Y座標)
+#define	TITLE_PRESS_LOGO_WIDTH				(200.0f)					// PRESSロゴの幅
+#define	TITLE_PRESS_LOGO_HEIGHT				(50.0f)					// PRESSロゴの高さ
 
-#define	COUNT_APPERA_START		(10)						// スタートボタン出現までの時間
-#define	INTERVAL_DISP_START		(30)						// スタートボタン点滅の時間
-#define	COUNT_WAIT_DEMO			(60 * 5)					// デモまでの待ち時間
+#define	TITLE_SELECT_POS_X					(SCREEN_CENTER_X)			// セレクトテクスチャの位置(X座標)
+#define	TITLE_SELECT_POS_Y					(SCREEN_CENTER_Y)			// セレクトテクスチャの位置(Y座標)
+#define	TITLE_SELECT_WIDTH					(150.0f)					// セレクトテクスチャの幅
+#define	TITLE_SELECT_HEIGHT					(100.0f)					// セレクトテクスチャの高さ
+#define	TITLE_SELECT_OFFSET_X				(200.0f)					// オフセット値
+#define	TITLE_SELECT_OFFSET_Y				(200.0f)					// オフセット値
+
+#define	COUNT_APPERA_START					(10)						// スタートボタン出現までの時間
+#define	INTERVAL_DISP_START					(30)						// スタートボタン点滅の時間
+#define	COUNT_WAIT_DEMO						(60 * 5)					// デモまでの待ち時間
 
 
 //=============================================================================
@@ -53,13 +61,29 @@ void TITLE::Init(void)
 	MakeVertexTitle();
 
 	// テクスチャの読み込み
-	D3DXCreateTextureFromFile(pDevice, TEXTURE_TITLE_BG, &this[0].tex2DVB.pD3DTexture);
-	D3DXCreateTextureFromFile(pDevice, TEXTURE_LOGO_START, &this[1].tex2DVB.pD3DTexture);
-	D3DXCreateTextureFromFile(pDevice, TEXTURE_TITLE_SELECT_TUTORIAL, &this[2].tex2DVB.pD3DTexture);
-	D3DXCreateTextureFromFile(pDevice, TEXTURE_TITLE_SELECT_GAME, &this[3].tex2DVB.pD3DTexture);
-	D3DXCreateTextureFromFile(pDevice, TEXTURE_TITLE_SELECT_GAME_LOCAL, &this[4].tex2DVB.pD3DTexture);
-	D3DXCreateTextureFromFile(pDevice, TEXTURE_TITLE_SELECT_GAME_NET, &this[5].tex2DVB.pD3DTexture);
+	D3DXCreateTextureFromFile(pDevice, TEXTURE_TITLE_LOGO, &this[TITLE_OBJECT_NAME_LOGO].tex2DVB.pD3DTexture);
+	D3DXCreateTextureFromFile(pDevice, TEXTURE_TITLE_BG, &this[TITLE_OBJECT_NAME_BG].tex2DVB.pD3DTexture);
+	D3DXCreateTextureFromFile(pDevice, TEXTURE_TITLE_PRESS, &this[TITLE_OBJECT_NAME_PRESS].tex2DVB.pD3DTexture);
+	D3DXCreateTextureFromFile(pDevice, TEXTURE_TITLE_SELECT_TUTORIAL, &this[TITLE_OBJECT_NAME_TUTO].tex2DVB.pD3DTexture);
+	D3DXCreateTextureFromFile(pDevice, TEXTURE_TITLE_SELECT_GAME_LOCAL, &this[TITLE_OBJECT_NAME_LOCAL].tex2DVB.pD3DTexture);
+	D3DXCreateTextureFromFile(pDevice, TEXTURE_TITLE_SELECT_GAME_NET, &this[TITLE_OBJECT_NAME_NET].tex2DVB.pD3DTexture);
+	D3DXCreateTextureFromFile(pDevice, TEXTURE_TITLE_SELECT_GAME_QUIT, &this[TITLE_OBJECT_NAME_QUIT].tex2DVB.pD3DTexture);
 
+	this[TITLE_OBJECT_NAME_BG].bDisp = true;
+	this[TITLE_OBJECT_NAME_LOGO].bDisp = true;
+	this[TITLE_OBJECT_NAME_PRESS].bDisp = true;
+	this[TITLE_OBJECT_NAME_TUTO].bDisp = false;
+	this[TITLE_OBJECT_NAME_LOCAL].bDisp = false;
+	this[TITLE_OBJECT_NAME_NET].bDisp = false;
+	this[TITLE_OBJECT_NAME_QUIT].bDisp = false;
+
+	this[0].SetColorTitle(TITLE_OBJECT_NAME_BG, 1.0f);
+	this[0].SetColorTitle(TITLE_OBJECT_NAME_LOGO, 1.0f);
+	this[0].SetColorTitle(TITLE_OBJECT_NAME_PRESS, 1.0f);
+	this[0].SetColorTitle(TITLE_OBJECT_NAME_TUTO, 0.0f);
+	this[0].SetColorTitle(TITLE_OBJECT_NAME_LOCAL, 0.0f);
+	this[0].SetColorTitle(TITLE_OBJECT_NAME_NET, 0.0f);
+	this[0].SetColorTitle(TITLE_OBJECT_NAME_QUIT, 0.0f);
 }
 
 //=============================================================================
@@ -67,21 +91,26 @@ void TITLE::Init(void)
 //=============================================================================
 void TITLE::Reinit(void)
 {
-	this[0].HierarchyNum = 0;
-	this[0].SceneNum = TITLE_SELECT_SCENE_LOCAL;
+	this[0].HierarchyNum = TITLE_HIERARCHY_NUM_ANIM;
+	this[0].SceneNumX = 0;
+	this[0].SceneNumY = 0;
 	this[0].fAlpha = 1.0f;
 
+	this[TITLE_OBJECT_NAME_BG].bDisp = true;
+	this[TITLE_OBJECT_NAME_LOGO].bDisp = true;
+	this[TITLE_OBJECT_NAME_PRESS].bDisp = true;
 	this[TITLE_OBJECT_NAME_TUTO].bDisp = false;
-	this[TITLE_OBJECT_NAME_BATTLE].bDisp = false;
 	this[TITLE_OBJECT_NAME_LOCAL].bDisp = false;
 	this[TITLE_OBJECT_NAME_NET].bDisp = false;
+	this[TITLE_OBJECT_NAME_QUIT].bDisp = false;
 
-	this[0].SetColorTitle(TITLE_OBJECT_NAME_TITLELOGO, 1.0f);
-	this[0].SetColorTitle(TITLE_OBJECT_NAME_START, 1.0f);
+	this[0].SetColorTitle(TITLE_OBJECT_NAME_BG, 1.0f);
+	this[0].SetColorTitle(TITLE_OBJECT_NAME_LOGO, 1.0f);
+	this[0].SetColorTitle(TITLE_OBJECT_NAME_PRESS, 1.0f);
 	this[0].SetColorTitle(TITLE_OBJECT_NAME_TUTO, 0.0f);
-	this[0].SetColorTitle(TITLE_OBJECT_NAME_BATTLE, 0.0f);
 	this[0].SetColorTitle(TITLE_OBJECT_NAME_LOCAL, 0.0f);
 	this[0].SetColorTitle(TITLE_OBJECT_NAME_NET, 0.0f);
+	this[0].SetColorTitle(TITLE_OBJECT_NAME_QUIT, 0.0f);
 }
 
 //=============================================================================
@@ -96,148 +125,133 @@ void TITLE::Uninit(void)
 //=============================================================================
 void TITLE::Update(GAME_OBJECT* obj, FADE *fade)
 {
-		switch (this[0].HierarchyNum)
+	switch (this[0].HierarchyNum)
+	{
+		//タイトルアニメ階層
+	case TITLE_HIERARCHY_NUM_ANIM:
+	{
+		//シーンセレクト階層へ切り替え
+		if (GetKeyboardTrigger(DIK_RETURN) || IsButtonTriggered(0, BUTTON_A))
 		{
-		//タイトル階層
-		case TITLE_HIERARCHY_NUM_TITLE:
-			this[0].SetColorTitle(TITLE_OBJECT_NAME_TITLELOGO, 1.0f);
-			this[0].SetColorTitle(TITLE_OBJECT_NAME_START, 1.0f);
+			PlaySound(SOUND_LABEL_SE_enter01);
+			this[0].HierarchyNum = TITLE_HIERARCHY_NUM_SELECT;
+			this[0].SetColorTitle(TITLE_OBJECT_NAME_LOGO, 0.0f);
+			this[0].SetColorTitle(TITLE_OBJECT_NAME_PRESS, 0.0f);
+			this[TITLE_OBJECT_NAME_TUTO].bDisp = true;
+			this[TITLE_OBJECT_NAME_LOCAL].bDisp = true;
+			this[TITLE_OBJECT_NAME_NET].bDisp = true;
+			this[TITLE_OBJECT_NAME_QUIT].bDisp = true;
+		}
+		break;
+	}
+	//シーンセレクト階層
+	case TITLE_HIERARCHY_NUM_SELECT:
+	{
+		//チュートリアル対決階層へ切り替え
+		if (GetKeyboardTrigger(DIK_BACK) || IsButtonTriggered(0, BUTTON_B))
+		{
+			PlaySound(SOUND_LABEL_SE_enter01);
+			this[0].HierarchyNum = TITLE_HIERARCHY_NUM_ANIM;
+			this[0].SetColorTitle(TITLE_OBJECT_NAME_LOGO, 1.0f);
+			this[0].SetColorTitle(TITLE_OBJECT_NAME_PRESS, 1.0f);
 			this[0].SetColorTitle(TITLE_OBJECT_NAME_TUTO, 0.0f);
-			this[0].SetColorTitle(TITLE_OBJECT_NAME_BATTLE, 0.0f);
 			this[0].SetColorTitle(TITLE_OBJECT_NAME_LOCAL, 0.0f);
 			this[0].SetColorTitle(TITLE_OBJECT_NAME_NET, 0.0f);
-			//チュートリアル対決階層へ切り替え
+			this[0].SetColorTitle(TITLE_OBJECT_NAME_QUIT, 0.0f);
+			this[TITLE_OBJECT_NAME_TUTO].bDisp = false;
+			this[TITLE_OBJECT_NAME_LOCAL].bDisp = false;
+			this[TITLE_OBJECT_NAME_NET].bDisp = false;
+			this[TITLE_OBJECT_NAME_QUIT].bDisp = false;
+
+		}
+		//カーソル移動
+		else if (GetKeyboardTrigger(DIK_UP) || IsButtonTriggered(0, BUTTON_ANALOG_L_UP) || IsButtonTriggered(0, BUTTON_DIGITAL_UP))
+		{
+			PlaySound(SOUND_LABEL_SE_enter03);
+			this[0].SceneNumY++;
+			if (this[0].SceneNumY >= 2)this[0].SceneNumY = 0;
+		}
+		else if (GetKeyboardTrigger(DIK_DOWN) || IsButtonTriggered(0, BUTTON_ANALOG_L_DOWN) || IsButtonTriggered(0, BUTTON_DIGITAL_DOWN))
+		{
+			PlaySound(SOUND_LABEL_SE_enter03);
+			this[0].SceneNumY--;
+			if (this[0].SceneNumY <= -1)this[0].SceneNumY = 1;
+		}
+		else if (GetKeyboardTrigger(DIK_RIGHT) || IsButtonTriggered(0, BUTTON_ANALOG_L_RIGHT) || IsButtonTriggered(0, BUTTON_DIGITAL_RIGHT))
+		{
+			PlaySound(SOUND_LABEL_SE_enter03);
+			this[0].SceneNumX++;
+			if (this[0].SceneNumX >= 2)this[0].SceneNumX = 0;
+		}
+		else if (GetKeyboardTrigger(DIK_LEFT) || IsButtonTriggered(0, BUTTON_ANALOG_L_LEFT) || IsButtonTriggered(0, BUTTON_DIGITAL_LEFT))
+		{
+			PlaySound(SOUND_LABEL_SE_enter03);
+			this[0].SceneNumX--;
+			if (this[0].SceneNumX <= -1)this[0].SceneNumX = 1;
+		}
+
+		//カーソルに合わせているやつを光らせる
+		//チュートリアル
+		if (this[0].SceneNumX == 0 && this[0].SceneNumY == 0)
+		{
+			this[0].SetColorTitle(TITLE_OBJECT_NAME_TUTO, 1.0f);
+			this[0].SetColorTitle(TITLE_OBJECT_NAME_LOCAL, 0.4f);
+			this[0].SetColorTitle(TITLE_OBJECT_NAME_NET, 0.4f);
+			this[0].SetColorTitle(TITLE_OBJECT_NAME_QUIT, 0.4f);
+			//シーンをチュートリアルへ
 			if (GetKeyboardTrigger(DIK_RETURN) || IsButtonTriggered(0, BUTTON_A))
 			{
 				PlaySound(SOUND_LABEL_SE_enter01);
-				this[0].HierarchyNum = TITLE_HIERARCHY_NUM_TUTO_BATTLE;
-				this[TITLE_OBJECT_NAME_TUTO].bDisp = true;
-				this[TITLE_OBJECT_NAME_BATTLE].bDisp = true;
-				this[0].SceneNum = TITLE_SELECT_SCENE_TUTORIAL;
+				fade->SetFade(FADE_OUT, SCENE_TUTORIAL, SOUND_LABEL_BGM_tutorial01);
 			}
-			//切り替え
-			else if (GetKeyboardTrigger(DIK_BACK) || IsButtonTriggered(0, BUTTON_B))
-			{
-				PlaySound(SOUND_LABEL_SE_attack02);
-			}
-			break;
-			//チュートリアル対決階層
-		case TITLE_HIERARCHY_NUM_TUTO_BATTLE:
-			this[0].SetColorTitle(TITLE_OBJECT_NAME_TITLELOGO, 0.2f);
-			this[0].SetColorTitle(TITLE_OBJECT_NAME_START, 0.2f);
-			this[0].SetColorTitle(TITLE_OBJECT_NAME_LOCAL, 0.0f);
-			this[0].SetColorTitle(TITLE_OBJECT_NAME_NET, 0.0f);
-			this[0].SetColorTitle(TITLE_OBJECT_NAME_TUTO, 1.0f);
-			this[0].SetColorTitle(TITLE_OBJECT_NAME_BATTLE, 0.2f);
-			//タイトル階層へ切り替え
-			if (GetKeyboardTrigger(DIK_BACK) || IsButtonTriggered(0, BUTTON_B))
-			{
-				PlaySound(SOUND_LABEL_SE_enter01);
-				this[0].HierarchyNum = TITLE_HIERARCHY_NUM_TITLE;
-				this[TITLE_OBJECT_NAME_TUTO].bDisp = false;
-				this[TITLE_OBJECT_NAME_BATTLE].bDisp = false;
-
-			}
-			//上入力でチュートリアルにカーソル合わせる
-			else if (GetKeyboardTrigger(DIK_UP) || IsButtonTriggered(0, BUTTON_ANALOG_L_UP))
-			{
-				PlaySound(SOUND_LABEL_SE_enter03);
-				this[0].SceneNum = TITLE_SELECT_SCENE_TUTORIAL;
-			}
-			//下入力で対決にカーソル合わせる
-			else if (GetKeyboardTrigger(DIK_DOWN) || IsButtonTriggered(0, BUTTON_ANALOG_L_DOWN))
-			{
-				PlaySound(SOUND_LABEL_SE_enter03);
-				this[0].SceneNum = TITLE_SELECT_SCENE_BATTLE;
-			}
-
-			if (this[0].SceneNum == TITLE_SELECT_SCENE_TUTORIAL)
-			{
-				this[0].SetColorTitle(TITLE_OBJECT_NAME_TUTO, 1.0f);
-				this[0].SetColorTitle(TITLE_OBJECT_NAME_BATTLE, 0.2f);
-				//ゲームシーンをチュートリアルへ
-				if (GetKeyboardTrigger(DIK_RETURN) || IsButtonTriggered(0, BUTTON_A))
-				{
-					PlaySound(SOUND_LABEL_SE_enter01);
-					fade->SetFade(FADE_OUT, SCENE_TUTORIAL, SOUND_LABEL_BGM_tutorial01);
-				}
-			}
-			else if (this[0].SceneNum == TITLE_SELECT_SCENE_BATTLE)
-			{
-				this[0].SetColorTitle(TITLE_OBJECT_NAME_TUTO, 0.2f);
-				this[0].SetColorTitle(TITLE_OBJECT_NAME_BATTLE, 1.0f);
-				//ローカルネット階層へ切り替え
-				if (GetKeyboardTrigger(DIK_RETURN) || IsButtonTriggered(0, BUTTON_A))
-				{
-					PlaySound(SOUND_LABEL_SE_enter01);
-					this[0].HierarchyNum = TITLE_HIERARCHY_NUM_LOCAL_NET;
-					this[TITLE_OBJECT_NAME_TUTO].bDisp = false;
-					this[TITLE_OBJECT_NAME_BATTLE].bDisp = false;
-					this[TITLE_OBJECT_NAME_LOCAL].bDisp = true;
-					this[TITLE_OBJECT_NAME_NET].bDisp = true;
-					this[0].SceneNum = TITLE_SELECT_SCENE_LOCAL;
-
-				}
-			}
-			break;
-			//ローカルネット階層
-		case TITLE_HIERARCHY_NUM_LOCAL_NET:
-			this[0].SetColorTitle(TITLE_OBJECT_NAME_TITLELOGO, 0.2f);
-			this[0].SetColorTitle(TITLE_OBJECT_NAME_START, 0.2f);
-			this[0].SetColorTitle(TITLE_OBJECT_NAME_TUTO, 0.0f);
-			this[0].SetColorTitle(TITLE_OBJECT_NAME_BATTLE, 0.0f);
-			this[0].SetColorTitle(TITLE_OBJECT_NAME_LOCAL, 1.0f);
-			this[0].SetColorTitle(TITLE_OBJECT_NAME_NET, 0.2f);
-			//チュートリアル対決階層へ切り替え
-			if (GetKeyboardTrigger(DIK_BACK) || IsButtonTriggered(0, BUTTON_B))
-			{
-				PlaySound(SOUND_LABEL_SE_enter01);
-				this[0].HierarchyNum = TITLE_HIERARCHY_NUM_TUTO_BATTLE;
-				this[TITLE_OBJECT_NAME_TUTO].bDisp = true;
-				this[TITLE_OBJECT_NAME_BATTLE].bDisp = true;
-				this[TITLE_OBJECT_NAME_LOCAL].bDisp = false;
-				this[TITLE_OBJECT_NAME_NET].bDisp = false;
-
-			}
-			//上入力でローカルにカーソル合わせる
-			else if (GetKeyboardTrigger(DIK_UP) || IsButtonTriggered(0, BUTTON_ANALOG_L_UP))
-			{
-				PlaySound(SOUND_LABEL_SE_enter03);
-				this[0].SceneNum = TITLE_SELECT_SCENE_LOCAL;
-			}
-			//下入力でネットにカーソル合わせる
-			else if (GetKeyboardTrigger(DIK_DOWN) || IsButtonTriggered(0, BUTTON_ANALOG_L_DOWN))
-			{
-				PlaySound(SOUND_LABEL_SE_enter03);
-				this[0].SceneNum = TITLE_SELECT_SCENE_NET;
-			}
-
-			if (this[0].SceneNum == TITLE_SELECT_SCENE_LOCAL)
-			{
-				this[0].SetColorTitle(TITLE_OBJECT_NAME_LOCAL, 1.0f);
-				this[0].SetColorTitle(TITLE_OBJECT_NAME_NET, 0.2f);
-				//シーンをゲームへ
-				if (GetKeyboardTrigger(DIK_RETURN) || IsButtonTriggered(0, BUTTON_A))
-				{
-					PlaySound(SOUND_LABEL_SE_enter01);
-					fade->SetFade(FADE_OUT, SCENE_GAMECOUNTDOWN, SOUND_LABEL_BGM_normal01);
-				}
-			}
-			else if (this[0].SceneNum == TITLE_SELECT_SCENE_NET)
-			{
-				this[0].SetColorTitle(TITLE_OBJECT_NAME_LOCAL, 0.2f);
-				this[0].SetColorTitle(TITLE_OBJECT_NAME_NET, 1.0f);
-				//シーンをネットマッチへ
-				if (GetKeyboardTrigger(DIK_RETURN) || IsButtonTriggered(0, BUTTON_A))
-				{
-					PlaySound(SOUND_LABEL_SE_enter01);
-					//obj->ReinitNet();
-					fade->SetFade(FADE_OUT, SCENE_NETMATCH, SOUND_LABEL_SE_damage);
-				}
-			}
-		default:
-			break;
 		}
+		//ローカル対戦
+		else if (this[0].SceneNumX == 1 && this[0].SceneNumY == 0)
+		{
+			this[0].SetColorTitle(TITLE_OBJECT_NAME_TUTO, 0.4f);
+			this[0].SetColorTitle(TITLE_OBJECT_NAME_LOCAL, 1.0f);
+			this[0].SetColorTitle(TITLE_OBJECT_NAME_NET, 0.4f);
+			this[0].SetColorTitle(TITLE_OBJECT_NAME_QUIT, 0.4f);
+			//シーンをゲームへ
+			if (GetKeyboardTrigger(DIK_RETURN) || IsButtonTriggered(0, BUTTON_A))
+			{
+				PlaySound(SOUND_LABEL_SE_enter01);
+				fade->SetFade(FADE_OUT, SCENE_GAMECOUNTDOWN, SOUND_LABEL_BGM_normal01);
+			}
+		}
+		//ネット対戦
+		else if (this[0].SceneNumX == 0 && this[0].SceneNumY == 1)
+		{
+			this[0].SetColorTitle(TITLE_OBJECT_NAME_TUTO, 0.4f);
+			this[0].SetColorTitle(TITLE_OBJECT_NAME_LOCAL, 0.4f);
+			this[0].SetColorTitle(TITLE_OBJECT_NAME_NET, 1.0f);
+			this[0].SetColorTitle(TITLE_OBJECT_NAME_QUIT, 0.4f);
+			//シーンをゲームへ
+			if (GetKeyboardTrigger(DIK_RETURN) || IsButtonTriggered(0, BUTTON_A))
+			{
+				PlaySound(SOUND_LABEL_SE_enter01);
+				fade->SetFade(FADE_OUT, SCENE_NETMATCH, SOUND_LABEL_BGM_select01);
+			}
+		}
+		//アプリ終了へ
+		else if (this[0].SceneNumX == 1 && this[0].SceneNumY == 1)
+		{
+			this[0].SetColorTitle(TITLE_OBJECT_NAME_TUTO, 0.4f);
+			this[0].SetColorTitle(TITLE_OBJECT_NAME_LOCAL, 0.4f);
+			this[0].SetColorTitle(TITLE_OBJECT_NAME_NET, 0.4f);
+			this[0].SetColorTitle(TITLE_OBJECT_NAME_QUIT, 1.0f);
+			//シーンをゲームへ
+			if (GetKeyboardTrigger(DIK_RETURN) || IsButtonTriggered(0, BUTTON_A))
+			{
+				PlaySound(SOUND_LABEL_SE_enter01);
+				SetMsg(WM_QUIT);
+			}
+		}
+
+	}
+	default:
+		break;
+	}
 }
 
 //=============================================================================
@@ -247,44 +261,19 @@ void TITLE::Draw(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 
-	// 頂点バッファをデバイスのデータストリームにバインド
-	pDevice->SetStreamSource(0, this[0].tex2DVB.pD3DVtxBuff, 0, sizeof(VERTEX_2D));
-
-	// 頂点フォーマットの設定
-	pDevice->SetFVF(FVF_VERTEX_2D);
-
-	// テクスチャの設定
-	pDevice->SetTexture(0, this[0].tex2DVB.pD3DTexture);
-
-	// ポリゴンの描画
-	pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, POLYGON_2D_NUM);
-
-	// 頂点バッファをデバイスのデータストリームにバインド
-	pDevice->SetStreamSource(0, this[1].tex2DVB.pD3DVtxBuff, 0, sizeof(VERTEX_2D));
-
-	// 頂点フォーマットの設定
-	pDevice->SetFVF(FVF_VERTEX_2D);
-
-	// テクスチャの設定
-	pDevice->SetTexture(0, this[1].tex2DVB.pD3DTexture);
-
-	// ポリゴンの描画
-	pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, POLYGON_2D_NUM);
-
-
-	for (int CntTitleSelectScene = 0; CntTitleSelectScene < TITLE_SELECT_SCENE_MAX; CntTitleSelectScene++)
+	for (int CntTitleSelectScene = 0; CntTitleSelectScene < TITLE_OBJECT_NAME_MAX; CntTitleSelectScene++)
 	{
-		if (this[CntTitleSelectScene + 2].bDisp == true)
+		if (this[CntTitleSelectScene].bDisp == true)
 		{
 
 			// 頂点バッファをデバイスのデータストリームにバインド
-			pDevice->SetStreamSource(0, this[CntTitleSelectScene + 2].tex2DVB.pD3DVtxBuff, 0, sizeof(VERTEX_2D));
+			pDevice->SetStreamSource(0, this[CntTitleSelectScene].tex2DVB.pD3DVtxBuff, 0, sizeof(VERTEX_2D));
 
 			// 頂点フォーマットの設定
 			pDevice->SetFVF(FVF_VERTEX_2D);
 
 			// テクスチャの設定
-			pDevice->SetTexture(0, this[CntTitleSelectScene + 2].tex2DVB.pD3DTexture);
+			pDevice->SetTexture(0, this[CntTitleSelectScene].tex2DVB.pD3DTexture);
 
 			// ポリゴンの描画
 			pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, POLYGON_2D_NUM);
@@ -298,7 +287,7 @@ void TITLE::Draw(void)
 HRESULT TITLE::MakeVertexTitle(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
-	//タイトルBG生成
+	//BG生成
 	{
 		// オブジェクトの頂点バッファを生成
 		if (FAILED(pDevice->CreateVertexBuffer(sizeof(VERTEX_2D) * POLYGON_2D_VERTEX,	// 頂点データ用に確保するバッファサイズ(バイト単位)
@@ -346,7 +335,7 @@ HRESULT TITLE::MakeVertexTitle(void)
 		}
 	}
 
-	//タイトルスタートロゴ生成
+	//タイトルロゴ生成
 	{
 		// オブジェクトの頂点バッファを生成
 		if (FAILED(pDevice->CreateVertexBuffer(sizeof(VERTEX_2D) * POLYGON_2D_VERTEX,	// 頂点データ用に確保するバッファサイズ(バイト単位)
@@ -366,10 +355,10 @@ HRESULT TITLE::MakeVertexTitle(void)
 			this[1].tex2DVB.pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
 
 			// 頂点座標の設定
-			pVtx[0].vtx = D3DXVECTOR3(TITLE_START_LOGO_POS_X - TITLE_START_LOGO_WIDTH, TITLE_START_LOGO_POS_Y - TITLE_START_LOGO_HEIGHT, 0.0f);
-			pVtx[1].vtx = D3DXVECTOR3(TITLE_START_LOGO_POS_X + TITLE_START_LOGO_WIDTH, TITLE_START_LOGO_POS_Y - TITLE_START_LOGO_HEIGHT, 0.0f);
-			pVtx[2].vtx = D3DXVECTOR3(TITLE_START_LOGO_POS_X - TITLE_START_LOGO_WIDTH, TITLE_START_LOGO_POS_Y + TITLE_START_LOGO_HEIGHT, 0.0f);
-			pVtx[3].vtx = D3DXVECTOR3(TITLE_START_LOGO_POS_X + TITLE_START_LOGO_WIDTH, TITLE_START_LOGO_POS_Y + TITLE_START_LOGO_HEIGHT, 0.0f);
+			pVtx[0].vtx = D3DXVECTOR3(TITLE_LOGO_POS_X - TITLE_LOGO_WIDTH, TITLE_LOGO_POS_Y - TITLE_LOGO_HEIGHT, 0.0f);
+			pVtx[1].vtx = D3DXVECTOR3(TITLE_LOGO_POS_X + TITLE_LOGO_WIDTH, TITLE_LOGO_POS_Y - TITLE_LOGO_HEIGHT, 0.0f);
+			pVtx[2].vtx = D3DXVECTOR3(TITLE_LOGO_POS_X - TITLE_LOGO_WIDTH, TITLE_LOGO_POS_Y + TITLE_LOGO_HEIGHT, 0.0f);
+			pVtx[3].vtx = D3DXVECTOR3(TITLE_LOGO_POS_X + TITLE_LOGO_WIDTH, TITLE_LOGO_POS_Y + TITLE_LOGO_HEIGHT, 0.0f);
 
 			// テクスチャのパースペクティブコレクト用
 			pVtx[0].rhw =
@@ -394,62 +383,58 @@ HRESULT TITLE::MakeVertexTitle(void)
 		}
 	}
 
-	//タイトルセレクトロゴ生成
+	//PRESS生成
 	{
-		for (int CntTitleSelectScene = TITLE_OBJECT_NAME_TUTO; CntTitleSelectScene < TITLE_OBJECT_NAME_LOCAL; CntTitleSelectScene++)
+
+		// オブジェクトの頂点バッファを生成
+		if (FAILED(pDevice->CreateVertexBuffer(sizeof(VERTEX_2D) * POLYGON_2D_VERTEX,	// 頂点データ用に確保するバッファサイズ(バイト単位)
+			D3DUSAGE_WRITEONLY,			// 頂点バッファの使用法　
+			FVF_VERTEX_2D,				// 使用する頂点フォーマット
+			D3DPOOL_MANAGED,			// リソースのバッファを保持するメモリクラスを指定
+			&this[2].tex2DVB.pD3DVtxBuff,	// 頂点バッファインターフェースへのポインタ
+			NULL)))						// NULLに設定
 		{
+			return E_FAIL;
+		}
 
-			// オブジェクトの頂点バッファを生成
-			if (FAILED(pDevice->CreateVertexBuffer(sizeof(VERTEX_2D) * POLYGON_2D_VERTEX,	// 頂点データ用に確保するバッファサイズ(バイト単位)
-				D3DUSAGE_WRITEONLY,			// 頂点バッファの使用法　
-				FVF_VERTEX_2D,				// 使用する頂点フォーマット
-				D3DPOOL_MANAGED,			// リソースのバッファを保持するメモリクラスを指定
-				&this[CntTitleSelectScene].tex2DVB.pD3DVtxBuff,	// 頂点バッファインターフェースへのポインタ
-				NULL)))						// NULLに設定
-			{
-				return E_FAIL;
-			}
+		{//頂点バッファの中身を埋める
+			VERTEX_2D *pVtx;
 
-			{//頂点バッファの中身を埋める
-				VERTEX_2D *pVtx;
+			// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
+			this[2].tex2DVB.pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
 
-				// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
-				this[CntTitleSelectScene].tex2DVB.pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+			// 頂点座標の設定
+			pVtx[0].vtx = D3DXVECTOR3(TITLE_PRESS_LOGO_POS_X - TITLE_PRESS_LOGO_WIDTH, TITLE_PRESS_LOGO_POS_Y - TITLE_PRESS_LOGO_HEIGHT, 0.0f);
+			pVtx[1].vtx = D3DXVECTOR3(TITLE_PRESS_LOGO_POS_X + TITLE_PRESS_LOGO_WIDTH, TITLE_PRESS_LOGO_POS_Y - TITLE_PRESS_LOGO_HEIGHT, 0.0f);
+			pVtx[2].vtx = D3DXVECTOR3(TITLE_PRESS_LOGO_POS_X - TITLE_PRESS_LOGO_WIDTH, TITLE_PRESS_LOGO_POS_Y + TITLE_PRESS_LOGO_HEIGHT, 0.0f);
+			pVtx[3].vtx = D3DXVECTOR3(TITLE_PRESS_LOGO_POS_X + TITLE_PRESS_LOGO_WIDTH, TITLE_PRESS_LOGO_POS_Y + TITLE_PRESS_LOGO_HEIGHT, 0.0f);
 
-				// 頂点座標の設定
-				int cnt = CntTitleSelectScene - TITLE_OBJECT_NAME_TUTO;
-				pVtx[0].vtx = D3DXVECTOR3(TITLE_SELECT_POS_X - TITLE_SELECT_WIDTH, TITLE_SELECT_POS_Y - TITLE_SELECT_HEIGHT + (cnt*TITLE_SELECT_HEIGHT * 2), 0.0f);
-				pVtx[1].vtx = D3DXVECTOR3(TITLE_SELECT_POS_X + TITLE_SELECT_WIDTH, TITLE_SELECT_POS_Y - TITLE_SELECT_HEIGHT + (cnt*TITLE_SELECT_HEIGHT * 2), 0.0f);
-				pVtx[2].vtx = D3DXVECTOR3(TITLE_SELECT_POS_X - TITLE_SELECT_WIDTH, TITLE_SELECT_POS_Y + TITLE_SELECT_HEIGHT + (cnt*TITLE_SELECT_HEIGHT * 2), 0.0f);
-				pVtx[3].vtx = D3DXVECTOR3(TITLE_SELECT_POS_X + TITLE_SELECT_WIDTH, TITLE_SELECT_POS_Y + TITLE_SELECT_HEIGHT + (cnt*TITLE_SELECT_HEIGHT * 2), 0.0f);
+			// テクスチャのパースペクティブコレクト用
+			pVtx[0].rhw =
+				pVtx[1].rhw =
+				pVtx[2].rhw =
+				pVtx[3].rhw = 1.0f;
 
-				// テクスチャのパースペクティブコレクト用
-				pVtx[0].rhw =
-					pVtx[1].rhw =
-					pVtx[2].rhw =
-					pVtx[3].rhw = 1.0f;
+			// 反射光の設定
+			pVtx[0].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+			pVtx[1].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+			pVtx[2].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+			pVtx[3].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
 
-				// 反射光の設定
-				pVtx[0].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
-				pVtx[1].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
-				pVtx[2].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
-				pVtx[3].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+			// テクスチャ座標の設定
+			pVtx[0].tex = D3DXVECTOR2(0.0f, 0.0f);
+			pVtx[1].tex = D3DXVECTOR2(1.0f, 0.0f);
+			pVtx[2].tex = D3DXVECTOR2(0.0f, 1.0f);
+			pVtx[3].tex = D3DXVECTOR2(1.0f, 1.0f);
 
-				// テクスチャ座標の設定
-				pVtx[0].tex = D3DXVECTOR2(0.0f, 0.0f);
-				pVtx[1].tex = D3DXVECTOR2(1.0f, 0.0f);
-				pVtx[2].tex = D3DXVECTOR2(0.0f, 1.0f);
-				pVtx[3].tex = D3DXVECTOR2(1.0f, 1.0f);
-
-				// 頂点データをアンロックする
-				this[CntTitleSelectScene].tex2DVB.pD3DVtxBuff->Unlock();
-			}
+			// 頂点データをアンロックする
+			this[2].tex2DVB.pD3DVtxBuff->Unlock();
 		}
 	}
 
-	//タイトルセレクトロゴ生成
+	//セレクトUI生成
 	{
-		for (int CntTitleSelectScene = TITLE_OBJECT_NAME_LOCAL; CntTitleSelectScene < TITLE_OBJECT_NAME_MAX; CntTitleSelectScene++)
+		for (int CntTitleSelectScene = TITLE_OBJECT_NAME_TUTO; CntTitleSelectScene < TITLE_OBJECT_NAME_MAX; CntTitleSelectScene++)
 		{
 
 			// オブジェクトの頂点バッファを生成
@@ -470,12 +455,33 @@ HRESULT TITLE::MakeVertexTitle(void)
 				this[CntTitleSelectScene].tex2DVB.pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
 
 				// 頂点座標の設定
-				int cnt = CntTitleSelectScene- TITLE_OBJECT_NAME_LOCAL;
-				pVtx[0].vtx = D3DXVECTOR3(TITLE_SELECT_POS_X - TITLE_SELECT_WIDTH, TITLE_SELECT_POS_Y - TITLE_SELECT_HEIGHT + (cnt*TITLE_SELECT_HEIGHT * 2), 0.0f);
-				pVtx[1].vtx = D3DXVECTOR3(TITLE_SELECT_POS_X + TITLE_SELECT_WIDTH, TITLE_SELECT_POS_Y - TITLE_SELECT_HEIGHT + (cnt*TITLE_SELECT_HEIGHT * 2), 0.0f);
-				pVtx[2].vtx = D3DXVECTOR3(TITLE_SELECT_POS_X - TITLE_SELECT_WIDTH, TITLE_SELECT_POS_Y + TITLE_SELECT_HEIGHT + (cnt*TITLE_SELECT_HEIGHT * 2), 0.0f);
-				pVtx[3].vtx = D3DXVECTOR3(TITLE_SELECT_POS_X + TITLE_SELECT_WIDTH, TITLE_SELECT_POS_Y + TITLE_SELECT_HEIGHT + (cnt*TITLE_SELECT_HEIGHT * 2), 0.0f);
-
+				switch (CntTitleSelectScene)
+				{
+				case TITLE_OBJECT_NAME_TUTO:
+					pVtx[0].vtx = D3DXVECTOR3(TITLE_SELECT_POS_X - TITLE_SELECT_WIDTH - TITLE_SELECT_OFFSET_X, TITLE_SELECT_POS_Y - TITLE_SELECT_HEIGHT - TITLE_SELECT_OFFSET_Y, 0.0f);
+					pVtx[1].vtx = D3DXVECTOR3(TITLE_SELECT_POS_X + TITLE_SELECT_WIDTH - TITLE_SELECT_OFFSET_X, TITLE_SELECT_POS_Y - TITLE_SELECT_HEIGHT - TITLE_SELECT_OFFSET_Y, 0.0f);
+					pVtx[2].vtx = D3DXVECTOR3(TITLE_SELECT_POS_X - TITLE_SELECT_WIDTH - TITLE_SELECT_OFFSET_X, TITLE_SELECT_POS_Y + TITLE_SELECT_HEIGHT - TITLE_SELECT_OFFSET_Y, 0.0f);
+					pVtx[3].vtx = D3DXVECTOR3(TITLE_SELECT_POS_X + TITLE_SELECT_WIDTH - TITLE_SELECT_OFFSET_X, TITLE_SELECT_POS_Y + TITLE_SELECT_HEIGHT - TITLE_SELECT_OFFSET_Y, 0.0f);
+					break;
+				case TITLE_OBJECT_NAME_LOCAL:
+					pVtx[0].vtx = D3DXVECTOR3(TITLE_SELECT_POS_X - TITLE_SELECT_WIDTH + TITLE_SELECT_OFFSET_X, TITLE_SELECT_POS_Y - TITLE_SELECT_HEIGHT - TITLE_SELECT_OFFSET_Y, 0.0f);
+					pVtx[1].vtx = D3DXVECTOR3(TITLE_SELECT_POS_X + TITLE_SELECT_WIDTH + TITLE_SELECT_OFFSET_X, TITLE_SELECT_POS_Y - TITLE_SELECT_HEIGHT - TITLE_SELECT_OFFSET_Y, 0.0f);
+					pVtx[2].vtx = D3DXVECTOR3(TITLE_SELECT_POS_X - TITLE_SELECT_WIDTH + TITLE_SELECT_OFFSET_X, TITLE_SELECT_POS_Y + TITLE_SELECT_HEIGHT - TITLE_SELECT_OFFSET_Y, 0.0f);
+					pVtx[3].vtx = D3DXVECTOR3(TITLE_SELECT_POS_X + TITLE_SELECT_WIDTH + TITLE_SELECT_OFFSET_X, TITLE_SELECT_POS_Y + TITLE_SELECT_HEIGHT - TITLE_SELECT_OFFSET_Y, 0.0f);
+					break;
+				case TITLE_OBJECT_NAME_NET:
+					pVtx[0].vtx = D3DXVECTOR3(TITLE_SELECT_POS_X - TITLE_SELECT_WIDTH - TITLE_SELECT_OFFSET_X, TITLE_SELECT_POS_Y - TITLE_SELECT_HEIGHT + TITLE_SELECT_OFFSET_Y, 0.0f);
+					pVtx[1].vtx = D3DXVECTOR3(TITLE_SELECT_POS_X + TITLE_SELECT_WIDTH - TITLE_SELECT_OFFSET_X, TITLE_SELECT_POS_Y - TITLE_SELECT_HEIGHT + TITLE_SELECT_OFFSET_Y, 0.0f);
+					pVtx[2].vtx = D3DXVECTOR3(TITLE_SELECT_POS_X - TITLE_SELECT_WIDTH - TITLE_SELECT_OFFSET_X, TITLE_SELECT_POS_Y + TITLE_SELECT_HEIGHT + TITLE_SELECT_OFFSET_Y, 0.0f);
+					pVtx[3].vtx = D3DXVECTOR3(TITLE_SELECT_POS_X + TITLE_SELECT_WIDTH - TITLE_SELECT_OFFSET_X, TITLE_SELECT_POS_Y + TITLE_SELECT_HEIGHT + TITLE_SELECT_OFFSET_Y, 0.0f);
+					break;
+				case TITLE_OBJECT_NAME_QUIT:
+					pVtx[0].vtx = D3DXVECTOR3(TITLE_SELECT_POS_X - TITLE_SELECT_WIDTH + TITLE_SELECT_OFFSET_X, TITLE_SELECT_POS_Y - TITLE_SELECT_HEIGHT + TITLE_SELECT_OFFSET_Y, 0.0f);
+					pVtx[1].vtx = D3DXVECTOR3(TITLE_SELECT_POS_X + TITLE_SELECT_WIDTH + TITLE_SELECT_OFFSET_X, TITLE_SELECT_POS_Y - TITLE_SELECT_HEIGHT + TITLE_SELECT_OFFSET_Y, 0.0f);
+					pVtx[2].vtx = D3DXVECTOR3(TITLE_SELECT_POS_X - TITLE_SELECT_WIDTH + TITLE_SELECT_OFFSET_X, TITLE_SELECT_POS_Y + TITLE_SELECT_HEIGHT + TITLE_SELECT_OFFSET_Y, 0.0f);
+					pVtx[3].vtx = D3DXVECTOR3(TITLE_SELECT_POS_X + TITLE_SELECT_WIDTH + TITLE_SELECT_OFFSET_X, TITLE_SELECT_POS_Y + TITLE_SELECT_HEIGHT + TITLE_SELECT_OFFSET_Y, 0.0f);
+					break;
+				}
 				// テクスチャのパースペクティブコレクト用
 				pVtx[0].rhw =
 					pVtx[1].rhw =

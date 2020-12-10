@@ -130,7 +130,7 @@ void DAMEGE::Update(void)
 //=============================================================================
 // ï`âÊèàóù
 //=============================================================================
-void DAMEGE::Draw(bool Netflag, int NetMyNumber)
+void DAMEGE::Draw(bool Netflag, int NetMyNumber, int CntPlayer)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 
@@ -141,16 +141,13 @@ void DAMEGE::Draw(bool Netflag, int NetMyNumber)
 
 	if (Netflag==false)
 	{
-		for (int CntDamege = 0; CntDamege < OBJECT_DAMEGE_MAX; CntDamege++)
-		{
-			bool use = this[CntDamege].GetUse();
+			bool use = this[CntPlayer].GetUse();
 			if (use == true)
 			{
 				pDevice->SetFVF(FVF_VERTEX_2D);
-				pDevice->SetTexture(0, this[CntDamege].tex2D.pD3DTexture);
-				pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, POLYGON_2D_NUM, this[CntDamege].tex2D.textureVTX, sizeof(VERTEX_2D));
+				pDevice->SetTexture(0, this[CntPlayer].tex2D.pD3DTexture);
+				pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, POLYGON_2D_NUM, this[CntPlayer].tex2D.textureVTX, sizeof(VERTEX_2D));
 			}
-		}
 	}
 
 	else

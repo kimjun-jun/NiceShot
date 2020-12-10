@@ -42,7 +42,7 @@ void PLAYER_HONTAI::Init(FIELD *field)
 		this[CntPlayer].Parent = NULL;
 		this[CntPlayer].AmmoCnt = PLAYER_AMMOPOWER_NORMAL;
 		this[CntPlayer].ModelType = PLAYER_MODEL_NORMAL;
-		this[CntPlayer].vital = this[CntPlayer].oldvital = PLAYER_VITAL;
+		this[CntPlayer].vital = this[CntPlayer].oldvital = PLAYER_VITAL_MAX;
 		this[CntPlayer].MorphingSignal = NoMorphing;
 
 		// Xファイルの読み込み
@@ -228,7 +228,7 @@ void PLAYER_HONTAI::Reinit(FIELD *field)
 		this[CntPlayer].AmmoCnt = PLAYER_AMMOPOWER_NORMAL;
 		this[CntPlayer].AmmoBornTime = 0.0f;
 		this[CntPlayer].ModelType = PLAYER_MODEL_NORMAL;
-		this[CntPlayer].vital = this[CntPlayer].oldvital = PLAYER_VITAL;
+		this[CntPlayer].vital = this[CntPlayer].oldvital = PLAYER_VITAL_MAX;
 		this[CntPlayer].MorphingSignal = NoMorphing;
 
 		//砲塔
@@ -1082,8 +1082,8 @@ void PLAYER_HONTAI::SetMoveL(int CntPlayer, EFFECT *effect, bool Netflag)
 		}
 
 		//移動処理
-		if (IsButtonPressed(0, BUTTON_ANALOG_L_UP) || IsButtonPressed(0, BUTTON_ANALOG_L_DOWN) ||
-			IsButtonPressed(0, BUTTON_ANALOG_L_LEFT) || IsButtonPressed(0, BUTTON_ANALOG_L_RIGHT))
+		if (IsButtonPressed(1, BUTTON_ANALOG_L_UP) || IsButtonPressed(1, BUTTON_ANALOG_L_DOWN) ||
+			IsButtonPressed(1, BUTTON_ANALOG_L_LEFT) || IsButtonPressed(1, BUTTON_ANALOG_L_RIGHT))
 		{
 			DIJOYSTATE2 *Button = GetIsButton(0);
 
@@ -1092,7 +1092,7 @@ void PLAYER_HONTAI::SetMoveL(int CntPlayer, EFFECT *effect, bool Netflag)
 			dir = FRONT_VEC;
 		}
 		//旋回入力は後退中に限りリバースする
-		if (IsButtonPressed(0, BUTTON_ANALOG_L_DOWN))
+		if (IsButtonPressed(1, BUTTON_ANALOG_L_DOWN))
 		{
 			dir = BACK_VEC;
 		}

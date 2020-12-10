@@ -11,7 +11,7 @@
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define	TEXTURE_DAMEGE			("../data/TEXTURE/screendamage.png")			
+#define	TEXTURE_DAMEGE			("../data/TEXTURE/effect/screendamage.png")			
 #define	DAMEGE_SIZE_X			(SCREEN_W/4)										// チュートリアルの幅
 #define	DAMEGE_SIZE_Y			(SCREEN_H/4)										// チュートリアルの高さ
 #define	DAMEGE_POS_X			(SCREEN_CENTER_X)									// チュートリアルの表示位置
@@ -28,7 +28,7 @@ public:
 	virtual void				ReinitNet(void);				//!< 再初期化
 	virtual void				Uninit(void);				//!< 終了
 	virtual void				Update(void);				//!< 更新
-	virtual void				Draw(bool Netflag, int NetMyNumber);					//!< 描画
+	virtual void				Draw(bool Netflag, int NetMyNumber, int CntPlayer);					//!< 描画
 	HRESULT						MakeVertexDamege(void);		//!< 頂点設定
 	int							alpha;						//!< アルファ値
 	float						time;						//!< 描画時間

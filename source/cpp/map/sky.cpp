@@ -11,7 +11,7 @@
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define	SKY_TEXTURE_FILENAME	"../data/TEXTURE/sky001.jpg"		// 読み込むテクスチャファイル名
+#define	SKY_TEXTURE_FILENAME	"../data/TEXTURE/map/sky001.jpg"		// 読み込むテクスチャファイル名
 #define	VALUE_MOVE_SKY		(5.0f)							// 移動速度
 #define	VALUE_ROTATE_SKY	(D3DX_PI * 0.01f)				// 回転速度
 #define	VALUE_TIME_SKY		(0.01f)							// 移動速度

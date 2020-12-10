@@ -54,6 +54,7 @@
     <ClCompile Include="..\cpp\scene\result.cpp" />
     <ClCompile Include="..\cpp\scene\title.cpp" />
     <ClCompile Include="..\cpp\scene\tutorial.cpp" />
+    <ClCompile Include="titleAnim.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\h\collision.h" />
@@ -92,6 +93,7 @@
     <ClInclude Include="..\h\scene\title.h" />
     <ClInclude Include="..\h\scene\tutorial.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="titleAnim.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="NiceShot.rc" />

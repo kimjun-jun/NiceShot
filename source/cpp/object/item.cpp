@@ -80,6 +80,7 @@ void ITEM::Init(void)
 
 	}
 
+	//初期化 全てセットしない
 	for(int nCntItem = 0; nCntItem < OBJECT_ITEM_MAX; nCntItem++)
 	{
 		this[nCntItem].SetScl(D3DXVECTOR3(2.0f, 2.0f, 2.0f));
@@ -90,35 +91,26 @@ void ITEM::Init(void)
 		this[nCntItem].NetGetItemFlag = false;
 		this[nCntItem].NetGetItemFlagOld = false;
 	}
-	//for (int nCntItem = 0; nCntItem < DROP_ITEM_MAX; nCntItem++)
-	//{
-	//	D3DXVECTOR3 pos = D3DXVECTOR3(float(rand() % int(WALL_SIZE_X/4)) + 100.0f, ITEM_INIT_POSY, float(rand() % int(WALL_SIZE_X / 4)) + 100.0f);
-	//	int x = rand() % 2;
-	//	int z = rand() % 2;
-	//	if (x == 1) pos.x *= -1;
-	//	if (z == 1) pos.z *= -1;
 
-	//	/*
-	//	enum
-	//	{
-	//		ITEMTYPE_TIKEI = 0,		// 地形
-	//		ITEMTYPE_LIFE,			// ライフ
-	//		ITEMTYPE_SENSYA,		// 戦車
-	//		ITEMTYPE_BULLET,		// バレット
-	//		ITEMTYPE_SPEEDUP,		// スピードアップ
-	//		ITEMTYPE_CAMERA,		// お邪魔アイテム　強制バックカメラ
-	//		ITEMTYPE_KIRI,			// お邪魔アイテム　霧
-	//		ITEMTYPE_MAX
-	//	};
-	//	*/
-	//	int ItemTypeNum = rand() % ITEMTYPE_MAX;
-	//	//ライフ、カメラ、霧アイテムの時はもう一度抽選
-	//	if (ItemTypeNum == ITEMTYPE_LIFE && ItemTypeNum == ITEMTYPE_CAMERA && ItemTypeNum == ITEMTYPE_KIRI) ItemTypeNum = rand() % ITEMTYPE_MAX;
-	//	//this[0].SetItem(pos, D3DXVECTOR3(2.0f, 2.0f, 2.0f),D3DXVECTOR3(0.0f, 0.0f, 0.0f), ItemTypeNum);
-	//	this[0].SetItem(pos, D3DXVECTOR3(2.0f, 2.0f, 2.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ITEMTYPE_SENSYA);
-	//	this[nCntItem].SetUse(true);
+	//初期化2　すべてセット
 
-	//}
+	/*
+	for (int nCntItem = 0; nCntItem < DROP_ITEM_MAX; nCntItem++)
+	{
+		D3DXVECTOR3 pos = D3DXVECTOR3(float(rand() % int(WALL_SIZE_X/4)) + 100.0f, ITEM_INIT_POSY, float(rand() % int(WALL_SIZE_X / 4)) + 100.0f);
+		int x = rand() % 2;
+		int z = rand() % 2;
+		if (x == 1) pos.x *= -1;
+		if (z == 1) pos.z *= -1;
+		int ItemTypeNum = rand() % ITEMTYPE_MAX;
+		//ライフ、カメラ、霧アイテムの時はもう一度抽選
+		if (ItemTypeNum == ITEMTYPE_LIFE && ItemTypeNum == ITEMTYPE_CAMERA && ItemTypeNum == ITEMTYPE_KIRI) ItemTypeNum = rand() % ITEMTYPE_MAX;
+		//this[0].SetItem(pos, D3DXVECTOR3(2.0f, 2.0f, 2.0f),D3DXVECTOR3(0.0f, 0.0f, 0.0f), ItemTypeNum);
+		this[0].SetItem(pos, D3DXVECTOR3(2.0f, 2.0f, 2.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ITEMTYPE_SENSYA);
+		this[nCntItem].SetUse(true);
+	}
+	*/
+
 	//this[0].GoukeiDrop = DROP_ITEM_MAX;
 	this[0].GoukeiDrop = 0;
 
@@ -129,6 +121,7 @@ void ITEM::Init(void)
 //=============================================================================
 void ITEM::Reinit(void)
 {
+	//初期化 全てセットしない
 	for (int nCntItem = 0; nCntItem < OBJECT_ITEM_MAX; nCntItem++)
 	{
 		this[nCntItem].SetPos(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
@@ -147,6 +140,9 @@ void ITEM::Reinit(void)
 		this[nCntItem].NetGetItemFlag = false;
 		this[nCntItem].NetGetItemFlagOld = false;
 	}
+
+	//初期化2　すべてセット
+	/*
 	for (int nCntItem = 0; nCntItem < DROP_ITEM_MAX; nCntItem++)
 	{
 		D3DXVECTOR3 pos = D3DXVECTOR3(float(rand() % int(WALL_SIZE_X / 4)) + 100.0f, ITEM_INIT_POSY, float(rand() % int(WALL_SIZE_X / 4)) + 100.0f);
@@ -154,19 +150,6 @@ void ITEM::Reinit(void)
 		int z = rand() % 2;
 		if (x == 1) pos.x *= -1;
 		if (z == 1) pos.z *= -1;
-		/*
-		enum
-		{
-			ITEMTYPE_TIKEI = 0,		// 地形
-			ITEMTYPE_LIFE,			// ライフ
-			ITEMTYPE_SENSYA,		// 戦車
-			ITEMTYPE_BULLET,		// バレット
-			ITEMTYPE_SPEEDUP,		// スピードアップ
-			ITEMTYPE_CAMERA,		// お邪魔アイテム　強制バックカメラ
-			ITEMTYPE_KIRI,			// お邪魔アイテム　霧
-			ITEMTYPE_MAX
-		};
-		*/
 		int ItemTypeNum = rand() % ITEMTYPE_MAX;
 		//ライフ、カメラ、霧アイテムの時はもう一度抽選
 		if (ItemTypeNum == ITEMTYPE_LIFE && ItemTypeNum == ITEMTYPE_CAMERA && ItemTypeNum == ITEMTYPE_KIRI) ItemTypeNum = rand() % ITEMTYPE_MAX;
@@ -174,8 +157,10 @@ void ITEM::Reinit(void)
 		//this[0].SetItem(pos, D3DXVECTOR3(1.0f, 1.0f, 1.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ITEMTYPE_TIKEI);
 		this[nCntItem].SetUse(true);
 	}
-	this[0].GoukeiDrop = DROP_ITEM_MAX;
-	//this[0].GoukeiDrop = 0;
+	*/
+
+	//this[0].GoukeiDrop = DROP_ITEM_MAX;
+	this[0].GoukeiDrop = 0;
 }
 
 //=============================================================================

@@ -14,12 +14,14 @@
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define	TEXTURE_RESULT_OK		_T("../data/TEXTURE/result/result_gameclear.png")			// 読み込むテクスチャファイル名
-#define	TEXTURE_RESULT_NO		_T("../data/TEXTURE/result/result_gameover.png")		// 読み込むテクスチャファイル名
-#define	RESULT_OK_SIZE_X		(SCREEN_W)						// タイトルの幅
-#define	RESULT_OK_SIZE_Y		(SCREEN_H)						// タイトルの高さ
-#define	RESULT_NO_SIZE_X		(SCREEN_W)					
-#define	RESULT_NO_SIZE_Y		(SCREEN_H)					
+#define	TEXTURE_RESULT_LOGO		_T("../data/TEXTURE/other/GameClear.png")					// 読み込むテクスチャファイル名
+#define	TEXTURE_RESULT_BG		_T("../data/TEXTURE/other/GameClear_Background.png")		// 読み込むテクスチャファイル名
+#define	RESULT_LOGO_POS_X		(SCREEN_CENTER_X)											// ロゴの座標
+#define	RESULT_LOGO_POS_Y		(SCREEN_CENTER_Y-200.0f)									// ロゴの座標
+#define	RESULT_LOGO_SIZE_X		(300.0f)													// ロゴの幅
+#define	RESULT_LOGO_SIZE_Y		(200.0f)													// ロゴの高さ
+#define	RESULT_BG_SIZE_X		(SCREEN_W)					
+#define	RESULT_BG_SIZE_Y		(SCREEN_H)					
 
 //=============================================================================
 // 初期化処理
@@ -29,8 +31,8 @@ void RESULT::Init(void)
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 
 	// テクスチャの読み込み
-	D3DXCreateTextureFromFile(pDevice, TEXTURE_RESULT_OK, &this[0].tex2D.pD3DTexture);
-	D3DXCreateTextureFromFile(pDevice, TEXTURE_RESULT_NO, &this[1].tex2D.pD3DTexture);
+	D3DXCreateTextureFromFile(pDevice, TEXTURE_RESULT_LOGO, &this[0].tex2D.pD3DTexture);
+	D3DXCreateTextureFromFile(pDevice, TEXTURE_RESULT_BG, &this[1].tex2D.pD3DTexture);
 
 
 	// 頂点情報の作成
@@ -71,16 +73,27 @@ void RESULT::Draw(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 
-	{
+	//BG
 	// 頂点フォーマットの設定
-		pDevice->SetFVF(FVF_VERTEX_2D);
+	pDevice->SetFVF(FVF_VERTEX_2D);
 
-		// テクスチャの設定
-		pDevice->SetTexture(0, this[0].tex2D.pD3DTexture);
+	// テクスチャの設定
+	pDevice->SetTexture(0, this[1].tex2D.pD3DTexture);
 
-		// ポリゴンの描画
-		pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, POLYGON_2D_NUM, this[0].tex2D.textureVTX, sizeof(VERTEX_2D));
-	}
+	// ポリゴンの描画
+	pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, POLYGON_2D_NUM, this[1].tex2D.textureVTX, sizeof(VERTEX_2D));
+
+
+	//LOGO
+	// 頂点フォーマットの設定
+	pDevice->SetFVF(FVF_VERTEX_2D);
+
+	// テクスチャの設定
+	pDevice->SetTexture(0, this[0].tex2D.pD3DTexture);
+
+	// ポリゴンの描画
+	pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, POLYGON_2D_NUM, this[0].tex2D.textureVTX, sizeof(VERTEX_2D));
+
 }
 
 //=============================================================================
@@ -90,10 +103,10 @@ HRESULT RESULT::MakeVertexResult(void)
 {
 	{
 		// 頂点座標の設定
-		this[0].tex2D.textureVTX[0].vtx = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-		this[0].tex2D.textureVTX[1].vtx = D3DXVECTOR3(RESULT_OK_SIZE_X, 0.0f, 0.0f);
-		this[0].tex2D.textureVTX[2].vtx = D3DXVECTOR3(0.0f,RESULT_OK_SIZE_Y, 0.0f);
-		this[0].tex2D.textureVTX[3].vtx = D3DXVECTOR3(RESULT_OK_SIZE_X, RESULT_OK_SIZE_Y, 0.0f);
+		this[0].tex2D.textureVTX[0].vtx = D3DXVECTOR3(RESULT_LOGO_POS_X - RESULT_LOGO_SIZE_X, RESULT_LOGO_POS_Y - RESULT_LOGO_SIZE_Y, 0.0f);
+		this[0].tex2D.textureVTX[1].vtx = D3DXVECTOR3(RESULT_LOGO_POS_X + RESULT_LOGO_SIZE_X, RESULT_LOGO_POS_Y - RESULT_LOGO_SIZE_Y, 0.0f);
+		this[0].tex2D.textureVTX[2].vtx = D3DXVECTOR3(RESULT_LOGO_POS_X - RESULT_LOGO_SIZE_X, RESULT_LOGO_POS_Y + RESULT_LOGO_SIZE_Y, 0.0f);
+		this[0].tex2D.textureVTX[3].vtx = D3DXVECTOR3(RESULT_LOGO_POS_X + RESULT_LOGO_SIZE_X, RESULT_LOGO_POS_Y + RESULT_LOGO_SIZE_Y, 0.0f);
 
 		// テクスチャのパースペクティブコレクト用
 		this[0].tex2D.textureVTX[0].rhw =
@@ -118,9 +131,9 @@ HRESULT RESULT::MakeVertexResult(void)
 	{
 		// 頂点座標の設定
 		this[1].tex2D.textureVTX[0].vtx = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-		this[1].tex2D.textureVTX[1].vtx = D3DXVECTOR3(RESULT_NO_SIZE_X, 0.0f, 0.0f);
-		this[1].tex2D.textureVTX[2].vtx = D3DXVECTOR3(0.0f, RESULT_NO_SIZE_Y, 0.0f);
-		this[1].tex2D.textureVTX[3].vtx = D3DXVECTOR3(RESULT_NO_SIZE_X, RESULT_NO_SIZE_Y, 0.0f);
+		this[1].tex2D.textureVTX[1].vtx = D3DXVECTOR3(RESULT_BG_SIZE_X, 0.0f, 0.0f);
+		this[1].tex2D.textureVTX[2].vtx = D3DXVECTOR3(0.0f, RESULT_BG_SIZE_Y, 0.0f);
+		this[1].tex2D.textureVTX[3].vtx = D3DXVECTOR3(RESULT_BG_SIZE_X, RESULT_BG_SIZE_Y, 0.0f);
 
 		// テクスチャのパースペクティブコレクト用
 		this[1].tex2D.textureVTX[0].rhw =

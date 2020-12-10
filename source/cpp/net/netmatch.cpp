@@ -13,7 +13,7 @@
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define	TEXTURE_NETMATCHRIAL		("../data/TEXTURE/MatchLogo.png")						//!< 読み込むテクスチャファイル名
+#define	TEXTURE_NETMATCHRIAL		("../data/TEXTURE/old/MatchLogo.png")						//!< 読み込むテクスチャファイル名
 #define	NETMATCHRIAL_SIZE_X			(SCREEN_W/4-50)										//!< チュートリアルの幅
 #define	NETMATCHRIAL_SIZE_Y			(SCREEN_H/4-50)										//!< チュートリアルの高さ
 #define	NETMATCHRIAL_POS_X			(SCREEN_CENTER_X)									//!< チュートリアルの表示位置

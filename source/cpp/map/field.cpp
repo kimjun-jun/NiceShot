@@ -17,8 +17,8 @@
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define	TEXTURE_FILENAME				"../data/TEXTURE/white.png"		// 読み込むテクスチャファイル名
-#define	TEXTURE_NOISE					"../data/TEXTURE/noise.bmp"		// 読み込むテクスチャファイル名
+#define	TEXTURE_FILENAME				"../data/TEXTURE/map/white.png"		// 読み込むテクスチャファイル名
+//#define	TEXTURE_NOISE					"../data/TEXTURE/noise.bmp"		// 読み込むテクスチャファイル名
 #define SPHERELINEAR_LEN				(8.0f)							//!< 球面線形補間で使う、プレイヤーの座標と3角ポリゴン辺までの距離(プレイヤーの座標がこの値より辺に近ければ球面線形補間開始する)
 
 #define FIELD_Y_HIGH					(120.0f)						//!< フィールドの高さで色を変える。高い
