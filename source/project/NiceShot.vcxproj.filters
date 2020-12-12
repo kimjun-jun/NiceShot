@@ -174,9 +174,6 @@
     <ClCompile Include="..\cpp\net\netmatch.cpp">
       <Filter>cpp\net</Filter>
     </ClCompile>
-    <ClCompile Include="titleAnim.cpp">
-      <Filter>cpp\scene</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\h\collision.h">
@@ -286,9 +283,6 @@
     </ClInclude>
     <ClInclude Include="..\h\net\netmatch.h">
       <Filter>h\net</Filter>
-    </ClInclude>
-    <ClInclude Include="titleAnim.h">
-      <Filter>h\scene</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

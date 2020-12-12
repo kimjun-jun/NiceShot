@@ -73,6 +73,7 @@ public:
 	void						SetMoveABL(int CntPlayer, EFFECT *effect);				//!< 移動制御(ABボタンLスティックで移動制御)
 	void						SetCamera(int CntPlayer, bool Netflag);				//!< カメラ更新
 	void						SetMoveL(int CntPlayer, EFFECT *effect, bool Netflag);				//!< 移動制御(LRスティックで移動制御)
+	void						SetMoveLtype0(int CntPlayer, EFFECT *effect, bool Netflag);				//!< 移動制御(LRスティックで移動制御)
 	void						SetCameraR(int CntPlayer, bool Netflag);				//!< カメラ制御(LRスティックで移動制御)
 	void						SetMoveL2R2(int CntPlayer, EFFECT *effect, bool Netflag);				//!< 移動制御(L2R2で移動制御)
 	void						SetQ(int CntPlayer);					//!< クォータニオン制御

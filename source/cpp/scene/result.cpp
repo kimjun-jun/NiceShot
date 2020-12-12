@@ -8,6 +8,7 @@
 #include "../../h/other/input.h"
 #include "../../h/other/fade.h"
 #include "../../h/other/sound.h"
+#include "../../h/net/sock.h"
 #include "../../h/scene/result.h"
 
 

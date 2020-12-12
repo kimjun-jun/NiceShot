@@ -130,6 +130,7 @@ void ITEM::Reinit(void)
 		this[nCntItem].SetFieldNorVec(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
 		this[nCntItem].SetFieldNorUpNorCross(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
 		this[nCntItem].SetQrot(0.0f);
+		this[nCntItem].NetUse = false;
 		this[nCntItem].SetUse(false);
 		this[nCntItem].Droptime = 0.0f;
 		this[nCntItem].nIdxShadow = -1;

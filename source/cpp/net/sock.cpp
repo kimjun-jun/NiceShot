@@ -43,8 +43,27 @@ int numrcv;
 //char Packetbuffer[BUFFER_SIZE]; //送られてくるデータ内容
 char toSendText[1024] = "Entry";
 
+//マルチスレッド判定用
 bool MultThreadFlag = false;
+void SetMultThreadFlag(bool flag)
+{
+	MultThreadFlag = flag;
+}
+bool GetMultThreadFlag(void)
+{
+	return MultThreadFlag;
+}
 
+//ネット対戦中ループ　trueでネット対戦中　falseで対戦していない  これで同期どうきするか判定している
+bool GameSceneFlag = false;
+void SetGameSceneFlag(bool flag)
+{
+	GameSceneFlag = flag;
+}
+bool GetGameSceneFlag(void)
+{
+	return GameSceneFlag;
+}
 
 
 //通信データのバッファ　この値とクライアント現在の値を比較して変更があれば最新データを送信する
@@ -428,6 +447,7 @@ void NetCountdown(void)
 				SetNetGameStartFlag(true);
 				//マルチスレッド開始信号ON
 				MultThreadFlag = true;
+				GameSceneFlag = true;
 			}
 		}
 		Sleep(10);
@@ -438,12 +458,15 @@ void Packet(void)
 {
 	while (GetEndGame() == false)
 	{
-		if (MultThreadFlag == true)
+		while(GameSceneFlag==true)
 		{
-			//ゲーム中
-			//パケットを制御
-			SendPacket();
-			ReceivePacket();
+			if (MultThreadFlag == true)
+			{
+				//ゲーム中
+				//パケットを制御
+				SendPacket();
+				ReceivePacket();
+			}
 		}
 	}
 }
@@ -456,6 +479,7 @@ void SendPacket(void)
 	char SMsg[BUFFER_SIZE] = { NULL }; //送るデータ内容
 	char ItemSMsg[BUFFER_SIZE] = { NULL }; //送るデータ内容
 	char ItemUseSMsg[BUFFER_SIZE] = { NULL }; //送るデータ内容
+	char EndGameMsg[BUFFER_SIZE] = { NULL }; //送るデータ内容
 
 	//---------------------------プレイヤー
 	//変更したか確認　変更箇所があればsend()する
@@ -466,179 +490,207 @@ void SendPacket(void)
 	SendObjectP->player[MyNum].NetChkHousinRot = false;
 	SendObjectP->player[MyNum].NetChkvital[4] = { false };
 	SendObjectP->player[MyNum].NetChkMorphing = false;
-	//座標
-	D3DXVECTOR3 Pos = SendObjectP->player[MyNum].GetPos();
-	D3DXVECTOR3 OldPos = SendObjectP->player[MyNum].GetOldPos();
-	if (Pos != OldPos)
+
+	if (SendObjectP != NULL)
 	{
-		g_SendMsgBuff.PlayerPos = Pos;
-		//SendObjectP->player[MyNum].NetChkPos = true;
-		//変更があるので送信用メッセージに書き込む
-		char NewSMsg[BUFFER_SIZE] = { NULL }; //送るデータ内容
-		sprintf_s(NewSMsg, "@P%d,Pos,X%4.3f,Y%4.3f,Z%4.3f&", MyNum, Pos.x, Pos.y, Pos.z);
-		sprintf_s(SMsg, "%s%s", SMsg, NewSMsg);
-	}
-	//回転
-	D3DXVECTOR3 HoudaiRot = SendObjectP->player[MyNum].GetRot();
-	D3DXVECTOR3 HoudaiOldRot = SendObjectP->player[MyNum].GetOldRot();
-	if (HoudaiRot != HoudaiOldRot)
-	{
-		g_SendMsgBuff.HoudaiRot = HoudaiRot;
-		SendObjectP->player[MyNum].NetChkHoudaiRot = true;
-		//変更があるので送信用メッセージに書き込む
-		char NewSMsg[BUFFER_SIZE] = { NULL }; //送るデータ内容
-		sprintf_s(NewSMsg, "@P%d,HoudaiRot,X%4.3f,Y%4.3f,Z%4.3f&", MyNum, HoudaiRot.x, HoudaiRot.y, HoudaiRot.z);
-		sprintf_s(SMsg, "%s%s", SMsg, NewSMsg);
-	}
-	D3DXVECTOR3 HoutouRot = SendObjectP->player[MyNum].parts[PARTSTYPE_HOUTOU].GetRot();
-	D3DXVECTOR3 HoutouOldRot = SendObjectP->player[MyNum].parts[PARTSTYPE_HOUTOU].GetOldRot();
-	if (HoutouRot != HoutouOldRot)
-	{
-		g_SendMsgBuff.HoutouRot = HoutouRot;
-		SendObjectP->player[MyNum].NetChkHoutouRot = true;
-		//変更があるので送信用メッセージに書き込む
-		char NewSMsg[BUFFER_SIZE] = { NULL }; //送るデータ内容
-		sprintf_s(NewSMsg, "@P%d,HoutouRot,X%4.3f,Y%4.3f,Z%4.3f&", MyNum, HoutouRot.x, HoutouRot.y, HoutouRot.z);
-		sprintf_s(SMsg, "%s%s", SMsg, NewSMsg);
-	}
-	D3DXVECTOR3 HousinRot = SendObjectP->player[MyNum].parts[PARTSTYPE_HOUSIN].GetRot();
-	D3DXVECTOR3 HousinOldRot = SendObjectP->player[MyNum].parts[PARTSTYPE_HOUSIN].GetOldRot();
-	if (HousinRot != HousinOldRot)
-	{
-		g_SendMsgBuff.HousinRot = HousinRot;
-		SendObjectP->player[MyNum].NetChkHousinRot = true;
-		//変更があるので送信用メッセージに書き込む
-		char NewSMsg[BUFFER_SIZE] = { NULL }; //送るデータ内容
-		sprintf_s(NewSMsg, "@P%d,HousinRot,X%4.3f,Y%4.3f,Z%4.3f&", MyNum, HousinRot.x, HousinRot.y, HousinRot.z);
-		sprintf_s(SMsg, "%s%s", SMsg, NewSMsg);
-	}
-	//バイタル
-	for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
-	{
-		if (SendObjectP->player[CntPlayer].vital != SendObjectP->player[CntPlayer].oldvital)
+		//座標
+		D3DXVECTOR3 Pos = SendObjectP->player[MyNum].GetPos();
+		D3DXVECTOR3 OldPos = SendObjectP->player[MyNum].GetOldPos();
+		if (Pos != OldPos)
 		{
-			g_SendMsgBuff.Vital = SendObjectP->player[CntPlayer].vital;
-			int Vital = SendObjectP->player[CntPlayer].vital;
-			SendObjectP->player[MyNum].NetChkvital[CntPlayer] = true;
+			g_SendMsgBuff.PlayerPos = Pos;
+			//SendObjectP->player[MyNum].NetChkPos = true;
 			//変更があるので送信用メッセージに書き込む
 			char NewSMsg[BUFFER_SIZE] = { NULL }; //送るデータ内容
-			sprintf_s(NewSMsg, "@P%d,Vital,%d&", CntPlayer, Vital);
+			sprintf_s(NewSMsg, "@P%d,Pos,X%4.3f,Y%4.3f,Z%4.3f&", MyNum, Pos.x, Pos.y, Pos.z);
 			sprintf_s(SMsg, "%s%s", SMsg, NewSMsg);
 		}
-	}
-	//モーフィング モーフィング信号ON(アタックモデルの時、常時ON)のときメッセージ送信。receive側は1を受け続ける。
-	if (SendObjectP->player[MyNum].GetMorphing == true)
-	{
-		g_SendMsgBuff.Morphing = SendObjectP->player[MyNum].GetMorphing;
-		SendObjectP->player[MyNum].NetChkMorphing = true;
-		//変更があるので送信用メッセージに書き込む
-		char NewSMsg[BUFFER_SIZE] = { NULL }; //送るデータ内容
-		sprintf_s(NewSMsg, "@P%d,Morphing,%d&", MyNum, 1);
-		sprintf_s(SMsg, "%s%s", SMsg, NewSMsg);
-	}
-
-
-	//---------------------------バレット
-	//バレットを発射していなと0,通常モデルの発射1,アタックモデルの発射3
-	switch (SendObjectP->player[MyNum].BFlag)
-	{
-	case 0:
-		break;
-	case 1:
-	{
-		g_SendMsgBuff.BPos = SendObjectP->player[MyNum].Bpos;
-		D3DXVECTOR3 BPos = SendObjectP->player[MyNum].Bpos;
-		D3DXVECTOR3 BMove = SendObjectP->player[MyNum].Bmove[0];
-		//変更があるので送信用メッセージに書き込む
-		char NewSMsg[BUFFER_SIZE] = { NULL }; //送るデータ内容
-		sprintf_s(NewSMsg, "@P%d,BulletA,PX%4.3f,PY%4.3f,PZ%4.3f,MX%4.3f,MY%4.3f,MZ%4.3f&"
-			, MyNum, BPos.x, BPos.y, BPos.z, BMove.x, BMove.y, BMove.z);
-		sprintf_s(SMsg, "%s%s", SMsg, NewSMsg);
-		break;
-	}
-	case 3:
-	{
-		g_SendMsgBuff.BPos = SendObjectP->player[MyNum].Bpos;
-		D3DXVECTOR3 BPos = SendObjectP->player[MyNum].Bpos;
-		D3DXVECTOR3 BMove[3];
-		BMove[0] = SendObjectP->player[MyNum].Bmove[0];
-		BMove[1] = SendObjectP->player[MyNum].Bmove[1];
-		BMove[2] = SendObjectP->player[MyNum].Bmove[2];
-		//変更があるので送信用メッセージに書き込む
-		char NewSMsg[BUFFER_SIZE] = { NULL }; //送るデータ内容
-		sprintf_s(NewSMsg,
-			"@P%d,BulletB,PX%4.3f,PY%4.3f,PZ%4.3f,MX%4.3f,MY%4.3f,MZ%4.3f,MX%4.3f,MY%4.3f,MZ%4.3f,MX%4.3f,MY%4.3f,MZ%4.3f&"
-			, MyNum, BPos.x, BPos.y, BPos.z, BMove[0].x, BMove[0].y, BMove[0].z
-			, BMove[1].x, BMove[1].y, BMove[1].z, BMove[2].x, BMove[2].y, BMove[2].z);
-		sprintf_s(SMsg, "%s%s", SMsg, NewSMsg);
-		break;
-	}
-	}
-
-
-	//---------------------------アイテム取得信号
-
-	for (int CntItem = 0; CntItem < OBJECT_ITEM_MAX; CntItem++)
-	{
-		if (SendObjectP->item[CntItem].NetGetItemFlag == true &&
-			SendObjectP->item[CntItem].GetPlayerType == MyNum)
+		//回転
+		D3DXVECTOR3 HoudaiRot = SendObjectP->player[MyNum].GetRot();
+		D3DXVECTOR3 HoudaiOldRot = SendObjectP->player[MyNum].GetOldRot();
+		if (HoudaiRot != HoudaiOldRot)
 		{
-			bool use = SendObjectP->item[CntItem].GetUse();
-			//if (g_SendMsgBuff.ItemSyncUse != use)
-			//{
-			g_SendMsgBuff.ItemSyncUse = use;
-			//int ItemN = SendObjectP->item[CntItem].GetPlayerType;
-			int ItemT = SendObjectP->item[CntItem].nType;
-			D3DXVECTOR3 ItemPos = SendObjectP->item[CntItem].GetPos();
+			g_SendMsgBuff.HoudaiRot = HoudaiRot;
+			SendObjectP->player[MyNum].NetChkHoudaiRot = true;
 			//変更があるので送信用メッセージに書き込む
 			char NewSMsg[BUFFER_SIZE] = { NULL }; //送るデータ内容
-			sprintf_s(NewSMsg, "@I,N%d,T%d,X%4.3f,Y%4.3f,Z%4.3f&"
-				, CntItem, ItemT, ItemPos.x, ItemPos.y, ItemPos.z);
-			sprintf_s(ItemSMsg, "%s%s", ItemSMsg, NewSMsg);
-			//}
+			sprintf_s(NewSMsg, "@P%d,HoudaiRot,X%4.3f,Y%4.3f,Z%4.3f&", MyNum, HoudaiRot.x, HoudaiRot.y, HoudaiRot.z);
+			sprintf_s(SMsg, "%s%s", SMsg, NewSMsg);
 		}
-	}
-
-	//---------------------------アイテム使用信号
-	/*
-	for (int CntItem = 0; CntItem < OBJECT_ITEM_MAX; CntItem++)
-	{
-		//情報取得
-		bool ItemUse = SendObjectP->item[CntItem].GetUse();
-		int ItemT = SendObjectP->item[CntItem].nType;
-		//送信用メッセージに書き込む
-		char NewSMsg[BUFFER_SIZE] = { NULL };
-		sprintf_s(NewSMsg, "@UI,N%d,T%d,U%d&"
-			, CntItem, ItemT, ItemUse);
-		sprintf_s(ItemUseSMsg, "%s%s", ItemUseSMsg, NewSMsg);
-	}
-
-	*/
-
-
-
-	//変更があった場合send()する　基本情報
-	if (SMsg[0] != NULL)
-	{
-		send(dstSocket, SMsg, strlen(SMsg) + 1, 0);
-	}
-
-	//変更があった場合send()する　アイテム取得情報
-	if (ItemSMsg[0] != NULL)
-	{
-		send(dstSocket, ItemSMsg, strlen(ItemSMsg) + 1, 0);
-
-		//地形アイテムが取得された時だけ追加のメッセージを送信する
-		if (SendObjectP->field->TikeiSeed != SendObjectP->field->OldTikeiSeed)
+		D3DXVECTOR3 HoutouRot = SendObjectP->player[MyNum].parts[PARTSTYPE_HOUTOU].GetRot();
+		D3DXVECTOR3 HoutouOldRot = SendObjectP->player[MyNum].parts[PARTSTYPE_HOUTOU].GetOldRot();
+		if (HoutouRot != HoutouOldRot)
 		{
-			char SpecialSMsg[BUFFER_SIZE] = { NULL }; //送るデータ内容
-			sprintf_s(SpecialSMsg, "@T,S%d,N%d&", SendObjectP->field->TikeiSeed, SendObjectP->field->GetPlayerNum);
-			send(dstSocket, SpecialSMsg, strlen(SpecialSMsg) + 1, 0);
+			g_SendMsgBuff.HoutouRot = HoutouRot;
+			SendObjectP->player[MyNum].NetChkHoutouRot = true;
+			//変更があるので送信用メッセージに書き込む
+			char NewSMsg[BUFFER_SIZE] = { NULL }; //送るデータ内容
+			sprintf_s(NewSMsg, "@P%d,HoutouRot,X%4.3f,Y%4.3f,Z%4.3f&", MyNum, HoutouRot.x, HoutouRot.y, HoutouRot.z);
+			sprintf_s(SMsg, "%s%s", SMsg, NewSMsg);
 		}
-	}
+		D3DXVECTOR3 HousinRot = SendObjectP->player[MyNum].parts[PARTSTYPE_HOUSIN].GetRot();
+		D3DXVECTOR3 HousinOldRot = SendObjectP->player[MyNum].parts[PARTSTYPE_HOUSIN].GetOldRot();
+		if (HousinRot != HousinOldRot)
+		{
+			g_SendMsgBuff.HousinRot = HousinRot;
+			SendObjectP->player[MyNum].NetChkHousinRot = true;
+			//変更があるので送信用メッセージに書き込む
+			char NewSMsg[BUFFER_SIZE] = { NULL }; //送るデータ内容
+			sprintf_s(NewSMsg, "@P%d,HousinRot,X%4.3f,Y%4.3f,Z%4.3f&", MyNum, HousinRot.x, HousinRot.y, HousinRot.z);
+			sprintf_s(SMsg, "%s%s", SMsg, NewSMsg);
+		}
+		//バイタル
+		for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
+		{
+			if (SendObjectP->player[CntPlayer].vital != SendObjectP->player[CntPlayer].oldvital)
+			{
+				g_SendMsgBuff.Vital = SendObjectP->player[CntPlayer].vital;
+				int Vital = SendObjectP->player[CntPlayer].vital;
+				SendObjectP->player[MyNum].NetChkvital[CntPlayer] = true;
+				//変更があるので送信用メッセージに書き込む
+				char NewSMsg[BUFFER_SIZE] = { NULL }; //送るデータ内容
+				sprintf_s(NewSMsg, "@P%d,Vital,%d&", CntPlayer, Vital);
+				sprintf_s(SMsg, "%s%s", SMsg, NewSMsg);
+			}
+		}
+		//モーフィング モーフィング信号ON(アタックモデルの時、常時ON)のときメッセージ送信。receive側は1を受け続ける。
+		if (SendObjectP->player[MyNum].GetMorphing == true)
+		{
+			g_SendMsgBuff.Morphing = SendObjectP->player[MyNum].GetMorphing;
+			SendObjectP->player[MyNum].NetChkMorphing = true;
+			//変更があるので送信用メッセージに書き込む
+			char NewSMsg[BUFFER_SIZE] = { NULL }; //送るデータ内容
+			sprintf_s(NewSMsg, "@P%d,Morphing,%d&", MyNum, 1);
+			sprintf_s(SMsg, "%s%s", SMsg, NewSMsg);
+		}
 
-	//常時send()する　アイテム使用情報
-	//send(dstSocket, ItemUseSMsg, strlen(ItemUseSMsg) + 1, 0);
+
+		//---------------------------バレット
+		//バレットを発射していなと0,通常モデルの発射1,アタックモデルの発射3
+		switch (SendObjectP->player[MyNum].BFlag)
+		{
+		case 0:
+			break;
+		case 1:
+		{
+			g_SendMsgBuff.BPos = SendObjectP->player[MyNum].Bpos;
+			D3DXVECTOR3 BPos = SendObjectP->player[MyNum].Bpos;
+			D3DXVECTOR3 BMove = SendObjectP->player[MyNum].Bmove[0];
+			//変更があるので送信用メッセージに書き込む
+			char NewSMsg[BUFFER_SIZE] = { NULL }; //送るデータ内容
+			sprintf_s(NewSMsg, "@P%d,BulletA,PX%4.3f,PY%4.3f,PZ%4.3f,MX%4.3f,MY%4.3f,MZ%4.3f&"
+				, MyNum, BPos.x, BPos.y, BPos.z, BMove.x, BMove.y, BMove.z);
+			sprintf_s(SMsg, "%s%s", SMsg, NewSMsg);
+			break;
+		}
+		case 3:
+		{
+			g_SendMsgBuff.BPos = SendObjectP->player[MyNum].Bpos;
+			D3DXVECTOR3 BPos = SendObjectP->player[MyNum].Bpos;
+			D3DXVECTOR3 BMove[3];
+			BMove[0] = SendObjectP->player[MyNum].Bmove[0];
+			BMove[1] = SendObjectP->player[MyNum].Bmove[1];
+			BMove[2] = SendObjectP->player[MyNum].Bmove[2];
+			//変更があるので送信用メッセージに書き込む
+			char NewSMsg[BUFFER_SIZE] = { NULL }; //送るデータ内容
+			sprintf_s(NewSMsg,
+				"@P%d,BulletB,PX%4.3f,PY%4.3f,PZ%4.3f,MX%4.3f,MY%4.3f,MZ%4.3f,MX%4.3f,MY%4.3f,MZ%4.3f,MX%4.3f,MY%4.3f,MZ%4.3f&"
+				, MyNum, BPos.x, BPos.y, BPos.z, BMove[0].x, BMove[0].y, BMove[0].z
+				, BMove[1].x, BMove[1].y, BMove[1].z, BMove[2].x, BMove[2].y, BMove[2].z);
+			sprintf_s(SMsg, "%s%s", SMsg, NewSMsg);
+			break;
+		}
+		}
+
+
+		//---------------------------アイテム取得信号
+
+		for (int CntItem = 0; CntItem < OBJECT_ITEM_MAX; CntItem++)
+		{
+			if (SendObjectP->item[CntItem].NetGetItemFlag == true &&
+				SendObjectP->item[CntItem].GetPlayerType == MyNum)
+			{
+				bool use = SendObjectP->item[CntItem].GetUse();
+				//if (g_SendMsgBuff.ItemSyncUse != use)
+				//{
+				g_SendMsgBuff.ItemSyncUse = use;
+				//int ItemN = SendObjectP->item[CntItem].GetPlayerType;
+				int ItemT = SendObjectP->item[CntItem].nType;
+				D3DXVECTOR3 ItemPos = SendObjectP->item[CntItem].GetPos();
+				//変更があるので送信用メッセージに書き込む
+				char NewSMsg[BUFFER_SIZE] = { NULL }; //送るデータ内容
+				sprintf_s(NewSMsg, "@I,N%d,T%d,X%4.3f,Y%4.3f,Z%4.3f&"
+					, CntItem, ItemT, ItemPos.x, ItemPos.y, ItemPos.z);
+				sprintf_s(ItemSMsg, "%s%s", ItemSMsg, NewSMsg);
+				//}
+			}
+		}
+
+		//---------------------------アイテム使用信号
+		/*
+		for (int CntItem = 0; CntItem < OBJECT_ITEM_MAX; CntItem++)
+		{
+			//情報取得
+			bool ItemUse = SendObjectP->item[CntItem].GetUse();
+			int ItemT = SendObjectP->item[CntItem].nType;
+			//送信用メッセージに書き込む
+			char NewSMsg[BUFFER_SIZE] = { NULL };
+			sprintf_s(NewSMsg, "@UI,N%d,T%d,U%d&"
+				, CntItem, ItemT, ItemUse);
+			sprintf_s(ItemUseSMsg, "%s%s", ItemUseSMsg, NewSMsg);
+		}
+
+		*/
+
+
+
+		//ゲームシーン終了メッセージ
+		int Puse = 0;
+		for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
+		{
+			if (SendObjectP->player[CntPlayer].GetUse() == false) Puse++;
+		}
+		if (Puse >= 3)
+		{
+			//変更があるので送信用メッセージに書き込む
+			char NewSMsg[BUFFER_SIZE] = { NULL }; //送るデータ内容
+			sprintf_s(NewSMsg, "EndGame");
+			sprintf_s(EndGameMsg, "%s%s", EndGameMsg, NewSMsg);
+		}
+
+
+
+
+
+		//変更があった場合send()する　基本情報
+		if (SMsg[0] != NULL)
+		{
+			send(dstSocket, SMsg, strlen(SMsg) + 1, 0);
+		}
+
+		//変更があった場合send()する　アイテム取得情報
+		if (ItemSMsg[0] != NULL)
+		{
+			send(dstSocket, ItemSMsg, strlen(ItemSMsg) + 1, 0);
+
+			//地形アイテムが取得された時だけ追加のメッセージを送信する
+			if (SendObjectP->field->TikeiSeed != SendObjectP->field->OldTikeiSeed)
+			{
+				char SpecialSMsg[BUFFER_SIZE] = { NULL }; //送るデータ内容
+				sprintf_s(SpecialSMsg, "@T,S%d,N%d&", SendObjectP->field->TikeiSeed, SendObjectP->field->GetPlayerNum);
+				send(dstSocket, SpecialSMsg, strlen(SpecialSMsg) + 1, 0);
+			}
+		}
+
+		//変更があった場合send()する　基本情報
+		if (EndGameMsg[0] != NULL)
+		{
+			send(dstSocket, EndGameMsg, strlen(EndGameMsg) + 1, 0);
+		}
+
+		//常時send()する　アイテム使用情報
+		//send(dstSocket, ItemUseSMsg, strlen(ItemUseSMsg) + 1, 0);
+	}
 }
 
 void ReceivePacket(void)

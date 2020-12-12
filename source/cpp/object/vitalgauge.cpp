@@ -33,8 +33,8 @@
 #define VITALGAUGE_P3_POS_Y		SCREEN_H - SCREEN_SEPARATE_BUFF - VITALGAUGE_BASE_POS_Y
 #define VITALGAUGE_P4_POS_X		SCREEN_W - SCREEN_SEPARATE_BUFF - VITALGAUGE_BASE_POS_X
 #define VITALGAUGE_P4_POS_Y		SCREEN_H - SCREEN_SEPARATE_BUFF - VITALGAUGE_BASE_POS_Y
-#define VITALGAUGE_NET_POS_X	SCREEN_W - SCREEN_SEPARATE_BUFF - 30.0f
-#define VITALGAUGE_NET_POS_Y	SCREEN_H - SCREEN_SEPARATE_BUFF - 150.0f
+#define VITALGAUGE_NET_POS_X	SCREEN_CENTER_X - SCREEN_SEPARATE_BUFF - VITALGAUGE_BASE_POS_X+55.0f
+#define VITALGAUGE_NET_POS_Y	SCREEN_H - SCREEN_SEPARATE_BUFF - VITALGAUGE_BASE_POS_Y
 
 #define	VITAL_GREEN_DIAMETER			(0.5f)
 #define	VITAL_ORANGE_DIAMETER			(0.2f)
@@ -108,19 +108,25 @@ void VITALGAUGE::ReinitNet(int MyNumber)
 {
 
 	this[MyNumber].SetPos(D3DXVECTOR3(VITALGAUGE_NET_POS_X, VITALGAUGE_NET_POS_Y, 0.0f));
+	//座標取得
+	D3DXVECTOR3 pos = this[MyNumber].GetPos();
 
 	//頂点座標の設定
 	//BASE
-	this[MyNumber].tex2D.textureVTX[0].vtx = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-	this[MyNumber].tex2D.textureVTX[1].vtx = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-	this[MyNumber].tex2D.textureVTX[2].vtx = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-	this[MyNumber].tex2D.textureVTX[3].vtx = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	this[MyNumber].tex2D.textureVTX[0].vtx = D3DXVECTOR3(pos.x, pos.y, 0.0f);
+	this[MyNumber].tex2D.textureVTX[1].vtx = D3DXVECTOR3(pos.x + VITALGAUGE_SIZE_X*2, pos.y, 0.0f);
+	this[MyNumber].tex2D.textureVTX[2].vtx = D3DXVECTOR3(pos.x, pos.y + VITALGAUGE_SIZE_Y*2, 0.0f);
+	this[MyNumber].tex2D.textureVTX[3].vtx = D3DXVECTOR3(pos.x + VITALGAUGE_SIZE_X*2, pos.y + VITALGAUGE_SIZE_Y*2, 0.0f);
+
 
 	//中身
-	this[MyNumber].Tex[0].textureVTX[0].vtx = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-	this[MyNumber].Tex[0].textureVTX[1].vtx = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-	this[MyNumber].Tex[0].textureVTX[2].vtx = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-	this[MyNumber].Tex[0].textureVTX[3].vtx = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	//バイタルの長さ
+	float vitallen = float(VITALGAUGE_SIZE_X*2 * (this[MyNumber].VitalPower / PLAYER_VITAL_MAX));
+	// 頂点座標の設定
+	this[MyNumber].Tex[0].textureVTX[0].vtx = D3DXVECTOR3(pos.x + VITALGAUGE_SIZE_X_OFFSET, pos.y + VITALGAUGE_SIZE_Y_OFFSET, 0.0f);
+	this[MyNumber].Tex[0].textureVTX[1].vtx = D3DXVECTOR3(pos.x - VITALGAUGE_SIZE_X_OFFSET + vitallen, pos.y + VITALGAUGE_SIZE_Y_OFFSET, 0.0f);
+	this[MyNumber].Tex[0].textureVTX[2].vtx = D3DXVECTOR3(pos.x + VITALGAUGE_SIZE_X_OFFSET, pos.y + VITALGAUGE_SIZE_Y*2 - VITALGAUGE_SIZE_Y_OFFSET, 0.0f);
+	this[MyNumber].Tex[0].textureVTX[3].vtx = D3DXVECTOR3(pos.x - VITALGAUGE_SIZE_X_OFFSET + vitallen, pos.y + VITALGAUGE_SIZE_Y*2 - VITALGAUGE_SIZE_Y_OFFSET, 0.0f);
 
 }
 

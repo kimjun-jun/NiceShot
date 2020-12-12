@@ -9,6 +9,22 @@
 #include "../../../h/object/player.h"
 #include "../../h/object/status.h"
 
+//*****************************************************************************
+// マクロ定義
+//*****************************************************************************
+#define	STATUS_SIZE_X			(20.0f)							// ステータスの幅
+#define	STATUS_SIZE_Y			(20.0f)							// ステータスの高さ
+#define	STATUS_SIZE_X_OFFSET	(0.8f)							// ステータスの幅
+#define	STATUS_SIZE_Y_OFFSET	(0.8f)							// ステータスの高さ
+#define	STATUS_POS_X			(SCREEN_CENTER_X)				// ステータスの表示位置
+#define	STATUS_POS_Y			(SCREEN_CENTER_Y)				// ステータスの表示位置
+#define	STATUS_POS_X_OFFSET		(220.0f)						// ステータスの表示位置オフセット
+#define	STATUS_POS_Y_OFFSET		(80.0f)						// ステータスの表示位置オフセット
+#define	STATUS_POS_X_OFFSETBUFF	(1.0f)						// ステータスの表示位置オフセット
+
+#define STATUS_NET_POS_X_OFFSET		(260.0f)
+#define STATUS_NET_POS_Y_OFFSET		(48.0f)
+
 //=============================================================================
 // 初期化処理
 //=============================================================================
@@ -79,23 +95,30 @@ void STATUS::ReinitNet(int MyNumber)
 {
 
 	float buffsize = 48.0f;
-	this[MyNumber].SetPos(D3DXVECTOR3(STATUS_POS_X * 2 - STATUS_POS_X_OFFSET * 2 + buffsize, STATUS_POS_Y * 2 - STATUS_POS_Y_OFFSET * 2, 0.0f));
-	this[MyNumber].SetPos(D3DXVECTOR3(STATUS_POS_X * 2 - STATUS_POS_X_OFFSET * 2 + buffsize, STATUS_POS_Y * 2 - STATUS_POS_Y_OFFSET * 2, 0.0f));
-	this[MyNumber].SetPos(D3DXVECTOR3(STATUS_POS_X * 2 - STATUS_POS_X_OFFSET * 2 + buffsize, STATUS_POS_Y * 2 - STATUS_POS_Y_OFFSET * 2, 0.0f));
-	this[MyNumber].SetPos(D3DXVECTOR3(STATUS_POS_X * 2 - STATUS_POS_X_OFFSET * 2 + buffsize, STATUS_POS_Y * 2 - STATUS_POS_Y_OFFSET * 2, 0.0f));
+	this[MyNumber].SetPos(D3DXVECTOR3(STATUS_POS_X * 2 - STATUS_NET_POS_X_OFFSET * 2 + buffsize, STATUS_POS_Y * 2 - STATUS_NET_POS_Y_OFFSET * 2, 0.0f));
+	this[MyNumber].SetPos(D3DXVECTOR3(STATUS_POS_X * 2 - STATUS_NET_POS_X_OFFSET * 2 + buffsize, STATUS_POS_Y * 2 - STATUS_NET_POS_Y_OFFSET * 2, 0.0f));
+	this[MyNumber].SetPos(D3DXVECTOR3(STATUS_POS_X * 2 - STATUS_NET_POS_X_OFFSET * 2 + buffsize, STATUS_POS_Y * 2 - STATUS_NET_POS_Y_OFFSET * 2, 0.0f));
+	this[MyNumber].SetPos(D3DXVECTOR3(STATUS_POS_X * 2 - STATUS_NET_POS_X_OFFSET * 2 + buffsize, STATUS_POS_Y * 2 - STATUS_NET_POS_Y_OFFSET * 2, 0.0f));
 
 	for (int CntStatus = 0; CntStatus < STATUSTYPE_MAX; CntStatus++)
 	{
 		//-----------------------------------オブジェクト値読み込み
 		D3DXVECTOR3 pos = this[MyNumber].GetPos();
 
+		//Base
 		// 頂点座標の設定
-		this[MyNumber].Tex[CntStatus].textureVTX[0].vtx = D3DXVECTOR3(pos.x - STATUS_SIZE_X*2.0f + (CntStatus*STATUS_SIZE_X * 2 * 2.0f), pos.y - STATUS_SIZE_Y * 2.0f, 0.0f);
-		this[MyNumber].Tex[CntStatus].textureVTX[1].vtx = D3DXVECTOR3(pos.x + STATUS_SIZE_X * 2.0f + (CntStatus*STATUS_SIZE_X * 2 * 2.0f), pos.y - STATUS_SIZE_Y * 2.0f, 0.0f);
-		this[MyNumber].Tex[CntStatus].textureVTX[2].vtx = D3DXVECTOR3(pos.x - STATUS_SIZE_X * 2.0f + (CntStatus*STATUS_SIZE_X * 2 * 2.0f), pos.y + STATUS_SIZE_Y * 2.0f, 0.0f);
-		this[MyNumber].Tex[CntStatus].textureVTX[3].vtx = D3DXVECTOR3(pos.x + STATUS_SIZE_X * 2.0f + (CntStatus*STATUS_SIZE_X * 2 * 2.0f), pos.y + STATUS_SIZE_Y * 2.0f, 0.0f);
-	}
+		this[MyNumber].TexEmpty[CntStatus].textureVTX[0].vtx = D3DXVECTOR3(pos.x - STATUS_SIZE_X * 2.0f + (CntStatus*(STATUS_SIZE_X + STATUS_POS_X_OFFSETBUFF) * 2.0f * 2), pos.y - STATUS_SIZE_Y * 2, 0.0f);
+		this[MyNumber].TexEmpty[CntStatus].textureVTX[1].vtx = D3DXVECTOR3(pos.x + STATUS_SIZE_X * 2.0f + (CntStatus*(STATUS_SIZE_X + STATUS_POS_X_OFFSETBUFF) * 2.0f * 2), pos.y - STATUS_SIZE_Y * 2, 0.0f);
+		this[MyNumber].TexEmpty[CntStatus].textureVTX[2].vtx = D3DXVECTOR3(pos.x - STATUS_SIZE_X * 2.0f + (CntStatus*(STATUS_SIZE_X + STATUS_POS_X_OFFSETBUFF) * 2.0f * 2), pos.y + STATUS_SIZE_Y * 2, 0.0f);
+		this[MyNumber].TexEmpty[CntStatus].textureVTX[3].vtx = D3DXVECTOR3(pos.x + STATUS_SIZE_X * 2.0f + (CntStatus*(STATUS_SIZE_X + STATUS_POS_X_OFFSETBUFF) * 2.0f * 2), pos.y + STATUS_SIZE_Y * 2, 0.0f);
 
+		//中身
+		// 頂点座標の設定
+		this[MyNumber].Tex[CntStatus].textureVTX[0].vtx = D3DXVECTOR3(pos.x - STATUS_SIZE_X * 2.0f + (CntStatus*(STATUS_SIZE_X + STATUS_POS_X_OFFSETBUFF) * 2.0f * 2), pos.y - STATUS_SIZE_Y * 2.0f, 0.0f);
+		this[MyNumber].Tex[CntStatus].textureVTX[1].vtx = D3DXVECTOR3(pos.x + STATUS_SIZE_X * 2.0f + (CntStatus*(STATUS_SIZE_X + STATUS_POS_X_OFFSETBUFF) * 2.0f * 2), pos.y - STATUS_SIZE_Y * 2.0f, 0.0f);
+		this[MyNumber].Tex[CntStatus].textureVTX[2].vtx = D3DXVECTOR3(pos.x - STATUS_SIZE_X * 2.0f + (CntStatus*(STATUS_SIZE_X + STATUS_POS_X_OFFSETBUFF) * 2.0f * 2), pos.y + STATUS_SIZE_Y * 2.0f, 0.0f);
+		this[MyNumber].Tex[CntStatus].textureVTX[3].vtx = D3DXVECTOR3(pos.x + STATUS_SIZE_X * 2.0f + (CntStatus*(STATUS_SIZE_X + STATUS_POS_X_OFFSETBUFF) * 2.0f * 2), pos.y + STATUS_SIZE_Y * 2.0f, 0.0f);
+	}
 }
 
 //=============================================================================
@@ -180,10 +203,10 @@ HRESULT STATUS::MakeVertexStatus(void)
 			D3DXVECTOR3 pos = this[CntPlayer].GetPos();
 			//Base
 			// 頂点座標の設定
-			this[CntPlayer].TexEmpty[CntStatus].textureVTX[0].vtx = D3DXVECTOR3(pos.x - STATUS_SIZE_X + (CntStatus*STATUS_SIZE_X * 2), pos.y - STATUS_SIZE_Y, 0.0f);
-			this[CntPlayer].TexEmpty[CntStatus].textureVTX[1].vtx = D3DXVECTOR3(pos.x + STATUS_SIZE_X + (CntStatus*STATUS_SIZE_X * 2), pos.y - STATUS_SIZE_Y, 0.0f);
-			this[CntPlayer].TexEmpty[CntStatus].textureVTX[2].vtx = D3DXVECTOR3(pos.x - STATUS_SIZE_X + (CntStatus*STATUS_SIZE_X * 2), pos.y + STATUS_SIZE_Y, 0.0f);
-			this[CntPlayer].TexEmpty[CntStatus].textureVTX[3].vtx = D3DXVECTOR3(pos.x + STATUS_SIZE_X + (CntStatus*STATUS_SIZE_X * 2), pos.y + STATUS_SIZE_Y, 0.0f);
+			this[CntPlayer].TexEmpty[CntStatus].textureVTX[0].vtx = D3DXVECTOR3(pos.x - STATUS_SIZE_X + (CntStatus*(STATUS_SIZE_X + STATUS_POS_X_OFFSETBUFF) * 2), pos.y - STATUS_SIZE_Y, 0.0f);
+			this[CntPlayer].TexEmpty[CntStatus].textureVTX[1].vtx = D3DXVECTOR3(pos.x + STATUS_SIZE_X + (CntStatus*(STATUS_SIZE_X + STATUS_POS_X_OFFSETBUFF) * 2), pos.y - STATUS_SIZE_Y, 0.0f);
+			this[CntPlayer].TexEmpty[CntStatus].textureVTX[2].vtx = D3DXVECTOR3(pos.x - STATUS_SIZE_X + (CntStatus*(STATUS_SIZE_X + STATUS_POS_X_OFFSETBUFF) * 2), pos.y + STATUS_SIZE_Y, 0.0f);
+			this[CntPlayer].TexEmpty[CntStatus].textureVTX[3].vtx = D3DXVECTOR3(pos.x + STATUS_SIZE_X + (CntStatus*(STATUS_SIZE_X + STATUS_POS_X_OFFSETBUFF) * 2), pos.y + STATUS_SIZE_Y, 0.0f);
 			// テクスチャのパースペクティブコレクト用
 			this[CntPlayer].TexEmpty[CntStatus].textureVTX[0].rhw =
 				this[CntPlayer].TexEmpty[CntStatus].textureVTX[1].rhw =
@@ -204,10 +227,10 @@ HRESULT STATUS::MakeVertexStatus(void)
 
 			//中身
 			// 頂点座標の設定
-			this[CntPlayer].Tex[CntStatus].textureVTX[0].vtx = D3DXVECTOR3(pos.x - STATUS_SIZE_X + (CntStatus*STATUS_SIZE_X * 2), pos.y - STATUS_SIZE_Y, 0.0f);
-			this[CntPlayer].Tex[CntStatus].textureVTX[1].vtx = D3DXVECTOR3(pos.x + STATUS_SIZE_X + (CntStatus*STATUS_SIZE_X * 2), pos.y - STATUS_SIZE_Y, 0.0f);
-			this[CntPlayer].Tex[CntStatus].textureVTX[2].vtx = D3DXVECTOR3(pos.x - STATUS_SIZE_X + (CntStatus*STATUS_SIZE_X * 2), pos.y + STATUS_SIZE_Y, 0.0f);
-			this[CntPlayer].Tex[CntStatus].textureVTX[3].vtx = D3DXVECTOR3(pos.x + STATUS_SIZE_X + (CntStatus*STATUS_SIZE_X * 2), pos.y + STATUS_SIZE_Y, 0.0f);
+			this[CntPlayer].Tex[CntStatus].textureVTX[0].vtx = D3DXVECTOR3(pos.x - STATUS_SIZE_X + (CntStatus*(STATUS_SIZE_X + STATUS_POS_X_OFFSETBUFF) * 2), pos.y - STATUS_SIZE_Y, 0.0f);
+			this[CntPlayer].Tex[CntStatus].textureVTX[1].vtx = D3DXVECTOR3(pos.x + STATUS_SIZE_X + (CntStatus*(STATUS_SIZE_X + STATUS_POS_X_OFFSETBUFF) * 2), pos.y - STATUS_SIZE_Y, 0.0f);
+			this[CntPlayer].Tex[CntStatus].textureVTX[2].vtx = D3DXVECTOR3(pos.x - STATUS_SIZE_X + (CntStatus*(STATUS_SIZE_X + STATUS_POS_X_OFFSETBUFF) * 2), pos.y + STATUS_SIZE_Y, 0.0f);
+			this[CntPlayer].Tex[CntStatus].textureVTX[3].vtx = D3DXVECTOR3(pos.x + STATUS_SIZE_X + (CntStatus*(STATUS_SIZE_X + STATUS_POS_X_OFFSETBUFF) * 2), pos.y + STATUS_SIZE_Y, 0.0f);
 			// テクスチャのパースペクティブコレクト用
 			this[CntPlayer].Tex[CntStatus].textureVTX[0].rhw =
 				this[CntPlayer].Tex[CntStatus].textureVTX[1].rhw =

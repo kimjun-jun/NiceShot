@@ -1,4 +1,8 @@
 #pragma once
+void SetMultThreadFlag(bool flag);
+bool GetMultThreadFlag(void);
+void SetGameSceneFlag(bool flag);
+bool GetGameSceneFlag(void);
 int NetClientSocketCreate(void);
 int NetClientSocketDelete(void);
 void NetMatch(void);

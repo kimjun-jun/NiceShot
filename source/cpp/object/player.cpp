@@ -13,6 +13,7 @@
 #include "../../h/object/bullet/bullet.h"
 #include "../../h/effect/effect.h"
 #include "../../h/other/fade.h"
+#include "../../h/net/sock.h"
 #include "../../h/object/player.h"
 
 static D3DXCOLOR PLAYER_COLOR[] = {
@@ -322,7 +323,11 @@ void PLAYER_HONTAI::Update(EFFECT*effect, BULLET*bullet, SHADOW*shadow, FADE *fa
 	{
 		bool use = this[CntPlayer].GetUse();
 		if (use == false) deadcnt++;
-		if (deadcnt >= 3) fade->SetFade(FADE_OUT, SCENE_RESULT, SOUND_LABEL_BGM_gameclear01);
+		if (deadcnt >= 3)
+		{
+			fade->SetFade(FADE_OUT, SCENE_RESULT, SOUND_LABEL_BGM_gameclear01);
+			SetGameSceneFlag(false);
+		}
 	}
 
 	//プレイヤー制御
@@ -394,8 +399,8 @@ void PLAYER_HONTAI::Update(EFFECT*effect, BULLET*bullet, SHADOW*shadow, FADE *fa
 				this[CntPlayer].BFlag = 0;
 				this[CntPlayer].oldvital = this[CntPlayer].vital;
 			}
-			//this[MyNumber].SetMoveL2R2(MyNumber, Netflag);
-			this[0].SetMoveL(MyNumber, &effect[0], Netflag);
+			for(int i=0;i< OBJECT_PLAYER_MAX;i++) this[0].SetMoveLtype0(i, &effect[0], Netflag);
+			//this[0].SetMoveL(MyNumber, &effect[0], Netflag);
 			for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
 			{
 				this[0].SetQ(CntPlayer);
@@ -1082,8 +1087,8 @@ void PLAYER_HONTAI::SetMoveL(int CntPlayer, EFFECT *effect, bool Netflag)
 		}
 
 		//移動処理
-		if (IsButtonPressed(1, BUTTON_ANALOG_L_UP) || IsButtonPressed(1, BUTTON_ANALOG_L_DOWN) ||
-			IsButtonPressed(1, BUTTON_ANALOG_L_LEFT) || IsButtonPressed(1, BUTTON_ANALOG_L_RIGHT))
+		if (IsButtonPressed(0, BUTTON_ANALOG_L_UP) || IsButtonPressed(0, BUTTON_ANALOG_L_DOWN) ||
+			IsButtonPressed(0, BUTTON_ANALOG_L_LEFT) || IsButtonPressed(0, BUTTON_ANALOG_L_RIGHT))
 		{
 			DIJOYSTATE2 *Button = GetIsButton(0);
 
@@ -1092,7 +1097,7 @@ void PLAYER_HONTAI::SetMoveL(int CntPlayer, EFFECT *effect, bool Netflag)
 			dir = FRONT_VEC;
 		}
 		//旋回入力は後退中に限りリバースする
-		if (IsButtonPressed(1, BUTTON_ANALOG_L_DOWN))
+		if (IsButtonPressed(0, BUTTON_ANALOG_L_DOWN))
 		{
 			dir = BACK_VEC;
 		}
@@ -1118,6 +1123,88 @@ void PLAYER_HONTAI::SetMoveL(int CntPlayer, EFFECT *effect, bool Netflag)
 		SetCameraR(CntPlayer, Netflag);
 
 	}
+}
+
+//=============================================================================
+// 移動制御(Lスティックで移動制御)
+//=============================================================================
+void PLAYER_HONTAI::SetMoveLtype0(int CntPlayer, EFFECT *effect, bool Netflag)
+{
+		//---------------------------------------------------------オブジェクト値呼び出し
+		D3DXVECTOR3 pos = this[CntPlayer].GetPos();
+		D3DXVECTOR3 move = this[CntPlayer].GetMove();
+		D3DXVECTOR3 HoudaiRot = this[CntPlayer].GetRot();
+
+		//保存
+		this[CntPlayer].SetOldPos(pos);
+		this[CntPlayer].SetOldRot(HoudaiRot);
+
+		int dir = FRONT_VEC;
+
+		//移動変化はLスティックアナログ値を使用
+		float LAnalogX = 0.0f;		//縦入力
+		float LAnalogY = 0.0f;		//横入力
+		float DashRate = 1.0f;		//スピードアップレート
+
+		//ダッシュ判定
+		if (this[CntPlayer].speedbuffsignal == true)
+		{
+			//スピードバフ時間減少
+			this[CntPlayer].speedbufftime -= VALUE_SPEEDBUFF_SUB;
+			this[CntPlayer].dashFlag = true;
+
+			// エフェクトスピードアップの生成
+			D3DXVECTOR3 EffctSpeedupPos = pos;
+			effect->SetEffect(EffctSpeedupPos, D3DXVECTOR3(0.0f, 0.0f, 0.0f), PLAYER_COLOR[CntPlayer], EFFECT_SPEEDUP_SIZE_X, EFFECT_SPEEDUP_SIZE_Y, EFFECT_SPEEDUP_TIME);
+
+			if (this[CntPlayer].speedbufftime <= 0.0f)
+			{
+				this[CntPlayer].dashFlag = false;
+				this[CntPlayer].speedbuffsignal = false;
+			}
+		}
+
+
+		if (this[CntPlayer].dashFlag == true)
+		{
+			DashRate = PLAYER_VALUE_DASHRATE;
+		}
+
+		//移動処理
+		if (IsButtonPressed(CntPlayer, BUTTON_ANALOG_L_UP) || IsButtonPressed(CntPlayer, BUTTON_ANALOG_L_DOWN) ||
+			IsButtonPressed(CntPlayer, BUTTON_ANALOG_L_LEFT) || IsButtonPressed(CntPlayer, BUTTON_ANALOG_L_RIGHT))
+		{
+			DIJOYSTATE2 *Button = GetIsButton(CntPlayer);
+
+			LAnalogX = float(Button->lX * PLAYER_MOVE_RATE_X);
+			LAnalogY = float(Button->lY * PLAYER_MOVE_RATE_Y * DashRate);
+			dir = FRONT_VEC;
+		}
+		//旋回入力は後退中に限りリバースする
+		if (IsButtonPressed(CntPlayer, BUTTON_ANALOG_L_DOWN))
+		{
+			dir = BACK_VEC;
+		}
+		// 無移動時は移動量に慣性をかける
+		else
+		{
+			this[CntPlayer].dashFlag = false;
+		}
+		if (LAnalogY > 0.0f) LAnalogX *= -1;
+
+		//移動量を反映
+		HoudaiRot.y += LAnalogX * dir;
+		move.x = LAnalogY * sinf(HoudaiRot.y);
+		move.z = LAnalogY * cosf(HoudaiRot.y);
+
+		//プレイヤー座標を更新
+		pos += move;
+
+		//---------------------------------------------------------オブジェクト値セット
+		this[CntPlayer].SetPos(pos);
+		this[CntPlayer].SetRot(HoudaiRot);
+
+		SetCameraR(CntPlayer, Netflag);
 }
 
 //=============================================================================

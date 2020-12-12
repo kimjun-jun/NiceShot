@@ -105,6 +105,7 @@ void GAME_OBJECT::Init()
 	NetMatchFlag = false;
 	NetMyNumberFlag = false;
 	NetMyNumber = -1;
+	NetItemFlag = false;
 	NetGameStartFlag = false;
 	NetShareDateFlag = false;
 	field->Init();
@@ -134,10 +135,12 @@ void GAME_OBJECT::Init()
 void GAME_OBJECT::Reinit()
 {
 	//ネット対戦用
+	SetMultThreadFlag(false);
 	NetClientSocketCreate();
 	NetMatchFlag = false;
 	NetMyNumberFlag = false;
 	NetMyNumber = -1;
+	NetItemFlag = false;
 	NetGameStartFlag = false;
 	NetShareDateFlag = false;
 
