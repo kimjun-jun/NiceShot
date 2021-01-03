@@ -295,8 +295,8 @@ void ITEM::Update(PLAYER_HONTAI *p, bool NetGameStartFlag)
 					int ItemNum = rand() % ITEMTYPE_MAX;
 					//ライフ、カメラ、霧アイテムの時はもう一度抽選
 					if (ItemNum == ITEMTYPE_LIFE && ItemNum == ITEMTYPE_CAMERA && ItemNum == ITEMTYPE_KIRI) ItemNum = rand() % ITEMTYPE_MAX;
-					this[0].SetItem(pos, D3DXVECTOR3(2.0f, 2.0f, 2.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ItemNum);
-					//this[0].SetItem(pos, D3DXVECTOR3(1.0f, 1.0f, 1.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ITEMTYPE_TIKEI);
+					//this[0].SetItem(pos, D3DXVECTOR3(2.0f, 2.0f, 2.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ItemNum);
+					this[0].SetItem(pos, D3DXVECTOR3(2.0f, 2.0f, 2.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ITEMTYPE_TIKEI);
 					this[nCntItem].CollisionFieldEnd = false;
 					this[nCntItem].Droptime = 0.0f;
 					this[0].GoukeiDrop++;

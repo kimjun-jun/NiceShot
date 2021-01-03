@@ -78,8 +78,8 @@ LPDIRECT3DDEVICE9	g_pD3DDevice = NULL;		//!< Deviceオブジェクト(描画に必要)
 
 #ifdef _DEBUG
 static LPD3DXFONT	g_pD3DXFont = NULL;			//!< フォントへのポインタ
-int					g_nCountFPS;				//!< FPSカウンタ
 char				g_text[256] = { 0 };		//!< 表示させるテキスト
+int					g_nCountFPS;				//!< FPSカウンタ
 char				g_textSo[256] = { "aa" };		//!< 表示させるテキスト
 DWORD				dwFrameCount;				//!< 時間計測用
 #endif
@@ -229,6 +229,10 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	// メッセージループ
 	while (1)
 	{
+		if (msg.message == WM_QUIT)
+		{// PostQuitMessage()が呼ばれたらループ終了
+			break;
+		}
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
 			if (msg.message == WM_QUIT)
@@ -283,6 +287,8 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	//-----------------------------------------------------オブジェクト終了
 	ObjectAll->Uninit();
 	EndGame = true;
+	SetMultThreadFlag(false);
+	SetGameSceneFlag(false);
 
 	//スレッド破棄
 	t1.join();
@@ -534,12 +540,16 @@ LPDIRECT3DDEVICE9 GetDevice(void)
 	return g_pD3DDevice;
 }
 
+#ifdef _DEBUG
 //=============================================================================
-// 表示させる文字列をg_textに書き込む
+// デバッグ時にどの制御になったかゲーム画面で判断する文字描画関数
 //=============================================================================
-void SetTextSo(char *moji)
+void DrawTextType(void)
 {
-	strcpy(g_textSo, moji);
+	TCHAR str[256];
+	RECT rect = { 10, 90, SCREEN_W, SCREEN_H };
+	wsprintf(str, _T("%s\n"), g_text);
+	g_pD3DXFont->DrawText(NULL, str, -1, &rect, DT_LEFT, D3DCOLOR_ARGB(0xff, 0xff, 0x00, 0xff));
 }
 
 //=============================================================================
@@ -553,8 +563,14 @@ void DrawTextTypeSo(void)
 	g_pD3DXFont->DrawText(NULL, str, -1, &rect, DT_LEFT, D3DCOLOR_ARGB(0xff, 0xff, 0x00, 0xff));
 }
 
+//=============================================================================
+// 表示させる文字列をg_textに書き込む
+//=============================================================================
+void SetTextSo(char *moji)
+{
+	strcpy(g_textSo, moji);
+}
 
-#ifdef _DEBUG
 //=============================================================================
 // デバッグ時に表示させる文字列をg_textに書き込む
 //=============================================================================
@@ -563,16 +579,6 @@ void SetText(char *moji)
 	strcpy(g_text, moji);
 }
 
-//=============================================================================
-// デバッグ時にどの制御になったかゲーム画面で判断する文字描画関数
-//=============================================================================
-void DrawTextType(void)
-{
-	TCHAR str[256];
-	RECT rect = { 10, 90, SCREEN_W, SCREEN_H };
-	wsprintf(str, _T("%s\n"), g_text);
-	g_pD3DXFont->DrawText(NULL, str, -1, &rect, DT_LEFT, D3DCOLOR_ARGB(0xff, 0xff, 0x00, 0xff));
-}
 
 //=============================================================================
 // FPS表示処理

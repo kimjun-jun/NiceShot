@@ -19,7 +19,7 @@
 //*****************************************************************************
 #define	TEXTURE_FILENAME				"../data/TEXTURE/map/white.png"		// 読み込むテクスチャファイル名
 //#define	TEXTURE_NOISE					"../data/TEXTURE/noise.bmp"		// 読み込むテクスチャファイル名
-#define SPHERELINEAR_LEN				(8.0f)							//!< 球面線形補間で使う、プレイヤーの座標と3角ポリゴン辺までの距離(プレイヤーの座標がこの値より辺に近ければ球面線形補間開始する)
+#define SPHERELINEAR_LEN				(10.0f)							//!< 球面線形補間で使う、プレイヤーの座標と3角ポリゴン辺までの距離(プレイヤーの座標がこの値より辺に近ければ球面線形補間開始する)
 
 #define FIELD_Y_HIGH					(120.0f)						//!< フィールドの高さで色を変える。高い
 #define FIELD_Y_LOW						(20.0f)							//!< フィールドの高さで色を変える。低い
@@ -1183,7 +1183,8 @@ void FIELD::FieldHitGetSphereVec(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVEC
 						//今の頂点z座標と比べ、一個次の頂点z座標が大きければ左下直角三角形に乗っている
 						if (pVtx[pIdx[nCntVtx]].vtx.z < pVtx[pIdx[nCntVtx + 1]].vtx.z)
 						{
-							//特別な頂点番号
+							//特別な頂点
+							/*
 							if (nCntVtx == this[0].model.nNumVertexIndex - this[0].nNumBlockZField * 2)
 							{
 								//頂点境界辺に近づくと球面線形補間で姿勢ベクトルを制御
@@ -1203,32 +1204,39 @@ void FIELD::FieldHitGetSphereVec(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVEC
 									*vtxNor = NewPolyNorVec;
 								}
 							}
+
 							//　左　左下直角三角形で今の頂点番号がthis[0].nNumBlockZField以下ならば、地面の最左端にいる
+							//特別な頂点
 							//else if (nCntVtx >= this[0].nNumBlockZField)
 							//{
 							//	int a = 0;
-
 							//}
 							//　上　左下直角三角形で今の頂点座標と一個前の頂点座標が同じもしくは、一個前の頂点座標と二個前の頂点座標が同じならば、地面の最上端にいる
+							//特別な頂点
+							//特別な頂点
 							else if (pVtx[pIdx[nCntVtx]].vtx == pVtx[pIdx[nCntVtx - 1]].vtx || pVtx[pIdx[nCntVtx - 1]].vtx == pVtx[pIdx[nCntVtx - 2]].vtx)
 							{
 								int a = 0;
 
 							}
 							//　下　左下直角三角形で今の頂点座標と一個次の頂点座標が同じもしくは、一個次の頂点座標と二個次の頂点座標が同じならば、地面の最下端にいる(縮退ポリゴンなのでtrueにならないはず)
+							//特別な頂点
 							else if (pVtx[pIdx[nCntVtx]].vtx == pVtx[pIdx[nCntVtx + 1]].vtx || pVtx[pIdx[nCntVtx + 1]].vtx == pVtx[pIdx[nCntVtx + 2]].vtx)
 							{
-								//縮退ポリゴン
 								int a = 0;
 							}
-							else
+							*/
+
+							//通常の頂点
+							//else
 							{
 								//頂点境界辺に近づくと球面線形補間で姿勢ベクトルを制御
-								//右上
+								//プレイヤーの座標から乗っているポリゴンの各3辺までの最短距離MinDistanceを計算する
 								float MinDistanceRightUp = PointAndLineMinDistance(InrayS, pVtx[pIdx[nCntVtx + 1]].vtx, pVtx[pIdx[nCntVtx + 2]].vtx);
-								float MinDistanceDown = PointAndLineMinDistance(InrayS, pVtx[pIdx[nCntVtx]].vtx, pVtx[pIdx[nCntVtx + 1]].vtx);
-								float MinDistanceLeft = PointAndLineMinDistance(InrayS, pVtx[pIdx[nCntVtx]].vtx, pVtx[pIdx[nCntVtx + 2]].vtx);
+								float MinDistanceDown = PointAndLineMinDistance(InrayS, pVtx[pIdx[nCntVtx]].vtx, pVtx[pIdx[nCntVtx + 2]].vtx);
+								float MinDistanceLeft = PointAndLineMinDistance(InrayS, pVtx[pIdx[nCntVtx]].vtx, pVtx[pIdx[nCntVtx + 1]].vtx);
 								//プレイヤー座標から2辺までの距離がSPHERELINEAR_LENより短いと、その先に続く二つの地形の法線平均値をとり、その値で補間させる
+								//プレイヤーが3角ポリゴン境界線付近にいるときにいずれかのif()に入る。if(&&)の条件が二つあるものはポリゴン境界線が2辺に対して近い時に実行される
 								if (SPHERELINEAR_LEN > MinDistanceRightUp && SPHERELINEAR_LEN > MinDistanceDown)
 								{
 									// 1つめ　辺先にある地面ポリゴンの法線を求める MinDistanceRightUp
@@ -1313,6 +1321,7 @@ void FIELD::FieldHitGetSphereVec(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVEC
 
 								}
 								//1辺しか干渉していない
+								//OK
 								else if (SPHERELINEAR_LEN > MinDistanceRightUp)
 								{
 									//辺先にある地面ポリゴンの法線を求める
@@ -1327,11 +1336,12 @@ void FIELD::FieldHitGetSphereVec(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVEC
 									SphereLinear(&NewPolyNorVec, &NowPolyNorVec, &NextPolyNorVec, (SPHERELINEAR_LEN - MinDistanceRightUp) / 10);
 									*vtxNor = NewPolyNorVec;
 								}
+								//
 								else if (SPHERELINEAR_LEN > MinDistanceDown)
 								{
 									//辺先にある地面ポリゴンの法線を求める
 									D3DXVECTOR3 NextPolyNorVec;
-									D3DXVec3Cross(&NextPolyNorVec, &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 2]].vtx - pVtx[pIdx[nCntVtx]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx + (this[0].nNumBlockZField * 2 + 6)]].vtx - pVtx[pIdx[nCntVtx]].vtx));
+									D3DXVec3Cross(&NextPolyNorVec, &D3DXVECTOR3(pVtx[pIdx[nCntVtx + (this[0].nNumBlockZField * 2) + 6]].vtx - pVtx[pIdx[nCntVtx]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 2]].vtx - pVtx[pIdx[nCntVtx]].vtx));
 									if (NextPolyNorVec.y <= 0) NextPolyNorVec *= -1;
 									D3DXVec3Normalize(&NextPolyNorVec, &NextPolyNorVec);
 									D3DXVECTOR3 NowPolyNorVec;
@@ -1341,11 +1351,12 @@ void FIELD::FieldHitGetSphereVec(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVEC
 									SphereLinear(&NewPolyNorVec, &NowPolyNorVec, &NextPolyNorVec, (SPHERELINEAR_LEN - MinDistanceDown) / 10);
 									*vtxNor = NewPolyNorVec;
 								}
+								//OK
 								else if (SPHERELINEAR_LEN > MinDistanceLeft)
 								{
 									//辺先にある地面ポリゴンの法線を求める
 									D3DXVECTOR3 NextPolyNorVec;
-									D3DXVec3Cross(&NextPolyNorVec, &D3DXVECTOR3(pVtx[pIdx[nCntVtx - 1]].vtx - pVtx[pIdx[nCntVtx]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 1]].vtx - pVtx[pIdx[nCntVtx]].vtx));
+									D3DXVec3Cross(&NextPolyNorVec, &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 1]].vtx - pVtx[pIdx[nCntVtx]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx -1]].vtx - pVtx[pIdx[nCntVtx]].vtx));
 									if (NextPolyNorVec.y <= 0) NextPolyNorVec *= -1;
 									D3DXVec3Normalize(&NextPolyNorVec, &NextPolyNorVec);
 									D3DXVECTOR3 NowPolyNorVec;
@@ -1361,7 +1372,8 @@ void FIELD::FieldHitGetSphereVec(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVEC
 						else
 						{
 							//特別な頂点番号
-							if (nCntVtx == this[0].nNumBlockZField * 2 - 3)
+							/*
+							if (nCntVtx == this[0].model.nNumVertexIndex - this[0].nNumBlockZField * 2)
 							{
 								//頂点境界辺に近づくと球面線形補間で姿勢ベクトルを制御
 								float MinDistance = PointAndLineMinDistance(InrayS, pVtx[pIdx[nCntVtx]].vtx, pVtx[pIdx[nCntVtx + 1]].vtx);
@@ -1395,12 +1407,17 @@ void FIELD::FieldHitGetSphereVec(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVEC
 							//{
 
 							//}
-							else
+							*/
+
+							//else
 							{
 								//頂点境界辺に近づくと球面線形補間で姿勢ベクトルを制御
-								float MinDistanceRight = PointAndLineMinDistance(InrayS, pVtx[pIdx[nCntVtx + 1]].vtx, pVtx[pIdx[nCntVtx + 2]].vtx);
-								float MinDistanceUp = PointAndLineMinDistance(InrayS, pVtx[pIdx[nCntVtx]].vtx, pVtx[pIdx[nCntVtx + 2]].vtx);
-								float MinDistanceLeftDown = PointAndLineMinDistance(InrayS, pVtx[pIdx[nCntVtx]].vtx, pVtx[pIdx[nCntVtx + 1]].vtx);
+								float MinDistanceRight = PointAndLineMinDistance(InrayS, pVtx[pIdx[nCntVtx + 2]].vtx, pVtx[pIdx[nCntVtx + 3]].vtx);
+								float MinDistanceUp = PointAndLineMinDistance(InrayS, pVtx[pIdx[nCntVtx+1]].vtx, pVtx[pIdx[nCntVtx + 3]].vtx);
+								float MinDistanceLeftDown = PointAndLineMinDistance(InrayS, pVtx[pIdx[nCntVtx+1]].vtx, pVtx[pIdx[nCntVtx + 2]].vtx);
+								//float MinDistanceRight = PointAndLineMinDistance(InrayS, pVtx[pIdx[nCntVtx + 1]].vtx, pVtx[pIdx[nCntVtx + 2]].vtx);
+								//float MinDistanceUp = PointAndLineMinDistance(InrayS, pVtx[pIdx[nCntVtx]].vtx, pVtx[pIdx[nCntVtx + 2]].vtx);
+								//float MinDistanceLeftDown = PointAndLineMinDistance(InrayS, pVtx[pIdx[nCntVtx]].vtx, pVtx[pIdx[nCntVtx + 1]].vtx);
 								//プレイヤー座標から2辺までの距離がSPHERELINEAR_LENより短いと、その先に続く二つの地形の法線平均値をとり、その値で補間させる
 								if (SPHERELINEAR_LEN > MinDistanceRight && SPHERELINEAR_LEN > MinDistanceUp)
 								{
@@ -1487,6 +1504,7 @@ void FIELD::FieldHitGetSphereVec(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVEC
 								}
 
 								//1辺しか干渉していない
+								//OK
 								else if (SPHERELINEAR_LEN > MinDistanceRight)
 								{
 									//辺先にある地面ポリゴンの法線を求める
@@ -1501,11 +1519,12 @@ void FIELD::FieldHitGetSphereVec(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVEC
 									SphereLinear(&NewPolyNorVec, &NowPolyNorVec, &NextPolyNorVec, (SPHERELINEAR_LEN - MinDistanceRight) / 10);
 									*vtxNor = NewPolyNorVec;
 								}
+								//OK
 								else if (SPHERELINEAR_LEN > MinDistanceUp)
 								{
 									//辺先にある地面ポリゴンの法線を求める
 									D3DXVECTOR3 NextPolyNorVec;
-									D3DXVec3Cross(&NextPolyNorVec, &D3DXVECTOR3(pVtx[pIdx[nCntVtx - (this[0].nNumBlockZField * 2 + 6)]].vtx - pVtx[pIdx[nCntVtx]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 2]].vtx - pVtx[pIdx[nCntVtx]].vtx));
+									D3DXVec3Cross(&NextPolyNorVec, &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 1]].vtx - pVtx[pIdx[nCntVtx]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 2]].vtx - pVtx[pIdx[nCntVtx]].vtx));
 									if (NextPolyNorVec.y <= 0) NextPolyNorVec *= -1;
 									D3DXVec3Normalize(&NextPolyNorVec, &NextPolyNorVec);
 									D3DXVECTOR3 NowPolyNorVec;
@@ -1515,11 +1534,12 @@ void FIELD::FieldHitGetSphereVec(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVEC
 									SphereLinear(&NewPolyNorVec, &NowPolyNorVec, &NextPolyNorVec, (SPHERELINEAR_LEN - MinDistanceUp) / 10);
 									*vtxNor = NewPolyNorVec;
 								}
+								//OK
 								else if (SPHERELINEAR_LEN > MinDistanceLeftDown)
 								{
 									//辺先にある地面ポリゴンの法線を求める
 									D3DXVECTOR3 NextPolyNorVec;
-									D3DXVec3Cross(&NextPolyNorVec, &D3DXVECTOR3(pVtx[pIdx[nCntVtx - 1]].vtx - pVtx[pIdx[nCntVtx]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx + 1]].vtx - pVtx[pIdx[nCntVtx]].vtx));
+									D3DXVec3Cross(&NextPolyNorVec, &D3DXVECTOR3(pVtx[pIdx[nCntVtx +1]].vtx - pVtx[pIdx[nCntVtx+2]].vtx), &D3DXVECTOR3(pVtx[pIdx[nCntVtx+3]].vtx - pVtx[pIdx[nCntVtx+2]].vtx));
 									if (NextPolyNorVec.y <= 0) NextPolyNorVec *= -1;
 									D3DXVec3Normalize(&NextPolyNorVec, &NextPolyNorVec);
 									D3DXVECTOR3 NowPolyNorVec;

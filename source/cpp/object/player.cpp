@@ -399,7 +399,7 @@ void PLAYER_HONTAI::Update(EFFECT*effect, BULLET*bullet, SHADOW*shadow, FADE *fa
 				this[CntPlayer].BFlag = 0;
 				this[CntPlayer].oldvital = this[CntPlayer].vital;
 			}
-			for(int i=0;i< OBJECT_PLAYER_MAX;i++) this[0].SetMoveLtype0(i, &effect[0], Netflag);
+			this[0].SetMoveLtype0(MyNumber, &effect[0], Netflag);
 			//this[0].SetMoveL(MyNumber, &effect[0], Netflag);
 			for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
 			{
@@ -496,214 +496,218 @@ void PLAYER_HONTAI::Draw(void)
 
 	for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
 	{
-		//-----------------------------------------------------親
+		bool use = this[CntPlayer].GetUse();
+		if (use == true)
 		{
-			D3DXMATRIX mtxScl, mtxRot, mtxTranslate;
-			D3DXMATERIAL *pD3DXMat;
-			D3DMATERIAL9 matDef;
-			D3DXMATRIX mtxQ;
-			D3DXMatrixIdentity(&mtxQ);
-
-			//---------------------------------------------------------オブジェクト値呼び出し
-			D3DXVECTOR3 PlayerUpToFieldNorVec = this[CntPlayer].GetFieldNorUpNorCross();
-			float Qrot= this[CntPlayer].GetQrot();
-			D3DXQUATERNION q = D3DXQUATERNION(0, 0, 0, 1);
-			D3DXMATRIX mtxWorldOYA=this[CntPlayer].GetMatrix();
-			D3DXVECTOR3 scl = this[CntPlayer].GetScl();
-			D3DXVECTOR3 rot = this[CntPlayer].GetRot();
-			D3DXVECTOR3 pos = this[CntPlayer].GetPos();
-
-			//q=(rotVecAxis法線)*(g_Player.rot回転)
-			D3DXQuaternionRotationAxis(&q, &PlayerUpToFieldNorVec, -Qrot);
-			D3DXMatrixRotationQuaternion(&mtxQ, &q);
-
-			// ワールドマトリックスの初期化
-			D3DXMatrixIdentity(&mtxWorldOYA);
-
-			// スケールを反映
-			D3DXMatrixScaling(&mtxScl, scl.x, scl.y, scl.z);
-			D3DXMatrixMultiply(&mtxWorldOYA, &mtxWorldOYA, &mtxScl);
-
-			// 回転を反映
-			D3DXMatrixRotationYawPitchRoll(&mtxRot, rot.y, rot.x, rot.z);
-
-			D3DXMatrixMultiply(&mtxWorldOYA, &mtxWorldOYA, &mtxRot);
-			D3DXMatrixMultiply(&mtxWorldOYA, &mtxWorldOYA, &mtxQ);
-
-			// 移動を反映
-			D3DXMatrixTranslation(&mtxTranslate, pos.x, pos.y, pos.z);
-			D3DXMatrixMultiply(&mtxWorldOYA, &mtxWorldOYA, &mtxTranslate);
-
-			// ワールドマトリックスの設定
-			pDevice->SetTransform(D3DTS_WORLD, &mtxWorldOYA);
-			this[CntPlayer].SetMatrix(mtxWorldOYA);
-
-			// 現在のマテリアルを取得
-			pDevice->GetMaterial(&matDef);
-
-			// マテリアル情報に対するポインタを取得
-			pD3DXMat = (D3DXMATERIAL*)this[CntPlayer].model.pD3DXBuffMat->GetBufferPointer();
-
-			// 描画
-			for (int nCntMat = 0; nCntMat < (int)this[CntPlayer].model.nNumMat; nCntMat++)
+			//-----------------------------------------------------親
 			{
-				// マテリアルの設定
-				pDevice->SetMaterial(&pD3DXMat[nCntMat].MatD3D);
+				D3DXMATRIX mtxScl, mtxRot, mtxTranslate;
+				D3DXMATERIAL *pD3DXMat;
+				D3DMATERIAL9 matDef;
+				D3DXMATRIX mtxQ;
+				D3DXMatrixIdentity(&mtxQ);
 
-				if (pD3DXMat[nCntMat].pTextureFilename != NULL)
-				{
-					// テクスチャの設定
-					pDevice->SetTexture(0, this[CntPlayer].model.pD3DTexture);
-				}
+				//---------------------------------------------------------オブジェクト値呼び出し
+				D3DXVECTOR3 PlayerUpToFieldNorVec = this[CntPlayer].GetFieldNorUpNorCross();
+				float Qrot = this[CntPlayer].GetQrot();
+				D3DXQUATERNION q = D3DXQUATERNION(0, 0, 0, 1);
+				D3DXMATRIX mtxWorldOYA = this[CntPlayer].GetMatrix();
+				D3DXVECTOR3 scl = this[CntPlayer].GetScl();
+				D3DXVECTOR3 rot = this[CntPlayer].GetRot();
+				D3DXVECTOR3 pos = this[CntPlayer].GetPos();
 
-				// 頂点フォーマットの設定
-				pDevice->SetFVF(FVF_VERTEX_3D);
-				// 頂点バッファをレンダリングパイプラインに設定
-				pDevice->SetStreamSource(0, this[CntPlayer].model.pD3DVtxBuff, 0, sizeof(VERTEX_3D));
-				// インデックスバッファをレンダリングパイプラインに設定
-				pDevice->SetIndices(this[CntPlayer].model.pD3DIdxBuff);
-				//描画
-				pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, this[CntPlayer].model.nNumVertex, 0, this[CntPlayer].model.nNumPolygon);
-			}
-			// マテリアルをデフォルトに戻す
-			pDevice->SetMaterial(&matDef);
-		}
-		//-----------------------------------------------------子
-		{
-			D3DXMATRIX mtxScl, mtxRot, mtxTranslate;
-			D3DXMATERIAL *pD3DXMat;
-			D3DMATERIAL9 matDef;
+				//q=(rotVecAxis法線)*(g_Player.rot回転)
+				D3DXQuaternionRotationAxis(&q, &PlayerUpToFieldNorVec, -Qrot);
+				D3DXMatrixRotationQuaternion(&mtxQ, &q);
 
-			//---------------------------------------------------------オブジェクト値呼び出し
-			D3DXMATRIX mtxWorldKO = this[CntPlayer].parts[PARTSTYPE_HOUTOU].GetMatrix();
-			D3DXVECTOR3 scl = this[CntPlayer].parts[PARTSTYPE_HOUTOU].GetScl();
-			D3DXVECTOR3 rot = this[CntPlayer].parts[PARTSTYPE_HOUTOU].GetRot();
-			D3DXVECTOR3 pos = this[CntPlayer].parts[PARTSTYPE_HOUTOU].GetPos();
+				// ワールドマトリックスの初期化
+				D3DXMatrixIdentity(&mtxWorldOYA);
 
-			// ワールドマトリックスの初期化
-			D3DXMatrixIdentity(&mtxWorldKO);
+				// スケールを反映
+				D3DXMatrixScaling(&mtxScl, scl.x, scl.y, scl.z);
+				D3DXMatrixMultiply(&mtxWorldOYA, &mtxWorldOYA, &mtxScl);
 
-			// スケールを反映
-			D3DXMatrixScaling(&mtxScl, scl.x, scl.y, scl.z);
-			D3DXMatrixMultiply(&mtxWorldKO, &mtxWorldKO, &mtxScl);
+				// 回転を反映
+				D3DXMatrixRotationYawPitchRoll(&mtxRot, rot.y, rot.x, rot.z);
 
-			// 回転を反映
-			D3DXMatrixRotationYawPitchRoll(&mtxRot, rot.y, rot.x, rot.z);
-			D3DXMatrixMultiply(&mtxWorldKO, &mtxWorldKO, &mtxRot);
+				D3DXMatrixMultiply(&mtxWorldOYA, &mtxWorldOYA, &mtxRot);
+				D3DXMatrixMultiply(&mtxWorldOYA, &mtxWorldOYA, &mtxQ);
 
-			// 移動を反映
-			D3DXMatrixTranslation(&mtxTranslate, pos.x, pos.y, pos.z);
-			D3DXMatrixMultiply(&mtxWorldKO, &mtxWorldKO, &mtxTranslate);
+				// 移動を反映
+				D3DXMatrixTranslation(&mtxTranslate, pos.x, pos.y, pos.z);
+				D3DXMatrixMultiply(&mtxWorldOYA, &mtxWorldOYA, &mtxTranslate);
 
-			if (this[CntPlayer].parts[PARTSTYPE_HOUTOU].ParentHontai != NULL)
-			{
-				//-------------------------------------------------親のワールドマトリクスを取得
-				D3DXMATRIX ParentmtxWorldKO = this[CntPlayer].parts[PARTSTYPE_HOUTOU].ParentHontai->GetMatrix();
-				D3DXMatrixMultiply(&mtxWorldKO, &mtxWorldKO, &ParentmtxWorldKO);
-			}
+				// ワールドマトリックスの設定
+				pDevice->SetTransform(D3DTS_WORLD, &mtxWorldOYA);
+				this[CntPlayer].SetMatrix(mtxWorldOYA);
 
-			// ワールドマトリックスの設定
-			pDevice->SetTransform(D3DTS_WORLD, &mtxWorldKO);
-			this[CntPlayer].parts[PARTSTYPE_HOUTOU].SetMatrix(mtxWorldKO);
+				// 現在のマテリアルを取得
+				pDevice->GetMaterial(&matDef);
 
-			// 現在のマテリアルを取得
-			pDevice->GetMaterial(&matDef);
+				// マテリアル情報に対するポインタを取得
+				pD3DXMat = (D3DXMATERIAL*)this[CntPlayer].model.pD3DXBuffMat->GetBufferPointer();
 
-			// マテリアル情報に対するポインタを取得
-			pD3DXMat = (D3DXMATERIAL*)this[CntPlayer].parts[PARTSTYPE_HOUTOU].model.pD3DXBuffMat->GetBufferPointer();
-
-			for (int nCntMat = 0; nCntMat < (int)this[CntPlayer].parts[PARTSTYPE_HOUTOU].model.nNumMat; nCntMat++)
-			{
-				// マテリアルの設定
-				pDevice->SetMaterial(&pD3DXMat[nCntMat].MatD3D);
-				if (pD3DXMat[nCntMat].pTextureFilename != NULL)
-				{
-					// テクスチャの設定
-					pDevice->SetTexture(0, this[CntPlayer].parts[PARTSTYPE_HOUTOU].model.pD3DTexture);
-				}
 				// 描画
+				for (int nCntMat = 0; nCntMat < (int)this[CntPlayer].model.nNumMat; nCntMat++)
 				{
+					// マテリアルの設定
+					pDevice->SetMaterial(&pD3DXMat[nCntMat].MatD3D);
+
+					if (pD3DXMat[nCntMat].pTextureFilename != NULL)
+					{
+						// テクスチャの設定
+						pDevice->SetTexture(0, this[CntPlayer].model.pD3DTexture);
+					}
+
 					// 頂点フォーマットの設定
 					pDevice->SetFVF(FVF_VERTEX_3D);
 					// 頂点バッファをレンダリングパイプラインに設定
-					pDevice->SetStreamSource(0, this[CntPlayer].parts[PARTSTYPE_HOUTOU].model.pD3DVtxBuff, 0, sizeof(VERTEX_3D));
+					pDevice->SetStreamSource(0, this[CntPlayer].model.pD3DVtxBuff, 0, sizeof(VERTEX_3D));
 					// インデックスバッファをレンダリングパイプラインに設定
-					pDevice->SetIndices(this[CntPlayer].parts[PARTSTYPE_HOUTOU].model.pD3DIdxBuff);
+					pDevice->SetIndices(this[CntPlayer].model.pD3DIdxBuff);
 					//描画
-					pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, this[CntPlayer].parts[PARTSTYPE_HOUTOU].model.nNumVertex, 0, this[CntPlayer].parts[PARTSTYPE_HOUTOU].model.nNumPolygon);
+					pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, this[CntPlayer].model.nNumVertex, 0, this[CntPlayer].model.nNumPolygon);
 				}
+				// マテリアルをデフォルトに戻す
+				pDevice->SetMaterial(&matDef);
 			}
-			// マテリアルをデフォルトに戻す
-			pDevice->SetMaterial(&matDef);
-		}
-		//-----------------------------------------------------孫
-		{
-			D3DXMATRIX mtxScl, mtxRot, mtxTranslate;
-			D3DXMATERIAL *pD3DXMat;
-			D3DMATERIAL9 matDef;
-
-			//---------------------------------------------------------オブジェクト値呼び出し
-			D3DXMATRIX mtxWorldMAGO = this[CntPlayer].parts[PARTSTYPE_HOUSIN].GetMatrix();
-			D3DXVECTOR3 scl = this[CntPlayer].parts[PARTSTYPE_HOUSIN].GetScl();
-			D3DXVECTOR3 rot = this[CntPlayer].parts[PARTSTYPE_HOUSIN].GetRot();
-			D3DXVECTOR3 pos = this[CntPlayer].parts[PARTSTYPE_HOUSIN].GetPos();
-
-			// ワールドマトリックスの初期化
-			D3DXMatrixIdentity(&mtxWorldMAGO);
-
-			// スケールを反映
-			D3DXMatrixScaling(&mtxScl, scl.x, scl.y, scl.z);
-			D3DXMatrixMultiply(&mtxWorldMAGO, &mtxWorldMAGO, &mtxScl);
-
-			// 回転を反映
-			D3DXMatrixRotationYawPitchRoll(&mtxRot, rot.y, rot.x, rot.z);
-			D3DXMatrixMultiply(&mtxWorldMAGO, &mtxWorldMAGO, &mtxRot);
-
-			// 移動を反映
-			D3DXMatrixTranslation(&mtxTranslate, pos.x, pos.y, pos.z);
-			D3DXMatrixMultiply(&mtxWorldMAGO, &mtxWorldMAGO, &mtxTranslate);
-
-
-
-			if (this[CntPlayer].parts[PARTSTYPE_HOUSIN].ParentParts != NULL)
+			//-----------------------------------------------------子
 			{
-				//-------------------------------------------------親のワールドマトリクスを取得
-				D3DXMATRIX ParentmtxWorldMAGO = this[CntPlayer].parts[PARTSTYPE_HOUSIN].ParentParts->GetMatrix();
-				D3DXMatrixMultiply(&mtxWorldMAGO, &mtxWorldMAGO, &ParentmtxWorldMAGO);
+				D3DXMATRIX mtxScl, mtxRot, mtxTranslate;
+				D3DXMATERIAL *pD3DXMat;
+				D3DMATERIAL9 matDef;
+
+				//---------------------------------------------------------オブジェクト値呼び出し
+				D3DXMATRIX mtxWorldKO = this[CntPlayer].parts[PARTSTYPE_HOUTOU].GetMatrix();
+				D3DXVECTOR3 scl = this[CntPlayer].parts[PARTSTYPE_HOUTOU].GetScl();
+				D3DXVECTOR3 rot = this[CntPlayer].parts[PARTSTYPE_HOUTOU].GetRot();
+				D3DXVECTOR3 pos = this[CntPlayer].parts[PARTSTYPE_HOUTOU].GetPos();
+
+				// ワールドマトリックスの初期化
+				D3DXMatrixIdentity(&mtxWorldKO);
+
+				// スケールを反映
+				D3DXMatrixScaling(&mtxScl, scl.x, scl.y, scl.z);
+				D3DXMatrixMultiply(&mtxWorldKO, &mtxWorldKO, &mtxScl);
+
+				// 回転を反映
+				D3DXMatrixRotationYawPitchRoll(&mtxRot, rot.y, rot.x, rot.z);
+				D3DXMatrixMultiply(&mtxWorldKO, &mtxWorldKO, &mtxRot);
+
+				// 移動を反映
+				D3DXMatrixTranslation(&mtxTranslate, pos.x, pos.y, pos.z);
+				D3DXMatrixMultiply(&mtxWorldKO, &mtxWorldKO, &mtxTranslate);
+
+				if (this[CntPlayer].parts[PARTSTYPE_HOUTOU].ParentHontai != NULL)
+				{
+					//-------------------------------------------------親のワールドマトリクスを取得
+					D3DXMATRIX ParentmtxWorldKO = this[CntPlayer].parts[PARTSTYPE_HOUTOU].ParentHontai->GetMatrix();
+					D3DXMatrixMultiply(&mtxWorldKO, &mtxWorldKO, &ParentmtxWorldKO);
+				}
+
+				// ワールドマトリックスの設定
+				pDevice->SetTransform(D3DTS_WORLD, &mtxWorldKO);
+				this[CntPlayer].parts[PARTSTYPE_HOUTOU].SetMatrix(mtxWorldKO);
+
+				// 現在のマテリアルを取得
+				pDevice->GetMaterial(&matDef);
+
+				// マテリアル情報に対するポインタを取得
+				pD3DXMat = (D3DXMATERIAL*)this[CntPlayer].parts[PARTSTYPE_HOUTOU].model.pD3DXBuffMat->GetBufferPointer();
+
+				for (int nCntMat = 0; nCntMat < (int)this[CntPlayer].parts[PARTSTYPE_HOUTOU].model.nNumMat; nCntMat++)
+				{
+					// マテリアルの設定
+					pDevice->SetMaterial(&pD3DXMat[nCntMat].MatD3D);
+					if (pD3DXMat[nCntMat].pTextureFilename != NULL)
+					{
+						// テクスチャの設定
+						pDevice->SetTexture(0, this[CntPlayer].parts[PARTSTYPE_HOUTOU].model.pD3DTexture);
+					}
+					// 描画
+					{
+						// 頂点フォーマットの設定
+						pDevice->SetFVF(FVF_VERTEX_3D);
+						// 頂点バッファをレンダリングパイプラインに設定
+						pDevice->SetStreamSource(0, this[CntPlayer].parts[PARTSTYPE_HOUTOU].model.pD3DVtxBuff, 0, sizeof(VERTEX_3D));
+						// インデックスバッファをレンダリングパイプラインに設定
+						pDevice->SetIndices(this[CntPlayer].parts[PARTSTYPE_HOUTOU].model.pD3DIdxBuff);
+						//描画
+						pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, this[CntPlayer].parts[PARTSTYPE_HOUTOU].model.nNumVertex, 0, this[CntPlayer].parts[PARTSTYPE_HOUTOU].model.nNumPolygon);
+					}
+				}
+				// マテリアルをデフォルトに戻す
+				pDevice->SetMaterial(&matDef);
 			}
-
-			// ワールドマトリックスの設定
-			pDevice->SetTransform(D3DTS_WORLD, &mtxWorldMAGO);
-			this[CntPlayer].parts[PARTSTYPE_HOUSIN].SetMatrix(mtxWorldMAGO);
-			// 現在のマテリアルを取得
-			pDevice->GetMaterial(&matDef);
-
-			// マテリアル情報に対するポインタを取得
-			pD3DXMat = (D3DXMATERIAL*)this[CntPlayer].parts[PARTSTYPE_HOUSIN].model.pD3DXBuffMat->GetBufferPointer();
-
-			for (int nCntMat = 0; nCntMat < (int)this[CntPlayer].parts[PARTSTYPE_HOUSIN].model.nNumMat; nCntMat++)
+			//-----------------------------------------------------孫
 			{
-				// マテリアルの設定
-				pDevice->SetMaterial(&pD3DXMat[nCntMat].MatD3D);
-				if (pD3DXMat[nCntMat].pTextureFilename != NULL)
+				D3DXMATRIX mtxScl, mtxRot, mtxTranslate;
+				D3DXMATERIAL *pD3DXMat;
+				D3DMATERIAL9 matDef;
+
+				//---------------------------------------------------------オブジェクト値呼び出し
+				D3DXMATRIX mtxWorldMAGO = this[CntPlayer].parts[PARTSTYPE_HOUSIN].GetMatrix();
+				D3DXVECTOR3 scl = this[CntPlayer].parts[PARTSTYPE_HOUSIN].GetScl();
+				D3DXVECTOR3 rot = this[CntPlayer].parts[PARTSTYPE_HOUSIN].GetRot();
+				D3DXVECTOR3 pos = this[CntPlayer].parts[PARTSTYPE_HOUSIN].GetPos();
+
+				// ワールドマトリックスの初期化
+				D3DXMatrixIdentity(&mtxWorldMAGO);
+
+				// スケールを反映
+				D3DXMatrixScaling(&mtxScl, scl.x, scl.y, scl.z);
+				D3DXMatrixMultiply(&mtxWorldMAGO, &mtxWorldMAGO, &mtxScl);
+
+				// 回転を反映
+				D3DXMatrixRotationYawPitchRoll(&mtxRot, rot.y, rot.x, rot.z);
+				D3DXMatrixMultiply(&mtxWorldMAGO, &mtxWorldMAGO, &mtxRot);
+
+				// 移動を反映
+				D3DXMatrixTranslation(&mtxTranslate, pos.x, pos.y, pos.z);
+				D3DXMatrixMultiply(&mtxWorldMAGO, &mtxWorldMAGO, &mtxTranslate);
+
+
+
+				if (this[CntPlayer].parts[PARTSTYPE_HOUSIN].ParentParts != NULL)
 				{
-					// テクスチャの設定
-					pDevice->SetTexture(0, this[CntPlayer].parts[PARTSTYPE_HOUSIN].model.pD3DTexture);
+					//-------------------------------------------------親のワールドマトリクスを取得
+					D3DXMATRIX ParentmtxWorldMAGO = this[CntPlayer].parts[PARTSTYPE_HOUSIN].ParentParts->GetMatrix();
+					D3DXMatrixMultiply(&mtxWorldMAGO, &mtxWorldMAGO, &ParentmtxWorldMAGO);
 				}
-				// 描画
+
+				// ワールドマトリックスの設定
+				pDevice->SetTransform(D3DTS_WORLD, &mtxWorldMAGO);
+				this[CntPlayer].parts[PARTSTYPE_HOUSIN].SetMatrix(mtxWorldMAGO);
+				// 現在のマテリアルを取得
+				pDevice->GetMaterial(&matDef);
+
+				// マテリアル情報に対するポインタを取得
+				pD3DXMat = (D3DXMATERIAL*)this[CntPlayer].parts[PARTSTYPE_HOUSIN].model.pD3DXBuffMat->GetBufferPointer();
+
+				for (int nCntMat = 0; nCntMat < (int)this[CntPlayer].parts[PARTSTYPE_HOUSIN].model.nNumMat; nCntMat++)
 				{
-					// 頂点フォーマットの設定
-					pDevice->SetFVF(FVF_VERTEX_3D);
-					// 頂点バッファをレンダリングパイプラインに設定
-					pDevice->SetStreamSource(0, this[CntPlayer].parts[PARTSTYPE_HOUSIN].model.pD3DVtxBuff, 0, sizeof(VERTEX_3D));
-					// インデックスバッファをレンダリングパイプラインに設定
-					pDevice->SetIndices(this[CntPlayer].parts[PARTSTYPE_HOUSIN].model.pD3DIdxBuff);
-					//描画
-					pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, this[CntPlayer].parts[PARTSTYPE_HOUSIN].model.nNumVertex, 0, this[CntPlayer].parts[PARTSTYPE_HOUSIN].model.nNumPolygon);
+					// マテリアルの設定
+					pDevice->SetMaterial(&pD3DXMat[nCntMat].MatD3D);
+					if (pD3DXMat[nCntMat].pTextureFilename != NULL)
+					{
+						// テクスチャの設定
+						pDevice->SetTexture(0, this[CntPlayer].parts[PARTSTYPE_HOUSIN].model.pD3DTexture);
+					}
+					// 描画
+					{
+						// 頂点フォーマットの設定
+						pDevice->SetFVF(FVF_VERTEX_3D);
+						// 頂点バッファをレンダリングパイプラインに設定
+						pDevice->SetStreamSource(0, this[CntPlayer].parts[PARTSTYPE_HOUSIN].model.pD3DVtxBuff, 0, sizeof(VERTEX_3D));
+						// インデックスバッファをレンダリングパイプラインに設定
+						pDevice->SetIndices(this[CntPlayer].parts[PARTSTYPE_HOUSIN].model.pD3DIdxBuff);
+						//描画
+						pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, this[CntPlayer].parts[PARTSTYPE_HOUSIN].model.nNumVertex, 0, this[CntPlayer].parts[PARTSTYPE_HOUSIN].model.nNumPolygon);
+					}
 				}
+				// マテリアルをデフォルトに戻す
+				pDevice->SetMaterial(&matDef);
 			}
-			// マテリアルをデフォルトに戻す
-			pDevice->SetMaterial(&matDef);
 		}
 	}
 }
@@ -1299,10 +1303,10 @@ void PLAYER_HONTAI::SetCameraR(int CntPlayer, bool Netflag)
 		float RAnalogY = 0.0f;		//横入力
 
 		//視野角処理
-		if (IsButtonPressed(0, BUTTON_ANALOG_R_UP) || IsButtonPressed(0, BUTTON_ANALOG_R_DOWN) ||
-			IsButtonPressed(0, BUTTON_ANALOG_R_LEFT) || IsButtonPressed(0, BUTTON_ANALOG_R_RIGHT))
+		if (IsButtonPressed(CntPlayer, BUTTON_ANALOG_R_UP) || IsButtonPressed(CntPlayer, BUTTON_ANALOG_R_DOWN) ||
+			IsButtonPressed(CntPlayer, BUTTON_ANALOG_R_LEFT) || IsButtonPressed(CntPlayer, BUTTON_ANALOG_R_RIGHT))
 		{
-			DIJOYSTATE2 *Button = GetIsButton(0);
+			DIJOYSTATE2 *Button = GetIsButton(CntPlayer);
 			//入力中央値32000　最小0　最大64000
 			//なので-32000することで　中央値0　最小-32000　最大32000にしている
 			//rotに32000とかバカ高い数値を入れるとぶっ飛ぶので、さらに入力値を小さくする
@@ -1736,7 +1740,7 @@ void PLAYER_HONTAI::SetBulletALL(int CntPlayer, BULLET *bullet, SHADOW *shadow, 
 		{
 			//if (IsButtonTriggered(CntPlayer, BUTTON_X))
 			//{
-			if (IsButtonTriggered(0, BUTTON_R1))
+			if (IsButtonTriggered(CntPlayer, BUTTON_R1))
 			{
 				//-----------------------------------オブジェクト先頭アドレスを読み込み
 				bullet->SetBullet(BposStart, bulletmove, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, CntPlayer, shadow);

@@ -144,6 +144,7 @@ void GAME_OBJECT::Reinit()
 	NetGameStartFlag = false;
 	NetShareDateFlag = false;
 
+	field->Reinit();
 	player->Reinit(&field[0]);
 	effect->Reinit();
 	bullet->Reinit();
@@ -160,7 +161,6 @@ void GAME_OBJECT::Reinit()
 	rank->Reinit();
 	result->Reinit();
 	title->Reinit();
-	field->Reinit();
 	sky->Reinit();
 	wall->Reinit();
 	fade->Reinit();
@@ -593,9 +593,9 @@ void GAME_OBJECT::Draw()
 		// フェード描画
 		fade->Draw();
 
+#ifdef _DEBUG
 		// デバッグ表示
 		DrawTextType();
-#ifdef _DEBUG
 		DrawDebugProc();
 #endif
 	}
@@ -805,6 +805,7 @@ void GAME_OBJECT::CheakHit(int scene)
 						break;
 					case ITEMTYPE_LIFE:
 						player[CntPlayer].vital += PLAYER_ATTACK_NORMAL;
+						if (player[CntPlayer].vital >= PLAYER_VITAL_MAX) player[CntPlayer].vital = PLAYER_VITAL_MAX;
 						PlaySound(SOUND_LABEL_SE_enter03);
 						break;
 					case ITEMTYPE_SENSYA:
