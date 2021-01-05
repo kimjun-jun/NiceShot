@@ -278,7 +278,7 @@ void GAME_OBJECT::Update()
 			//マイナンバー取得中
 			if (NetMyNumberFlag == false)
 			{
-				if (NetMyNumber == -1) NetMyNumberGet();
+				if (NetMyNumber >= -1 && NetMyNumber <= 3) NetMyNumberGet();
 			}
 			//アイテム情報取得中
 			else if (NetItemFlag==false)
