@@ -22,6 +22,7 @@
 
 #pragma comment (lib, "Ws2_32.lib")
 #define BUFFER_SIZE 500
+#define BUFFER_SIZE_STRING 501					//!< 送信データバッファサイズ
 
 //Send()用オブジェクトのClone
 GAME_OBJECT *SendObjectP = NULL;
@@ -230,11 +231,11 @@ void NetMatch(void)
 		sprintf_s(toSendText, "Entry");
 		if (ChkSend == false)
 		{
-			send(dstSocket, toSendText, BUFFER_SIZE, 0);
+			send(dstSocket, toSendText, BUFFER_SIZE_STRING, 0);
 			ChkSend = true;
 		}
 		printf("マッチング中\n");
-		numrcv = recv(dstSocket, ConnectRMsg, BUFFER_SIZE, 0);
+		numrcv = recv(dstSocket, ConnectRMsg, BUFFER_SIZE_STRING, 0);
 		if (numrcv < 1)
 		{
 			if (WSAGetLastError() == WSAEWOULDBLOCK)
@@ -254,13 +255,13 @@ void NetMatch(void)
 			{
 				//受信完了メッセージ送信
 				//strcpy_s(toSendText, "OK");
-				//send(dstSocket, toSendText, strlen(toSendText) + 1, 0);
+				//send(dstSocket, toSendText, BUFFER_SIZE_STRING, 0);
 				ChkMatch = true;
 				SetNetMatchFlag(true);
 
 			}
 		}
-		//Sleep(10);
+		Sleep(500);
 	}
 }
 
@@ -273,7 +274,7 @@ void NetMyNumberGet(void)
 	char MyNumChkRMsg[BUFFER_SIZE]; //送られてくるデータ内容
 	MyNumChkRMsg[0] = NULL;
 	printf("個人番号取得中\n");
-	numrcv = recv(dstSocket, MyNumChkRMsg, BUFFER_SIZE, 0);
+	numrcv = recv(dstSocket, MyNumChkRMsg, BUFFER_SIZE_STRING, 0);
 	if (numrcv < 1)
 	{
 		if (WSAGetLastError() == WSAEWOULDBLOCK)
@@ -300,8 +301,8 @@ void NetMyNumberGet(void)
 		{
 			//受信完了メッセージ送信
 			toSendText[0] = NULL;
-			sprintf_s(toSendText, "OK");
-			send(dstSocket, toSendText, BUFFER_SIZE, 0);
+			sprintf_s(toSendText, "MyNumOK");
+			send(dstSocket, toSendText, BUFFER_SIZE_STRING, 0);
 			//printf("received: 個人番号取得%s\n", Packetbuffer);
 			//ChkMyNumber = true;
 			int num = packet;
@@ -309,8 +310,8 @@ void NetMyNumberGet(void)
 			SetNetMyNumberFlagFlag(true);
 		}
 	}
-	//Sleep(10);
-//}
+	Sleep(500);
+	//}
 }
 
 void NetItemGet(void)
@@ -323,7 +324,7 @@ void NetItemGet(void)
 	char ItemChkRMsg[BUFFER_SIZE]; //送られてくるデータ内容
 	ItemChkRMsg[0] = NULL;
 	//printf("アイテム情報取得中\n");
-	numrcv = recv(dstSocket, ItemChkRMsg, BUFFER_SIZE, 0);
+	numrcv = recv(dstSocket, ItemChkRMsg, BUFFER_SIZE_STRING, 0);
 	if (numrcv < 1)
 	{
 		if (WSAGetLastError() == WSAEWOULDBLOCK)
@@ -405,8 +406,8 @@ void NetItemGet(void)
 		{
 			//受信完了メッセージ送信
 			toSendText[0] = NULL;
-			sprintf_s(toSendText, "OK");
-			send(dstSocket, toSendText, BUFFER_SIZE, 0);
+			sprintf_s(toSendText, "ItemOK");
+			send(dstSocket, toSendText, BUFFER_SIZE_STRING, 0);
 			SetNetItemFlag(true);
 		}
 	}
@@ -421,7 +422,7 @@ void NetCountdown(void)
 	//bool ChkStart = false;
 	//while (ChkStart != true)
 	//{
-		numrcv = recv(dstSocket, CountChkRMsg, BUFFER_SIZE, 0);
+		numrcv = recv(dstSocket, CountChkRMsg, BUFFER_SIZE_STRING, 0);
 		if (numrcv < 1)
 		{
 			if (WSAGetLastError() == WSAEWOULDBLOCK)
@@ -441,8 +442,8 @@ void NetCountdown(void)
 			{
 				//受信完了メッセージ送信
 				toSendText[0] = NULL;
-				sprintf_s(toSendText, "OK");
-				send(dstSocket, toSendText, BUFFER_SIZE, 0);
+				sprintf_s(toSendText, "StartOK");
+				send(dstSocket, toSendText, BUFFER_SIZE_STRING, 0);
 				//ChkStart = true;
 				SetNetGameStartFlag(true);
 				//マルチスレッド開始信号ON
@@ -665,31 +666,31 @@ void SendPacket(void)
 		//変更があった場合send()する　基本情報
 		if (SMsg[0] != NULL)
 		{
-			send(dstSocket, SMsg, BUFFER_SIZE, 0);
+			send(dstSocket, SMsg, BUFFER_SIZE_STRING, 0);
 		}
 
 		//変更があった場合send()する　アイテム取得情報
 		if (ItemSMsg[0] != NULL)
 		{
-			send(dstSocket, ItemSMsg, BUFFER_SIZE, 0);
+			send(dstSocket, ItemSMsg, BUFFER_SIZE_STRING, 0);
 
 			//地形アイテムが取得された時だけ追加のメッセージを送信する
 			if (SendObjectP->field->TikeiSeed != SendObjectP->field->OldTikeiSeed)
 			{
 				char SpecialSMsg[BUFFER_SIZE] = { NULL }; //送るデータ内容
 				sprintf_s(SpecialSMsg, "@T,S%d,N%d&", SendObjectP->field->TikeiSeed, SendObjectP->field->GetPlayerNum);
-				send(dstSocket, SpecialSMsg, BUFFER_SIZE, 0);
+				send(dstSocket, SpecialSMsg, BUFFER_SIZE_STRING, 0);
 			}
 		}
 
 		//変更があった場合send()する　基本情報
 		if (EndGameMsg[0] != NULL)
 		{
-			send(dstSocket, EndGameMsg, BUFFER_SIZE, 0);
+			send(dstSocket, EndGameMsg, BUFFER_SIZE_STRING, 0);
 		}
 
 		//常時send()する　アイテム使用情報
-		//send(dstSocket, ItemUseSMsg, strlen(ItemUseSMsg) + 1, 0);
+		//send(dstSocket, ItemUseSMsg, BUFFER_SIZE_STRING, 0);
 	}
 }
 
@@ -701,7 +702,7 @@ void ReceivePacket(void)
 	char RMsg[BUFFER_SIZE] = { NULL }; //送られてくるデータ内容
 
 	//常時受け取りをする。データの変更があった時のみアクセス許可を取り、対象データに書き込みを行う。
-	numrcv = recv(dstSocket, RMsg, BUFFER_SIZE, 0);
+	numrcv = recv(dstSocket, RMsg, BUFFER_SIZE_STRING, 0);
 	if (numrcv < 1)
 	{
 		if (WSAGetLastError() == WSAEWOULDBLOCK)
