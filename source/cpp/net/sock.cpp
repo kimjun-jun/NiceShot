@@ -261,7 +261,7 @@ void NetMatch(void)
 
 			}
 		}
-		Sleep(500);
+		Sleep(100);
 	}
 }
 
@@ -310,7 +310,7 @@ void NetMyNumberGet(void)
 			SetNetMyNumberFlagFlag(true);
 		}
 	}
-	Sleep(500);
+	Sleep(100);
 	//}
 }
 
@@ -451,7 +451,7 @@ void NetCountdown(void)
 				GameSceneFlag = true;
 			}
 		}
-		Sleep(10);
+		Sleep(1);
 	//}
 }
 
@@ -467,6 +467,9 @@ void Packet(void)
 				//パケットを制御
 				SendPacket();
 				ReceivePacket();
+				//調整用スリープ　これがないとランタイムエラーになる
+				//receiveとsendの回数に関係がありそう。すこし待ってからreceiveしないといけいない
+				Sleep(1);
 			}
 		}
 	}
