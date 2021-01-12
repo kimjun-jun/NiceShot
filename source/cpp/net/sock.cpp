@@ -32,8 +32,8 @@ GAME_OBJECT *SendObjectP = NULL;
 //STEP3	WAN通信		OK
 
 /* IP アドレス、ポート番号、ソケット */
-char destination[80] = { "192.168.11.3" };
-unsigned short port = 27015;
+char destination[80];
+unsigned short port;
 int dstSocket=0;
 
 /* sockaddr_in 構造体 */
@@ -229,7 +229,7 @@ void NetMatch(void)
 		ConnectRMsg[0] = NULL;
 		toSendText[0] = NULL;
 		sprintf_s(toSendText, "Entry");
-		if (ChkSend == false)
+		//if (ChkSend == false)
 		{
 			send(dstSocket, toSendText, BUFFER_SIZE_STRING, 0);
 			ChkSend = true;
