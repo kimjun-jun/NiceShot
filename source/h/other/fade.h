@@ -5,7 +5,7 @@
 * @date 2020/01/15
 */
 #pragma once
-
+#include "../../h/object/objectclass.h"
 
 /**
  * @enum FADE
@@ -20,33 +20,39 @@ enum FADE_TYPE
 	FADE_MAX			//!< マックス
 };
 
-#include "../../h/object/objectclass.h"
-
-
 /**
-*　@struct FADE
-*　@brief 2Dポリゴンを定義する構造体
+*　@class FADE_PARAMETER
+*　@brief 
 */
-class FADE : public OBJECT_2D
+class FADE_PARAMETER
 {
 public:
-	FADE() { color = D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.0f); eFade = FADE_NONE; eScene = 0; sno = 0; }
-	virtual void						Init(void);					//!< 初期化
-	virtual void						Reinit(void);				//!< 再初期化
-	virtual void						Uninit(void);				//!< 終了
-	virtual void						Update(GAME_OBJECT*obj);				//!< 更新
-	virtual void						Draw(void);					//!< 描画
-	void								SetFade(FADE_TYPE fade, E_STAGE next, int sno);
-	void								SetColor(D3DCOLOR col);
+	FADE_PARAMETER() { color = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f); eFade = FADE_IN; eScene = SCENE_TITLE; sno = 0; }
+	~FADE_PARAMETER() { }
 
-	D3DXCOLOR				color;								//!< カラー情報
-	FADE_TYPE				eFade = FADE_IN;						//!< フェード番号
-	int						eScene = SCENE_TITLE;					//!< 次に飛ぶ予定のScene
-	int						sno = -1;								//!< サウンドナンバー
-
-private:
-	void MakeVertexFade(void);
+	D3DXCOLOR	color;							//!< カラー情報
+	FADE_TYPE	eFade;							//!< フェード番号
+	int			sno;							//!< サウンドナンバー
+	E_STAGE		eScene;							//!< 次に飛ぶ予定のScene
 };
 
+/**
+*　@class FADE
+*　@brief GAMEOBJECT派生クラス　シーン切り替え時のフェード効果　一定周期タイム後にシーンを切り替える
+*/
+class FADE : public GAME_OBJECT
+{
+public:
+	FADE();		//!< データ読み込み　初期化
+	~FADE();	//!< 削除
 
+	void		SetFade(FADE_TYPE fade, E_STAGE next, int sno);		//フェード効果セット
 
+private:
+	void		Init(void);						//!< 初期化
+	void		Update(GAME_OBJECT*obj);		//!< 更新
+	void		Draw(void);						//!< 描画
+
+	VTXBuffer	vtx;							//!< 頂点情報　複数使用するならここを配列化
+	FADE_PARAMETER	FadePara;					//!< マネージャーに必要なデータ群
+};

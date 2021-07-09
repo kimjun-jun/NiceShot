@@ -63,7 +63,885 @@ bool NetShareDateFlag = false;
 void SetNetShareDateFlag(bool flag) { NetShareDateFlag = flag; }
 bool GetNetShareDateFlag(void) { return NetShareDateFlag; }
 
-//std::mutex m;
+//使用するタイプを変更する
+void iUseCheak::ChangeUse(int NowUseType)
+{
+	switch (NowUseType)
+	{
+		//使用していなかったら使用状態に変更
+	case NoUse:
+		this->Use(YesUseType1);
+		break;
+		//使用していたら未使用状態に変更
+	case YesUseType1:
+		this->Use(NoUse);
+		break;
+	}
+}
+
+//テクスチャ読み込み処理
+void TEXTURE::LoadTexture(const char *FileName)
+{
+	D3DXCreateTextureFromFile(GetDevice(), FileName, &this->pD3DTexture);
+}
+
+//頂点[作成]時設定(3D)
+//作成のみ (3D)
+void VTXBuffer::MakeVertex3D(const int VTXnum, const DWORD FVF)
+{
+	// オブジェクトの頂点バッファを生成
+	GetDevice()->CreateVertexBuffer(sizeof(VERTEX_3D) * VTXnum,	// 頂点データ用に確保するバッファサイズ(バイト単位)
+		D3DUSAGE_WRITEONLY,							// 頂点バッファの使用法　
+		FVF,										// 使用する頂点フォーマット
+		D3DPOOL_MANAGED,							// リソースのバッファを保持するメモリクラスを指定
+		&this->pD3DVtxBuff,							// 頂点バッファインターフェースへのポインタ
+		NULL);										// NULLに設定
+}
+
+//座標のみ入力　他自動 (3D)
+void VTXBuffer::MakeVertex3D(const int VTXnum, const DWORD FVF, const float HalfSizeX, const float HalfSizeY)
+{
+	// 3D頂点処理　基本的にビルボード処理で使用
+	// オブジェクトの頂点バッファを生成
+	GetDevice()->CreateVertexBuffer(sizeof(VERTEX_3D) * VTXnum,	// 頂点データ用に確保するバッファサイズ(バイト単位)
+		D3DUSAGE_WRITEONLY,							// 頂点バッファの使用法　
+		FVF,										// 使用する頂点フォーマット
+		D3DPOOL_MANAGED,							// リソースのバッファを保持するメモリクラスを指定
+		&this->pD3DVtxBuff,							// 頂点バッファインターフェースへのポインタ
+		NULL);										// NULLに設定
+
+	{//頂点バッファの中身を埋める
+		VERTEX_3D *pVtx;
+		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
+		this->pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+		for (int Cnt = 0; Cnt < VTXnum; Cnt++, pVtx += 4)
+		{
+			// 頂点座標の設定
+			pVtx[0].vtx = D3DXVECTOR3(-HalfSizeX, -HalfSizeY, 0.0f);
+			pVtx[1].vtx = D3DXVECTOR3(HalfSizeX, -HalfSizeY, 0.0f);
+			pVtx[2].vtx = D3DXVECTOR3(-HalfSizeX, HalfSizeY, 0.0f);
+			pVtx[3].vtx = D3DXVECTOR3(HalfSizeX, HalfSizeY, 0.0f);
+			// 法線の設定
+			pVtx[0].nor = pVtx[1].nor = pVtx[2].nor = pVtx[3].nor = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
+			// 反射光の設定
+			pVtx[0].diffuse = pVtx[1].diffuse = pVtx[2].diffuse = pVtx[3].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+			// テクスチャ座標の設定
+			pVtx[0].tex = D3DXVECTOR2(0.0f, 0.0f);
+			pVtx[1].tex = D3DXVECTOR2(1.0f, 0.0f);
+			pVtx[2].tex = D3DXVECTOR2(0.0f, 1.0f);
+			pVtx[3].tex = D3DXVECTOR2(1.0f, 1.0f);
+		}
+		// 頂点データをアンロックする
+		this->pD3DVtxBuff->Unlock();
+	}
+}
+
+//＋テクスチャ入力　他自動 (3D)
+void VTXBuffer::MakeVertex3D(const int VTXnum, const DWORD FVF, const float HalfSizeX, const float HalfSizeY, const float uStart, const float uEnd, const float vStart, const float vEnd)
+{
+	// 3D頂点処理　基本的にビルボード処理で使用
+	// オブジェクトの頂点バッファを生成
+	GetDevice()->CreateVertexBuffer(sizeof(VERTEX_3D) * VTXnum,	// 頂点データ用に確保するバッファサイズ(バイト単位)
+		D3DUSAGE_WRITEONLY,							// 頂点バッファの使用法　
+		FVF,										// 使用する頂点フォーマット
+		D3DPOOL_MANAGED,							// リソースのバッファを保持するメモリクラスを指定
+		&this->pD3DVtxBuff,							// 頂点バッファインターフェースへのポインタ
+		NULL);										// NULLに設定
+
+	{//頂点バッファの中身を埋める
+		VERTEX_3D *pVtx;
+		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
+		this->pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+		for (int Cnt = 0; Cnt < VTXnum; Cnt++, pVtx += 4)
+		{
+			// 頂点座標の設定
+			pVtx[0].vtx = D3DXVECTOR3(-HalfSizeX, -HalfSizeY, 0.0f);
+			pVtx[1].vtx = D3DXVECTOR3(HalfSizeX, -HalfSizeY, 0.0f);
+			pVtx[2].vtx = D3DXVECTOR3(-HalfSizeX, HalfSizeY, 0.0f);
+			pVtx[3].vtx = D3DXVECTOR3(HalfSizeX, HalfSizeY, 0.0f);
+			// 法線の設定
+			pVtx[0].nor = pVtx[1].nor = pVtx[2].nor = pVtx[3].nor = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
+			// 反射光の設定
+			pVtx[0].diffuse = pVtx[1].diffuse = pVtx[2].diffuse = pVtx[3].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+			// テクスチャ座標の設定
+			pVtx[0].tex = D3DXVECTOR2(uStart, vStart);
+			pVtx[1].tex = D3DXVECTOR2(uEnd, vStart);
+			pVtx[2].tex = D3DXVECTOR2(uStart, vEnd);
+			pVtx[3].tex = D3DXVECTOR2(uEnd, vEnd);
+		}
+		// 頂点データをアンロックする
+		this->pD3DVtxBuff->Unlock();
+	}
+}
+
+//全項目入力 (3D)
+void VTXBuffer::MakeVertex3D(const int VTXnum, const DWORD FVF, const float LHalfSizeX, const float RHalfSizeX, const float HHalfSizeY, const float LHalfSizeY,
+	const D3DXVECTOR3 Nor[4], const D3DXCOLOR col, const float uStart, const float uEnd, const float vStart, const float vEnd)
+{
+	// 3D頂点処理　基本的にビルボード処理で使用
+	// オブジェクトの頂点バッファを生成
+	GetDevice()->CreateVertexBuffer(sizeof(VERTEX_3D) * VTXnum,	// 頂点データ用に確保するバッファサイズ(バイト単位)
+		D3DUSAGE_WRITEONLY,							// 頂点バッファの使用法　
+		FVF,										// 使用する頂点フォーマット
+		D3DPOOL_MANAGED,							// リソースのバッファを保持するメモリクラスを指定
+		&this->pD3DVtxBuff,							// 頂点バッファインターフェースへのポインタ
+		NULL);										// NULLに設定
+
+	{//頂点バッファの中身を埋める
+		VERTEX_3D *pVtx;
+
+		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
+		this->pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+		for (int Cnt = 0; Cnt < VTXnum; Cnt++, pVtx += 4)
+		{
+			// 頂点座標の設定
+			pVtx[0].vtx = D3DXVECTOR3(-LHalfSizeX, -HHalfSizeY, 0.0f);
+			pVtx[1].vtx = D3DXVECTOR3(RHalfSizeX, -HHalfSizeY, 0.0f);
+			pVtx[2].vtx = D3DXVECTOR3(-LHalfSizeX, LHalfSizeY, 0.0f);
+			pVtx[3].vtx = D3DXVECTOR3(RHalfSizeX, LHalfSizeY, 0.0f);
+			// 法線の設定
+			pVtx[0].nor = Nor[0];
+			pVtx[1].nor = Nor[1];
+			pVtx[2].nor = Nor[2];
+			pVtx[3].nor = Nor[3];
+			// 反射光の設定
+			pVtx[0].diffuse = pVtx[1].diffuse = pVtx[2].diffuse = pVtx[3].diffuse = col;
+			// テクスチャ座標の設定
+			pVtx[0].tex = D3DXVECTOR2(uStart, vStart);
+			pVtx[1].tex = D3DXVECTOR2(uEnd, vStart);
+			pVtx[2].tex = D3DXVECTOR2(uStart, vEnd);
+			pVtx[3].tex = D3DXVECTOR2(uEnd, vEnd);
+		}
+		// 頂点データをアンロックする
+		this->pD3DVtxBuff->Unlock();
+	}
+}
+
+//頂点[作成]時設定(3Dビルボード)
+//作成のみ (3Dビルボード)
+void VTXBuffer::MakeVertex3DBill(const int CntMax, const DWORD FVF)
+{
+	// オブジェクトの頂点バッファを生成
+	GetDevice()->CreateVertexBuffer(sizeof(VERTEX_3D) * POLYGON_2D_VERTEX * CntMax,	// 頂点データ用に確保するバッファサイズ(バイト単位)
+		D3DUSAGE_WRITEONLY,							// 頂点バッファの使用法　
+		FVF,										// 使用する頂点フォーマット
+		D3DPOOL_MANAGED,							// リソースのバッファを保持するメモリクラスを指定
+		&this->pD3DVtxBuff,							// 頂点バッファインターフェースへのポインタ
+		NULL);										// NULLに設定
+}
+
+//座標のみ入力　他自動 (3Dビルボード)
+void VTXBuffer::MakeVertex3DBill(const int CntMax, const DWORD FVF, const float HalfSizeX, const float HalfSizeY)
+{
+	// 3D頂点処理　基本的にビルボード処理で使用
+	// オブジェクトの頂点バッファを生成
+	GetDevice()->CreateVertexBuffer(sizeof(VERTEX_3D) * POLYGON_2D_VERTEX * CntMax,	// 頂点データ用に確保するバッファサイズ(バイト単位)
+		D3DUSAGE_WRITEONLY,							// 頂点バッファの使用法　
+		FVF,										// 使用する頂点フォーマット
+		D3DPOOL_MANAGED,							// リソースのバッファを保持するメモリクラスを指定
+		&this->pD3DVtxBuff,							// 頂点バッファインターフェースへのポインタ
+		NULL);										// NULLに設定
+
+	{//頂点バッファの中身を埋める
+		VERTEX_3D *pVtx;
+		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
+		this->pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+		for (int Cnt = 0; Cnt < CntMax; Cnt++, pVtx += 4)
+		{
+			// 頂点座標の設定
+			pVtx[0].vtx = D3DXVECTOR3(-HalfSizeX, -HalfSizeY, 0.0f);
+			pVtx[1].vtx = D3DXVECTOR3(HalfSizeX, -HalfSizeY, 0.0f);
+			pVtx[2].vtx = D3DXVECTOR3(-HalfSizeX, HalfSizeY, 0.0f);
+			pVtx[3].vtx = D3DXVECTOR3(HalfSizeX, HalfSizeY, 0.0f);
+			// 法線の設定
+			pVtx[0].nor = pVtx[1].nor = pVtx[2].nor = pVtx[3].nor = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
+			// 反射光の設定
+			pVtx[0].diffuse = pVtx[1].diffuse = pVtx[2].diffuse = pVtx[3].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+			// テクスチャ座標の設定
+			pVtx[0].tex = D3DXVECTOR2(0.0f, 0.0f);
+			pVtx[1].tex = D3DXVECTOR2(1.0f, 0.0f);
+			pVtx[2].tex = D3DXVECTOR2(0.0f, 1.0f);
+			pVtx[3].tex = D3DXVECTOR2(1.0f, 1.0f);
+		}
+		// 頂点データをアンロックする
+		this->pD3DVtxBuff->Unlock();
+	}
+}
+
+//＋テクスチャ入力　他自動 (3Dビルボード)
+void VTXBuffer::MakeVertex3DBill(const int CntMax, const DWORD FVF, const float HalfSizeX, const float HalfSizeY, const float uStart, const float uEnd, const float vStart, const float vEnd)
+{
+	// 3D頂点処理　基本的にビルボード処理で使用
+	// オブジェクトの頂点バッファを生成
+	GetDevice()->CreateVertexBuffer(sizeof(VERTEX_3D) * POLYGON_2D_VERTEX * CntMax,	// 頂点データ用に確保するバッファサイズ(バイト単位)
+		D3DUSAGE_WRITEONLY,							// 頂点バッファの使用法　
+		FVF,										// 使用する頂点フォーマット
+		D3DPOOL_MANAGED,							// リソースのバッファを保持するメモリクラスを指定
+		&this->pD3DVtxBuff,							// 頂点バッファインターフェースへのポインタ
+		NULL);										// NULLに設定
+
+	{//頂点バッファの中身を埋める
+		VERTEX_3D *pVtx;
+		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
+		this->pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+		for (int Cnt = 0; Cnt < CntMax; Cnt++, pVtx += 4)
+		{
+			// 頂点座標の設定
+			pVtx[0].vtx = D3DXVECTOR3(-HalfSizeX, -HalfSizeY, 0.0f);
+			pVtx[1].vtx = D3DXVECTOR3(HalfSizeX, -HalfSizeY, 0.0f);
+			pVtx[2].vtx = D3DXVECTOR3(-HalfSizeX, HalfSizeY, 0.0f);
+			pVtx[3].vtx = D3DXVECTOR3(HalfSizeX, HalfSizeY, 0.0f);
+			// 法線の設定
+			pVtx[0].nor = pVtx[1].nor = pVtx[2].nor = pVtx[3].nor = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
+			// 反射光の設定
+			pVtx[0].diffuse = pVtx[1].diffuse = pVtx[2].diffuse = pVtx[3].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+			// テクスチャ座標の設定
+			pVtx[0].tex = D3DXVECTOR2(uStart, vStart);
+			pVtx[1].tex = D3DXVECTOR2(uEnd, vStart);
+			pVtx[2].tex = D3DXVECTOR2(uStart, vEnd);
+			pVtx[3].tex = D3DXVECTOR2(uEnd, vEnd);
+		}
+		// 頂点データをアンロックする
+		this->pD3DVtxBuff->Unlock();
+	}
+}
+
+//全項目入力 (3Dビルボード)
+void VTXBuffer::MakeVertex3DBill(const int CntMax, const DWORD FVF, const float LHalfSizeX, const float RHalfSizeX, const float HHalfSizeY, const float LHalfSizeY,
+	const D3DXVECTOR3 Nor[4], const D3DXCOLOR col, const float uStart, const float uEnd, const float vStart, const float vEnd)
+{
+	// 3D頂点処理　基本的にビルボード処理で使用
+	// オブジェクトの頂点バッファを生成
+	GetDevice()->CreateVertexBuffer(sizeof(VERTEX_3D) * POLYGON_2D_VERTEX * CntMax,	// 頂点データ用に確保するバッファサイズ(バイト単位)
+		D3DUSAGE_WRITEONLY,							// 頂点バッファの使用法　
+		FVF,										// 使用する頂点フォーマット
+		D3DPOOL_MANAGED,							// リソースのバッファを保持するメモリクラスを指定
+		&this->pD3DVtxBuff,							// 頂点バッファインターフェースへのポインタ
+		NULL);										// NULLに設定
+
+	{//頂点バッファの中身を埋める
+		VERTEX_3D *pVtx;
+
+		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
+		this->pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+		for (int Cnt = 0; Cnt < CntMax; Cnt++, pVtx += 4)
+		{
+			// 頂点座標の設定
+			pVtx[0].vtx = D3DXVECTOR3(-LHalfSizeX, -HHalfSizeY, 0.0f);
+			pVtx[1].vtx = D3DXVECTOR3(RHalfSizeX, -HHalfSizeY, 0.0f);
+			pVtx[2].vtx = D3DXVECTOR3(-LHalfSizeX, LHalfSizeY, 0.0f);
+			pVtx[3].vtx = D3DXVECTOR3(RHalfSizeX, LHalfSizeY, 0.0f);
+			// 法線の設定
+			pVtx[0].nor = Nor[0];
+			pVtx[1].nor = Nor[1];
+			pVtx[2].nor = Nor[2];
+			pVtx[3].nor = Nor[3];
+			// 反射光の設定
+			pVtx[0].diffuse = pVtx[1].diffuse = pVtx[2].diffuse = pVtx[3].diffuse = col;
+			// テクスチャ座標の設定
+			pVtx[0].tex = D3DXVECTOR2(uStart, vStart);
+			pVtx[1].tex = D3DXVECTOR2(uEnd, vStart);
+			pVtx[2].tex = D3DXVECTOR2(uStart, vEnd);
+			pVtx[3].tex = D3DXVECTOR2(uEnd, vEnd);
+		}
+		// 頂点データをアンロックする
+		this->pD3DVtxBuff->Unlock();
+	}
+}
+
+//頂点[作成]時設定(2D)
+//作成のみ (2D)
+void VTXBuffer::MakeVertex2D(const int CntMax, const DWORD FVF)
+{
+	// オブジェクトの頂点バッファを生成
+	GetDevice()->CreateVertexBuffer(sizeof(VERTEX_2D) * POLYGON_2D_VERTEX * CntMax,	// 頂点データ用に確保するバッファサイズ(バイト単位)
+		D3DUSAGE_WRITEONLY,							// 頂点バッファの使用法　
+		FVF,										// 使用する頂点フォーマット
+		D3DPOOL_MANAGED,							// リソースのバッファを保持するメモリクラスを指定
+		&this->pD3DVtxBuff,							// 頂点バッファインターフェースへのポインタ
+		NULL);										// NULLに設定
+
+}
+
+//頂点のみ入力　他自動 (2D)
+void VTXBuffer::MakeVertex2D(const int CntMax, const DWORD FVF, const float HalfSizeX, const float HalfSizeY)
+{
+	// オブジェクトの頂点バッファを生成
+	GetDevice()->CreateVertexBuffer(sizeof(VERTEX_2D) * POLYGON_2D_VERTEX * CntMax,	// 頂点データ用に確保するバッファサイズ(バイト単位)
+		D3DUSAGE_WRITEONLY,							// 頂点バッファの使用法　
+		FVF,										// 使用する頂点フォーマット
+		D3DPOOL_MANAGED,							// リソースのバッファを保持するメモリクラスを指定
+		&this->pD3DVtxBuff,							// 頂点バッファインターフェースへのポインタ
+		NULL);										// NULLに設定
+
+	{//頂点バッファの中身を埋める
+		VERTEX_2D *pVtx;
+		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
+		this->pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+		for (int Cnt = 0; Cnt < CntMax; Cnt++, pVtx += 4)
+		{
+			// 頂点座標の設定
+			pVtx[0].vtx = D3DXVECTOR3(-HalfSizeX, -HalfSizeY, 0.0f);
+			pVtx[1].vtx = D3DXVECTOR3(HalfSizeX, -HalfSizeY, 0.0f);
+			pVtx[2].vtx = D3DXVECTOR3(-HalfSizeX, HalfSizeY, 0.0f);
+			pVtx[3].vtx = D3DXVECTOR3(HalfSizeX, HalfSizeY, 0.0f);
+			// テクスチャのパースペクティブコレクト用
+			pVtx[0].rhw = pVtx[1].rhw = pVtx[2].rhw = pVtx[3].rhw = 1.0f;
+			// 反射光の設定
+			pVtx[0].diffuse = pVtx[1].diffuse = pVtx[2].diffuse = pVtx[3].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+			// テクスチャ座標の設定
+			pVtx[0].tex = D3DXVECTOR2(0.0f, 0.0f);
+			pVtx[1].tex = D3DXVECTOR2(1.0f, 0.0f);
+			pVtx[2].tex = D3DXVECTOR2(0.0f, 1.0f);
+			pVtx[3].tex = D3DXVECTOR2(1.0f, 1.0f);
+		}
+		// 頂点データをアンロックする
+		this->pD3DVtxBuff->Unlock();
+	}
+}
+
+//＋テクスチャ入力　他自動 (2D)
+void VTXBuffer::MakeVertex2D(const int CntMax, const DWORD FVF, const float HalfSizeX, const float HalfSizeY, const float uStart, const float uEnd, const float vStart, const float vEnd)
+{
+	// オブジェクトの頂点バッファを生成
+	GetDevice()->CreateVertexBuffer(sizeof(VERTEX_2D) * POLYGON_2D_VERTEX * CntMax,	// 頂点データ用に確保するバッファサイズ(バイト単位)
+		D3DUSAGE_WRITEONLY,							// 頂点バッファの使用法　
+		FVF,										// 使用する頂点フォーマット
+		D3DPOOL_MANAGED,							// リソースのバッファを保持するメモリクラスを指定
+		&this->pD3DVtxBuff,							// 頂点バッファインターフェースへのポインタ
+		NULL);										// NULLに設定
+
+	{//頂点バッファの中身を埋める
+		VERTEX_2D *pVtx;
+		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
+		this->pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+		for (int Cnt = 0; Cnt < CntMax; Cnt++, pVtx += 4)
+		{
+			// 頂点座標の設定
+			pVtx[0].vtx = D3DXVECTOR3(-HalfSizeX, -HalfSizeY, 0.0f);
+			pVtx[1].vtx = D3DXVECTOR3(HalfSizeX, -HalfSizeY, 0.0f);
+			pVtx[2].vtx = D3DXVECTOR3(-HalfSizeX, HalfSizeY, 0.0f);
+			pVtx[3].vtx = D3DXVECTOR3(HalfSizeX, HalfSizeY, 0.0f);
+			// テクスチャのパースペクティブコレクト用
+			pVtx[0].rhw = pVtx[1].rhw = pVtx[2].rhw = pVtx[3].rhw = 1.0f;
+			// 反射光の設定
+			pVtx[0].diffuse = pVtx[1].diffuse = pVtx[2].diffuse = pVtx[3].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+			// テクスチャ座標の設定
+			pVtx[0].tex = D3DXVECTOR2(uStart, vStart);
+			pVtx[1].tex = D3DXVECTOR2(uEnd, vStart);
+			pVtx[2].tex = D3DXVECTOR2(uStart, vEnd);
+			pVtx[3].tex = D3DXVECTOR2(uEnd, vEnd);
+		}
+
+		// 頂点データをアンロックする
+		this->pD3DVtxBuff->Unlock();
+	}
+}
+
+//全項目入力 (2D)
+void VTXBuffer::MakeVertex2D(const int CntMax, const DWORD FVF, const float LHalfSizeX, const float RHalfSizeX,
+	const float HHalfSizeY, const float LHalfSizeY, const D3DXCOLOR col, const float uStart, const float uEnd, const float vStart, const float vEnd)
+{
+	// オブジェクトの頂点バッファを生成
+	GetDevice()->CreateVertexBuffer(sizeof(VERTEX_2D) * POLYGON_2D_VERTEX * CntMax,	// 頂点データ用に確保するバッファサイズ(バイト単位)
+		D3DUSAGE_WRITEONLY,							// 頂点バッファの使用法　
+		FVF,										// 使用する頂点フォーマット
+		D3DPOOL_MANAGED,							// リソースのバッファを保持するメモリクラスを指定
+		&this->pD3DVtxBuff,							// 頂点バッファインターフェースへのポインタ
+		NULL);										// NULLに設定
+
+	{//頂点バッファの中身を埋める
+		VERTEX_2D *pVtx;
+		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
+		this->pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+		for (int Cnt = 0; Cnt < CntMax; Cnt++, pVtx += 4)
+		{
+			// 頂点座標の設定
+			pVtx[0].vtx = D3DXVECTOR3(-LHalfSizeX, -HHalfSizeY, 0.0f);
+			pVtx[1].vtx = D3DXVECTOR3(RHalfSizeX, -HHalfSizeY, 0.0f);
+			pVtx[2].vtx = D3DXVECTOR3(-LHalfSizeX, LHalfSizeY, 0.0f);
+			pVtx[3].vtx = D3DXVECTOR3(RHalfSizeX, LHalfSizeY, 0.0f);
+			// テクスチャのパースペクティブコレクト用
+			pVtx[0].rhw = pVtx[1].rhw = pVtx[2].rhw = pVtx[3].rhw = 1.0f;
+			// 反射光の設定
+			pVtx[0].diffuse = pVtx[1].diffuse = pVtx[2].diffuse = pVtx[3].diffuse = col;
+			// テクスチャ座標の設定
+			pVtx[0].tex = D3DXVECTOR2(uStart, vStart);
+			pVtx[1].tex = D3DXVECTOR2(uEnd, vStart);
+			pVtx[2].tex = D3DXVECTOR2(uStart, vEnd);
+			pVtx[3].tex = D3DXVECTOR2(uEnd, vEnd);
+		}
+		// 頂点データをアンロックする
+		this->pD3DVtxBuff->Unlock();
+	}
+}
+
+//頂点[作成]時設定(3D)
+void VTXBuffer::MakeIdxVertex(const int VTXIdxNum)
+{
+	// オブジェクトのインデックスバッファを生成
+	GetDevice()->CreateIndexBuffer(VTXIdxNum,						// 頂点データ用に確保するバッファサイズ(バイト単位)
+		D3DUSAGE_WRITEONLY,													// 頂点バッファの使用法　
+		D3DFMT_INDEX16,														// 使用するインデックスフォーマット
+		D3DPOOL_MANAGED,													// リソースのバッファを保持するメモリクラスを指定
+		&this->pD3DIdxBuff,														// インデックスバッファインターフェースへのポインタ
+		NULL);
+}
+
+//頂点サイズの設定　左右上下対称 (3D) effect で使用
+void VTXBuffer::Vertex3D(const int Indx, const float HalfSizeX, const float HalfSizeY)
+{
+	{//頂点バッファの中身を埋める
+		VERTEX_3D *pVtx;
+		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
+		this->pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+		pVtx += (Indx * 4);
+		// 頂点座標の設定
+		pVtx[0].vtx = D3DXVECTOR3(-HalfSizeX, -HalfSizeY, 0.0f);
+		pVtx[1].vtx = D3DXVECTOR3(HalfSizeX, -HalfSizeY, 0.0f);
+		pVtx[2].vtx = D3DXVECTOR3(-HalfSizeX, HalfSizeY, 0.0f);
+		pVtx[3].vtx = D3DXVECTOR3(HalfSizeX, HalfSizeY, 0.0f);
+		// 頂点データをアンロックする
+		this->pD3DVtxBuff->Unlock();
+	}
+}
+
+//頂点サイズの設定　左右上下非対称　比率固定 (3D)
+void VTXBuffer::Vertex3D(const int Indx, const float LHalfSizeX, const float RHalfSizeX, const float HHalfSizeY, const float LHalfSizeY)
+{
+	{//頂点バッファの中身を埋める
+		VERTEX_3D *pVtx;
+		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
+		this->pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+		pVtx += (Indx * 4);
+		// 頂点座標の設定
+		pVtx[0].vtx = D3DXVECTOR3(-LHalfSizeX, -HHalfSizeY, 0.0f);
+		pVtx[1].vtx = D3DXVECTOR3(RHalfSizeX, -HHalfSizeY, 0.0f);
+		pVtx[2].vtx = D3DXVECTOR3(-LHalfSizeX, LHalfSizeY, 0.0f);
+		pVtx[3].vtx = D3DXVECTOR3(RHalfSizeX, LHalfSizeY, 0.0f);
+		// 頂点データをアンロックする
+		this->pD3DVtxBuff->Unlock();
+	}
+}
+
+//頂点サイズの設定　全座標直接指定　(pos無しver) (3D)
+void VTXBuffer::Vertex3D(const int Indx, const D3DXVECTOR3 VTX[4])
+{
+	{//頂点バッファの中身を埋める
+		VERTEX_3D *pVtx;
+		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
+		this->pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+		pVtx += (Indx * 4);
+		// 頂点座標の設定
+		pVtx[0].vtx = D3DXVECTOR3(VTX[0].x, VTX[0].y, VTX[0].z);
+		pVtx[1].vtx = D3DXVECTOR3(VTX[1].x, VTX[1].y, VTX[1].z);
+		pVtx[2].vtx = D3DXVECTOR3(VTX[2].x, VTX[2].y, VTX[2].z);
+		pVtx[3].vtx = D3DXVECTOR3(VTX[3].x, VTX[3].y, VTX[3].z);
+		// 頂点データをアンロックする
+		this->pD3DVtxBuff->Unlock();
+	}
+}
+
+//頂点サイズの設定　全座標間接指定　(pos有りver) (3D)
+void VTXBuffer::Vertex3D(const int Indx, const float HalfSizeX, const float HalfSizeY, const D3DXVECTOR3 Pos)
+{
+	{//頂点バッファの中身を埋める
+		VERTEX_3D *pVtx;
+		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
+		this->pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+		pVtx += (Indx * 4);
+		// 頂点座標の設定
+		pVtx[0].vtx = D3DXVECTOR3(Pos.x - HalfSizeX, Pos.y - HalfSizeX, 0.0f);
+		pVtx[1].vtx = D3DXVECTOR3(Pos.x + HalfSizeX, Pos.y - HalfSizeX, 0.0f);
+		pVtx[2].vtx = D3DXVECTOR3(Pos.x - HalfSizeX, Pos.y + HalfSizeX, 0.0f);
+		pVtx[3].vtx = D3DXVECTOR3(Pos.x + HalfSizeX, Pos.y + HalfSizeX, 0.0f);
+		// 頂点データをアンロックする
+		this->pD3DVtxBuff->Unlock();
+	}
+}
+
+//頂点[作成]時設定(3D)
+void VTXBuffer::MakeIdxVertex(const int VTXIdxNum)
+{
+	// オブジェクトのインデックスバッファを生成
+	GetDevice()->CreateIndexBuffer(VTXIdxNum,						// 頂点データ用に確保するバッファサイズ(バイト単位)
+		D3DUSAGE_WRITEONLY,													// 頂点バッファの使用法　
+		D3DFMT_INDEX16,														// 使用するインデックスフォーマット
+		D3DPOOL_MANAGED,													// リソースのバッファを保持するメモリクラスを指定
+		&this->pD3DIdxBuff,														// インデックスバッファインターフェースへのポインタ
+		NULL);
+}
+
+//頂点サイズの設定　左右上下対称 (2D)
+void VTXBuffer::Vertex2D(const int Indx, const float HalfSizeX, const float HalfSizeY)
+{
+	{//頂点バッファの中身を埋める
+		VERTEX_2D *pVtx;
+		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
+		this->pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+		pVtx += (Indx * 4);
+		// 頂点座標の設定
+		pVtx[0].vtx = D3DXVECTOR3(-HalfSizeX, -HalfSizeY, 0.0f);
+		pVtx[1].vtx = D3DXVECTOR3(HalfSizeX, -HalfSizeY, 0.0f);
+		pVtx[2].vtx = D3DXVECTOR3(-HalfSizeX, HalfSizeY, 0.0f);
+		pVtx[3].vtx = D3DXVECTOR3(HalfSizeX, HalfSizeY, 0.0f);
+		// 頂点データをアンロックする
+		this->pD3DVtxBuff->Unlock();
+	}
+}
+
+//頂点サイズの設定　左右上下非対称　比率固定 (2D)
+void VTXBuffer::Vertex2D(const int Indx, const float LHalfSizeX, const float RHalfSizeX, const float HHalfSizeY, const float LHalfSizeY)
+{
+	{//頂点バッファの中身を埋める
+		VERTEX_2D *pVtx;
+		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
+		this->pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+		pVtx += (Indx * 4);
+		// 頂点座標の設定
+		pVtx[0].vtx = D3DXVECTOR3(-LHalfSizeX, -HHalfSizeY, 0.0f);
+		pVtx[1].vtx = D3DXVECTOR3(RHalfSizeX, -HHalfSizeY, 0.0f);
+		pVtx[2].vtx = D3DXVECTOR3(-LHalfSizeX, LHalfSizeY, 0.0f);
+		pVtx[3].vtx = D3DXVECTOR3(RHalfSizeX, LHalfSizeY, 0.0f);
+		// 頂点データをアンロックする
+		this->pD3DVtxBuff->Unlock();
+	}
+}
+
+//頂点サイズの設定　全座標直接指定　(pos無しver) (2D)
+void VTXBuffer::Vertex2D(const int Indx, const D3DXVECTOR3 VTX[4])
+{
+	{//頂点バッファの中身を埋める
+		VERTEX_2D *pVtx;
+		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
+		this->pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+		pVtx += (Indx * 4);
+		// 頂点座標の設定
+		pVtx[0].vtx = D3DXVECTOR3(VTX[0].x, VTX[0].y, VTX[0].z);
+		pVtx[1].vtx = D3DXVECTOR3(VTX[1].x, VTX[1].y, VTX[1].z);
+		pVtx[2].vtx = D3DXVECTOR3(VTX[2].x, VTX[2].y, VTX[2].z);
+		pVtx[3].vtx = D3DXVECTOR3(VTX[3].x, VTX[3].y, VTX[3].z);
+		// 頂点データをアンロックする
+		this->pD3DVtxBuff->Unlock();
+	}
+}
+
+//頂点サイズの設定　全座標間接指定　(pos有りver) (2D) damege で使用
+void VTXBuffer::Vertex2D(const int Indx, const float HalfSizeX, const float HalfSizeY, const D3DXVECTOR3 Pos)
+{
+	{//頂点バッファの中身を埋める
+		VERTEX_2D *pVtx;
+		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
+		this->pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+		pVtx += (Indx * 4);
+		// 頂点座標の設定
+		pVtx[0].vtx = D3DXVECTOR3(Pos.x - HalfSizeX, Pos.y - HalfSizeX, 0.0f);
+		pVtx[1].vtx = D3DXVECTOR3(Pos.x + HalfSizeX, Pos.y - HalfSizeX, 0.0f);
+		pVtx[2].vtx = D3DXVECTOR3(Pos.x - HalfSizeX, Pos.y + HalfSizeX, 0.0f);
+		pVtx[3].vtx = D3DXVECTOR3(Pos.x + HalfSizeX, Pos.y + HalfSizeX, 0.0f);
+		// 頂点データをアンロックする
+		this->pD3DVtxBuff->Unlock();
+	}
+}
+
+//頂点法線の設定
+//法線自動
+void VTXBuffer::Nor3D(const int Indx)
+{
+	{//頂点バッファの中身を埋める
+		VERTEX_3D *pVtx;
+		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
+		this->pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+		pVtx += (Indx * 4);
+		// 法線の設定
+		pVtx[0].nor = pVtx[1].nor = pVtx[2].nor = pVtx[3].nor = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
+		// 頂点データをアンロックする
+		this->pD3DVtxBuff->Unlock();
+	}
+}
+
+//法線入力
+void VTXBuffer::Nor3D(const int Indx, const D3DXVECTOR3 Nor[4])
+{
+	{//頂点バッファの中身を埋める
+		VERTEX_3D *pVtx;
+		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
+		this->pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+		pVtx += (Indx * 4);
+		// 法線の設定
+		pVtx[0].nor = Nor[0];
+		pVtx[1].nor = Nor[1];
+		pVtx[2].nor = Nor[2];
+		pVtx[3].nor = Nor[3];
+		// 頂点データをアンロックする
+		this->pD3DVtxBuff->Unlock();
+	}
+}
+
+// テクスチャのパースペクティブコレクト用
+void VTXBuffer::RHW2D(const int Indx)
+{
+	{//頂点バッファの中身を埋める
+		VERTEX_2D *pVtx;
+		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
+		this->pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+		pVtx += (Indx * 4);
+		// テクスチャのパースペクティブコレクト用
+		pVtx[0].rhw = pVtx[1].rhw = pVtx[2].rhw = pVtx[3].rhw = 1.0f;
+		// 頂点データをアンロックする
+		this->pD3DVtxBuff->Unlock();
+	}
+}
+
+//頂点カラーの設定
+//カラー自動 (3D)
+void VTXBuffer::Color3D(const int Indx)
+{
+	{//頂点バッファの中身を埋める
+		VERTEX_3D *pVtx;
+		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
+		this->pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+		pVtx += (Indx * 4);
+		// 反射光の設定
+		pVtx[0].diffuse = pVtx[1].diffuse = pVtx[2].diffuse = pVtx[3].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+		// 頂点データをアンロックする
+		this->pD3DVtxBuff->Unlock();
+	}
+}
+
+//カラー入力 (3D)
+void VTXBuffer::Color3D(const int Indx, const D3DXCOLOR col)
+{
+	{//頂点バッファの中身を埋める
+		VERTEX_3D *pVtx;
+		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
+		this->pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+		pVtx += (Indx * 4);
+		// 頂点座標の設定
+		pVtx[0].diffuse = col;
+		pVtx[1].diffuse = col;
+		pVtx[2].diffuse = col;
+		pVtx[3].diffuse = col;
+		// 頂点データをアンロックする
+		this->pD3DVtxBuff->Unlock();
+	}
+}
+
+//カラー自動 (2D)
+void VTXBuffer::Color2D(const int Indx)
+{
+	{//頂点バッファの中身を埋める
+		VERTEX_2D *pVtx;
+		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
+		this->pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+		pVtx += (Indx * 4);
+		// 反射光の設定
+		pVtx[0].diffuse = pVtx[1].diffuse = pVtx[2].diffuse = pVtx[3].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+		// 頂点データをアンロックする
+		this->pD3DVtxBuff->Unlock();
+	}
+}
+
+//カラー入力 (2D)
+void VTXBuffer::Color2D(const int Indx, const D3DXCOLOR col)
+{
+	{//頂点バッファの中身を埋める
+		VERTEX_2D *pVtx;
+		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
+		this->pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+		pVtx += (Indx * 4);
+		// 頂点座標の設定
+		pVtx[0].diffuse = col;
+		pVtx[1].diffuse = col;
+		pVtx[2].diffuse = col;
+		pVtx[3].diffuse = col;
+		// 頂点データをアンロックする
+		this->pD3DVtxBuff->Unlock();
+	}
+}
+
+//UV設定(3D)
+//UV自動 (3D)
+void VTXBuffer::UV3D(const int Indx)
+{
+	{//頂点バッファの中身を埋める
+		VERTEX_3D *pVtx;
+		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
+		this->pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+		pVtx += (Indx * 4);
+		// テクスチャ座標の設定
+		pVtx[0].tex = D3DXVECTOR2(0.0f, 0.0f);
+		pVtx[1].tex = D3DXVECTOR2(1.0f, 0.0f);
+		pVtx[2].tex = D3DXVECTOR2(0.0f, 1.0f);
+		pVtx[3].tex = D3DXVECTOR2(1.0f, 1.0f);
+		// 頂点データをアンロックする
+		this->pD3DVtxBuff->Unlock();
+	}
+}
+
+//UV入力　スプライトテクスチャ用 (3D)
+void VTXBuffer::UV3D(const int Indx, const float PatternU, const float PatternV)
+{
+	{//頂点バッファの中身を埋める
+		VERTEX_3D *pVtx;
+		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
+		this->pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+		pVtx += (Indx * 4);
+		// 頂点座標の設定　+1は次のスプライトでの調整用
+		pVtx[0].tex = D3DXVECTOR2(PatternU, PatternV);
+		pVtx[1].tex = D3DXVECTOR2((PatternU + 1), PatternV);
+		pVtx[2].tex = D3DXVECTOR2(PatternU, (PatternV + 1));
+		pVtx[3].tex = D3DXVECTOR2((PatternU + 1), (PatternV + 1));
+		// 頂点データをアンロックする
+		this->pD3DVtxBuff->Unlock();
+	}
+}
+
+//UV入力　調整用 (3D)
+void VTXBuffer::UV3D(const int Indx, const float uStart, const float uEnd, const float vStart, const float vEnd)
+{
+	{//頂点バッファの中身を埋める
+		VERTEX_3D *pVtx;
+		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
+		this->pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+		pVtx += (Indx * 4);
+		// 頂点座標の設定
+		pVtx[0].tex = D3DXVECTOR2(uStart, vStart);
+		pVtx[1].tex = D3DXVECTOR2(uEnd, vStart);
+		pVtx[2].tex = D3DXVECTOR2(uStart, vEnd);
+		pVtx[3].tex = D3DXVECTOR2(uEnd, vEnd);
+		// 頂点データをアンロックする
+		this->pD3DVtxBuff->Unlock();
+	}
+}
+
+//UV入力　直接入力 (3D)
+void VTXBuffer::UV3D(const int Indx, const float uStart1, const float uEnd1, const float vStart1, const float vEnd1
+	, const float uStart2, const float uEnd2, const float vStart2, const float vEnd2)
+{
+	{//頂点バッファの中身を埋める
+		VERTEX_3D *pVtx;
+		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
+		this->pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+		pVtx += (Indx * 4);
+		// 頂点座標の設定
+		pVtx[0].tex = D3DXVECTOR2(uStart1, vStart1);
+		pVtx[1].tex = D3DXVECTOR2(uEnd1, vStart1);
+		pVtx[2].tex = D3DXVECTOR2(uStart2, vEnd2);
+		pVtx[3].tex = D3DXVECTOR2(uEnd2, vEnd2);
+		// 頂点データをアンロックする
+		this->pD3DVtxBuff->Unlock();
+	}
+}
+
+//UV自動 (2D)
+void VTXBuffer::UV2D(const int Indx)
+{
+	{//頂点バッファの中身を埋める
+		VERTEX_2D *pVtx;
+		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
+		this->pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+		pVtx += (Indx * 4);
+		// テクスチャ座標の設定
+		pVtx[0].tex = D3DXVECTOR2(0.0f, 0.0f);
+		pVtx[1].tex = D3DXVECTOR2(1.0f, 0.0f);
+		pVtx[2].tex = D3DXVECTOR2(0.0f, 1.0f);
+		pVtx[3].tex = D3DXVECTOR2(1.0f, 1.0f);
+		// 頂点データをアンロックする
+		this->pD3DVtxBuff->Unlock();
+	}
+}
+
+//UV入力　スプライトテクスチャ用 (2D)
+void VTXBuffer::UV2D(const int Indx, const float PatternU, const float PatternV)
+{
+	{//頂点バッファの中身を埋める
+		VERTEX_2D *pVtx;
+		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
+		this->pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+		pVtx += (Indx * 4);
+		// 頂点座標の設定　+1は次のスプライトでの調整用
+		pVtx[0].tex = D3DXVECTOR2(PatternU, PatternV);
+		pVtx[1].tex = D3DXVECTOR2((PatternU + 1), PatternV);
+		pVtx[2].tex = D3DXVECTOR2(PatternU, (PatternV + 1));
+		pVtx[3].tex = D3DXVECTOR2((PatternU + 1), (PatternV + 1));
+		// 頂点データをアンロックする
+		this->pD3DVtxBuff->Unlock();
+	}
+}
+
+//UV入力　調整用 (2D)
+void VTXBuffer::UV2D(const int Indx, const float uStart, const float uEnd, const float vStart, const float vEnd)
+{
+	{//頂点バッファの中身を埋める
+		VERTEX_2D *pVtx;
+		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
+		this->pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+		pVtx += (Indx * 4);
+		// 頂点座標の設定
+		pVtx[0].tex = D3DXVECTOR2(uStart, vStart);
+		pVtx[1].tex = D3DXVECTOR2(uEnd, vStart);
+		pVtx[2].tex = D3DXVECTOR2(uStart, vEnd);
+		pVtx[3].tex = D3DXVECTOR2(uEnd, vEnd);
+		// 頂点データをアンロックする
+		this->pD3DVtxBuff->Unlock();
+	}
+}
+
+//UV入力　直接入力 (2D)
+void VTXBuffer::UV2D(const int Indx, const float uStart1, const float uEnd1, const float vStart1, const float vEnd1
+	, const float uStart2, const float uEnd2, const float vStart2, const float vEnd2)
+{
+	{//頂点バッファの中身を埋める
+		VERTEX_2D *pVtx;
+		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
+		this->pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+		pVtx += (Indx * 4);
+		// 頂点座標の設定
+		pVtx[0].tex = D3DXVECTOR2(uStart1, vStart1);
+		pVtx[1].tex = D3DXVECTOR2(uEnd1, vStart1);
+		pVtx[2].tex = D3DXVECTOR2(uStart2, vEnd2);
+		pVtx[3].tex = D3DXVECTOR2(uEnd2, vEnd2);
+		// 頂点データをアンロックする
+		this->pD3DVtxBuff->Unlock();
+	}
+}
+
+//Color取得(3D)
+D3DXCOLOR VTXBuffer::GetColor3D(const int Indx)
+{
+	D3DXCOLOR col;
+	{
+		VERTEX_3D *pVtx;
+		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
+		this->pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+		pVtx += (Indx * 4);
+
+		col = pVtx[0].diffuse;
+
+		// 頂点データをアンロックする
+		this->pD3DVtxBuff->Unlock();
+	}
+	return col;
+}
+
+//Color取得(2D)
+D3DXCOLOR VTXBuffer::GetColor2D(const int Indx)
+{
+	D3DXCOLOR col;
+	{
+		VERTEX_2D *pVtx;
+		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
+		this->pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+		pVtx += (Indx * 4);
+
+		col = pVtx[0].diffuse;
+
+		// 頂点データをアンロックする
+		this->pD3DVtxBuff->Unlock();
+	}
+	return col;
+}
 
 static D3DXCOLOR PLAYER_COLOR[] = {
 	D3DXCOLOR(1.0f, 1.0f, 0.1f, 1.0f),//p1カラー
@@ -72,57 +950,59 @@ static D3DXCOLOR PLAYER_COLOR[] = {
 	D3DXCOLOR(0.2f, 1.0f, 1.0f, 1.0f),//p4カラー
 };
 
-void GAME_OBJECT::Create()
+void GAME_OBJECT::Generate()
 {
-	player = new PLAYER_HONTAI[OBJECT_PLAYER_MAX];
-	effect = new EFFECT[OBJECT_EFFECT_MAX];
-	bullet = new BULLET[OBJECT_BULLET_MAX];
-	shadow = new SHADOW[OBJECT_SHADOW_MAX];
-	countdown = new COUNTDOWN[OBJECT_COUNTDOWN_MAX];
-	tuto = new TUTO[OBJECT_TUTORIAL_MAX];
-	netmatch = new NETMATCH[OBJECT_NETMATCH_MAX];
-	status = new STATUS[OBJECT_STATUS_MAX];
-	bulletprediction = new BULLETPREDICTION[OBJECT_BULLETPREDICTION_MAX];
-	vitalgauge = new VITALGAUGE[OBJECT_VITAL_MAX];
-	bulletgauge = new BULLETGAUGE[OBJECT_BULLETGAUGE_MAX];
-	damege = new DAMEGE[OBJECT_DAMEGE_MAX];
-	explosion = new EXPLOSION[OBJECT_EXPLOSION_MAX];
-	item = new ITEM[OBJECT_ITEM_MAX];
-	rank = new RANK[OBJECT_RANK_MAX];
-	result = new RESULT[OBJECT_RESULT_MAX];
-	title = new TITLE[OBJECT_TITLE_MAX];
-	field = new FIELD[OBJECT_FIELD_MAX];
-	sky = new SKY[OBJECT_SKY_MAX];
-	wall = new WALL[OBJECT_WALL_MAX];
-	fade = new FADE[OBJECT_FADE_MAX];
+	player = new PLAYER_HONTAI;
+	effect = new EFFECT;
+	bullet = new BULLET;
+	shadow = new SHADOW;
+	countdown = new COUNTDOWN;
+	tuto = new TUTO;
+	netmatch = new NETMATCH;
+	status = new STATUS;
+	bulletprediction = new BULLETPREDICTION;
+	vitalgauge = new VITALGAUGE;
+	bulletgauge = new BULLETGAUGE;
+	damege = new DAMEGE;
+	explosion = new EXPLOSION;
+	item = new ITEM;
+	rank = new RANK;
+	result = new RESULT;
+	title = new TITLE;
+	field = new FIELD;
+	sky = new SKY;
+	wall = new WALL;
+	fade = new FADE;
 
 }
 
 void GAME_OBJECT::Init()
 {
 	//ネット対戦用
-	NetClientSocketCreate();
-	NetMatchFlag = false;
-	NetMyNumberFlag = false;
-	NetMyNumber = -1;
-	NetItemFlag = false;
-	NetGameStartFlag = false;
-	NetShareDateFlag = false;
-	field->Init();
-	sky->Init();
-	wall->Init();
-	fade->Init();
-	rank->Init();
-	result->Init();
-	title->Init();
+	//NetClientSocketCreate();
+	//NetMatchFlag = false;
+	//NetMyNumberFlag = false;
+	//NetMyNumber = -1;
+	//NetItemFlag = false;
+	//NetGameStartFlag = false;
+	//NetShareDateFlag = false;
 
-	shadow->Init();
+	//スクリーンのUIを再設定してるだけ　修正必要
+	//status->ReinitNet(NetMyNumber);
+	//vitalgauge->ReinitNet(NetMyNumber);
+	//bulletgauge->ReinitNet(NetMyNumber);
+	//damege->ReinitNet();
+
+	//こっちの書き方のほうが短くなる　引数が必要な場合は例外処理をするか　引数を必要としない構造にする
+	//for (int CntOBJ = 0; CntOBJ < AllOBJCnt; CntOBJ++) { this[CntOBJ].Init(); }
+
+	field->Init();
 	player->Init(&field[0]);
 	effect->Init();
 	bullet->Init();
+	shadow->Init();
 	countdown->Init();
 	tuto->Init();
-	netmatch->Init();
 	status->Init();
 	bulletprediction->Init();
 	vitalgauge->Init();
@@ -130,58 +1010,37 @@ void GAME_OBJECT::Init()
 	damege->Init();
 	explosion->Init();
 	item->Init();
+	rank->Init();
+	result->Init();
+	title->Init();
+	sky->Init();
+	wall->Init();
+	fade->Init();
 }
 
-void GAME_OBJECT::Reinit()
+void GAME_OBJECT::Delete()
 {
-	//ネット対戦用
-	SetMultThreadFlag(false);
-	NetClientSocketCreate();
-	NetMatchFlag = false;
-	NetMyNumberFlag = false;
-	NetMyNumber = -1;
-	NetItemFlag = false;
-	NetGameStartFlag = false;
-	NetShareDateFlag = false;
-
-	field->Reinit();
-	player->Reinit(&field[0]);
-	effect->Reinit();
-	bullet->Reinit();
-	shadow->Reinit();
-	countdown->Reinit();
-	tuto->Reinit();
-	status->Reinit();
-	bulletprediction->Reinit();
-	vitalgauge->Reinit();
-	bulletgauge->Reinit();
-	damege->Reinit();
-	explosion->Reinit();
-	item->Reinit();
-	rank->Reinit();
-	result->Reinit();
-	title->Reinit();
-	sky->Reinit();
-	wall->Reinit();
-	fade->Reinit();
-}
-
-void GAME_OBJECT::ReinitNet()
-{
-	player->ReinitNet(NetMyNumber);
-	//effect->Reinit();
-	//bullet->Reinit();
-	//shadow->Reinit();
-	//countdown->Reinit();
-	status->ReinitNet(NetMyNumber);
-	vitalgauge->ReinitNet(NetMyNumber);
-	bulletgauge->ReinitNet(NetMyNumber);
-	damege->ReinitNet();
-	//explosion->Reinit();
-	//rank->ReinitNet();
-	//result->Reinit();
-	//item->Reinit();
-	//field->Reinit();
+	delete player;
+	delete effect;
+	delete bullet;
+	delete shadow;
+	delete countdown;
+	delete tuto;
+	delete netmatch;
+	delete status;
+	delete bulletprediction;
+	delete vitalgauge;
+	delete bulletgauge;
+	delete damege;
+	delete explosion;
+	delete item;
+	delete rank;
+	delete result;
+	delete title;
+	delete field;
+	delete sky;
+	delete wall;
+	delete fade;
 }
 
 void GAME_OBJECT::Update()
@@ -203,7 +1062,7 @@ void GAME_OBJECT::Update()
 	//}
 #endif
 
-	if (stop % 2 == 0)
+	if (stop == false)
 	{
 		// カメラの更新処理
 		UpdateCamera();
@@ -434,7 +1293,7 @@ void GAME_OBJECT::Draw()
 				pD3DDevice->SetViewport(&vp[CntPlayer]);
 				pD3DDevice->Clear(0, NULL, (D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER), D3DCOLOR_RGBA(200, 100, 100, 150), 1.0f, 0);
 
-				bool puse = player[CntPlayer].GetUse();
+				bool puse = player[CntPlayer].Use();
 				if (puse == true)
 				{
 					if (player[CntPlayer].KiriSignal == true) pD3DDevice->SetRenderState(D3DRS_FOGENABLE, TRUE); //フォグ：ON
@@ -526,7 +1385,7 @@ void GAME_OBJECT::Draw()
 		}
 		case SCENE_NETGAME:
 		{
-			bool puseNet = player[NetMyNumber].GetUse();
+			bool puseNet = player[NetMyNumber].Use();
 			if (puseNet == true)
 			{
 				if (player[NetMyNumber].KiriSignal == true) pD3DDevice->SetRenderState(D3DRS_FOGENABLE, TRUE); //フォグ：ON
@@ -612,41 +1471,17 @@ void GAME_OBJECT::Draw()
 	SetNetShareDateFlag(false);
 }
 
-void GAME_OBJECT::Uninit()
-{
-	player->Uninit();
-	effect->Uninit();
-	bullet->Uninit();
-	shadow->Uninit();
-	countdown->Uninit();
-	tuto->Uninit();
-	status->Uninit();
-	bulletprediction->Uninit();
-	vitalgauge->Uninit();
-	bulletgauge->Uninit();
-	damege->Uninit();
-	explosion->Uninit();
-	item->Uninit();
-	rank->Uninit();
-	result->Uninit();
-	title->Uninit();
-	field->Uninit();
-	sky->Uninit();
-	wall->Uninit();
-
-}
-
 void GAME_OBJECT::CheakHit(int scene)
 {
 	//プレイヤーに対する当たり判定
 	for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
 	{
-		bool puse = player[CntPlayer].GetUse();
+		bool puse = player[CntPlayer].Use();
 		if (puse == true)
 		{
 			//オブジェクト値読み込み
-			D3DXVECTOR3 ppos = player[CntPlayer].GetPos();
-			D3DXVECTOR3 poldpos = player[CntPlayer].GetOldPos();
+			D3DXVECTOR3 ppos = player[CntPlayer].Pos();
+			D3DXVECTOR3 poldpos = player[CntPlayer].OldPos();
 
 			//保存
 			player[CntPlayer].oldvital = player[CntPlayer].vital;
@@ -655,7 +1490,7 @@ void GAME_OBJECT::CheakHit(int scene)
 			for (int CntWall = 0; CntWall < 4; CntWall++)
 			{
 
-				D3DXVECTOR3 wpos = wall[CntWall].GetPos();
+				D3DXVECTOR3 wpos = wall[CntWall].Pos();
 				switch (CntWall)
 				{
 				case 0:
@@ -674,15 +1509,15 @@ void GAME_OBJECT::CheakHit(int scene)
 					break;
 				}
 				//オブジェクト値書き込み
-				player[CntPlayer].SetPos(ppos);
+				player[CntPlayer].Pos(ppos);
 			}
 
 			//プレイヤーバレット対プレイヤー、壁、床
 			for (int CntPlayerBullet = 0; CntPlayerBullet < OBJECT_BULLET_MAX; CntPlayerBullet++)
 			{
 				//オブジェクト値読み込み
-				D3DXVECTOR3 bpos = bullet[CntPlayerBullet].GetPos();
-				bool buse = bullet[CntPlayerBullet].GetUse();
+				D3DXVECTOR3 bpos = bullet[CntPlayerBullet].Pos();
+				bool buse = bullet[CntPlayerBullet].Use();
 
 				if (buse == true)
 				{
@@ -699,7 +1534,7 @@ void GAME_OBJECT::CheakHit(int scene)
 								player[CntPlayer].vital -= PLAYER_ATTACK_NORMAL;
 							}
 							//画面ダメージエフェクト
-							damege[CntPlayer].SetUse(true);
+							damege[CntPlayer].Use(true);
 							damege[CntPlayer].time = 0.0f;
 							damege[CntPlayer].alpha = 0;
 
@@ -714,7 +1549,7 @@ void GAME_OBJECT::CheakHit(int scene)
 					//対壁
 					for (int CntWall = 0; CntWall < OBJECT_WALL_MAX; CntWall++)
 					{
-						D3DXVECTOR3 wpos = wall[CntWall].GetPos();
+						D3DXVECTOR3 wpos = wall[CntWall].Pos();
 						switch (CntWall)
 						{
 						case 0:
@@ -777,8 +1612,8 @@ void GAME_OBJECT::CheakHit(int scene)
 			for (int CntItem = 0; CntItem < OBJECT_ITEM_MAX; CntItem++)
 			{
 				//オブジェクト値読み込み
-				D3DXVECTOR3 ipos = item[CntItem].GetPos();
-				bool iuse = item[CntItem].GetUse();
+				D3DXVECTOR3 ipos = item[CntItem].Pos();
+				bool iuse = item[CntItem].Use();
 				if (iuse == false || item[CntItem].GettingSignal == true || item[CntItem].GettingSignalEnd == true) continue;
 				if (CollisionBC(ppos, PLAYER_MODEL_SIZE, ipos, ITEM_MODEL_SIZE))
 				{
@@ -949,93 +1784,6 @@ void SetOjama(int type, int UsePlayer, PLAYER_HONTAI *p)
 	}
 }
 
-
-
-//-------------------------------------------------------------------2DVBテクスチャゲット関数
-//LPDIRECT3DTEXTURE9 TEXTURE2D_VERTEXBUFFER::GetpD3DTexture() { return this->pD3DTexture; };
-//LPDIRECT3DVERTEXBUFFER9 TEXTURE2D_VERTEXBUFFER::GetpD3DVtxBuff() { return this->pD3DVtxBuff; };
-
-//-------------------------------------------------------------------2DVBテクスチャセット関数
-//void TEXTURE2D_VERTEXBUFFER::SetpD3DTexture(LPDIRECT3DTEXTURE9 pD3DTexture) { this->pD3DTexture = pD3DTexture; };
-//void TEXTURE2D_VERTEXBUFFER::SetpD3DVtxBuff(LPDIRECT3DVERTEXBUFFER9 pD3DVtxBuff) { this->pD3DVtxBuff = pD3DVtxBuff; };
-
-
-//-------------------------------------------------------------------2Dテクスチャゲット関数
-//LPDIRECT3DTEXTURE9 TEXTURE_2D::GetpD3DTexture() { return this->pD3DTexture; };
-//VERTEX_2D* TEXTURE_2D::GettextureVTX() { return &this->textureVTX[0]; };
-
-//-------------------------------------------------------------------2Dテクスチャセット関数
-//void TEXTURE_2D::SetpD3DTexture(LPDIRECT3DTEXTURE9 pD3DTexture) {this->pD3DTexture = pD3DTexture;};
-//void TEXTURE_2D::SettextureVTX(VERTEX_2D *textureVTX) { this->textureVTX[0] = textureVTX[0], 
-//this->textureVTX[1] = textureVTX[1], this->textureVTX[2] = textureVTX[2], this->textureVTX[3] = textureVTX[3]; };
-
-
-//-------------------------------------------------------------------2DオブジェクトVBテクスチャゲット関数
-D3DXVECTOR3 OBJECT_2D_VERTEXBUFFER::GetPos() { return this->para.pos; }
-D3DXVECTOR3 OBJECT_2D_VERTEXBUFFER::GetOldPos() { return this->para.oldpos; }
-D3DXVECTOR3 OBJECT_2D_VERTEXBUFFER::GetRot() { return this->para.rot; }
-D3DXVECTOR3 OBJECT_2D_VERTEXBUFFER::GetScl() { return this->para.scl; }
-D3DXVECTOR3 OBJECT_2D_VERTEXBUFFER::GetMove() { return this->para.move; }
-D3DXCOLOR OBJECT_2D_VERTEXBUFFER::GetCol() { return this->para.col; }
-bool OBJECT_2D_VERTEXBUFFER::GetUse() { return this->para.use; }
-
-//-------------------------------------------------------------------2DオブジェクトVBテクスチャセット関数
-void OBJECT_2D_VERTEXBUFFER::SetPos(D3DXVECTOR3 pos) { this->para.pos = pos; }
-void OBJECT_2D_VERTEXBUFFER::SetOldPos(D3DXVECTOR3 oldpos) { this->para.oldpos = oldpos; }
-void OBJECT_2D_VERTEXBUFFER::SetRot(D3DXVECTOR3 rot) { this->para.rot = rot; }
-void OBJECT_2D_VERTEXBUFFER::SetScl(D3DXVECTOR3 scl) { this->para.scl = scl; }
-void OBJECT_2D_VERTEXBUFFER::SetMove(D3DXVECTOR3 move) { this->para.move = move; }
-void OBJECT_2D_VERTEXBUFFER::SetCol(D3DXCOLOR col) { this->para.col = col; }
-void OBJECT_2D_VERTEXBUFFER::SetUse(bool use) { this->para.use=use; }
-
-
-
-//-------------------------------------------------------------------2Dオブジェクトゲット関数
-D3DXVECTOR3 OBJECT_2D::GetPos() { return this->para.pos; }
-D3DXVECTOR3 OBJECT_2D::GetOldPos() { return this->para.oldpos; }
-D3DXVECTOR3 OBJECT_2D::GetRot() { return this->para.rot; }
-D3DXVECTOR3 OBJECT_2D::GetScl() { return this->para.scl; }
-D3DXVECTOR3 OBJECT_2D::GetMove() { return this->para.move; }
-D3DXCOLOR OBJECT_2D::GetCol() { return this->para.col; }
-bool OBJECT_2D::GetUse() { return this->para.use; }
-
-//-------------------------------------------------------------------2Dオブジェクトセット関数
-void OBJECT_2D::SetPos(D3DXVECTOR3 pos) { this->para.pos = pos; }
-void OBJECT_2D::SetOldPos(D3DXVECTOR3 oldpos) { this->para.oldpos = oldpos; }
-void OBJECT_2D::SetRot(D3DXVECTOR3 rot) { this->para.rot = rot; }
-void OBJECT_2D::SetScl(D3DXVECTOR3 scl) { this->para.scl = scl; }
-void OBJECT_2D::SetMove(D3DXVECTOR3 move) { this->para.move = move; }
-void OBJECT_2D::SetCol(D3DXCOLOR col) { this->para.col = col; }
-void OBJECT_2D::SetUse(bool use) { this->para.use = use; }
-
-
-//-------------------------------------------------------------------3Dオブジェクトゲット関数
-D3DXMATRIX OBJECT_3D::GetMatrix() { return this->para.mtxWorld; }
-D3DXVECTOR3 OBJECT_3D::GetPos() { return this->para.pos; }
-D3DXVECTOR3 OBJECT_3D::GetOldPos() { return this->para.oldpos; }
-D3DXVECTOR3 OBJECT_3D::GetRot() { return this->para.rot; }
-D3DXVECTOR3 OBJECT_3D::GetOldRot() { return this->para.oldrot; }
-D3DXVECTOR3 OBJECT_3D::GetScl() { return this->para.scl; }
-D3DXVECTOR3 OBJECT_3D::GetMove() { return this->para.move; }
-D3DXVECTOR3 OBJECT_3D::GetFieldNorVec() { return this->para.FieldNorVec; }
-D3DXVECTOR3 OBJECT_3D::GetFieldNorUpNorCross() { return this->para.FieldNorUpNorCross; }
-float OBJECT_3D::GetQrot() { return this->para.Qrot; }
-D3DXCOLOR OBJECT_3D::GetCol() { return this->para.col; }
-bool OBJECT_3D::GetUse() { return this->para.use; }
-
-//-------------------------------------------------------------------3Dオブジェクトセット関数
-void OBJECT_3D::SetMatrix(D3DXMATRIX mtxWorld) { this->para.mtxWorld = mtxWorld; }
-void OBJECT_3D::SetPos(D3DXVECTOR3 pos) { this->para.pos = pos; }
-void OBJECT_3D::SetOldPos(D3DXVECTOR3 oldpos) { this->para.oldpos = oldpos; }
-void OBJECT_3D::SetRot(D3DXVECTOR3 rot) { this->para.rot = rot; }
-void OBJECT_3D::SetOldRot(D3DXVECTOR3 rot) { this->para.oldrot = rot; }
-void OBJECT_3D::SetScl(D3DXVECTOR3 scl) { this->para.scl = scl; }
-void OBJECT_3D::SetMove(D3DXVECTOR3 move) { this->para.move = move; }
-void OBJECT_3D::SetFieldNorVec(D3DXVECTOR3 FieldNorVec) { this->para.FieldNorVec = FieldNorVec; }
-void OBJECT_3D::SetFieldNorUpNorCross(D3DXVECTOR3 FieldNorUpNorCross) { this->para.FieldNorUpNorCross = FieldNorUpNorCross; }
-void OBJECT_3D::SetQrot(float Qrot) { this->para.Qrot = Qrot; }
-void OBJECT_3D::SetCol(D3DXCOLOR col) { this->para.col = col; }
-void OBJECT_3D::SetUse(bool use) { this->para.use = use; }
 
 
 

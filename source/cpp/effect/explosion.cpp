@@ -10,68 +10,87 @@
 #include "../../h/effect/explosion.h"
 
 //*****************************************************************************
-// マクロ定義
+// マクロ定義 nPatternX
 //*****************************************************************************
-#define	TEXTURE_EXPLOSION		"../data/TEXTURE/effect/bomb.png"		// 読み込むテクスチャファイル名
+#define	TEXTURE_EXPLOSION	"../data/TEXTURE/effect/bomb.png"		//!< 読み込むテクスチャファイル名
+#define	TEXTURE_PATTERN_X_UV_EXPLOSION		0.25f					//!< テクスチャスプライトX
+#define	TEXTURE_PATTERN_Y_UV_EXPLOSION		0.25f					//!< テクスチャスプライトY
+#define	TEXTURE_PATTERN_X_COUNT_EXPLOSION	4						//!< テクスチャスプライトX
+#define	TEXTURE_PATTERN_Y_COUNT_EXPLOSION	4						//!< テクスチャスプライトY
+#define	TEXTURE_PATTERN_COUNTER_EXPLOSION	4						//!< テクスチャスプライトのカウントタイマー
+#define	EXPLOSION_VERTEX_SIZE				(5.0f)					//!< EXPLOSION頂点サイズ
+#define	EXPLOSION_VERTEX_ADD_SIZE			(0.5f)					//!< EXPLOSION頂点サイズ
 
-//*****************************************************************************
-// グローバル変数
-//*****************************************************************************
-LPDIRECT3DTEXTURE9		g_pD3DTextureExplosion = NULL;	// テクスチャへのポインタ
-LPDIRECT3DVERTEXBUFFER9 g_pD3DVtxBuffExplosion = NULL;	// 頂点バッファインターフェースへのポインタ
+
+//=============================================================================
+// コンストラクタ　「読み込み」「初期化」
+//=============================================================================
+EXPLOSION::EXPLOSION(void)
+{
+	//オブジェクトカウントアップ
+	this->CreateInstanceOBJ();
+
+	//頂点の作成
+	this->vtx.MakeVertex2D(OBJECT_EXPLOSION_MAX, FVF_VERTEX_2D);
+
+	//カウントループ
+	for (int CntExplosion = 0; CntExplosion < OBJECT_EXPLOSION_MAX; CntExplosion++)
+	{
+		//描画位置反映
+		this->vtx.Vertex2D(CntExplosion, EXPLOSION_VERTEX_SIZE / 2, EXPLOSION_VERTEX_SIZE / 2);
+
+		//RHW設定
+		this->vtx.RHW2D(CntExplosion);
+
+		//UVの設定
+		this->vtx.UV2D(CntExplosion);
+
+		//カラー設定
+		this->vtx.Color2D(CntExplosion, D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
+
+		//使用設定
+		this->iUseType[CntExplosion].ChangeUse(NoUse);
+	}
+
+	// テクスチャの読み込み
+	this->tex.LoadTexture(TEXTURE_EXPLOSION);
+
+}
+
+//=============================================================================
+// デストラクタ　削除
+//=============================================================================
+EXPLOSION::~EXPLOSION(void)
+{
+	//テクスチャ解放
+	this->tex.~TEXTURE();
+	//頂点解放
+	this->vtx.~VTXBuffer();
+	//オブジェクトカウントダウン
+	this->DeleteInstanceOBJ();
+}
 
 //=============================================================================
 // 初期化処理
 //=============================================================================
 void EXPLOSION::Init(void)
 {
-	LPDIRECT3DDEVICE9 pDevice = GetDevice();
-
-	// 頂点情報の作成
-	MakeVertexExplosion(pDevice);
-
-		// テクスチャの読み込み
-		D3DXCreateTextureFromFile(pDevice,						// デバイスへのポインタ
-			TEXTURE_EXPLOSION,			// ファイルの名前
-			&g_pD3DTextureExplosion);	// 読み込むメモリー
-}
-
-//=============================================================================
-// 再初期化処理
-//=============================================================================
-void EXPLOSION::Reinit(void)
-{
+	//カウントループ
 	for (int nCntExplosion = 0; nCntExplosion < OBJECT_EXPLOSION_MAX; nCntExplosion++)
 	{
-		this[nCntExplosion].SetPos(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
-		this[nCntExplosion].SetRot(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
-		this[nCntExplosion].SetScl(D3DXVECTOR3(1.0f, 1.0f, 1.0f));
-		this[nCntExplosion].SetCol(D3DXCOLOR(DWORD(0)));
-		this[nCntExplosion].nCounter = 0;
-		this[nCntExplosion].nPatternX = 0;
-		this[nCntExplosion].nPatternY = 0;
-		this[nCntExplosion].fSizeX = 0;
-		this[nCntExplosion].fSizeY = 0;
-		this[nCntExplosion].nType = nType;
-		this[nCntExplosion].SetUse(false);
-	}
-}
-
-//=============================================================================
-// 終了処理
-//=============================================================================
-void EXPLOSION::Uninit(void)
-{
-	if(g_pD3DTextureExplosion != NULL)
-	{// テクスチャの開放
-		g_pD3DTextureExplosion->Release();
-		g_pD3DTextureExplosion = NULL;
-	}
-
-	if(g_pD3DVtxBuffExplosion != NULL)
-	{// 頂点バッファの開放
-		g_pD3DVtxBuffExplosion->Release();
-		g_pD3DVtxBuffExplosion = NULL;
+		//初期化設定
+		this->Transform[nCntExplosion].Pos(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+		this->Transform[nCntExplosion].Rot(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+		this->Transform[nCntExplosion].Scl(D3DXVECTOR3(1.0f, 1.0f, 1.0f));
+		this->vtx.Color2D(nCntExplosion);
+		this->vtx.UV2D(nCntExplosion);
+		this->ExploPara[nCntExplosion].nCounter = 0;
+		this->ExploPara[nCntExplosion].nPatternX = 0;
+		this->ExploPara[nCntExplosion].nPatternY = 0;
+		this->ExploPara[nCntExplosion].eType = EXPLOSIONTYPE_BULLET_NONE;;
+		this->ExploPara[nCntExplosion].fSizeX = 0.0f;
+		this->ExploPara[nCntExplosion].fSizeY = 0.0f;
+		this->iUseType[nCntExplosion].Use(NoUse);
 	}
 }
 
@@ -80,35 +99,41 @@ void EXPLOSION::Uninit(void)
 //=============================================================================
 void EXPLOSION::Update(void)
 {
+	//使用中の場合　スプライト再生後　未使用状態
 	for(int nCntExplosion = 0; nCntExplosion < OBJECT_EXPLOSION_MAX; nCntExplosion++)
 	{
-		bool use = this[nCntExplosion].GetUse();
+		bool use = this->iUseType[nCntExplosion].Use();
 		if(use)
 		{
-			this[nCntExplosion].nCounter--;
-			if((this[nCntExplosion].nCounter % 4) == 0)
+			//スプライト再生　カウントしてUVテクスチャを切り替える
+			this->ExploPara[nCntExplosion].nCounter--;
+			if((this->ExploPara[nCntExplosion].nCounter % TEXTURE_PATTERN_COUNTER_EXPLOSION) == 0)
 			{
-				this[nCntExplosion].nPatternX++;
-				if(this[nCntExplosion].nPatternY >= 4)
+				this->ExploPara[nCntExplosion].nPatternX++;
+				if(this->ExploPara[nCntExplosion].nPatternY >= TEXTURE_PATTERN_Y_COUNT_EXPLOSION)
 				{
-					this[nCntExplosion].SetUse(false);
+					this->iUseType[nCntExplosion].Use(false);
 				}
-				else if (this[nCntExplosion].nPatternX >= 4)
+				else if (this->ExploPara[nCntExplosion].nPatternX >= TEXTURE_PATTERN_X_COUNT_EXPLOSION)
 				{
-					this[nCntExplosion].nPatternX = 0;
-					this[nCntExplosion].nPatternY++;
+					this->ExploPara[nCntExplosion].nPatternX = 0;
+					this->ExploPara[nCntExplosion].nPatternY++;
 				}
 				else
 				{
 					// テクスチャ座標の設定
-					SetTextureExplosion(nCntExplosion, this[nCntExplosion].nPatternX, this[nCntExplosion].nPatternY);
+					this->vtx.UV2D(nCntExplosion,
+						float(this->ExploPara[nCntExplosion].nPatternX*TEXTURE_PATTERN_X_UV_EXPLOSION),
+						float(this->ExploPara[nCntExplosion].nPatternY*TEXTURE_PATTERN_Y_UV_EXPLOSION));
 				}
 			}
 
-			// 頂点座標の設定
-			this[nCntExplosion].fSizeX += 0.50f;
-			this[nCntExplosion].fSizeY += 0.50f;
-			SetVertexExplosion(nCntExplosion, this[nCntExplosion].fSizeX, this[nCntExplosion].fSizeY);
+			// 頂点サイズの設定
+			this->ExploPara[nCntExplosion].fSizeX += EXPLOSION_VERTEX_ADD_SIZE;
+			this->ExploPara[nCntExplosion].fSizeY += EXPLOSION_VERTEX_ADD_SIZE;
+			this->vtx.Vertex2D(nCntExplosion,
+				this->ExploPara[nCntExplosion].fSizeX, 
+				this->ExploPara[nCntExplosion].fSizeY);
 
 		}
 	}
@@ -127,14 +152,14 @@ void EXPLOSION::Draw(int CntPlayer)
 
 	for (int nCntExplosion = 0; nCntExplosion < OBJECT_EXPLOSION_MAX; nCntExplosion++)
 	{
-		bool use = this[nCntExplosion].GetUse();
+		bool use = this->iUseType[nCntExplosion].Use();
 		if (use)
 		{
 			//--------------------------------------------オブジェクト値読み込み
-			D3DXVECTOR3 pos = this[nCntExplosion].GetPos();
-			D3DXVECTOR3 scl = this[nCntExplosion].GetScl();
-			D3DXCOLOR col = this[nCntExplosion].GetCol();
-			D3DXMATRIX mtxWorldExplosion = this[nCntExplosion].GetMatrix();
+			D3DXVECTOR3 pos = this->Transform[nCntExplosion].Pos();
+			D3DXVECTOR3 scl = this->Transform[nCntExplosion].Scl();
+			D3DXCOLOR col = this->vtx.GetColor2D(nCntExplosion);
+			D3DXMATRIX mtxWorldExplosion;
 
 				D3DXMATRIX mtxView, mtxScale, mtxTranslate;
 
@@ -168,13 +193,13 @@ void EXPLOSION::Draw(int CntPlayer)
 				pDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
 
 				// 頂点バッファをデバイスのデータストリームにバインド
-				pDevice->SetStreamSource(0, g_pD3DVtxBuffExplosion, 0, sizeof(VERTEX_3D));
+				pDevice->SetStreamSource(0, *this->vtx.VtxBuff(), 0, sizeof(VERTEX_3D));
 
 				// 頂点フォーマットの設定
 				pDevice->SetFVF(FVF_VERTEX_3D);
 
 				// テクスチャの設定
-				pDevice->SetTexture(0, g_pD3DTextureExplosion);
+				pDevice->SetTexture(0, this->tex.Texture());
 
 				// ポリゴンの描画
 				pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, (nCntExplosion * 4), POLYGON_2D_NUM);
@@ -189,164 +214,34 @@ void EXPLOSION::Draw(int CntPlayer)
 }
 
 //=============================================================================
-// 頂点情報の作成
+// 
 //=============================================================================
-HRESULT EXPLOSION::MakeVertexExplosion(LPDIRECT3DDEVICE9 pDevice)
-{
-	// オブジェクトの頂点バッファを生成
-    if( FAILED( pDevice->CreateVertexBuffer(sizeof(VERTEX_3D) * POLYGON_2D_VERTEX * OBJECT_EXPLOSION_MAX,	// 頂点データ用に確保するバッファサイズ(バイト単位)
-												D3DUSAGE_WRITEONLY,							// 頂点バッファの使用法　
-												FVF_VERTEX_3D,								// 使用する頂点フォーマット
-												D3DPOOL_MANAGED,							// リソースのバッファを保持するメモリクラスを指定
-												&g_pD3DVtxBuffExplosion,					// 頂点バッファインターフェースへのポインタ
-												NULL)))										// NULLに設定
-	{
-        return E_FAIL;
-	}
-
-	{//頂点バッファの中身を埋める
-		VERTEX_3D *pVtx;
-
-		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
-		g_pD3DVtxBuffExplosion->Lock(0, 0, (void**)&pVtx, 0);
-
-		for(int nCntExplosion = 0; nCntExplosion < OBJECT_EXPLOSION_MAX; nCntExplosion++, pVtx += 4)
-		{
-			// 頂点座標の設定
-			pVtx[0].vtx = D3DXVECTOR3(-EXPLOSION_SIZE / 2, -EXPLOSION_SIZE / 2, 0.0f);
-			pVtx[1].vtx = D3DXVECTOR3(EXPLOSION_SIZE / 2, -EXPLOSION_SIZE / 2, 0.0f);
-			pVtx[2].vtx = D3DXVECTOR3(-EXPLOSION_SIZE / 2, EXPLOSION_SIZE / 2, 0.0f);
-			pVtx[3].vtx = D3DXVECTOR3(EXPLOSION_SIZE / 2, EXPLOSION_SIZE / 2, 0.0f);
-
-			// 法線の設定
-			pVtx[0].nor = D3DXVECTOR3(0.0f, 0.0f, -1.0f);
-			pVtx[1].nor = D3DXVECTOR3(0.0f, 0.0f, -1.0f);
-			pVtx[2].nor = D3DXVECTOR3(0.0f, 0.0f, -1.0f);
-			pVtx[3].nor = D3DXVECTOR3(0.0f, 0.0f, -1.0f);
-
-			// 反射光の設定
-			pVtx[0].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
-			pVtx[1].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
-			pVtx[2].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
-			pVtx[3].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
-
-			// テクスチャ座標の設定
-			pVtx[0].tex = D3DXVECTOR2(0.0f, 0.0f);
-			pVtx[1].tex = D3DXVECTOR2(1.0f, 0.0f);
-			pVtx[2].tex = D3DXVECTOR2(0.0f, 1.0f);
-			pVtx[3].tex = D3DXVECTOR2(1.0f, 1.0f);
-		}
-
-		// 頂点データをアンロックする
-		g_pD3DVtxBuffExplosion->Unlock();
-	}
-
-	return S_OK;
-}
-
-//=============================================================================
-// 頂点座標の設定
-//=============================================================================
-void EXPLOSION::SetVertexExplosion(int nIdxExplosion, float fSizeX, float fSizeY)
-{
-	{//頂点バッファの中身を埋める
-		VERTEX_3D *pVtx;
-
-		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
-		g_pD3DVtxBuffExplosion->Lock(0, 0, (void**)&pVtx, 0);
-
-		pVtx += (nIdxExplosion * 4);
-
-		// 頂点座標の設定
-		pVtx[0].vtx = D3DXVECTOR3(-fSizeX / 2, -fSizeY / 2, 0.0f);
-		pVtx[1].vtx = D3DXVECTOR3(-fSizeX / 2, fSizeY / 2, 0.0f);
-		pVtx[2].vtx = D3DXVECTOR3(fSizeX / 2, -fSizeY / 2, 0.0f);
-		pVtx[3].vtx = D3DXVECTOR3(fSizeX / 2, fSizeY / 2, 0.0f);
-
-		// 頂点データをアンロックする
-		g_pD3DVtxBuffExplosion->Unlock();
-	}
-}
-
-//=============================================================================
-// 頂点カラーの設定
-//=============================================================================
-void EXPLOSION::SetColorExplosion(int nIdxExplosion, D3DXCOLOR col)
-{
-	{//頂点バッファの中身を埋める
-		VERTEX_3D *pVtx;
-
-		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
-		g_pD3DVtxBuffExplosion->Lock(0, 0, (void**)&pVtx, 0);
-
-		pVtx += (nIdxExplosion * 4);
-
-		// 頂点座標の設定
-		pVtx[0].diffuse =
-		pVtx[1].diffuse =
-		pVtx[2].diffuse =
-		pVtx[3].diffuse = col;
-
-		// 頂点データをアンロックする
-		g_pD3DVtxBuffExplosion->Unlock();
-	}
-}
-
-//=============================================================================
-// テクスチャ座標の設定
-//=============================================================================
-void EXPLOSION::SetTextureExplosion(int nIdxExplosion, int nPatternX, int nPatternY)
-{
-	{//頂点バッファの中身を埋める
-		VERTEX_3D *pVtx;
-
-		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
-		g_pD3DVtxBuffExplosion->Lock(0, 0, (void**)&pVtx, 0);
-
-		pVtx += (nIdxExplosion * 4);
-
-		// 頂点座標の設定
-		pVtx[0].tex = D3DXVECTOR2(nPatternX * 0.25f, nPatternY * 0.25f);
-		pVtx[1].tex = D3DXVECTOR2((nPatternX + 1) * 0.25f, nPatternY * 0.25f);
-		pVtx[2].tex = D3DXVECTOR2(nPatternX * 0.25f, (nPatternY + 1) * 0.25f);
-		pVtx[3].tex = D3DXVECTOR2((nPatternX + 1) * 0.25f, (nPatternY + 1) * 0.25f);
-
-		// 頂点データをアンロックする
-		g_pD3DVtxBuffExplosion->Unlock();
-	}
-}
-
-//=============================================================================
-// 頂点情報の作成
-//=============================================================================
-int EXPLOSION::SetExplosion(D3DXVECTOR3 pos, float fSizeX, float fSizeY, int nType, D3DXCOLOR col)
+int EXPLOSION::SetInstance(D3DXVECTOR3 pos, float fSizeX, float fSizeY, eEXPLOSION_TYPE eType, D3DXCOLOR col)
 {
 	int nIdxExplosion = -1;
 
 	for(int nCntExplosion = 0; nCntExplosion < OBJECT_EXPLOSION_MAX; nCntExplosion++)
 	{
-		bool use = this[nCntExplosion].GetUse();
+		bool use = this->iUseType[nCntExplosion].Use();
 		if (use!=true)
 		{
-			this[nCntExplosion].SetPos(pos);
-			this[nCntExplosion].SetRot(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
-			this[nCntExplosion].SetScl(D3DXVECTOR3(1.0f, 1.0f, 1.0f));
-			this[nCntExplosion].SetCol(col);
-			this[nCntExplosion].SetUse(true);
-			this[nCntExplosion].fSizeX = fSizeX;
-			this[nCntExplosion].fSizeY = fSizeY;
-			this[nCntExplosion].nCounter = 0;
-			this[nCntExplosion].nPatternX = 0;
-			this[nCntExplosion].nPatternY = 0;
-			this[nCntExplosion].nType = nType;
+			this->Transform[nCntExplosion].Pos(pos);
+			this->Transform[nCntExplosion].Rot(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+			this->Transform[nCntExplosion].Scl(D3DXVECTOR3(1.0f, 1.0f, 1.0f));
+			this->vtx.Color2D(nCntExplosion,col);
+			this->iUseType[nCntExplosion].Use(YesUse);
+			this->ExploPara[nCntExplosion].fSizeX = fSizeX;
+			this->ExploPara[nCntExplosion].fSizeY = fSizeY;
+			this->ExploPara[nCntExplosion].nCounter = 0;
+			this->ExploPara[nCntExplosion].nPatternX = 0;
+			this->ExploPara[nCntExplosion].nPatternY = 0;
+			this->ExploPara[nCntExplosion].eType = eType;
 
 			// 頂点座標の設定
-			SetVertexExplosion(nCntExplosion, fSizeX, fSizeY);
-
-			SetColorExplosion(nCntExplosion, col);
+			this->vtx.Vertex2D(nCntExplosion, fSizeX, fSizeY);
 
 			// テクスチャ座標の設定
-			SetTextureExplosion(nCntExplosion, 0,0);
+			this->vtx.UV2D(nCntExplosion, 0,0);
 
 			nIdxExplosion = nCntExplosion;
 

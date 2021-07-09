@@ -14,62 +14,89 @@
 //*****************************************************************************
 #define	TEXTURE_EFFECT			"../data/TEXTURE/effect/effect000.jpg"	// 読み込むテクスチャファイル名
 
-//*****************************************************************************
-// グローバル変数
-//*****************************************************************************
-LPDIRECT3DTEXTURE9		g_pD3DTextureEffect = NULL;		// テクスチャへのポインタ
-LPDIRECT3DVERTEXBUFFER9 g_pD3DVtxBuffEffect = NULL;		// 頂点バッファインターフェースへのポインタ
+//エフェクト関連定数
+#define	EFFECT_NORMALSET_SIZE_X				(16.0f)			//!< エフェクト標準の幅
+#define	EFFECT_NORMALSET_SIZE_Y				(16.0f)			//!< エフェクト標準の高さ
+#define	EFFECT_SPEEDUP_SIZE_X				(25.0f)			//!< エフェクトスピードアップの幅
+#define	EFFECT_SPEEDUP_SIZE_Y				(10.0f)			//!< エフェクトスピードアップの高さ
+#define	EFFECT_SPEEDUP_TIME					(10)			//!< エフェクトスピードアップの生存時間
+
+
+//=============================================================================
+// コンストラクタ　「読み込み」「初期化」
+//=============================================================================
+EFFECT::EFFECT(void)
+{
+	//オブジェクトカウントアップ
+	this->CreateInstanceOBJ();
+
+	//頂点の作成
+	this->vtx.MakeVertex3DBill(OBJECT_EFFECT_MAX, FVF_VERTEX_3D);
+
+	//カウントループ
+	for (int CntEffect = 0; CntEffect < OBJECT_EFFECT_MAX; CntEffect++)
+	{
+		//描画位置反映
+		this->vtx.Vertex3D(CntEffect, EFFECT_NORMALSET_SIZE_X / 2, EFFECT_NORMALSET_SIZE_Y / 2);
+
+		//RHW設定
+		this->vtx.Nor3D(CntEffect);
+
+		//UVの設定
+		this->vtx.UV3D(CntEffect);
+
+		//カラー設定
+		this->vtx.Color3D(CntEffect, D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
+
+		//使用設定
+		this->iUseType[CntEffect].ChangeUse(NoUse);
+
+		//移動量設定
+		this->move[CntEffect].Move(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+	}
+
+	// テクスチャの読み込み
+	this->tex.LoadTexture(TEXTURE_EFFECT);
+
+}
+
+//=============================================================================
+// デストラクタ　削除
+//=============================================================================
+EFFECT::~EFFECT(void)
+{
+	//テクスチャ解放
+	this->tex.~TEXTURE();
+	//頂点解放
+	this->vtx.~VTXBuffer();
+	//オブジェクトカウントダウン
+	this->DeleteInstanceOBJ();
+}
 
 //=============================================================================
 // 初期化処理
 //=============================================================================
 void EFFECT::Init(void)
 {
-	LPDIRECT3DDEVICE9 pDevice = GetDevice();
-
-	// 頂点情報の作成
-	MakeVertexEffect(pDevice);
-
-		// テクスチャの読み込み
-		D3DXCreateTextureFromFile(pDevice,					// デバイスへのポインタ
-			TEXTURE_EFFECT,			// ファイルの名前
-			&g_pD3DTextureEffect);	// 読み込むメモリー
-
-}
-
-//=============================================================================
-// 再初期化処理
-//=============================================================================
-void EFFECT::Reinit(void)
-{
-	for (int nCntEffect = 0; nCntEffect < OBJECT_EFFECT_MAX; nCntEffect++)
+	//カウントループ
+	for (int CntEffect = 0; CntEffect < OBJECT_EFFECT_MAX; CntEffect++)
 	{
-		this[nCntEffect].SetPos(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
-		this[nCntEffect].SetRot(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
-		this[nCntEffect].SetScl(D3DXVECTOR3(1.0f, 1.0f, 1.0f));
-		this[nCntEffect].SetMove(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
-		this[nCntEffect].SetCol(D3DXCOLOR(DWORD(0)));
-		this[nCntEffect].nTimer = 0;
-		this[nCntEffect].nDecAlpha = 0.0f;
-		this[nCntEffect].SetUse(false);
-	}
-}
+		//カラー設定
+		this->vtx.Color3D(CntEffect, D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
 
-//=============================================================================
-// 終了処理
-//=============================================================================
-void  EFFECT::Uninit(void)
-{
-	if (g_pD3DTextureEffect != NULL)
-	{// テクスチャの開放
-		g_pD3DTextureEffect->Release();
-		g_pD3DTextureEffect = NULL;
-	}
+		//使用設定
+		this->iUseType[CntEffect].ChangeUse(NoUse);
 
-	if (g_pD3DVtxBuffEffect != NULL)
-	{// 頂点バッファの開放
-		g_pD3DVtxBuffEffect->Release();
-		g_pD3DVtxBuffEffect = NULL;
+		//移動量設定
+		this->move[CntEffect].Move(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+
+		//トランスフォーム設定
+		this->Transform[CntEffect].Pos(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+		this->Transform[CntEffect].Scl(D3DXVECTOR3(1.0f, 1.0f, 1.0f));
+
+		//パラメータ設定
+		this->EffectPara[CntEffect].nTimer = 0;
+		this->EffectPara[CntEffect].nDecAlpha = 0.0f;
 	}
 }
 
@@ -80,35 +107,32 @@ void  EFFECT::Update(void)
 {
 	for (int nCntEffect = 0; nCntEffect < OBJECT_EFFECT_MAX; nCntEffect++)
 	{
-		bool use = this[nCntEffect].GetUse();
+		bool use = this->iUseType[nCntEffect].Use();
 		if (use)
 		{
 			//--------------------------------------------オブジェクト値読み込み
-			D3DXVECTOR3 pos = this[nCntEffect].GetPos();
-			D3DXVECTOR3 move = this[nCntEffect].GetMove();
-			D3DXCOLOR col = this[nCntEffect].GetCol();
+			D3DXVECTOR3 pos = this->Transform[nCntEffect].Pos();
+			D3DXVECTOR3 move = this->move[nCntEffect].Move();
+			D3DXCOLOR col = this->vtx.GetColor3D(nCntEffect);
 
 			pos.x += move.x;
 			pos.z += move.z;
 
-			col.a -= this[nCntEffect].nDecAlpha;
+			col.a -= this->EffectPara[nCntEffect].nDecAlpha;
 			if (col.a <= 0.0f)
 			{
 				col.a = 0.0f;
 			}
 
-			//カラーセット
-			SetColorEffect(nCntEffect, col);
-
-			this[nCntEffect].nTimer--;
-			if (this[nCntEffect].nTimer <= 0)
+			this->EffectPara[nCntEffect].nTimer--;
+			if (this->EffectPara[nCntEffect].nTimer <= 0)
 			{
-				this[nCntEffect].SetUse(false);
+				this->iUseType[nCntEffect].Use(NoUse);
 			}
 
 			//--------------------------------------------オブジェクト値書き込み
-			this[nCntEffect].SetPos(pos);
-			this[nCntEffect].SetCol(col);
+			this->Transform[nCntEffect].Pos(pos);
+			this->vtx.Color3D(col);
 
 		}
 	}
@@ -127,14 +151,14 @@ void  EFFECT::Draw(int CntPlayer)
 
 	for (int nCntEffect = 0; nCntEffect < OBJECT_EFFECT_MAX; nCntEffect++)
 	{
-		bool use = this[nCntEffect].GetUse();
+		bool use = this->iUseType[nCntEffect].Use();
 		if (use)
 		{
 			//--------------------------------------------オブジェクト値読み込み
-			D3DXVECTOR3 pos = this[nCntEffect].GetPos();
-			D3DXVECTOR3 scl = this[nCntEffect].GetScl();
-			D3DXCOLOR col = this[nCntEffect].GetCol();
-			D3DXMATRIX mtxWorldEffect = this[nCntEffect].GetMatrix();
+			D3DXVECTOR3 pos = this->Transform[nCntEffect].Pos();
+			D3DXVECTOR3 scl = this->Transform[nCntEffect].Scl();
+			D3DXCOLOR col = this->vtx.GetColor3D(nCntEffect);
+			D3DXMATRIX mtxWorldEffect;
 
 			D3DXMATRIX mtxView, mtxScale, mtxTranslate;
 
@@ -168,13 +192,13 @@ void  EFFECT::Draw(int CntPlayer)
 			pDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
 
 			// 頂点バッファをデバイスのデータストリームにバインド
-			pDevice->SetStreamSource(0, g_pD3DVtxBuffEffect, 0, sizeof(VERTEX_3D));
+			pDevice->SetStreamSource(0, *this->vtx.VtxBuff(), 0, sizeof(VERTEX_3D));
 
 			// 頂点フォーマットの設定
 			pDevice->SetFVF(FVF_VERTEX_3D);
 
 			// テクスチャの設定
-			pDevice->SetTexture(0, g_pD3DTextureEffect);
+			pDevice->SetTexture(0, this->tex.Texture());
 
 			// ポリゴンの描画
 			pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, (nCntEffect * 4), POLYGON_2D_NUM);
@@ -189,135 +213,31 @@ void  EFFECT::Draw(int CntPlayer)
 }
 
 //=============================================================================
-// 頂点情報の作成
+// インスタンスセット
 //=============================================================================
-HRESULT EFFECT::MakeVertexEffect(LPDIRECT3DDEVICE9 pDevice)
-{
-	// オブジェクトの頂点バッファを生成
-	if (FAILED(pDevice->CreateVertexBuffer(sizeof(VERTEX_3D) * POLYGON_2D_VERTEX * OBJECT_EFFECT_MAX,	// 頂点データ用に確保するバッファサイズ(バイト単位)
-		D3DUSAGE_WRITEONLY,							// 頂点バッファの使用法　
-		FVF_VERTEX_3D,								// 使用する頂点フォーマット
-		D3DPOOL_MANAGED,							// リソースのバッファを保持するメモリクラスを指定
-		&g_pD3DVtxBuffEffect,						// 頂点バッファインターフェースへのポインタ
-		NULL)))										// NULLに設定
-	{
-		return E_FAIL;
-	}
-
-	{//頂点バッファの中身を埋める
-		VERTEX_3D *pVtx;
-
-		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
-		g_pD3DVtxBuffEffect->Lock(0, 0, (void**)&pVtx, 0);
-
-		for (int nCntEffect = 0; nCntEffect < OBJECT_EFFECT_MAX; nCntEffect++, pVtx += 4)
-		{
-			// 頂点座標の設定
-			pVtx[0].vtx = D3DXVECTOR3(-EFFECT_NORMALSET_SIZE_X / 2, -EFFECT_NORMALSET_SIZE_Y / 2, 0.0f);
-			pVtx[1].vtx = D3DXVECTOR3(EFFECT_NORMALSET_SIZE_X / 2, -EFFECT_NORMALSET_SIZE_Y / 2, 0.0f);
-			pVtx[2].vtx = D3DXVECTOR3(-EFFECT_NORMALSET_SIZE_X / 2, EFFECT_NORMALSET_SIZE_Y / 2, 0.0f);
-			pVtx[3].vtx = D3DXVECTOR3(EFFECT_NORMALSET_SIZE_X / 2, EFFECT_NORMALSET_SIZE_Y / 2, 0.0f);
-
-			// 法線の設定
-			pVtx[0].nor = D3DXVECTOR3(0.0f, 1.0f,0.0f);
-			pVtx[1].nor = D3DXVECTOR3(0.0f, 1.0f,0.0f);
-			pVtx[2].nor = D3DXVECTOR3(0.0f, 1.0f,0.0f);
-			pVtx[3].nor = D3DXVECTOR3(0.0f, 1.0f,0.0f);
-
-			// 反射光の設定
-			pVtx[0].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
-			pVtx[1].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
-			pVtx[2].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
-			pVtx[3].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
-
-			// テクスチャ座標の設定
-			pVtx[0].tex = D3DXVECTOR2(0.0f, 0.0f);
-			pVtx[1].tex = D3DXVECTOR2(1.0f, 0.0f);
-			pVtx[2].tex = D3DXVECTOR2(0.0f, 1.0f);
-			pVtx[3].tex = D3DXVECTOR2(1.0f, 1.0f);
-		}
-
-		// 頂点データをアンロックする
-		g_pD3DVtxBuffEffect->Unlock();
-	}
-
-	return S_OK;
-}
-
-//=============================================================================
-// 頂点座標の設定
-//=============================================================================
-void  EFFECT::SetVertexEffect(int nIdxEffect, float fSizeX, float fSizeY)
-{
-	{//頂点バッファの中身を埋める
-		VERTEX_3D *pVtx;
-
-		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
-		g_pD3DVtxBuffEffect->Lock(0, 0, (void**)&pVtx, 0);
-
-		pVtx += (nIdxEffect * 4);
-
-		// 頂点座標の設定
-		pVtx[0].vtx = D3DXVECTOR3(-fSizeX / 2, -fSizeY / 2, 0.0f);
-		pVtx[1].vtx = D3DXVECTOR3(-fSizeX / 2, fSizeY / 2, 0.0f);
-		pVtx[2].vtx = D3DXVECTOR3(fSizeX / 2, -fSizeY / 2, 0.0f);
-		pVtx[3].vtx = D3DXVECTOR3(fSizeX / 2, fSizeY / 2, 0.0f);
-
-		// 頂点データをアンロックする
-		g_pD3DVtxBuffEffect->Unlock();
-	}
-}
-
-//=============================================================================
-// 頂点カラーの設定
-//=============================================================================
-void  EFFECT::SetColorEffect(int nIdxEffect, D3DXCOLOR col)
-{
-	{//頂点バッファの中身を埋める
-		VERTEX_3D *pVtx;
-
-		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
-		g_pD3DVtxBuffEffect->Lock(0, 0, (void**)&pVtx, 0);
-
-		pVtx += (nIdxEffect * 4);
-
-		// 頂点座標の設定
-		pVtx[0].diffuse =
-			pVtx[1].diffuse =
-			pVtx[2].diffuse =
-			pVtx[3].diffuse = col;
-
-		// 頂点データをアンロックする
-		g_pD3DVtxBuffEffect->Unlock();
-	}
-}
-
-//=============================================================================
-// エフェクトの設定
-//=============================================================================
-int EFFECT::SetEffect(D3DXVECTOR3 pos, D3DXVECTOR3 move, D3DXCOLOR col, float fSizeX, float fSizeY, int nTimer)
+int EFFECT::SetInstance(D3DXVECTOR3 pos, D3DXVECTOR3 move, D3DXCOLOR col, float fSizeX, float fSizeY, int nTimer)
 {
 	int nIdxEffect = -1;
 
 	for (int nCntEffect = 0; nCntEffect < OBJECT_EFFECT_MAX; nCntEffect++)
 	{
-		bool use = this[nCntEffect].GetUse();
+		bool use = this->iUseType[nCntEffect].Use();
 		if (use != true)
 		{
-			this[nCntEffect].SetPos(pos);
-			this[nCntEffect].SetRot(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
-			this[nCntEffect].SetScl(D3DXVECTOR3(1.0f, 1.0f, 1.0f));
-			this[nCntEffect].SetMove(move);
-			this[nCntEffect].SetCol(col);
-			this[nCntEffect].nTimer = nTimer;
-			this[nCntEffect].nDecAlpha = col.a / nTimer;
-			this[nCntEffect].SetUse(true);
+			this->Transform[nCntEffect].Pos(pos);
+			this->Transform[nCntEffect].Rot(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+			this->Transform[nCntEffect].Scl(D3DXVECTOR3(1.0f, 1.0f, 1.0f));
+			this->move[nCntEffect].Move(move);
+			this->vtx.Color3D(col);
+			this->EffectPara[nCntEffect].nTimer = nTimer;
+			this->EffectPara[nCntEffect].nDecAlpha = col.a / nTimer;
+			this->iUseType[nCntEffect].Use(YesUse);
 
 			// 頂点座標の設定
-			SetVertexEffect(nCntEffect, fSizeX, fSizeY);
+			this->vtx.Vertex3D(nCntEffect, fSizeX, fSizeY);
 
 			// 頂点カラーの設定
-			SetColorEffect(nCntEffect,col);
+			this->vtx.Color3D(nCntEffect, col);
 
 			nIdxEffect = nCntEffect;
 

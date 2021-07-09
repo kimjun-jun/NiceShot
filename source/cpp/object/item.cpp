@@ -8,238 +8,225 @@
 #include "../../h/map/field.h"
 #include "../../h/other/sound.h"
 #include "../../h/object/player.h"
+#include "../../h/library.h"
 #include "../../h/object/item.h"
 
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define	VALUE_ROTATE_ITEM		(D3DX_PI * 0.01f)			// 回転速度
+#define	VALUE_ROTATE_ITEM_LO	(D3DX_PI * 0.01f)			// 回転速度　低速
+#define	VALUE_ROTATE_ITEM_HI	(D3DX_PI * 0.1f)			// 回転速度　高速
+#define	APPROADHING_RATE		(0.25f)						// プレイヤーに近づいていく割合 (距離 * APPROADHING_RATE)
 #define	VALUE_FALLSPEED_ITEM	(2.0f)						// 落下速度
 #define	ITEM_RADIUS				(20.0f)						// 半径
-#define DROP_ITEM_MAX						(20)																		//!< フィールドに落ちてるアイテムの数
-#define DROP_ITEM_CHARGE_ADDTIME			(1.0f)																		//!< アイテムをリスポーンさせる時の加算タイム
-#define DROP_ITEM_CHARGE_CNT				(60.0f)																		//!< アイテムをリスポーンさせる時の所要タイム
+#define DROP_ITEM_MAX						(20)			//!< フィールドに落ちてるアイテムの数
+#define DROP_ITEM_CHARGE_ADDTIME			(1.0f)			//!< アイテムをリスポーンさせる時の加算タイム
+#define DROP_ITEM_CHARGE_CNT				(60.0f)			//!< アイテムをリスポーンさせる時の所要タイム
 
-//*****************************************************************************
-// グローバル変数
-//*****************************************************************************
-LPDIRECT3DTEXTURE9	g_pD3DTextureItem[ITEMTYPE_MAX];	// テクスチャ読み込み場所
-LPD3DXMESH			g_pMeshItem[ITEMTYPE_MAX];			// ID3DXMeshインターフェイスへのポインタ
-LPD3DXBUFFER		g_pD3DXMatBuffItem[ITEMTYPE_MAX];	// メッシュのマテリアル情報を格納
-DWORD				g_aNumMatItem[ITEMTYPE_MAX];			// 属性情報の総数
-
-const char *c_aFileNameItemModel[ITEMTYPE_MAX] =
+//=============================================================================
+// コンストラクタ　「読み込み」「初期化」
+//=============================================================================
+ITEM::ITEM(void)
 {
-	"../data/MODEL/tikeiItem.x",		// 地形変形アイテム
-	"../data/MODEL/lifeItem.x",		// ライフ回復
-	"../data/MODEL/sensyaItem.x",		// 戦車変形アイテム
-	"../data/MODEL/bulletItem.x",		// バレットアイテム
-	"../data/MODEL/speedItem.x",		// スピードアップアイテム
-	"../data/MODEL/cameraItem.x",		// 強制バックカメラアイテム
-	"../data/MODEL/kiriItem.x",		// 霧アイテム
-};
+	//オブジェクトカウントアップ
+	this->CreateInstanceOBJ();
 
-const char *c_aFileNameItemTex[ITEMTYPE_MAX] =
+	//カウントループ(アイテムの種類)　
+	for (int nCntItemType = 0; nCntItemType < ITEMTYPE_MAX; nCntItemType++)
+	{
+		// テクスチャの読み込み
+		this->tex[nCntItemType].LoadTexture(this->c_aFileNameTex[nCntItemType]);
+	}
+
+	// Xファイルの読み込みデータ群
+	LPD3DXMESH	Mesh;
+	DWORD nv, nvi, nm, np;
+	LPD3DXBUFFER BuffMat;
+
+	// Xファイルの読み込み
+	// モデルは複数種類あるが、テクスチャ以外のモデルデータは全て同じため、モデルの読み込みは一度だけにしている
+	LoadMesh(this->c_aFileNameModel[0], &BuffMat,
+		&nm, &Mesh, &nv, &np, &nvi, NULL);
+
+	//カウントループ(アイテムのインスタンス数)　
+	for (int CntItem = 0; CntItem < OBJECT_ITEM_MAX; CntItem++)
+	{
+		//頂点の作成
+		LPDIRECT3DVERTEXBUFFER9 *VtxBuff;
+		LPDIRECT3DINDEXBUFFER9	*IdxBuff;
+		this->vtx[CntItem].MakeVertex3D(nv,FVF_VERTEX_3D);
+		this->vtx[CntItem].MakeIdxVertex(nvi);
+
+		//バッファの取得から反映
+		VtxBuff = this->vtx[CntItem].VtxBuff();
+		IdxBuff = this->vtx[CntItem].IdxBuff();
+		Mesh->GetVertexBuffer(VtxBuff);
+		Mesh->GetIndexBuffer(IdxBuff);
+		this->vtx[CntItem].VtxBuff(*VtxBuff);
+		this->vtx[CntItem].IdxBuff(*IdxBuff);
+
+		//使用の設定
+		this->iUseType[CntItem].ChangeUse(NoUse);
+	}
+
+	//モデルデータ反映
+	this->model.SetNumMat(nm);
+	this->model.SetMat(BuffMat);
+	this->model.SetNumVertex(nv);
+	this->model.SetNumPolygon(np);
+	this->model.SetNumVertexIndex(nvi);
+
+}
+
+//=============================================================================
+// デストラクタ　削除
+//=============================================================================
+ITEM::~ITEM(void)
 {
-	"../data/MODEL/landmark_aogashima.png",		// 地形変形アイテム
-	"../data/MODEL/life000.png",					// ライフ回復
-	"../data/MODEL/war_sensya_noman.png",			// 戦車変形アイテム
-	"../data/MODEL/bullettex.png",					// バレットアイテム
-	"../data/MODEL/1213810.png",					// スピードアップアイテム
-	"../data/MODEL/mark_camera_satsuei_ok.png",	// 強制バックカメラアイテム
-	"../data/MODEL/yama_kiri.png",					// 霧アイテム
-};
+	//カウントループ(アイテムの種類)
+	for (int nCntItemType = 0; nCntItemType < ITEMTYPE_MAX; nCntItemType++) {
+		//テクスチャ解放
+		this->tex[nCntItemType].~TEXTURE();
+		//モデル解放
+		this->model.~ModelAttribute();
+	}
+
+	//カウントループ(アイテムのインスタンス数)　
+	for (int CntItem = 0; CntItem < OBJECT_ITEM_MAX; CntItem++)
+	{
+		//頂点解放
+		this->vtx[CntItem].~VTXBuffer();
+	}
+	//オブジェクトカウントダウン
+	this->DeleteInstanceOBJ();
+}
 
 //=============================================================================
 // 初期化処理
 //=============================================================================
 void ITEM::Init(void)
 {
-	LPDIRECT3DDEVICE9 pDevice = GetDevice();
-
-	for(int nCntItemType = 0; nCntItemType < ITEMTYPE_MAX; nCntItemType++)
-	{
-		g_pD3DTextureItem[nCntItemType] = NULL;
-		g_pMeshItem[nCntItemType] = NULL;
-		g_pD3DXMatBuffItem[nCntItemType] = NULL;
-
-		// Xファイルの読み込み
-		D3DXLoadMeshFromX(c_aFileNameItemModel[nCntItemType],
-			D3DXMESH_SYSTEMMEM,
-			pDevice,
-			NULL,
-			&g_pD3DXMatBuffItem[nCntItemType],
-			NULL,
-			&g_aNumMatItem[nCntItemType],
-			&g_pMeshItem[nCntItemType]);
-
-		// テクスチャの読み込み
-		D3DXCreateTextureFromFile(pDevice,				// デバイスへのポインタ
-			c_aFileNameItemTex[nCntItemType],			// ファイルの名前
-			&g_pD3DTextureItem[nCntItemType]);			// 読み込むメモリー
-
-	}
-
-	//初期化 全てセットしない
+	//カウントループ(アイテムのインスタンス数)
 	for(int nCntItem = 0; nCntItem < OBJECT_ITEM_MAX; nCntItem++)
 	{
-		this[nCntItem].SetScl(D3DXVECTOR3(2.0f, 2.0f, 2.0f));
-		this[nCntItem].nIdxShadow = -1;
-		this[nCntItem].nType = -1;
-		this[nCntItem].NetUse = false;
-		this[nCntItem].SetUse(false);
-		this[nCntItem].NetGetItemFlag = false;
-		this[nCntItem].NetGetItemFlagOld = false;
+		//初期化設定
+		this->Transform[nCntItem].Scl(this->ItemParaOne.MaxSize);
+		this->ItemParaAll[nCntItem].nIdxShadow = -1;
+		this->ItemParaAll[nCntItem].eType = ITEMTYPE_NONE;
+		this->ItemParaAll[nCntItem].NetUse = false;
+		this->ItemParaAll[nCntItem].NetGetItemFlag = false;
+		this->ItemParaAll[nCntItem].NetGetItemFlagOld = false;
+		this->iUseType[nCntItem].Use(NoUse);
 	}
 
-	//初期化2　すべてセット
-
-	/*
-	for (int nCntItem = 0; nCntItem < DROP_ITEM_MAX; nCntItem++)
-	{
-		D3DXVECTOR3 pos = D3DXVECTOR3(float(rand() % int(WALL_SIZE_X/4)) + 100.0f, ITEM_INIT_POSY, float(rand() % int(WALL_SIZE_X / 4)) + 100.0f);
-		int x = rand() % 2;
-		int z = rand() % 2;
-		if (x == 1) pos.x *= -1;
-		if (z == 1) pos.z *= -1;
-		int ItemTypeNum = rand() % ITEMTYPE_MAX;
-		//ライフ、カメラ、霧アイテムの時はもう一度抽選
-		if (ItemTypeNum == ITEMTYPE_LIFE && ItemTypeNum == ITEMTYPE_CAMERA && ItemTypeNum == ITEMTYPE_KIRI) ItemTypeNum = rand() % ITEMTYPE_MAX;
-		//this[0].SetItem(pos, D3DXVECTOR3(2.0f, 2.0f, 2.0f),D3DXVECTOR3(0.0f, 0.0f, 0.0f), ItemTypeNum);
-		this[0].SetItem(pos, D3DXVECTOR3(2.0f, 2.0f, 2.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ITEMTYPE_SENSYA);
-		this[nCntItem].SetUse(true);
-	}
-	*/
-
-	//this[0].GoukeiDrop = DROP_ITEM_MAX;
-	this[0].GoukeiDrop = 0;
-
+	//!< 現在ドロップしている数　ドロップさせるまでのタイマー
+	this->ItemParaOne.GoukeiDrop = 0;
+	this->ItemParaOne.Droptime = 0;
 }
 
-//=============================================================================
-// 再初期化処理
-//=============================================================================
-void ITEM::Reinit(void)
-{
-	//初期化 全てセットしない
-	for (int nCntItem = 0; nCntItem < OBJECT_ITEM_MAX; nCntItem++)
-	{
-		this[nCntItem].SetPos(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
-		this[nCntItem].SetScl(D3DXVECTOR3(2.0f, 2.0f, 2.0f));
-		this[nCntItem].SetRot(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
-		this[nCntItem].SetFieldNorVec(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
-		this[nCntItem].SetFieldNorUpNorCross(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
-		this[nCntItem].SetQrot(0.0f);
-		this[nCntItem].NetUse = false;
-		this[nCntItem].SetUse(false);
-		this[nCntItem].Droptime = 0.0f;
-		this[nCntItem].nIdxShadow = -1;
-		this[nCntItem].nType = -1;
-		this[nCntItem].GettingSignal = false;
-		this[nCntItem].GettingSignalEnd = false;
-		this[nCntItem].CollisionFieldEnd = false;
-		this[nCntItem].NetGetItemFlag = false;
-		this[nCntItem].NetGetItemFlagOld = false;
-	}
 
-	//初期化2　すべてセット
-	/*
-	for (int nCntItem = 0; nCntItem < DROP_ITEM_MAX; nCntItem++)
-	{
-		D3DXVECTOR3 pos = D3DXVECTOR3(float(rand() % int(WALL_SIZE_X / 4)) + 100.0f, ITEM_INIT_POSY, float(rand() % int(WALL_SIZE_X / 4)) + 100.0f);
-		int x = rand() % 2;
-		int z = rand() % 2;
-		if (x == 1) pos.x *= -1;
-		if (z == 1) pos.z *= -1;
-		int ItemTypeNum = rand() % ITEMTYPE_MAX;
-		//ライフ、カメラ、霧アイテムの時はもう一度抽選
-		if (ItemTypeNum == ITEMTYPE_LIFE && ItemTypeNum == ITEMTYPE_CAMERA && ItemTypeNum == ITEMTYPE_KIRI) ItemTypeNum = rand() % ITEMTYPE_MAX;
-		this[0].SetItem(pos, D3DXVECTOR3(2.0f, 2.0f, 2.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ItemTypeNum);
-		//this[0].SetItem(pos, D3DXVECTOR3(1.0f, 1.0f, 1.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ITEMTYPE_TIKEI);
-		this[nCntItem].SetUse(true);
-	}
-	*/
+////=============================================================================
+//// 再初期化処理
+////=============================================================================
+//void ITEM::Reinit(void)
+//{
+//	//初期化 全てセットしない
+//	for (int nCntItem = 0; nCntItem < OBJECT_ITEM_MAX; nCntItem++)
+//	{
+//		this[nCntItem].Pos(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+//		this[nCntItem].SetScl(D3DXVECTOR3(2.0f, 2.0f, 2.0f));
+//		this[nCntItem].SetRot(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+//		this[nCntItem].SetFieldNorVec(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+//		this[nCntItem].SetFieldNorUpNorCross(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+//		this[nCntItem].SetQrot(0.0f);
+//		this[nCntItem].NetUse = false;
+//		this[nCntItem].Use(false);
+//		this[nCntItem].Droptime = 0.0f;
+//		this[nCntItem].nIdxShadow = -1;
+//		this[nCntItem].nType = -1;
+//		this[nCntItem].GettingSignal = false;
+//		this[nCntItem].GettingSignalEnd = false;
+//		this[nCntItem].CollisionFieldEnd = false;
+//		this[nCntItem].NetGetItemFlag = false;
+//		this[nCntItem].NetGetItemFlagOld = false;
+//	}
+//
+//	//初期化2　すべてセット
+//	/*
+//	for (int nCntItem = 0; nCntItem < DROP_ITEM_MAX; nCntItem++)
+//	{
+//		D3DXVECTOR3 pos = D3DXVECTOR3(float(rand() % int(WALL_SIZE_X / 4)) + 100.0f, ITEM_INIT_POSY, float(rand() % int(WALL_SIZE_X / 4)) + 100.0f);
+//		int x = rand() % 2;
+//		int z = rand() % 2;
+//		if (x == 1) pos.x *= -1;
+//		if (z == 1) pos.z *= -1;
+//		int ItemTypeNum = rand() % ITEMTYPE_MAX;
+//		//ライフ、カメラ、霧アイテムの時はもう一度抽選
+//		if (ItemTypeNum == ITEMTYPE_LIFE && ItemTypeNum == ITEMTYPE_CAMERA && ItemTypeNum == ITEMTYPE_KIRI) ItemTypeNum = rand() % ITEMTYPE_MAX;
+//		this[0].SetItem(pos, D3DXVECTOR3(2.0f, 2.0f, 2.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ItemTypeNum);
+//		//this[0].SetItem(pos, D3DXVECTOR3(1.0f, 1.0f, 1.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ITEMTYPE_TIKEI);
+//		this[nCntItem].Use(true);
+//	}
+//	*/
+//
+//	//this[0].GoukeiDrop = DROP_ITEM_MAX;
+//	this[0].GoukeiDrop = 0;
+//}
+//
 
-	//this[0].GoukeiDrop = DROP_ITEM_MAX;
-	this[0].GoukeiDrop = 0;
-}
 
-//=============================================================================
-// 再初期化処理
-//=============================================================================
-void ITEM::ReinitNet(void)
-{
-	for (int nCntItem = 0; nCntItem < OBJECT_ITEM_MAX; nCntItem++)
-	{
-		this[nCntItem].SetPos(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
-		this[nCntItem].SetScl(D3DXVECTOR3(2.0f, 2.0f, 2.0f));
-		this[nCntItem].SetRot(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
-		this[nCntItem].SetFieldNorVec(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
-		this[nCntItem].SetFieldNorUpNorCross(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
-		this[nCntItem].SetQrot(0.0f);
-		this[nCntItem].SetUse(false);
-		this[nCntItem].Droptime = 0.0f;
-		this[nCntItem].nIdxShadow = -1;
-		this[nCntItem].nType = -1;
-		this[nCntItem].GettingSignal = false;
-		this[nCntItem].GettingSignalEnd = false;
-		this[nCntItem].CollisionFieldEnd = false;
-		this[nCntItem].NetGetItemFlag = false;
-		this[nCntItem].NetGetItemFlagOld = false;
-	}
-}
+////=============================================================================
+//// 再初期化処理
+////=============================================================================
+//void ITEM::ReinitNet(void)
+//{
+//	for (int nCntItem = 0; nCntItem < OBJECT_ITEM_MAX; nCntItem++)
+//	{
+//		this[nCntItem].Pos(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+//		this[nCntItem].SetScl(D3DXVECTOR3(2.0f, 2.0f, 2.0f));
+//		this[nCntItem].SetRot(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+//		this[nCntItem].SetFieldNorVec(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+//		this[nCntItem].SetFieldNorUpNorCross(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+//		this[nCntItem].SetQrot(0.0f);
+//		this[nCntItem].Use(false);
+//		this[nCntItem].Droptime = 0.0f;
+//		this[nCntItem].nIdxShadow = -1;
+//		this[nCntItem].nType = -1;
+//		this[nCntItem].GettingSignal = false;
+//		this[nCntItem].GettingSignalEnd = false;
+//		this[nCntItem].CollisionFieldEnd = false;
+//		this[nCntItem].NetGetItemFlag = false;
+//		this[nCntItem].NetGetItemFlagOld = false;
+//	}
+//}
+//
 
-//=============================================================================
-// 終了処理
-//=============================================================================
-void ITEM::Uninit(void)
-{
-	for(int nCntItemType = 0; nCntItemType < ITEMTYPE_MAX; nCntItemType++)
-	{
-		if(g_pD3DTextureItem[nCntItemType] != NULL)
-		{// テクスチャの開放
-			g_pD3DTextureItem[nCntItemType]->Release();
-			g_pD3DTextureItem[nCntItemType] = NULL;
-		}
-
-		if(g_pMeshItem[nCntItemType] != NULL)
-		{// メッシュの開放
-			g_pMeshItem[nCntItemType]->Release();
-			g_pMeshItem[nCntItemType] = NULL;
-		}
-
-		if(g_pD3DXMatBuffItem[nCntItemType] != NULL)
-		{// マテリアルの開放
-			g_pD3DXMatBuffItem[nCntItemType]->Release();
-			g_pD3DXMatBuffItem[nCntItemType] = NULL;
-		}
-	}
-}
 
 //=============================================================================
 // 更新処理
 //=============================================================================
 void ITEM::Update(PLAYER_HONTAI *p, bool NetGameStartFlag)
 {
+	//カウントループ(アイテムのインスタンス数)
 	for (int nCntItem = 0; nCntItem < OBJECT_ITEM_MAX; nCntItem++)
 	{
-		this[nCntItem].NetGetItemFlagOld = this[nCntItem].NetGetItemFlag;
-		this[nCntItem].NetGetItemFlag = false;
-		bool use = this[nCntItem].GetUse();
+		this->ItemParaAll[nCntItem].NetGetItemFlagOld = this->ItemParaAll[nCntItem].NetGetItemFlag;
+		this->ItemParaAll[nCntItem].NetGetItemFlag = false;
+		bool use = this->iUseType[nCntItem].Use();
 		if (use == true)
 		{
 			//-------------------------------------------オブジェクトの値読み込み
-			D3DXVECTOR3 pos = this[nCntItem].GetPos();
-			D3DXVECTOR3 rot = this[nCntItem].GetRot();
-			D3DXVECTOR3 FieldNorVec = this[nCntItem].GetFieldNorVec();
-			D3DXVECTOR3 FieldNorUpNorCross = this[nCntItem].GetFieldNorUpNorCross();
-			float Qrot = this[nCntItem].GetQrot();
+			D3DXVECTOR3 pos = this->Transform[nCntItem].Pos();
+			D3DXVECTOR3 rot = this->Transform[nCntItem].Rot();
+			D3DXVECTOR3 FieldNorVec = this->PostureVec[nCntItem].FNVec();
+			D3DXVECTOR3 FieldNorUpNorCross = this->PostureVec[nCntItem].FNUNCross();
+			float Qrot = this->PostureVec[nCntItem].Qrot();
 
 			//フィールドに落ちてるときはくるくる回転させる
-			rot.y += VALUE_ROTATE_ITEM;
+			rot.y += VALUE_ROTATE_ITEM_LO;
 
 			//徐々に落ちてくる
-			if (this[nCntItem].CollisionFieldEnd != true)
+			if (this->ItemParaAll[nCntItem].CollisionFieldEnd != true)
 			{
 				pos.y -= VALUE_FALLSPEED_ITEM;
 			}
@@ -248,7 +235,7 @@ void ITEM::Update(PLAYER_HONTAI *p, bool NetGameStartFlag)
 			D3DXVECTOR3 Upvec = D3DXVECTOR3(0.0, 1.0f, 0.0f);
 			D3DXVec3Cross(&FieldNorUpNorCross, &FieldNorVec, &Upvec);
 			float kakezan = D3DXVec3Dot(&FieldNorVec, &Upvec);
-			if (kakezan != 0)
+			if (kakezan != 0.0f)
 			{
 				float cossita = kakezan /
 					sqrtf(FieldNorVec.x*FieldNorVec.x +
@@ -259,18 +246,17 @@ void ITEM::Update(PLAYER_HONTAI *p, bool NetGameStartFlag)
 			else Qrot = 0.0f;
 
 			//-------------------------------------------オブジェクトの値書き込み
-			this[nCntItem].SetPos(pos);
-			this[nCntItem].SetRot(rot);
-			this[nCntItem].SetFieldNorUpNorCross(FieldNorUpNorCross);
-			this[nCntItem].SetQrot(Qrot);
+			this->Transform[nCntItem].Pos(pos);
+			this->Transform[nCntItem].Rot(rot);
+			this->PostureVec[nCntItem].FNUNCross(FieldNorUpNorCross);
+			this->PostureVec[nCntItem].Qrot(Qrot);
 		}
 
-
-		if (this[nCntItem].GettingSignal == true)
+		//だれかがアイテムを取得したらそのプレイヤーに近づく処理
+		if (this->ItemParaAll[nCntItem].GettingSignal == true)
 		{
 			GettingItem(nCntItem,p);
 		}
-
 
 	}
 
@@ -280,26 +266,32 @@ void ITEM::Update(PLAYER_HONTAI *p, bool NetGameStartFlag)
 		//アイテムを復活させる制御。
 		for (int nCntItem = 0; nCntItem < OBJECT_ITEM_MAX; nCntItem++)
 		{
-			if (this[0].GoukeiDrop > DROP_ITEM_MAX) break;
-			bool use = this[nCntItem].GetUse();
+			//アイテムを最大数まで使用していたらスルー
+			if (this->ItemParaOne.GoukeiDrop > DROP_ITEM_MAX) break;
+			bool use = this->iUseType[nCntItem].Use();
 			if (use == false)
 			{
-				this[nCntItem].Droptime += DROP_ITEM_CHARGE_ADDTIME;
-				if (this[nCntItem].Droptime >= DROP_ITEM_CHARGE_CNT)
+				//タイマーを加算して、一定数以上になるとアイテムを出現させる
+				this->ItemParaOne.Droptime += DROP_ITEM_CHARGE_ADDTIME;
+				if (this->ItemParaOne.Droptime >= DROP_ITEM_CHARGE_CNT)
 				{
+					//出現処理
+					//座標指定
 					D3DXVECTOR3 pos = D3DXVECTOR3(float(rand() % int(WALL_SIZE_X / 4)) + 100.0f, ITEM_INIT_POSY, float(rand() % int(WALL_SIZE_X / 4)) + 100.0f);
+					//ランダムで正負を反転させる
 					int x = rand() % 2;
 					int z = rand() % 2;
 					if (x == 1) pos.x *= -1;
 					if (z == 1) pos.z *= -1;
+					//ランダムでアイテムの種類選択
 					int ItemNum = rand() % ITEMTYPE_MAX;
-					//ライフ、カメラ、霧アイテムの時はもう一度抽選
+					//確立設定のため　ライフ、カメラ、霧アイテムの時はもう一度抽選
 					if (ItemNum == ITEMTYPE_LIFE && ItemNum == ITEMTYPE_CAMERA && ItemNum == ITEMTYPE_KIRI) ItemNum = rand() % ITEMTYPE_MAX;
-					//this[0].SetItem(pos, D3DXVECTOR3(2.0f, 2.0f, 2.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ItemNum);
-					this[0].SetItem(pos, D3DXVECTOR3(2.0f, 2.0f, 2.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ITEMTYPE_TIKEI);
-					this[nCntItem].CollisionFieldEnd = false;
-					this[nCntItem].Droptime = 0.0f;
-					this[0].GoukeiDrop++;
+					//インスタンスセット　使用する
+					this[0].SetInstance(pos, D3DXVECTOR3(ITEM_BIG_SCL, ITEM_BIG_SCL, ITEM_BIG_SCL), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ITEMTYPE_TIKEI);
+					this->ItemParaAll[nCntItem].CollisionFieldEnd = false;
+					this->ItemParaOne.Droptime = 0.0f;
+					this->ItemParaOne.GoukeiDrop++;
 					PlaySound(SOUND_LABEL_SE_nyu);
 				}
 				break;
@@ -317,11 +309,14 @@ void ITEM::Draw(void)
 	// ライティングを有効に
 	pDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
 
+	//カウントループ(アイテムのインスタンス数)　使用の設定
 	for (int nCntItem = 0; nCntItem < OBJECT_ITEM_MAX; nCntItem++)
 	{
-		bool use = this[nCntItem].GetUse();
+		//使用していれば描画
+		bool use = this->iUseType[nCntItem].Use();
 		if (use == true)
 		{
+			//ワールド変換に必要なデータ群とマテリアル情報
 			D3DXMATRIX mtxScl, mtxRot, mtxTranslate;
 			D3DXMATERIAL *pD3DXMat;
 			D3DMATERIAL9 matDef;
@@ -330,13 +325,13 @@ void ITEM::Draw(void)
 			D3DXMATRIX mtxQ;
 			D3DXMatrixIdentity(&mtxQ);
 
-			D3DXMATRIX mtxWorldItem = this[nCntItem].GetMatrix();
-			D3DXVECTOR3 pos = this[nCntItem].GetPos();
-			D3DXVECTOR3 rot = this[nCntItem].GetRot();
-			D3DXVECTOR3 scl = this[nCntItem].GetScl();
-			D3DXVECTOR3 PlayerUpToFieldNorVec = this[nCntItem].GetFieldNorUpNorCross();
-			float Qrot = this[nCntItem].GetQrot();
-
+			D3DXMATRIX mtxWorldItem;
+			//-------------------------------------------オブジェクトの値読み込み
+			D3DXVECTOR3 pos = this->Transform[nCntItem].Pos();
+			D3DXVECTOR3 rot = this->Transform[nCntItem].Rot();
+			D3DXVECTOR3 scl = this->Transform[nCntItem].Scl();
+			D3DXVECTOR3 PlayerUpToFieldNorVec = this->PostureVec[nCntItem].FNUNCross();
+			float Qrot = this->PostureVec[nCntItem].Qrot();
 
 			//q=(rotVecAxis法線)*(g_Player.rot回転)  -がキモ？
 			D3DXQuaternionRotationAxis(&q, &PlayerUpToFieldNorVec, -Qrot);
@@ -361,23 +356,30 @@ void ITEM::Draw(void)
 			// ワールドマトリックスの設定
 			pDevice->SetTransform(D3DTS_WORLD, &mtxWorldItem);
 
-			// 現在のマテリアルを取得
+			// マテリアル設定
 			pDevice->GetMaterial(&matDef);
+			LPD3DXBUFFER mat;
+			mat = *this->model.GetMat();
+			pD3DXMat = (D3DXMATERIAL*)mat->GetBufferPointer();
 
-			pD3DXMat = (D3DXMATERIAL*)g_pD3DXMatBuffItem[this[nCntItem].nType]->GetBufferPointer();
-
-			for (int nCntMat = 0; nCntMat < (int)g_aNumMatItem[this[nCntItem].nType]; nCntMat++)
-			{
-				// マテリアルの設定
-				pDevice->SetMaterial(&pD3DXMat[0].MatD3D);
-
-				// テクスチャの設定
-				pDevice->SetTexture(0, g_pD3DTextureItem[this[nCntItem].nType]);
-
-				// 描画
-				g_pMeshItem[this[nCntItem].nType]->DrawSubset(nCntMat);
-			}
+			// マテリアルをデフォルトに戻す
 			pDevice->SetMaterial(&matDef);
+			for (int nCntMat = 0; nCntMat < (int)this->model.GetNumMat(); nCntMat++)
+			{
+				// デバイスにマテリアルの設定
+				pDevice->SetMaterial(&pD3DXMat->MatD3D);
+
+				// デバイスにテクスチャの設定
+				pDevice->SetTexture(0, this->tex[this->ItemParaAll[nCntItem].eType].Texture());
+				// 頂点フォーマットの設定
+				pDevice->SetFVF(FVF_VERTEX_3D);
+				// 頂点バッファをレンダリングパイプラインに設定
+				pDevice->SetStreamSource(0, *this->vtx[nCntItem].VtxBuff(), 0, sizeof(VERTEX_3D));
+				// インデックスバッファをレンダリングパイプラインに設定
+				pDevice->SetIndices(*this->vtx[nCntItem].IdxBuff());
+				//描画
+				pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, this->model.GetNumVertex(), 0, this->model.GetNumPolygon());
+			}
 		}
 	}
 	// ライティングを有効に
@@ -387,18 +389,21 @@ void ITEM::Draw(void)
 //=============================================================================
 // アイテムの設定
 //=============================================================================
-void ITEM::SetItem(D3DXVECTOR3 pos, D3DXVECTOR3 scl, D3DXVECTOR3 rot, int nType)
+void ITEM::SetInstance(D3DXVECTOR3 pos, D3DXVECTOR3 scl, D3DXVECTOR3 rot, eITEM_TYPE eType)
 {
+	//カウントループ(アイテムのインスタンス数)
 	for(int nCntItem = 0; nCntItem < OBJECT_ITEM_MAX; nCntItem++)
 	{
-		bool use = this[nCntItem].GetUse();
+		//使用されていないインスタンスが存在すれば一個だけ使用(出現)する
+		bool use = this->iUseType[nCntItem].Use();
 		if (use != true)
 		{
-			this[nCntItem].SetPos(pos);
-			this[nCntItem].SetScl(scl);
-			this[nCntItem].SetRot(rot);
-			this[nCntItem].SetUse(true);
-			this[nCntItem].nType = nType;
+			//基本パラメータの設定
+			this->Transform[nCntItem].Pos(pos);
+			this->Transform[nCntItem].Scl(scl);
+			this->Transform[nCntItem].Rot(rot);
+			this->iUseType[nCntItem].Use(YesUse);
+			this->ItemParaAll[nCntItem].eType = eType;
 			break;
 		}
 	}
@@ -407,12 +412,14 @@ void ITEM::SetItem(D3DXVECTOR3 pos, D3DXVECTOR3 scl, D3DXVECTOR3 rot, int nType)
 //=============================================================================
 // アイテムの削除
 //=============================================================================
-void ITEM::DeleteItem(int nIdxItem)
+void ITEM::ReleaseInstance(int nIdxItem)
 {
+	//指定範囲外の数値ならスルー　存在する数値なら使用(描画)しない
 	if(nIdxItem >= 0 && nIdxItem < OBJECT_ITEM_MAX)
 	{
-		this[nIdxItem].SetUse(false);
-		this[nIdxItem].CollisionFieldEnd = false;
+		//基本パラメータの設定
+		this->iUseType[nIdxItem].Use(NoUse);
+		this->ItemParaAll[nIdxItem].CollisionFieldEnd = false;
 	}
 }
 
@@ -421,39 +428,44 @@ void ITEM::DeleteItem(int nIdxItem)
 //=============================================================================
 void ITEM::GettingItem(int nIdxItem, PLAYER_HONTAI *p)
 {
-	if (this[nIdxItem].GettingSignalEnd == false)
+	//プレイヤーへ近づける処理
+	if (this->ItemParaAll[nIdxItem].GettingSignalEnd == false)
 	{
 		//-------------------------------------------オブジェクトの値読み込み
-		D3DXVECTOR3 ipos = this[nIdxItem].GetPos();
-		D3DXVECTOR3 irot = this[nIdxItem].GetRot();
-		D3DXVECTOR3 iscl = this[nIdxItem].GetScl();
+		D3DXVECTOR3 ipos = this->Transform[nIdxItem].Pos();
+		D3DXVECTOR3 irot = this->Transform[nIdxItem].Rot();
+		D3DXVECTOR3 iscl = this->Transform[nIdxItem].Scl();
 
 		//くるくる回転を加速
-		irot.y += VALUE_ROTATE_ITEM*10;
+		irot.y += VALUE_ROTATE_ITEM_HI;
 		
-		//プレイヤーとアイテムの距離を計算し/5分づつ近づける
-		D3DXVECTOR3 ppos = p[this[nIdxItem].GetPlayerType].GetPos();
+		//プレイヤーとアイテムの距離を計算し近づける
+		D3DXVECTOR3 ppos = p->Transform[this->ItemParaAll[nIdxItem].GetPlayerType].Pos();
 
 		D3DXVECTOR3 distance = ppos - ipos;
-		distance /= 4.0f;
+		distance *= APPROADHING_RATE;
 		ipos += distance;
+		//スケールも徐々に小さくしていく
 		iscl -= D3DXVECTOR3(ITEM_SMALL_SCL, ITEM_SMALL_SCL, ITEM_SMALL_SCL);
+		//一定値より小さくなれば近づく処理を終了させる
 		if (iscl.x <= ITEM_DELETE_SCL)
 		{
-			this[nIdxItem].GettingSignalEnd = true;
+			this->ItemParaAll[nIdxItem].GettingSignalEnd = true;
 		}
 
 		//-------------------------------------------オブジェクトの値書き込み
-		this[nIdxItem].SetPos(ipos);
-		this[nIdxItem].SetRot(irot);
-		this[nIdxItem].SetScl(iscl);
+		this->Transform[nIdxItem].Pos(ipos);
+		this->Transform[nIdxItem].Rot(irot);
+		this->Transform[nIdxItem].Scl(iscl);
 	}
 
-	else
+	//取得処理が終わったらアイテムを使用(描画)しない
+	else if(this->ItemParaAll[nIdxItem].GettingSignalEnd == true)
 	{
-		this[0].DeleteItem(nIdxItem);
-		this[nIdxItem].GettingSignal = false;
-		this[nIdxItem].GettingSignalEnd = false;
-		this[0].GoukeiDrop--;
+		//フラグを終了させ使用インスタンス数を減らす
+		this->ReleaseInstance(nIdxItem);
+		this->ItemParaAll[nIdxItem].GettingSignal = false;
+		this->ItemParaAll[nIdxItem].GettingSignalEnd = false;
+		this->ItemParaOne.GoukeiDrop--;
 	}
 }

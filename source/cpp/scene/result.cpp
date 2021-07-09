@@ -15,44 +15,70 @@
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define	TEXTURE_RESULT_LOGO		_T("../data/TEXTURE/other/GameClear.png")					// 読み込むテクスチャファイル名
-#define	TEXTURE_RESULT_BG		_T("../data/TEXTURE/other/GameClear_Background.png")		// 読み込むテクスチャファイル名
-#define	RESULT_LOGO_POS_X		(SCREEN_CENTER_X)											// ロゴの座標
-#define	RESULT_LOGO_POS_Y		(SCREEN_CENTER_Y-200.0f)									// ロゴの座標
-#define	RESULT_LOGO_SIZE_X		(300.0f)													// ロゴの幅
-#define	RESULT_LOGO_SIZE_Y		(200.0f)													// ロゴの高さ
-#define	RESULT_BG_SIZE_X		(SCREEN_W)					
-#define	RESULT_BG_SIZE_Y		(SCREEN_H)					
+#define	RESULT_LOGO_POS_X		(SCREEN_CENTER_X)				//!< ロゴの座標
+#define	RESULT_LOGO_POS_Y		(SCREEN_CENTER_Y-200.0f)		//!< ロゴの座標
+#define	RESULT_LOGO_SIZE_X		(300.0f)						//!< ロゴの幅
+#define	RESULT_LOGO_SIZE_Y		(200.0f)						//!< ロゴの高さ
+#define	RESULT_BG_SIZE_X		(SCREEN_W)						//!< 背景の幅
+#define	RESULT_BG_SIZE_Y		(SCREEN_H)						//!< 背景の高さ
+
+//=============================================================================
+// コンストラクタ　「読み込み」「初期化」
+//=============================================================================
+RESULT::RESULT(void)
+{
+	//オブジェクトカウントアップ
+	this->CreateInstanceOBJ();
+
+	//頂点の作成
+	this->vtx.MakeVertex2D(OBJECT_RESULT_MAX, FVF_VERTEX_2D);
+
+
+	//描画位置反映　スクリーンサイズで作成 BGとLOGO
+	D3DXVECTOR3 vtxBG[POLYGON_2D_VERTEX] = {
+	D3DXVECTOR3(0.0f, 0.0f, 0.0f),
+	D3DXVECTOR3(RESULT_BG_SIZE_X, 0.0f, 0.0f),
+	D3DXVECTOR3(0.0f, RESULT_BG_SIZE_Y, 0.0f),
+	D3DXVECTOR3(RESULT_BG_SIZE_X, RESULT_BG_SIZE_Y, 0.0f),
+	};
+	this->vtx.Vertex2D(RESULT_TEX_BG, vtxBG);
+
+
+	D3DXVECTOR3 vtxLOGO[POLYGON_2D_VERTEX] = {
+	D3DXVECTOR3(RESULT_LOGO_POS_X - RESULT_LOGO_SIZE_X, RESULT_LOGO_POS_Y - RESULT_LOGO_SIZE_Y, 0.0f),
+	D3DXVECTOR3(RESULT_LOGO_POS_X + RESULT_LOGO_SIZE_X, RESULT_LOGO_POS_Y - RESULT_LOGO_SIZE_Y, 0.0f),
+	D3DXVECTOR3(RESULT_LOGO_POS_X - RESULT_LOGO_SIZE_X, RESULT_LOGO_POS_Y + RESULT_LOGO_SIZE_Y, 0.0f),
+	D3DXVECTOR3(RESULT_LOGO_POS_X + RESULT_LOGO_SIZE_X, RESULT_LOGO_POS_Y + RESULT_LOGO_SIZE_Y, 0.0f),
+	};
+	this->vtx.Vertex2D(RESULT_TEX_LOGO, vtxLOGO);
+
+
+	for (int CntResult = 0; CntResult < OBJECT_RESULT_MAX; CntResult++)
+	{
+		this->tex->LoadTexture(this->c_aFileNameTex[CntResult]);
+	}
+}
+
+
+//=============================================================================
+// デストラクタ　削除
+//=============================================================================
+RESULT::~RESULT(void)
+{
+	for (int CntResult = 0; CntResult < OBJECT_RESULT_MAX; CntResult++)
+	{
+		this->tex[CntResult].~TEXTURE();
+	}
+	//頂点解放
+	this->vtx.~VTXBuffer();
+}
 
 //=============================================================================
 // 初期化処理
 //=============================================================================
 void RESULT::Init(void)
 {
-	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 
-	// テクスチャの読み込み
-	D3DXCreateTextureFromFile(pDevice, TEXTURE_RESULT_LOGO, &this[0].tex2D.pD3DTexture);
-	D3DXCreateTextureFromFile(pDevice, TEXTURE_RESULT_BG, &this[1].tex2D.pD3DTexture);
-
-
-	// 頂点情報の作成
-	MakeVertexResult();
-}
-
-//=============================================================================
-// 再初期化処理
-//=============================================================================
-void RESULT::Reinit(void)
-{
-
-}
-
-//=============================================================================
-// 終了処理
-//=============================================================================
-void RESULT::Uninit(void)
-{
 }
 
 //=============================================================================
@@ -60,9 +86,10 @@ void RESULT::Uninit(void)
 //=============================================================================
 void RESULT::Update(GAME_OBJECT* obj, FADE *fade)
 {
+	//リザルト画面中に入力があれば初期化してタイトルシーンに戻る
 	if (IsButtonTriggered(0, BUTTON_A)|| GetKeyboardTrigger(DIK_RETURN))
 	{
-		obj->Reinit();				// ゲームの再初期化処理
+		obj->Init();	// ゲームの初期化処理
 		fade->SetFade(FADE_OUT, SCENE_TITLE, SOUND_LABEL_BGM_title01);
 	}
 }
@@ -74,87 +101,16 @@ void RESULT::Draw(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 
-	//BG
-	// 頂点フォーマットの設定
-	pDevice->SetFVF(FVF_VERTEX_2D);
-
-	// テクスチャの設定
-	pDevice->SetTexture(0, this[1].tex2D.pD3DTexture);
-
-	// ポリゴンの描画
-	pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, POLYGON_2D_NUM, this[1].tex2D.textureVTX, sizeof(VERTEX_2D));
-
-
-	//LOGO
-	// 頂点フォーマットの設定
-	pDevice->SetFVF(FVF_VERTEX_2D);
-
-	// テクスチャの設定
-	pDevice->SetTexture(0, this[0].tex2D.pD3DTexture);
-
-	// ポリゴンの描画
-	pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, POLYGON_2D_NUM, this[0].tex2D.textureVTX, sizeof(VERTEX_2D));
-
-}
-
-//=============================================================================
-// 頂点の作成
-//=============================================================================
-HRESULT RESULT::MakeVertexResult(void)
-{
+	for (int CntResult = 0; CntResult < OBJECT_RESULT_MAX; CntResult++)
 	{
-		// 頂点座標の設定
-		this[0].tex2D.textureVTX[0].vtx = D3DXVECTOR3(RESULT_LOGO_POS_X - RESULT_LOGO_SIZE_X, RESULT_LOGO_POS_Y - RESULT_LOGO_SIZE_Y, 0.0f);
-		this[0].tex2D.textureVTX[1].vtx = D3DXVECTOR3(RESULT_LOGO_POS_X + RESULT_LOGO_SIZE_X, RESULT_LOGO_POS_Y - RESULT_LOGO_SIZE_Y, 0.0f);
-		this[0].tex2D.textureVTX[2].vtx = D3DXVECTOR3(RESULT_LOGO_POS_X - RESULT_LOGO_SIZE_X, RESULT_LOGO_POS_Y + RESULT_LOGO_SIZE_Y, 0.0f);
-		this[0].tex2D.textureVTX[3].vtx = D3DXVECTOR3(RESULT_LOGO_POS_X + RESULT_LOGO_SIZE_X, RESULT_LOGO_POS_Y + RESULT_LOGO_SIZE_Y, 0.0f);
-
-		// テクスチャのパースペクティブコレクト用
-		this[0].tex2D.textureVTX[0].rhw =
-			this[0].tex2D.textureVTX[1].rhw =
-			this[0].tex2D.textureVTX[2].rhw =
-			this[0].tex2D.textureVTX[3].rhw = 1.0f;
-
-		// 反射光の設定
-		this[0].tex2D.textureVTX[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-		this[0].tex2D.textureVTX[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-		this[0].tex2D.textureVTX[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-		this[0].tex2D.textureVTX[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-
-		// テクスチャ座標の設定
-		this[0].tex2D.textureVTX[0].tex = D3DXVECTOR2(0.0f, 0.0f);
-		this[0].tex2D.textureVTX[1].tex = D3DXVECTOR2(1.0f, 0.0f);
-		this[0].tex2D.textureVTX[2].tex = D3DXVECTOR2(0.0f, 1.0f);
-		this[0].tex2D.textureVTX[3].tex = D3DXVECTOR2(1.0f, 1.0f);
-
+		// 頂点バッファをデバイスのデータストリームにバインド
+		pDevice->SetStreamSource(0, *this->vtx.VtxBuff(), 0, sizeof(VERTEX_2D));
+		// 頂点フォーマットの設定
+		pDevice->SetFVF(FVF_VERTEX_2D);
+		// テクスチャの設定　テクスチャが複数ならtexを配列化して選択させるように
+		pDevice->SetTexture(0, this->tex[CntResult].Texture());
+		// ポリゴンの描画　引数二個目の描画開始頂点を設定することが大事
+		pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, (CntResult * 4), POLYGON_2D_NUM);
 	}
-
-	{
-		// 頂点座標の設定
-		this[1].tex2D.textureVTX[0].vtx = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-		this[1].tex2D.textureVTX[1].vtx = D3DXVECTOR3(RESULT_BG_SIZE_X, 0.0f, 0.0f);
-		this[1].tex2D.textureVTX[2].vtx = D3DXVECTOR3(0.0f, RESULT_BG_SIZE_Y, 0.0f);
-		this[1].tex2D.textureVTX[3].vtx = D3DXVECTOR3(RESULT_BG_SIZE_X, RESULT_BG_SIZE_Y, 0.0f);
-
-		// テクスチャのパースペクティブコレクト用
-		this[1].tex2D.textureVTX[0].rhw =
-			this[1].tex2D.textureVTX[1].rhw =
-			this[1].tex2D.textureVTX[2].rhw =
-			this[1].tex2D.textureVTX[3].rhw = 1.0f;
-
-		// 反射光の設定
-		this[1].tex2D.textureVTX[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-		this[1].tex2D.textureVTX[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-		this[1].tex2D.textureVTX[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-		this[1].tex2D.textureVTX[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-
-		// テクスチャ座標の設定
-		this[1].tex2D.textureVTX[0].tex = D3DXVECTOR2(0.0f, 0.0f);
-		this[1].tex2D.textureVTX[1].tex = D3DXVECTOR2(1.0f, 0.0f);
-		this[1].tex2D.textureVTX[2].tex = D3DXVECTOR2(0.0f, 1.0f);
-		this[1].tex2D.textureVTX[3].tex = D3DXVECTOR2(1.0f, 1.0f);
-	}
-
-	return S_OK;
 }
 

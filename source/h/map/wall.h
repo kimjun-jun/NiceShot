@@ -8,17 +8,18 @@
 #include "../../h/object/objectclass.h"
 
 
-class WALL : public OBJECT_3D
+/**
+*　@class WALL
+*　@brief GAMEOBJECT派生クラス
+*/
+class WALL : public GAME_OBJECT
 {
 public:
-	WALL() { cnt++;}
-	~WALL() { cnt--; }
-	virtual void Init(void);
-	virtual void Reinit(void);
-	virtual void Uninit(void);
-	virtual void Update(void);
-	virtual void Draw(void);
+	WALL();		//!< データ読み込み
+	~WALL();	//!< 削除
+	void		Init(void);		//!< 初期化
+	void		Update(void);	//!< 更新
+	void		Draw(void);		//!< 描画
 
 private:
-	static int cnt;								// インスタンス総数
 } ;

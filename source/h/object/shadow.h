@@ -10,20 +10,29 @@
 //*****************************************************************************
 // 構造体定義
 //*****************************************************************************
-class SHADOW : public OBJECT_3D
+/**
+*　@class SHADOW
+*　@brief GAMEOBJECT派生クラス
+*/
+class SHADOW : public GAME_OBJECT
 {
 public:
-	virtual void						Init(void);					//!< 初期化
-	virtual void						Reinit(void);				//!< 再初期化
-	virtual void						Uninit(void);				//!< 終了
-	virtual void						Update(void);				//!< 更新
-	virtual void						Draw(void);					//!< 描画
-	HRESULT						MakeVertexShadow(LPDIRECT3DDEVICE9 pDevice);
-	int							CreateShadow(D3DXVECTOR3 pos, D3DXVECTOR3 scl);
-	void						ReleaseShadow(int nIdxShadow);
-	void						SetPositionShadow(int nIdxShadow, D3DXVECTOR3 pos, D3DXVECTOR3 scl);
-	void						SetVertexShadow(int nIdxShadow, float fSizeX, float fSizeZ);
-	void						SetColorShadow(int nIdxShadow, D3DXCOLOR col);
-	SHADOW						*GetShadow(void);
+	SHADOW();	//!< データ読み込み　初期化
+	~SHADOW();	//!< 削除
+
+	int			SetInstance(D3DXVECTOR3 pos, D3DXVECTOR3 scl);	//!< インスタンスセット
+	void		ReleaseInstance(int Idx);				//!< インスタンス解放
+	void		UpdateInstance(int Idx, D3DXVECTOR3 pos, D3DXVECTOR3 rot, D3DXVECTOR3 scl);	//インスタンスアップデート　各インスタンス毎に任意呼び出し
+
+private:
+	void		Init(void);		//!< 初期化
+	//void		Update(void);	//!< 更新
+	void		Draw(void);		//!< 描画
+
+	TEXTURE		tex;			//!< テクスチャ情報　複数使用するならここを配列化
+	VTXBuffer	vtx;			//!< 頂点情報　複数使用するならここを配列化
+	TransForm	Transform[OBJECT_SHADOW_MAX];		//!< トランスフォーム情報
+	iUseCheak	iUseType[OBJECT_SHADOW_MAX];		//!< 使用情報
+
 } ;
 

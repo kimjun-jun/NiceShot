@@ -101,10 +101,8 @@ GAME_OBJECT *GetSendObjectP(void)
 }
 
 
-//-----------------------------------------------------------------オブジェクトの数を0で初期化
-int OBJECT_3D::Num = 0;
-int OBJECT_2D::Num = 0;
-int OBJECT_2D_VERTEXBUFFER::Num = 0;
+//-----------------------------------------------------------------生成オブジェクトの数を0で宣言　生成する度に++　削除する度に--
+int GAME_OBJECT::OBJCnt = 0;
 
 //=============================================================================
 // メイン関数
@@ -188,7 +186,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	//-----------------------------------------------------オブジェクト生成
 	GAME_OBJECT* ObjectAll = { NULL };
 	ObjectAll = new GAME_OBJECT;
-	ObjectAll->Create();
+	ObjectAll->Generate();
 
 
 	//Send()オブジェクトにゲームで使用するオブジェクトのアドレスを格納
@@ -285,7 +283,9 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	Uninit();
 
 	//-----------------------------------------------------オブジェクト終了
-	ObjectAll->Uninit();
+	ObjectAll->Delete();
+
+
 	EndGame = true;
 	SetMultThreadFlag(false);
 	SetGameSceneFlag(false);

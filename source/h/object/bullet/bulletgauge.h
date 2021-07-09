@@ -7,21 +7,53 @@
 #pragma once
 #include "../../../h/object/objectclass.h"
 
+enum eBULLETGAUGE_TEX_TYPE
+{
+	BULLETGAUGE_TEX_BASE,
+	BULLETGAUGE_TEX_SHELL,
+	BULLETGAUGE_TEX_MAX,
+};
+
 //*****************************************************************************
 // クラス定義
 //*****************************************************************************
-class BULLETGAUGE : public OBJECT_2D
+/**
+*　@class BULLETGAUGE_PARAMETER
+*　@brief 
+*/
+class BULLETGAUGE_PARAMETER
 {
 public:
-	BULLETGAUGE() { AmmoPower = 0; };
-	virtual void						Init(void);					//!< 初期化
-	virtual void						Reinit(void);				//!< 再初期化
-	virtual void						ReinitNet(int MyNumber);			//!< 再初期化ネット対戦前	
-	virtual void						Uninit(void);				//!< 終了
-	virtual void						Update(PLAYER_HONTAI *player);				//!< 更新
-	virtual void						Draw(bool Netflag, int NetMyNumber, int CntPlayer);					//!< 描画
-	HRESULT						MakeVertexBulletGauge(LPDIRECT3DDEVICE9 pDevice, int CntPlayer);
-	int							AmmoPower;
-	TEXTURE_2D					TexEmpty[PLAYER_AMMOPOWER_NORMAL];
-	TEXTURE_2D					Tex[PLAYER_AMMOPOWER_NORMAL];
+	BULLETGAUGE_PARAMETER() { AmmoStock = 0; }
+	~BULLETGAUGE_PARAMETER() { }
+	int	AmmoStock;
+};
+
+/**
+*　@class BULLETGAUGE
+*　@brief GAMEOBJECT派生クラス
+*/
+class BULLETGAUGE : public GAME_OBJECT
+{
+public:
+	BULLETGAUGE();	//!< データ読み込み　初期化
+	~BULLETGAUGE();	//!< 削除
+
+private:
+	void		Init(void);						//!< 初期化
+	void		Update(PLAYER_HONTAI *player);	//!< 更新
+	void		Draw(bool Netflag, int NetMyNumber, int CntPlayer);		//!< 描画
+
+	void		ReinitNet(int MyNumber);		//!< 再初期化ネット対戦前	
+
+	TEXTURE			tex[BULLETGAUGE_TEX_MAX];					//!< テクスチャ情報　複数使用するならここを配列化　0:枠　1:中身
+	VTXBuffer		vtx[OBJECT_BULLETGAUGE_MAX];				//!< 頂点情報　複数使用するならここを配列化
+	TransForm		Transform[OBJECT_BULLETGAUGE_MAX];			//!< トランスフォーム情報
+	BULLETGAUGE_PARAMETER	BulletGaugePara[OBJECT_BULLETGAUGE_MAX];//!< インスタンスに必要なデータ群
+
+	const char *c_aFileNameTex[] =
+	{
+		"../data/TEXTURE/UI/UI_Shell.png" ,
+		"../data/TEXTURE/UI/UI_Shell_Empty.png",
+	};
 };

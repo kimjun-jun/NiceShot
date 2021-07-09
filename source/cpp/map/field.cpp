@@ -488,18 +488,18 @@ void FIELD::Update(PLAYER_HONTAI *player,ITEM *item, BULLET *bullet, EXPLOSION *
 	for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
 	{
 		//-------------------オブジェクト値読み込み
-		D3DXVECTOR3 rayS = player[CntPlayer].GetPos();
+		D3DXVECTOR3 rayS = player[CntPlayer].Pos();
 		rayS.y += 1000.0f;
-		D3DXVECTOR3 rayG = player[CntPlayer].GetPos();
+		D3DXVECTOR3 rayG = player[CntPlayer].Pos();
 		rayG.y -= 1000.0f;
 		D3DXVECTOR3 FieldNor = player[CntPlayer].GetFieldNorVec();
-		D3DXVECTOR3 ReturnPos = player[CntPlayer].GetPos();
+		D3DXVECTOR3 ReturnPos = player[CntPlayer].Pos();
 
 		//判定
 		this[0].FieldHitGetSphereVec(rayS, rayG, &FieldNor, &ReturnPos.y);
 
 		//-------------------オブジェクト値書き込み
-		player[CntPlayer].SetPos(ReturnPos);
+		player[CntPlayer].Pos(ReturnPos);
 		player[CntPlayer].SetFieldNorVec(FieldNor);
 	}
 
@@ -507,42 +507,42 @@ void FIELD::Update(PLAYER_HONTAI *player,ITEM *item, BULLET *bullet, EXPLOSION *
 	//-----------------------------------オブジェクト先頭アドレスを読み込み
 	for (int CntItem = 0; CntItem < OBJECT_ITEM_MAX; CntItem++)
 	{
-		bool use = item[CntItem].GetUse();
+		bool use = item[CntItem].Use();
 		if (use == true)
 		{
 			if (item[CntItem].CollisionFieldEnd != true || InterPolationFieldSignal == false)
 			{
 				//-------------------オブジェクト値読み込み
-				D3DXVECTOR3 rayS = item[CntItem].GetPos();
+				D3DXVECTOR3 rayS = item[CntItem].Pos();
 				rayS.y += 5.0f;
-				D3DXVECTOR3 rayG = item[CntItem].GetPos();
+				D3DXVECTOR3 rayG = item[CntItem].Pos();
 				rayG.y -= 5.0f;
 				D3DXVECTOR3 FieldNor = item[CntItem].GetFieldNorVec();
-				D3DXVECTOR3 ReturnPos = item[CntItem].GetPos();
+				D3DXVECTOR3 ReturnPos = item[CntItem].Pos();
 
 				//判定
 				item[CntItem].CollisionFieldEnd = this[0].FieldHitItem(rayS, rayG, &FieldNor, &ReturnPos.y);
 
 				//-------------------オブジェクト値書き込み
-				item[CntItem].SetPos(ReturnPos);
+				item[CntItem].Pos(ReturnPos);
 				item[CntItem].SetFieldNorVec(FieldNor);
 
 			}
 			else if (InterPolationFieldSignal == true && item[CntItem].CollisionFieldEnd == true)
 			{
 				//-------------------オブジェクト値読み込み
-				D3DXVECTOR3 rayS = item[CntItem].GetPos();
+				D3DXVECTOR3 rayS = item[CntItem].Pos();
 				rayS.y -= 1000.0f;
-				D3DXVECTOR3 rayG = item[CntItem].GetPos();
+				D3DXVECTOR3 rayG = item[CntItem].Pos();
 				rayG.y += 1000.0f;
 				D3DXVECTOR3 FieldNor = item[CntItem].GetFieldNorVec();
-				D3DXVECTOR3 ReturnPos = item[CntItem].GetPos();
+				D3DXVECTOR3 ReturnPos = item[CntItem].Pos();
 
 				//判定
 				this[0].FieldHit(rayS, rayG, &FieldNor, &ReturnPos.y);
 
 				//-------------------オブジェクト値書き込み
-				item[CntItem].SetPos(ReturnPos);
+				item[CntItem].Pos(ReturnPos);
 				item[CntItem].SetFieldNorVec(FieldNor);
 			}
 		}
@@ -551,21 +551,21 @@ void FIELD::Update(PLAYER_HONTAI *player,ITEM *item, BULLET *bullet, EXPLOSION *
 	//バレットと地面の当たり判定
 	for (int Cntbullet = 0; Cntbullet < OBJECT_BULLET_MAX; Cntbullet++)
 	{
-		bool buse = bullet[Cntbullet].GetUse();
+		bool buse = bullet[Cntbullet].Use();
 		if (buse == true)
 		{
 			D3DXVECTOR3 kari = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 			//-------------------オブジェクト値読み込み
-			D3DXVECTOR3 rayS = bullet[Cntbullet].GetPos();
+			D3DXVECTOR3 rayS = bullet[Cntbullet].Pos();
 			rayS.y += 1000.0f;
-			D3DXVECTOR3 rayG = bullet[Cntbullet].GetPos();
+			D3DXVECTOR3 rayG = bullet[Cntbullet].Pos();
 			rayG.y -= 1000.0f;
 
 			//判定
 			this[0].FieldHit(rayS, rayG, &kari, &bullet[Cntbullet].FieldPosY);
 
 			//地形との当たり判定を緩く(調整)するためのbullet[Cntbullet].FieldPosY-3.0f
-			D3DXVECTOR3 bpos = bullet[Cntbullet].GetPos();
+			D3DXVECTOR3 bpos = bullet[Cntbullet].Pos();
 			if (bullet[Cntbullet].FieldPosY - 3.0f > bpos.y)
 			{
 				// 爆発の生成
@@ -589,7 +589,7 @@ void FIELD::Draw(void)
 
 	D3DXMATRIX mtxRot, mtxTranslate,mtxWorld;
 	mtxWorld = this[0].GetMatrix();
-	D3DXVECTOR3 pos = this[0].GetPos();
+	D3DXVECTOR3 pos = this[0].Pos();
 	D3DXVECTOR3 rot = this[0].GetRot();
 
 	// ワールドマトリックスの初期化
@@ -876,7 +876,7 @@ void FIELD::SetFieldType03(PLAYER_HONTAI *player)
 
 				//プレイヤーの乗っているエリアを特定。4分木で範囲を絞る。
 				//-------------------オブジェクト値読み込み
-				D3DXVECTOR3 pos = player[CntPlayer].GetPos();
+				D3DXVECTOR3 pos = player[CntPlayer].Pos();
 				SpeedUpFieldHitPoly(pos, &HitPosUp, &HitPosDown, &HitPosLeft, &HitPosRight,
 					fSideSizeXEighth, fSideSizeZEighth, fSideSizeXEighth/2, fSideSizeZEighth/2);
 
@@ -1074,7 +1074,7 @@ void FIELD::FieldHit(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVECTOR3 *vtxNor
 				D3DXVECTOR3 NaibunPos;
 
 				//-----------------------オブジェクト読み込み
-				D3DXVECTOR3 pos = this[0].GetPos();
+				D3DXVECTOR3 pos = this[0].Pos();
 				vtx[0] = pVtx[pIdx[nCntVtx]].vtx + pos;
 				vtx[1] = pVtx[pIdx[nCntVtx + 1]].vtx + pos;
 				vtx[2] = pVtx[pIdx[nCntVtx + 2]].vtx + pos;
@@ -1155,7 +1155,7 @@ void FIELD::FieldHitGetSphereVec(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVEC
 					D3DXVECTOR3 NaibunPos;
 
 					//-----------------------オブジェクト読み込み
-					D3DXVECTOR3 pos = this[0].GetPos();
+					D3DXVECTOR3 pos = this[0].Pos();
 					vtx[0] = pVtx[pIdx[nCntVtx]].vtx + pos;
 					vtx[1] = pVtx[pIdx[nCntVtx + 1]].vtx + pos;
 					vtx[2] = pVtx[pIdx[nCntVtx + 2]].vtx + pos;
@@ -1621,7 +1621,7 @@ bool FIELD::FieldHitItem(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVECTOR3 *vt
 					D3DXVECTOR3 NaibunPos;
 
 					//-----------------------オブジェクト読み込み
-					D3DXVECTOR3 pos = this[0].GetPos();
+					D3DXVECTOR3 pos = this[0].Pos();
 					vtx[0] = pVtx[pIdx[nCntVtx]].vtx + pos;
 					vtx[1] = pVtx[pIdx[nCntVtx + 1]].vtx + pos;
 					vtx[2] = pVtx[pIdx[nCntVtx + 2]].vtx + pos;

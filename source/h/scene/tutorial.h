@@ -6,22 +6,25 @@
 */
 #pragma once
 
-#include "../../h/object/objectclass.h"
 
 /**
 *　@class TUTO
-*　@brief 2Dポリゴンを定義する構造体
+*　@brief GAMEOBJECT派生クラス
 */
-class TUTO : public OBJECT_2D
+class TUTO : public GAME_OBJECT
 {
 public:
-	TUTO() { cnt = 0; }
-	virtual void						Init(void);					//!< 初期化
-	virtual void						Reinit(void);				//!< 再初期化
-	virtual void						Uninit(void);				//!< 終了
-	virtual void						Update(GAME_OBJECT* obj, FADE *fade);				//!< 更新
-	virtual void						Draw(void);					//!< 描画
-	HRESULT						MakeVertexTutorial(void);
-	int							cnt;						//!< 描画判定用　2で割った余り判定　0表示　1非表示　今後のテクスチャ情報が増えることを加味してint定義
+	TUTO();		//!< データ読み込み　初期化
+	~TUTO();	//!< 削除
+
+private:
+	void	Init(void);								//!< 初期化
+	void	Update(GAME_OBJECT* obj, FADE *fade);	//!< 更新
+	void	Draw(void);								//!< 描画
+
+	TEXTURE		tex;								//!< テクスチャ情報　複数使用するならここを配列化
+	VTXBuffer	vtx;								//!< 頂点情報　複数使用するならここを配列化
+	TransForm	Transform[OBJECT_PLAYER_MAX*OBJECT_TUTORIAL_MAX];		//!< トランスフォーム情報　各プレイヤーの数 * チュートリアル画像分作成
+	iUseCheak	iUseType[OBJECT_PLAYER_MAX*OBJECT_TUTORIAL_MAX];		//!< 使用情報　各プレイヤーの数分作成 * チュートリアル画像分作成
 };
 

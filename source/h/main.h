@@ -64,13 +64,7 @@ using namespace std;
 #define	POLYGON_2D_NUM				(2)																					//!< ポリゴン数
 																														
 //画像の参照名																											
-#define TEXTURE_GAME_SCORE			"../data/TEXTURE/BG/0-9.png"														//!< 読み込むテクスチャファイル名
 #define	TEXTURE_MEISAI				"../data/MODEL/28513607_p4_master1200.jpg"											//!< 読み込むテクスチャファイル名
-#define	TEXTURE_STATUS_EMPTY_ITEM	"../data/TEXTURE/UI/UI_Skill_Empty.png"												//!< 戦車変形アイテム
-#define	TEXTURE_STATUS_SENSYA_ITEM	"../data/TEXTURE/UI/UI_Skill_Power.png"												//!< 戦車変形アイテム
-#define	TEXTURE_STATUS_SPEED_ITEM	"../data/TEXTURE/UI/UI_Skill_Speed.png"															//!< スピードアップアイテム
-#define	TEXTURE_STATUS_CAMERA_ITEM	"../data/TEXTURE/UI/UI_Skill_Flash.png"											//!< 強制バックカメラアイテム
-#define	TEXTURE_STATUS_KIRI_ITEM	"../data/TEXTURE/UI/UI_Skill_Blind.png"														//!< 霧アイテム
 																													
 //モデルの参照																										
 #define	MODEL_HOUDAI				"../data/MODEL/PlayerSensyaHoudai.x"												//!< 読み込むモデル名
@@ -90,32 +84,15 @@ using namespace std;
 #define PLAYER_SPEED_STRONG					(1.5f)																		//!< プレイヤースピード強
 #define PLAYER_SPEED_NORMAL					(1.0f)																		//!< プレイヤースピード中
 #define PLAYER_SPEED_WEAK					(0.7f)																		//!< プレイヤースピード弱
-#define PLAYER_AMMOPOWER_STRONG				(15)																		//!< プレイヤー弾薬強
-#define PLAYER_AMMOPOWER_NORMAL				(10)																		//!< プレイヤー弾薬中
-#define PLAYER_AMMOPOWER_WEAK				(5)																			//!< プレイヤー弾薬弱
 
-#define	BULLETPREDICTION_MAX			(100)							// エフェクト最大数
-#define DAMEGE_MAX			(4)
+#define	BULLETPREDICTION_MAX			(100)		// 弾道予想エフェクト　100 * 4
 
-/**
- * @enum STATUSTYPE
- * ステータス定数
- */
-enum STATUSTYPE
-{
-	STATUSTYPE_SPEED = 0,		//!< スピードアップ状態
-	STATUSTYPE_SENSYA,			//!< 戦車強化状態
-	STATUSTYPE_CAMERA,			//!< バックカメラ状態
-	STATUSTYPE_KIRI,			//!< もやもや状態
-	STATUSTYPE_MAX
-};
-
-//オブジェクトの合計
-enum OBJECT_COUNT
+//オブジェクトの合計(インスタンス総数)
+enum eOBJECT_COUNT
 {
 	OBJECT_PLAYER_MAX = 4,
 	OBJECT_CAMERA_MAX = OBJECT_PLAYER_MAX,
-	OBJECT_TUTORIAL_MAX = OBJECT_PLAYER_MAX,
+	OBJECT_TUTORIAL_MAX = 1,
 	OBJECT_NETMATCH_MAX = 1,
 	OBJECT_STATUS_MAX = OBJECT_PLAYER_MAX,
 	OBJECT_BULLETPREDICTION_MAX = OBJECT_PLAYER_MAX * BULLETPREDICTION_MAX,
@@ -128,7 +105,7 @@ enum OBJECT_COUNT
 	OBJECT_ITEM_MAX = 20,
 	OBJECT_SHADOW_MAX = 256,
 	OBJECT_COUNTDOWN_MAX = 2,
-	OBJECT_RANK_MAX = 3,
+	OBJECT_RANK_MAX = 4,
 	OBJECT_RESULT_MAX = 2,
 	OBJECT_TITLE_MAX = 7,
 	OBJECT_TITLEANIM_MAX = 4,
@@ -151,18 +128,10 @@ enum OBJECT_COUNT
 #define	WALL_INIT_POSZ						(2600.0f)																	//!< 初期座標壁
 
 //モデル等のサイズ
-#define	BULLET_EFFECT_SIZE					(4.0f)																		//!< 
-#define	BULLET_EFFECT_TIME					(240)																		//!< 
+#define	BULLET_EFFECT_SIZE					(4.0f)		//!< プレイヤーで使用
+#define	BULLET_EFFECT_TIME					(240)		//!< プレイヤーで使用
 #define	WALL_SIZE_X							(WALL_INIT_POSX*2)															//!< 壁のサイズX
 #define	WALL_SIZE_Y							(800.0f)																	//!< 壁のサイズY
-#define	EXPLOSION_SIZE						(5.0f)																		//!< 
-#define	BULLET_SIZE_X						(50.0f)							// ビルボードの幅
-#define	BULLET_SIZE_Y						(50.0f)							// ビルボードの高さ
-#define	BULLETPREDICTION_SIZE_X			(5.0f)							// ビルボードの幅
-#define	BULLETPREDICTION_SIZE_Y			(5.0f)							// ビルボードの高さ
-#define	SHADOW_SIZE_X		(25.0f)							// 影の幅
-#define	SHADOW_SIZE_Z		(25.0f)							// 影の高さ
-
 
 
 //移動量マクロ
@@ -199,27 +168,20 @@ enum OBJECT_COUNT
 #define	BULLETTEX_POS_Y						(LIFETEX_POS_Y+LIFETEX_SIZE_Y)												//!< ライフの表示基準位置Ｙ座標
 #define	EXPLOSION_COLLISIONPOS_BUFFSIZE		(5.0f)																		//!< 2D爆破を壁に当たった時の描画する座標を調整
 
-#define MAX_LIFE							(6)																			//!< 体力最大値
 #define BORN_AMMO_ADDTIME					(1.0f)																		//!< 弾薬復活させるための加算タイム
 #define BORN_AMMO_MAXTIME					(120.0f)																	//!< 1弾薬復活するのに必要なタイム
 #define MORPHING_TIME						(300.0f)																	//!< モーフィングアイテム有効時間
 #define BACKCAMERA_TIME						(150.0f)																	//!< バックカメラアイテム有効時間
 #define KIRI_TIME							(150.0f)																	//!< フォグ霧アイテムの有効時間
-#define SCREENDAMEGE_TIME					(30.0f)																		//!< 被ダメージ時の画面フェード時間
 #define PLAYER_MODEL_SIZE					(15.0f)																		//!< モデルサイズ
 #define BULLET_MODEL_SIZE					(15.0f)																		//!< モデルサイズ
 #define ITEM_MODEL_SIZE						(15.0f)																		//!< モデルサイズ
 
 
-//エフェクト関連定数
-#define	EFFECT_NORMALSET_SIZE_X				(16.0f)																		//!< エフェクト標準の幅
-#define	EFFECT_NORMALSET_SIZE_Y				(16.0f)																		//!< エフェクト標準の高さ
-#define	EFFECT_BULLET_SIZE_X				(16.0f)																		//!< エフェクトバレットの幅
-#define	EFFECT_BULLET_SIZE_Y				(16.0f)																		//!< エフェクトバレットの高さ
-#define	EFFECT_BULLET_TIME					(12)																		//!< エフェクトバレットの生存時間
-#define	EFFECT_SPEEDUP_SIZE_X				(25.0f)																		//!< エフェクトスピードアップの幅
-#define	EFFECT_SPEEDUP_SIZE_Y				(10.0f)																		//!< エフェクトスピードアップの高さ
-#define	EFFECT_SPEEDUP_TIME					(10)																		//!< エフェクトスピードアップの生存時間
+#define VEC3_ALL0						D3DXVECTOR3(0.0f,0.0f,0.0f)		//!< 頻出文字列を短く
+#define VEC3_ALL1						D3DXVECTOR3(1.0f,1.0f,1.0f)		//!< 頻出文字列を短く
+
+
 
 /**
  * @enum E_STAGE
@@ -239,10 +201,24 @@ enum E_STAGE//列挙型。defineの番号を自動で割り当ててくれる。
 };
 
 /**
+ * @enum UseType
+ * 使用タイプの種類
+ */
+enum eUse_Type
+{
+	NoUse=0,
+	YesUse,
+	YesUseType1=1,
+	YesUseType2,
+	YesUseType3,
+	YesUseType4,
+};
+
+/**
  * @enum MASTER_VOLUMEOL_CHENGE
  * サウンドボリュームのアップダウン種類
  */
-enum MASTER_VOLUMEOL_CHENGE
+enum eMASTER_VOLUMEOL_CHENGE
 {
 	VOL_UP,
 	VOL_DOWN,
@@ -252,7 +228,7 @@ enum MASTER_VOLUMEOL_CHENGE
  * @enum RAND
  * ランダムの種類
  */
-enum RAND
+enum eRAND
 {
 	X,
 	Y,
@@ -263,7 +239,7 @@ enum RAND
  * @enum MORPHINGTYPE
  * モーフィング種類定数
  */
-enum MORPHINGTYPE
+enum eMORPHING_TYPE
 {
 	NoMorphing,				//!< 非モーフィング
 	NowMorphing,			//!< モーフィング中
@@ -271,38 +247,24 @@ enum MORPHINGTYPE
 };
 
 /**
- * @enum DIRECTION
- * 移動方向
- */
-enum DIRECTION
-{
-	DIRECTION_LEFT,
-	DIRECTION_RIGHT,
-	DIRECTION_UP,
-	DIRECTION_DOWN,
-	DIRECTION_LEFTUP,
-	DIRECTION_RIGHTUP,
-	DIRECTION_LEFTDOWN,
-	DIRECTION_RIGHTDOWN,
-};
-
-/**
  * @enum PLAYER_TYPE
  * プレイヤーNo定数
  */
-enum PLAYER_TYPE
+enum ePLAYER_TYPE
 {
+	PLAYER_NONE = -1,
 	PLAYER01,
 	PLAYER02,
 	PLAYER03,
-	PLAYER04
+	PLAYER04,
+	PLAYER_MAX,
 };
 
 /**
  * @enum PLAYER_MODEL_TYPE
  * モデルタイプ定数
  */
-enum PLAYER_MODEL_TYPE
+enum ePLAYER_MODEL_TYPE
 {
 	PLAYER_MODEL_NORMAL,
 	PLAYER_MODEL_ATTACK
@@ -312,9 +274,10 @@ enum PLAYER_MODEL_TYPE
  * @enum ITEMTYPE
  * アイテム定数
  */
-enum ITEMTYPE
+enum eITEM_TYPE
 {
-	ITEMTYPE_TIKEI = 0,		//!< 地形
+	ITEMTYPE_NONE = -1,		//!< 未設定
+	ITEMTYPE_TIKEI,			//!< 地形
 	ITEMTYPE_LIFE,			//!< ライフ
 	ITEMTYPE_SENSYA,		//!< 戦車
 	ITEMTYPE_BULLET,		//!< バレット
@@ -324,8 +287,18 @@ enum ITEMTYPE
 	ITEMTYPE_MAX
 };
 
-
-
+/**
+ * @enum STATUSTYPE
+ * ステータス定数
+ */
+enum eSTATUS_TYPE
+{
+	STATUSTYPE_SPEED = 0,		//!< スピードアップ状態
+	STATUSTYPE_SENSYA,			//!< 戦車強化状態
+	STATUSTYPE_CAMERA,			//!< バックカメラ状態
+	STATUSTYPE_KIRI,			//!< もやもや状態
+	STATUSTYPE_MAX
+};
 
 //*****************************************************************************
 // プロトタイプ宣言

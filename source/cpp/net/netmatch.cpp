@@ -31,7 +31,7 @@ void NETMATCH::Init(void)
 	}
 
 	//描画位置設定
-	this[0].SetPos(D3DXVECTOR3(NETMATCHRIAL_POS_X - NETMATCHRIAL_SIZE_X, NETMATCHRIAL_POS_Y - NETMATCHRIAL_SIZE_Y, 0.0f));
+	this[0].Pos(D3DXVECTOR3(NETMATCHRIAL_POS_X - NETMATCHRIAL_SIZE_X, NETMATCHRIAL_POS_Y - NETMATCHRIAL_SIZE_Y, 0.0f));
 	// 頂点情報の作成
 	MakeVertexTutorial();
 }
@@ -82,7 +82,7 @@ HRESULT NETMATCH::MakeVertexTutorial(void)
 {
 	for (int CntTuto = 0; CntTuto < OBJECT_NETMATCH_MAX; CntTuto++)
 	{
-		D3DXVECTOR3 pos = this[CntTuto].GetPos();
+		D3DXVECTOR3 pos = this[CntTuto].Pos();
 		// 頂点座標の設定
 		this[CntTuto].tex2D.textureVTX[0].vtx = D3DXVECTOR3(pos.x - NETMATCHRIAL_SIZE_X, pos.y - NETMATCHRIAL_SIZE_Y, 0.0f);
 		this[CntTuto].tex2D.textureVTX[1].vtx = D3DXVECTOR3(pos.x + NETMATCHRIAL_SIZE_X, pos.y - NETMATCHRIAL_SIZE_Y, 0.0f);

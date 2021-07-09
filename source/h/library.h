@@ -23,8 +23,11 @@
 * @details Xファイル読み込み用
 * @author : 木村純(キムラジュン)
 */
-HRESULT LoadMesh(char *FileName, LPD3DXBUFFER *pD3DXBuffMat, DWORD *nNumMat, LPD3DXMESH *pD3DXMesh,
+HRESULT LoadMesh(const char *FileName, LPD3DXBUFFER *pD3DXBuffMat, DWORD *nNumMat, LPD3DXMESH *pD3DXMesh,
 	LPDIRECT3DVERTEXBUFFER9 *pD3DVtxBuff, LPDIRECT3DINDEXBUFFER9 *pD3DIdxBuff,
+	DWORD *nNumVertex, DWORD *nNumPolygon, DWORD *nNumVertexIndex, LPDIRECT3DTEXTURE9 *pD3DTexture);
+
+HRESULT LoadMesh(const char *FileName, LPD3DXBUFFER *pD3DXBuffMat, DWORD *nNumMat, LPD3DXMESH *pD3DXMesh,
 	DWORD *nNumVertex, DWORD *nNumPolygon, DWORD *nNumVertexIndex, LPDIRECT3DTEXTURE9 *pD3DTexture);
 
 /**
@@ -63,7 +66,6 @@ bool RayCast(D3DXVECTOR3 rayS, D3DXVECTOR3 rayG, D3DXVECTOR3 vtx0, D3DXVECTOR3 v
 * @author : 木村純(キムラジュン)
 */
 float SpdCal(D3DXVECTOR3 move);
-
 
 /**
 * @brief 扇形当たり判定を計算する関数 IsCollisionFanAndPoint

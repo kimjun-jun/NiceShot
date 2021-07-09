@@ -29,7 +29,7 @@ void SetBuff(char* RMsgBlock,int Type, int PlayerNum);
 
 void NetSetItem(D3DXVECTOR3 buff, int index, int type);
 void NetSetTikeiSeed(int Seed, int PlayerNum);
-void NetSetPos(D3DXVECTOR3 buff, int PlayerNum);
+void NetPos(D3DXVECTOR3 buff, int PlayerNum);
 void NetSetHoudaiRot(D3DXVECTOR3 buff, int PlayerNum);
 void NetSetHoutouRot(D3DXVECTOR3 buff, int PlayerNum);
 void NetSetHousinRot(D3DXVECTOR3 buff, int PlayerNum);

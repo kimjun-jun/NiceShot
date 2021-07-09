@@ -8,40 +8,68 @@
 
 #include "../../h/object/objectclass.h"
 
-//**************************************
-// 種類
-//**************************************
-enum
+//爆発種類
+enum eEXPLOSION_TYPE
 {
-	EXPLOSIONTYPE_BULLET_PLAYER = 0,	// プレイヤーの弾の爆発
-	EXPLOSIONTYPE_BULLET_ENEMY,			// 敵の弾の爆発
+	EXPLOSIONTYPE_BULLET_NONE = -1,		//!< 未割当
+	EXPLOSIONTYPE_BULLET_PLAYER1 = 0,	//!< プレイヤー1
+	EXPLOSIONTYPE_BULLET_PLAYER2,		//!< プレイヤー2
+	EXPLOSIONTYPE_BULLET_PLAYER3,		//!< プレイヤー3
+	EXPLOSIONTYPE_BULLET_PLAYER4,		//!< プレイヤー4
+	EXPLOSIONTYPE_BULLET_ENEMY1,		//!< エネミー1
+	EXPLOSIONTYPE_BULLET_ENEMY2,		//!< エネミー2
+	EXPLOSIONTYPE_BULLET_ENEMY3,		//!< エネミー3
+	EXPLOSIONTYPE_BULLET_ENEMY4,		//!< エネミー4
 	EXPLOSIONTYPE_MAX
 };
 
 //*****************************************************************************
 // クラス定義
 //*****************************************************************************
-class EXPLOSION : public OBJECT_3D
+/**
+*　@class EXPLOSION_PARAMETER
+*　@brief 
+*/
+class EXPLOSION_PARAMETER
 {
 public:
-	EXPLOSION() { nCounter = 0, nPatternX = 0, nPatternY = 0, nType = 0, fSizeX = 0.0f, fSizeY = 0.0f; };
-	virtual void				Init(void);					//!< 初期化
-	virtual void				Reinit(void);				//!< 再初期化
-	virtual void				Uninit(void);				//!< 終了
-	virtual void				Update(void);				//!< 更新
-	virtual void				Draw(int CntPlayer);					//!< 描画
-	HRESULT						MakeVertexExplosion(LPDIRECT3DDEVICE9 pDevice);
-	void						SetVertexExplosion(int nIdxBullet, float fSizeX, float fSizeY);
-	void						SetColorExplosion(int nIdxExplosion, D3DXCOLOR col);
-	void						SetTextureExplosion(int nIdxExplosion, int nPatternX, int nPatternY);
-	int							SetExplosion(D3DXVECTOR3 pos, float fSizeX, float fSizeY, int nType, D3DXCOLOR col);
+	EXPLOSION_PARAMETER() { nCounter = nPatternX = nPatternY = 0; fSizeX = fSizeY = 0.0f; 
+	eType = EXPLOSIONTYPE_BULLET_NONE;}
+	~EXPLOSION_PARAMETER() {}
 
-	int							nCounter;			//!< カウンター
-	int							nPatternX;			//!< パターンNo.X
-	int							nPatternY;			//!< パターンNo.Y
-	int							nType;				//!< 種類
-	float						fSizeX;				//!< サイズX
-	float						fSizeY;				//!< サイズY
+	int			nCounter;			//!< カウンター
+	int			nPatternX;			//!< パターンNo.X
+	int			nPatternY;			//!< パターンNo.Y
+	float		fSizeX;				//!< 頂点サイズX
+	float		fSizeY;				//!< 頂点サイズY
+	eEXPLOSION_TYPE	eType;			//!< 種類
+};
+
+/**
+*　@class EXPLOSION
+*　@brief GAMEOBJECT派生クラス
+*/
+class EXPLOSION : public GAME_OBJECT
+{
+public:
+	EXPLOSION();	//!< データ読み込み　初期化
+	~EXPLOSION();	//!< 削除
+
+	int	SetInstance(D3DXVECTOR3 pos, float fSizeX, float fSizeY, eEXPLOSION_TYPE eType, D3DXCOLOR col);	//!< インスタンスセット
+
+private:
+	void		Init(void);					//!< 初期化
+	void		Update(void);				//!< 更新
+	void		Draw(int CntPlayer);		//!< 描画
+
+
+	TEXTURE		tex;	//!< テクスチャ情報　複数使用するならここを配列化
+	VTXBuffer	vtx;	//!< 頂点情報　複数使用するならここを配列化
+	TransForm	Transform[OBJECT_DAMEGE_MAX];			//!< トランスフォーム情報
+	iUseCheak	iUseType[OBJECT_DAMEGE_MAX];			//!< 使用情報
+
+	EXPLOSION_PARAMETER	ExploPara[OBJECT_EXPLOSION_MAX];
+
 } ;
 
 

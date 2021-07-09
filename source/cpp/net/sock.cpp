@@ -99,7 +99,8 @@ int NetClientSocketCreate(void)
 {
 	SendObjectP = NULL;
 
-	sprintf_s(destination, "192.168.11.3");
+	//sprintf_s(destination, "192.168.11.3");
+	sprintf_s(destination, "10.192.121.192");
 	port = 27015;
 	dstSocket = 0;
 	toSendText[0] = NULL;
@@ -498,8 +499,8 @@ void SendPacket(void)
 	if (SendObjectP != NULL)
 	{
 		//座標
-		D3DXVECTOR3 Pos = SendObjectP->player[MyNum].GetPos();
-		D3DXVECTOR3 OldPos = SendObjectP->player[MyNum].GetOldPos();
+		D3DXVECTOR3 Pos = SendObjectP->player[MyNum].Pos();
+		D3DXVECTOR3 OldPos = SendObjectP->player[MyNum].OldPos();
 		if (Pos != OldPos)
 		{
 			g_SendMsgBuff.PlayerPos = Pos;
@@ -614,13 +615,13 @@ void SendPacket(void)
 			if (SendObjectP->item[CntItem].NetGetItemFlag == true &&
 				SendObjectP->item[CntItem].GetPlayerType == MyNum)
 			{
-				bool use = SendObjectP->item[CntItem].GetUse();
+				bool use = SendObjectP->item[CntItem].Use();
 				//if (g_SendMsgBuff.ItemSyncUse != use)
 				//{
 				g_SendMsgBuff.ItemSyncUse = use;
 				//int ItemN = SendObjectP->item[CntItem].GetPlayerType;
 				int ItemT = SendObjectP->item[CntItem].nType;
-				D3DXVECTOR3 ItemPos = SendObjectP->item[CntItem].GetPos();
+				D3DXVECTOR3 ItemPos = SendObjectP->item[CntItem].Pos();
 				//変更があるので送信用メッセージに書き込む
 				char NewSMsg[BUFFER_SIZE] = { NULL }; //送るデータ内容
 				sprintf_s(NewSMsg, "@I,N%d,T%d,X%4.3f,Y%4.3f,Z%4.3f&"
@@ -635,7 +636,7 @@ void SendPacket(void)
 		for (int CntItem = 0; CntItem < OBJECT_ITEM_MAX; CntItem++)
 		{
 			//情報取得
-			bool ItemUse = SendObjectP->item[CntItem].GetUse();
+			bool ItemUse = SendObjectP->item[CntItem].Use();
 			int ItemT = SendObjectP->item[CntItem].nType;
 			//送信用メッセージに書き込む
 			char NewSMsg[BUFFER_SIZE] = { NULL };
@@ -652,7 +653,7 @@ void SendPacket(void)
 		int Puse = 0;
 		for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
 		{
-			if (SendObjectP->player[CntPlayer].GetUse() == false) Puse++;
+			if (SendObjectP->player[CntPlayer].Use() == false) Puse++;
 		}
 		if (Puse >= 3)
 		{
@@ -772,7 +773,7 @@ void MsgAnalys(char* argRMsg)
 				case 2:
 					buff.z = strtof(SetVal, NULL);
 					//データを格納
-					NetSetPos(buff, 0);
+					NetPos(buff, 0);
 					if (next[0] != NULL) RMsgBlock = strtok_s(next, "@P0,", &next);
 					break;
 				}
@@ -1091,7 +1092,7 @@ void MsgAnalys(char* argRMsg)
 				case 2:
 					buff.z = strtof(SetVal, NULL);
 					//データを格納
-					NetSetPos(buff, 1);
+					NetPos(buff, 1);
 					if (next[0] != NULL) RMsgBlock = strtok_s(next, "@P1,", &next);
 					break;
 				}
@@ -1410,7 +1411,7 @@ void MsgAnalys(char* argRMsg)
 				case 2:
 					buff.z = strtof(SetVal, NULL);
 					//データを格納
-					NetSetPos(buff, 2);
+					NetPos(buff, 2);
 					if (next[0] != NULL) RMsgBlock = strtok_s(next, "@P2,", &next);
 					break;
 				}
@@ -1729,7 +1730,7 @@ void MsgAnalys(char* argRMsg)
 				case 2:
 					buff.z = strtof(SetVal, NULL);
 					//データを格納
-					NetSetPos(buff, 3);
+					NetPos(buff, 3);
 					if (next[0] != NULL) RMsgBlock = strtok_s(next, "@P3,", &next);
 					break;
 				}
@@ -2104,7 +2105,7 @@ void SetBuff(char* RMsgBlock, int SetEnumType,int PlayerNum)
 			switch (SetEnumType)
 			{
 			case SetEnumPos:
-				NetSetPos(buff, PlayerNum);
+				NetPos(buff, PlayerNum);
 				break;
 			case SetEnumHoudaiRot:
 				NetSetHoudaiRot(buff, PlayerNum);
@@ -2124,7 +2125,7 @@ void SetBuff(char* RMsgBlock, int SetEnumType,int PlayerNum)
 void NetSetItem(D3DXVECTOR3 buff, int index, int type)
 {
 	SendObjectP = GetSendObjectP();
-	if (SendObjectP->item[index].GetUse() == false)
+	if (SendObjectP->item[index].Use() == false)
 	{
 		SendObjectP->item[index].SetItem(buff, D3DXVECTOR3(2.0f, 2.0f, 2.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), type);
 		SendObjectP->item[index].NetUse = true;
@@ -2147,13 +2148,13 @@ void NetSetTikeiSeed(int Seed, int PlayerNum)
 	}
 }
 
-void NetSetPos(D3DXVECTOR3 buff, int PlayerNum)
+void NetPos(D3DXVECTOR3 buff, int PlayerNum)
 {
 	//ロックされてなければ分析して書き込み
 	if (GetNetShareDateFlag() == false)
 	{
 		SendObjectP = GetSendObjectP();
-		SendObjectP->player[PlayerNum].SetPos(buff);
+		SendObjectP->player[PlayerNum].Pos(buff);
 	}
 }
 

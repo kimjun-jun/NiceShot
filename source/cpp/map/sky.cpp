@@ -36,9 +36,9 @@ void SKY::Init()
 
 
 	// ポリゴン表示位置の中心座標を設定
-	this[0].SetPos(D3DXVECTOR3(0.0f, -100.0f, 0.0f));
+	this[0].Pos(D3DXVECTOR3(0.0f, -100.0f, 0.0f));
 	this[0].SetRot(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
-	this[1].SetPos(D3DXVECTOR3(0.0f, -100.0f, 0.0f));
+	this[1].Pos(D3DXVECTOR3(0.0f, -100.0f, 0.0f));
 	this[1].SetRot(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
 
 	float fRadius = 4000.0f;
@@ -386,7 +386,7 @@ void SKY::Draw(void)
 	D3DXMATRIX mtxRot, mtxTranslate, mtxWorld;
 	// ワールドマトリックスの初期化
 	mtxWorld = this[0].GetMatrix();
-	D3DXVECTOR3 pos = this[0].GetPos();
+	D3DXVECTOR3 pos = this[0].Pos();
 	D3DXVECTOR3 rot = this[0].GetRot();
 
 	D3DXMatrixIdentity(&mtxWorld);

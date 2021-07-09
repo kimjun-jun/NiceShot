@@ -13,10 +13,13 @@
 #include "../../../h/effect/effect.h"
 #include "../../../h/object/bullet/bullet.h"
 
+//*****************************************************************************
+// マクロ定義
+//*****************************************************************************
+#define	EFFECT_BULLET_SIZE_X				(16.0f)			//!< エフェクトバレットの幅
+#define	EFFECT_BULLET_SIZE_Y				(16.0f)			//!< エフェクトバレットの高さ
+#define	EFFECT_BULLET_TIME					(12)			//!< エフェクトバレットの生存時間
 
-//*****************************************************************************
-// グローバル変数
-//*****************************************************************************
 static D3DXCOLOR PLAYER_COLOR[] = {
 	D3DXCOLOR(1.0f, 1.0f, 0.1f, 1.0f),//p1カラー
 	D3DXCOLOR(0.2f, 0.2f, 1.0f, 1.0f),//p2カラー
@@ -25,41 +28,47 @@ static D3DXCOLOR PLAYER_COLOR[] = {
 };
 
 //=============================================================================
+// コンストラクタ　「読み込み」「初期化」
+//=============================================================================
+BULLET::BULLET(void)
+{
+	//オブジェクトカウントアップ
+	this->CreateInstanceOBJ();
+
+	//カウントループ
+	for (int CntBullet = 0; CntBullet < OBJECT_BULLET_MAX; CntBullet++)
+	{
+		//使用設定
+		this->iUseType[CntBullet].Use(NoUse);
+	}
+
+}
+
+//=============================================================================
+// デストラクタ　削除
+//=============================================================================
+BULLET::~BULLET(void)
+{
+	//オブジェクトカウントダウン
+	this->DeleteInstanceOBJ();
+}
+
+//=============================================================================
 // 初期化処理
 //=============================================================================
 void BULLET::Init(void)
 {
-	for(int nCntBullet = 0; nCntBullet < OBJECT_BULLET_MAX; nCntBullet++)
+	//カウントループ
+	for(int CntBullet = 0; CntBullet < OBJECT_BULLET_MAX; CntBullet++)
 	{
-		this[nCntBullet].UsePlayerType = -1;
+		//使用設定
+		this->iUseType[CntBullet].Use(NoUse);
+		this->Transform[CntBullet].Pos(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+		this->move[CntBullet].Move(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+		this->BulletPara[CntBullet].Gravity = 0.0f;
+		this->BulletPara[CntBullet].Timer = 0;
+		this->BulletPara[CntBullet].UsePlayerType = PLAYER_NONE;
 	}
-}
-
-//=============================================================================
-// 再初期化処理
-//=============================================================================
-void BULLET::Reinit(void)
-{
-	for (int nCntBullet = 0; nCntBullet < OBJECT_BULLET_MAX; nCntBullet++)
-	{
-		this[nCntBullet].SetPos(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
-		this[nCntBullet].SetRot(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
-		this[nCntBullet].SetScl(D3DXVECTOR3(1.0f, 1.0f, 1.0f));
-		this[nCntBullet].SetMove(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
-		this[nCntBullet].SetUse(false);
-		this[nCntBullet].Gravity = 0.0f;
-		this[nCntBullet].nTimer = 0;
-		this[nCntBullet].UsePlayerType = -1;
-		this[nCntBullet].fRadius = 0.0f;
-	}
-}
-
-//=============================================================================
-// 終了処理
-//=============================================================================
-void BULLET::Uninit(void)
-{
-
 }
 
 //=============================================================================
@@ -67,15 +76,17 @@ void BULLET::Uninit(void)
 //=============================================================================
 void BULLET::Update(SHADOW *shadow, EFFECT *effect)
 {
-	for(int nCntBullet = 0; nCntBullet < OBJECT_BULLET_MAX; nCntBullet++)
+	for(int CntBullet = 0; CntBullet < OBJECT_BULLET_MAX; CntBullet++)
 	{
-		bool use = this[nCntBullet].GetUse();
+		bool use = this->iUseType[CntBullet].Use();
+		//使用していたら弾道制御、影、エフェクトを設定する
 		if (use)
 		{
 			//---------------------------------------------オブジェクト値読み込み
-			D3DXVECTOR3 pos = this[nCntBullet].GetPos();
-			D3DXVECTOR3 scl = this[nCntBullet].GetScl();
-			D3DXVECTOR3 move = this[nCntBullet].GetMove();
+			D3DXVECTOR3 pos = this->Transform[CntBullet].Pos();
+			D3DXVECTOR3 rot = this->Transform[CntBullet].Rot();
+			D3DXVECTOR3 scl = this->Transform[CntBullet].Scl();
+			D3DXVECTOR3 move = this->move[CntBullet].Move();
 
 			//バレットがプレイヤーの一定範囲内なら若干のホーミング　未使用
 			/*
@@ -83,106 +94,94 @@ void BULLET::Update(SHADOW *shadow, EFFECT *effect)
 
 			for (int CntPlayer = 0; CntPlayer < PLAYER_MAX; CntPlayer++)
 			{
-				if (this[nCntBullet].UsePlayerType == CntPlayer) continue;
+				if (this[CntBullet].UsePlayerType == CntPlayer) continue;
 				if (p[CntPlayer].use == false) continue;
 
 				if (CollisionBC(p[CntPlayer].pos, PLAYER_MODEL_SIZE*5.0f, pos, BULLET_MODEL_SIZE))
 				{
-					if (this[nCntBullet].HormingSignal == false)
+					if (this[CntBullet].HormingSignal == false)
 					{
-						this[nCntBullet].HormingSignal = true;
-						this[nCntBullet].HormingPlayerType = CntPlayer;
+						this[CntBullet].HormingSignal = true;
+						this[CntBullet].HormingPlayerType = CntPlayer;
 					}
 				}
 				else
 				{
-					this[nCntBullet].HormingSignal = false;
+					this[CntBullet].HormingSignal = false;
 				}
 			}
-			if (this[nCntBullet].HormingSignal == true)
+			if (this[CntBullet].HormingSignal == true)
 			{
-				this[nCntBullet].Hormingmove = p[this[nCntBullet].HormingPlayerType].pos - pos;
+				this[CntBullet].Hormingmove = p[this[CntBullet].HormingPlayerType].pos - pos;
 			}
 			*/
 
 			//ホーミングは未使用
-			//pos.x += move.x + (this[nCntBullet].Hormingmove.x / 30.0f);
-			//pos.y -= this[nCntBullet].Gravity + move.y - (this[nCntBullet].Hormingmove.y / 10.0f);
-			//pos.z += move.z + (this[nCntBullet].Hormingmove.z / 30.0f);
+			//pos.x += move.x + (this[CntBullet].Hormingmove.x / 30.0f);
+			//pos.y -= this[CntBullet].Gravity + move.y - (this[CntBullet].Hormingmove.y / 10.0f);
+			//pos.z += move.z + (this[CntBullet].Hormingmove.z / 30.0f);
 
+			//弾道制御
 			pos.x += move.x;
-			pos.y -= this[nCntBullet].Gravity + move.y;
+			pos.y -= this->BulletPara[CntBullet].Gravity + move.y;
 			pos.z += move.z;
 
-			this[nCntBullet].Gravity += VALUE_GRAVITYADD_BULLET;
-			if (this[nCntBullet].Gravity > VALUE_GRAVITYMAX_BULLET) this[nCntBullet].Gravity = VALUE_GRAVITYMAX_BULLET;
+			this->BulletPara[CntBullet].Gravity += VALUE_GRAVITYADD_BULLET;
+			if (this->BulletPara[CntBullet].Gravity > VALUE_GRAVITYMAX_BULLET) this->BulletPara[CntBullet].Gravity = VALUE_GRAVITYMAX_BULLET;
 
-			this[nCntBullet].nTimer--;
+			//タイマー(生存時間)を減らす
+			this->BulletPara[CntBullet].Timer--;
 
-			if (this[nCntBullet].nTimer <= 0)
+			//一定時間経過で未使用にする
+			if (this->BulletPara[CntBullet].Timer <= 0)
 			{
-				shadow->ReleaseShadow(this[nCntBullet].nIdxShadow);
-				ReleaseBullet(nCntBullet, &shadow[0]);
+				shadow->ReleaseInstance(this->BulletPara[CntBullet].IdxShadow);
+				this->ReleaseInstance(CntBullet, &shadow[0]);
 			}
 			else
 			{
 				// 影の位置設定
-				shadow->SetPositionShadow(this[nCntBullet].nIdxShadow, D3DXVECTOR3(pos.x, this[nCntBullet].FieldPosY, pos.z), scl);
+				shadow->UpdateInstance(this->BulletPara[CntBullet].IdxShadow,
+					D3DXVECTOR3(pos.x, this->BulletPara[CntBullet].FieldPosY, pos.z), 
+					rot,scl);
 
 				// エフェクトの設定
-				effect->SetEffect(pos, D3DXVECTOR3(0.0f, 0.0f, 0.0f),
-					PLAYER_COLOR[this[nCntBullet].UsePlayerType], EFFECT_BULLET_SIZE_X, EFFECT_BULLET_SIZE_Y, EFFECT_BULLET_TIME);
+				effect->SetInstance(pos, D3DXVECTOR3(0.0f, 0.0f, 0.0f),
+					PLAYER_COLOR[this->BulletPara[CntBullet].UsePlayerType], 
+					EFFECT_BULLET_SIZE_X, EFFECT_BULLET_SIZE_Y, EFFECT_BULLET_TIME);
 			}
-			this[nCntBullet].SetPos(pos);
-			//影の処理
-			float fSizeX = 8.0f + (pos.y - 4.0f) * 0.05f;
-			if (fSizeX < 8.0f) fSizeX = 8.0f;
-			float fSizeY = 8.0f + (pos.y - 4.0f) * 0.05f;
-			if (fSizeY < 8.0f) fSizeY = 8.0f;
-			shadow->SetVertexShadow(this[nCntBullet].nIdxShadow, fSizeX, fSizeY);
-
-			float colA = (200.0f - (pos.y - 4.0f)) / 400.0f;
-			if (colA < 0.0f) colA = 0.0f;
-			shadow->SetColorShadow(this[nCntBullet].nIdxShadow, D3DXCOLOR(1.0f, 1.0f, 1.0f, colA));
-
+			this->Transform[CntBullet].Pos(pos);
 		}
 	}
 }
 
 //=============================================================================
-// 描画処理
-//=============================================================================
-void BULLET::Draw(void)
-{
-
-}
-
-//=============================================================================
 // 弾の設定
 //=============================================================================
-int BULLET::SetBullet(D3DXVECTOR3 pos, D3DXVECTOR3 move, float fSizeX, float fSizeY, int nTimer, int type,SHADOW *s)
+int BULLET::SetInstance(D3DXVECTOR3 pos, D3DXVECTOR3 move, float fSizeX, float fSizeY, int nTimer, ePLAYER_TYPE type,SHADOW *s)
 {
 	int nIdxBullet = -1;
 
-	for (int nCntBullet = 0; nCntBullet < OBJECT_BULLET_MAX; nCntBullet++)
+	for (int CntBullet = 0; CntBullet < OBJECT_BULLET_MAX; CntBullet++)
 	{
-		bool use = this[nCntBullet].GetUse();
+		bool use = this->iUseType[CntBullet].Use();
 		if (use != true)
 		{
-			this[nCntBullet].SetPos(pos);
-			this[nCntBullet].SetRot(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
-			this[nCntBullet].SetScl(D3DXVECTOR3(1.0f, 1.0f, 1.0f));
-			this[nCntBullet].SetMove(move);
-			this[nCntBullet].SetUse(true);
-			this[nCntBullet].nTimer = nTimer;
-			this[nCntBullet].UsePlayerType = type;
-			this[nCntBullet].Gravity = 0.0f;
-
+			//引数で初期値を設定 rotやsclは使用しない
+			this->Transform[CntBullet].Pos(pos);
+			this->Transform[CntBullet].Rot(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+			this->Transform[CntBullet].Scl(D3DXVECTOR3(1.0f, 1.0f, 1.0f));
+			this->move[CntBullet].Move(move);
+			this->iUseType[CntBullet].Use(YesUse);
+			this->BulletPara[CntBullet].Timer = nTimer;
+			this->BulletPara[CntBullet].UsePlayerType = type;
+			this->BulletPara[CntBullet].Gravity = 0.0f;
 
 			// 影の設定
-			this[nCntBullet].nIdxShadow = s->CreateShadow(pos, D3DXVECTOR3(1.0f, 1.0f, 1.0f));		// 影の設定
+			this->BulletPara[CntBullet].IdxShadow = s->SetInstance(pos, D3DXVECTOR3(1.0f, 1.0f, 1.0f));
 
-			nIdxBullet = nCntBullet;
+			//リターンするインデックスを更新
+			nIdxBullet = CntBullet;
 
 			break;
 		}
@@ -194,11 +193,12 @@ int BULLET::SetBullet(D3DXVECTOR3 pos, D3DXVECTOR3 move, float fSizeX, float fSi
 //=============================================================================
 // 弾の削除
 //=============================================================================
-void BULLET::ReleaseBullet(int nIdxBullet, SHADOW *s)
+void BULLET::ReleaseInstance(int nIdxBullet, SHADOW *s)
 {
+	//インデックスが正常なら対応するバレットを未使用にする
 	if(nIdxBullet >= 0 && nIdxBullet < OBJECT_BULLET_MAX)
 	{
-		s->ReleaseShadow(this[nIdxBullet].nIdxShadow);
-		this[nIdxBullet].SetUse(false);
+		s->ReleaseInstance(this->BulletPara[nIdxBullet].IdxShadow);
+		this->iUseType[nIdxBullet].Use(NoUse);
 	}
 }

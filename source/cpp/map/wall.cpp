@@ -37,10 +37,10 @@ void WALL::Init(void)
 	rot[2] = D3DXVECTOR3(0.0f, D3DX_PI * 0.50f, 0.0f);
 	rot[3] = D3DXVECTOR3(0.0f, D3DX_PI, 0.0f);
 
-	this[0].SetPos(pos[0]);
-	this[1].SetPos(pos[1]);
-	this[2].SetPos(pos[2]);
-	this[3].SetPos(pos[3]);
+	this[0].Pos(pos[0]);
+	this[1].Pos(pos[1]);
+	this[2].Pos(pos[2]);
+	this[3].Pos(pos[3]);
 	this[0].SetRot(rot[0]);
 	this[1].SetRot(rot[1]);
 	this[2].SetRot(rot[2]);
@@ -128,7 +128,7 @@ void WALL::Draw(void)
 		//-----------------------------オブジェクト読み込み
 		mtxWorld = this[nCntMeshField].GetMatrix();
 		D3DXVECTOR3 rot = this[nCntMeshField].GetRot();
-		D3DXVECTOR3 pos = this[nCntMeshField].GetPos();
+		D3DXVECTOR3 pos = this[nCntMeshField].Pos();
 
 		// ワールドマトリックスの初期化
 		D3DXMatrixIdentity(&mtxWorld);

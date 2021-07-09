@@ -11,23 +11,47 @@
 //*****************************************************************************
 // class定義
 //*****************************************************************************
-class BULLET : public OBJECT_3D
+/**
+*　@class BULLET_PARAMETER
+*　@brief 
+*/
+class BULLET_PARAMETER
 {
 public:
-	BULLET() { nTimer = 0, nIdxShadow = 0, UsePlayerType = 0, fRadius = 0.0f, Gravity = 0.0f, FieldPosY = 0.0f; };
-	virtual void				Init(void);					//!< 初期化
-	virtual void				Reinit(void);				//!< 再初期化
-	virtual void				Uninit(void);				//!< 終了
-	virtual void				Update(SHADOW *s, EFFECT *e);				//!< 更新
-	virtual void				Draw(void);					//!< 描画
-	int					SetBullet(D3DXVECTOR3 pos, D3DXVECTOR3 move, float fSizeX, float fSizeY, int nTimer, int type, SHADOW *s);
-	void				ReleaseBullet(int nIdxBullet, SHADOW *s);
-	int					nTimer;						// タイマー
-	int					nIdxShadow;					// 影ID
-	int					UsePlayerType;				// 何プレイヤーが使用してるか識別する
-	float				fRadius;					// 半径
-	float				Gravity;					// 重力
-	float				FieldPosY;					// 影用の現在地の地形POSYを記憶
+	BULLET_PARAMETER() { Timer = IdxShadow = 0; Gravity = FieldPosY = 0.0f; UsePlayerType = PLAYER_NONE; }
+	~BULLET_PARAMETER() {}
+
+	int		Timer;							// タイマー
+	int		IdxShadow;						// 影ID
+	float	Gravity;						// 重力
+	float	FieldPosY;						// 影用の現在地の地形POSYを記憶
+	ePLAYER_TYPE	UsePlayerType;			// 何プレイヤーが使用してるか識別する
+
+};
+
+/**
+*　@class BULLET
+*　@brief GAMEOBJECT派生クラス
+*/
+class BULLET : public GAME_OBJECT
+{
+public:
+	BULLET();		//!< データ読み込み　初期化
+	~BULLET();		//!< 削除
+
+private:
+	void	Init(void);						//!< 初期化
+	void	Update(SHADOW *s, EFFECT *e);	//!< 更新
+	//void	Draw(void);						//!< 描画
+
+	int		SetInstance(D3DXVECTOR3 pos, D3DXVECTOR3 move, float fSizeX, float fSizeY, int nTimer, ePLAYER_TYPE type, SHADOW *s);	//!< インスタンスセット
+	void	ReleaseInstance(int nIdxBullet, SHADOW *s);	//!< インスタンス解放
+
+	TransForm	Transform[OBJECT_BULLET_MAX];		//!< トランスフォーム情報
+	iUseCheak	iUseType[OBJECT_BULLET_MAX];		//!< 使用情報
+	Movement	move[OBJECT_BULLET_MAX];			//!< 移動量
+
+	BULLET_PARAMETER	BulletPara[OBJECT_BULLET_MAX];	//!< インスタンスに必要なデータ群
 } ;
 
 

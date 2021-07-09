@@ -7,64 +7,90 @@
 #include "../../h/main.h"
 #include "../../h/effect/damege.h"
 
+//*****************************************************************************
+// マクロ定義
+//*****************************************************************************
+#define	TEXTURE_DAMEGE			("../data/TEXTURE/effect/screendamage.png")			
+#define	DAMEGE_SIZE_X			(SCREEN_W/4)										// チュートリアルの幅
+#define	DAMEGE_SIZE_Y			(SCREEN_H/4)										// チュートリアルの高さ
+#define	DAMEGE_POS_X			(SCREEN_CENTER_X)									// チュートリアルの表示位置
+#define	DAMEGE_POS_Y			(SCREEN_CENTER_Y)									// チュートリアルの表示位置
+
+#define SCREENDAMEGE_TIME					(30)									//!< 被ダメージ時の画面フェード時間
+
+//=============================================================================
+// コンストラクタ　「読み込み」「初期化」
+//=============================================================================
+DAMEGE::DAMEGE(void)
+{
+	//オブジェクトカウントアップ
+	this->CreateInstanceOBJ();
+
+	//頂点の作成
+	this->vtx.MakeVertex2D(OBJECT_DAMEGE_MAX, FVF_VERTEX_2D);
+
+	//描画位置設定
+	this->Transform[PLAYER01].Pos(D3DXVECTOR3(DAMEGE_POS_X - DAMEGE_SIZE_X, DAMEGE_POS_Y - DAMEGE_SIZE_Y, 0.0f));
+	this->Transform[PLAYER02].Pos(D3DXVECTOR3(DAMEGE_POS_X + DAMEGE_SIZE_X, DAMEGE_POS_Y - DAMEGE_SIZE_Y, 0.0f));
+	this->Transform[PLAYER03].Pos(D3DXVECTOR3(DAMEGE_POS_X - DAMEGE_SIZE_X, DAMEGE_POS_Y + DAMEGE_SIZE_Y, 0.0f));
+	this->Transform[PLAYER04].Pos(D3DXVECTOR3(DAMEGE_POS_X + DAMEGE_SIZE_X, DAMEGE_POS_Y + DAMEGE_SIZE_Y, 0.0f));
+
+	//カウントループ
+	for (int CntDamege = 0; CntDamege < OBJECT_DAMEGE_MAX; CntDamege++)
+	{
+		//描画位置反映
+		D3DXVECTOR3 pos = this->Transform[CntDamege].Pos;
+		this->vtx.Vertex2D(CntDamege, DAMEGE_SIZE_X / 2, DAMEGE_SIZE_Y / 2, pos);
+
+		//RHW設定
+		this->vtx.RHW2D(CntDamege);
+
+		//UVの設定
+		this->vtx.UV2D(CntDamege);
+
+		//カラー設定
+		this->vtx.Color2D(CntDamege, D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.0f));
+
+		//使用設定
+		this->iUseType[CntDamege].ChangeUse(NoUse);
+	}
+
+	// テクスチャの読み込み
+	this->tex.LoadTexture(TEXTURE_DAMEGE);
+
+}
+
+//=============================================================================
+// デストラクタ　削除
+//=============================================================================
+DAMEGE::~DAMEGE(void)
+{
+	//テクスチャ解放
+	this->tex.~TEXTURE();
+	//頂点解放
+	this->vtx.~VTXBuffer();
+	//オブジェクトカウントダウン
+	this->DeleteInstanceOBJ();
+}
+
 //=============================================================================
 // 初期化処理
 //=============================================================================
 void DAMEGE::Init(void)
 {
-	LPDIRECT3DDEVICE9 pDevice = GetDevice();
-
+	//カウントループ
 	for (int CntDamege = 0; CntDamege < OBJECT_DAMEGE_MAX; CntDamege++)
 	{
-		D3DXCreateTextureFromFile(pDevice,
-			TEXTURE_DAMEGE,
-			&this[CntDamege].tex2D.pD3DTexture);
-	}
-	D3DXVECTOR3 pos[4];
-	pos[0] = D3DXVECTOR3(DAMEGE_POS_X - DAMEGE_SIZE_X, DAMEGE_POS_Y - DAMEGE_SIZE_Y, 0.0f);
-	pos[1] = D3DXVECTOR3(DAMEGE_POS_X + DAMEGE_SIZE_X, DAMEGE_POS_Y - DAMEGE_SIZE_Y, 0.0f);
-	pos[2] = D3DXVECTOR3(DAMEGE_POS_X - DAMEGE_SIZE_X, DAMEGE_POS_Y + DAMEGE_SIZE_Y, 0.0f);
-	pos[3] = D3DXVECTOR3(DAMEGE_POS_X + DAMEGE_SIZE_X, DAMEGE_POS_Y + DAMEGE_SIZE_Y, 0.0f);
+		//カラー設定
+		this->vtx.Color2D(CntDamege, D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
 
-	this[0].SetPos(pos[0]);
-	this[1].SetPos(pos[1]);
-	this[2].SetPos(pos[2]);
-	this[3].SetPos(pos[3]);
+		//使用設定
+		this->iUseType[CntDamege].ChangeUse(NoUse);
 
+		//パラメータ設定
+		this->DamegePara[CntDamege].time = 0;
+		this->DamegePara[CntDamege].alpha = 0.0f;
 
-
-	// 頂点情報の作成
-	MakeVertexDamege();
-}
-
-//=============================================================================
-// 再初期化処理
-//=============================================================================
-void DAMEGE::Reinit(void)
-{
-	D3DXVECTOR3 pos[4];
-	pos[0] = D3DXVECTOR3(DAMEGE_POS_X - DAMEGE_SIZE_X, DAMEGE_POS_Y - DAMEGE_SIZE_Y, 0.0f);
-	pos[1] = D3DXVECTOR3(DAMEGE_POS_X + DAMEGE_SIZE_X, DAMEGE_POS_Y - DAMEGE_SIZE_Y, 0.0f);
-	pos[2] = D3DXVECTOR3(DAMEGE_POS_X - DAMEGE_SIZE_X, DAMEGE_POS_Y + DAMEGE_SIZE_Y, 0.0f);
-	pos[3] = D3DXVECTOR3(DAMEGE_POS_X + DAMEGE_SIZE_X, DAMEGE_POS_Y + DAMEGE_SIZE_Y, 0.0f);
-	this[0].SetPos(pos[0]);
-	this[1].SetPos(pos[1]);
-	this[2].SetPos(pos[2]);
-	this[3].SetPos(pos[3]);
-	for (int CntDamege = 0; CntDamege < OBJECT_DAMEGE_MAX; CntDamege++)
-	{
-		D3DXVECTOR3 Getpos = this[CntDamege].GetPos();
-		// 頂点座標の設定
-		this[CntDamege].tex2D.textureVTX[0].vtx = D3DXVECTOR3(Getpos.x - DAMEGE_SIZE_X, Getpos.y - DAMEGE_SIZE_Y, 0.0f);
-		this[CntDamege].tex2D.textureVTX[1].vtx = D3DXVECTOR3(Getpos.x + DAMEGE_SIZE_X, Getpos.y - DAMEGE_SIZE_Y, 0.0f);
-		this[CntDamege].tex2D.textureVTX[2].vtx = D3DXVECTOR3(Getpos.x - DAMEGE_SIZE_X, Getpos.y + DAMEGE_SIZE_Y, 0.0f);
-		this[CntDamege].tex2D.textureVTX[3].vtx = D3DXVECTOR3(Getpos.x + DAMEGE_SIZE_X, Getpos.y + DAMEGE_SIZE_Y, 0.0f);
-	}
-	for (int CntDamege = 0; CntDamege < OBJECT_DAMEGE_MAX; CntDamege++)
-	{
-		this[CntDamege].alpha = 0;
-		this[CntDamege].time = 0.0f;
-		this[CntDamege].SetUse(false);
 	}
 }
 
@@ -73,10 +99,11 @@ void DAMEGE::Reinit(void)
 //=============================================================================
 void DAMEGE::ReinitNet(void)
 {
+	/*
 	D3DXVECTOR3 pos;
 	pos = D3DXVECTOR3(DAMEGE_POS_X, DAMEGE_POS_Y, 0.0f);
-	this[0].SetPos(pos);
-	D3DXVECTOR3 Getpos = this[0].GetPos();
+	this[0].Pos(pos);
+	D3DXVECTOR3 Getpos = this[0].Pos();
 	// 頂点座標の設定
 	this[0].tex2D.textureVTX[0].vtx = D3DXVECTOR3(Getpos.x - DAMEGE_POS_X, Getpos.y - DAMEGE_POS_Y, 0.0f);
 	this[0].tex2D.textureVTX[1].vtx = D3DXVECTOR3(Getpos.x + DAMEGE_POS_X, Getpos.y - DAMEGE_POS_Y, 0.0f);
@@ -86,15 +113,9 @@ void DAMEGE::ReinitNet(void)
 	{
 		this[CntDamege].alpha = 0;
 		this[CntDamege].time = 0.0f;
-		this[CntDamege].SetUse(false);
+		this[CntDamege].Use(false);
 	}
-}
-
-//=============================================================================
-// 終了処理
-//=============================================================================
-void DAMEGE::Uninit(void)
-{
+	*/
 }
 
 //=============================================================================
@@ -102,25 +123,26 @@ void DAMEGE::Uninit(void)
 //=============================================================================
 void DAMEGE::Update(void)
 {
+	//カウントループ
 	for (int CntDamege = 0; CntDamege < OBJECT_DAMEGE_MAX; CntDamege++)
 	{
-		bool use = this[CntDamege].GetUse();
+		//使用中なら徐々にαを高くする
+		bool use = this->iUseType[CntDamege].Use();
 		if (use==true)
 		{
-			this[CntDamege].time += 1.0f;
-			this[CntDamege].alpha = int((this[CntDamege].time/ SCREENDAMEGE_TIME)*255.0f);
+			this->DamegePara[CntDamege].time += 1.0f;
+			this->DamegePara[CntDamege].alpha = float((this->DamegePara[CntDamege].time / SCREENDAMEGE_TIME)*255.0f);
 
 			// 反射光の設定
-			this[CntDamege].tex2D.textureVTX[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, this[CntDamege].alpha);
-			this[CntDamege].tex2D.textureVTX[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, this[CntDamege].alpha);
-			this[CntDamege].tex2D.textureVTX[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, this[CntDamege].alpha);
-			this[CntDamege].tex2D.textureVTX[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, this[CntDamege].alpha);
+			D3DXCOLOR col = D3DXCOLOR(1.0f, 1.0f, 1.0f, this->DamegePara[CntDamege].alpha);
+			this->vtx.Color2D(CntDamege, col);
 
-			if (this[CntDamege].time >= SCREENDAMEGE_TIME)
+			//一定時間経過で終了
+			if (this->DamegePara[CntDamege].time >= SCREENDAMEGE_TIME)
 			{
-				this[CntDamege].time = 0.0f;
-				this[CntDamege].alpha = 0;
-				this[CntDamege].SetUse(false);
+				this->DamegePara[CntDamege].time = 0.0f;
+				this->DamegePara[CntDamege].alpha = 0.0f;
+				this->iUseType[CntDamege].Use(false);
 			}
 		}
 	}
@@ -140,64 +162,38 @@ void DAMEGE::Draw(bool Netflag, int NetMyNumber, int CntPlayer)
 
 	if (Netflag==false)
 	{
-			bool use = this[CntPlayer].GetUse();
-			if (use == true)
-			{
-				pDevice->SetFVF(FVF_VERTEX_2D);
-				pDevice->SetTexture(0, this[CntPlayer].tex2D.pD3DTexture);
-				pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, POLYGON_2D_NUM, this[CntPlayer].tex2D.textureVTX, sizeof(VERTEX_2D));
-			}
+		//描画判定　
+		if (this->iUseType[CntPlayer].Use() == YesUseType1);
+		{
+			// 頂点バッファをデバイスのデータストリームにバインド
+			pDevice->SetStreamSource(0, *this->vtx.VtxBuff(), 0, sizeof(VERTEX_2D));
+			// 頂点フォーマットの設定
+			pDevice->SetFVF(FVF_VERTEX_2D);
+			// テクスチャの設定　テクスチャが複数ならtexを配列化して選択させるように
+			pDevice->SetTexture(0, this->tex.Texture());
+			// ポリゴンの描画　引数二個目の描画開始頂点を設定することが大事
+			pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, (CntPlayer * 4), POLYGON_2D_NUM);
+		}
 	}
 
 	else
 	{
-		bool use = this[NetMyNumber].GetUse();//サーバーから受け取った自分番号
-		if (use == true)
+		//描画判定　
+		if (this->iUseType[NetMyNumber].Use() == YesUseType1);
 		{
+			// 頂点バッファをデバイスのデータストリームにバインド
+			pDevice->SetStreamSource(0, *this->vtx.VtxBuff(), 0, sizeof(VERTEX_2D));
+			// 頂点フォーマットの設定
 			pDevice->SetFVF(FVF_VERTEX_2D);
-			pDevice->SetTexture(0, this[0].tex2D.pD3DTexture);
-			pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, POLYGON_2D_NUM, this[0].tex2D.textureVTX, sizeof(VERTEX_2D));//ここは座標だから0
+			// テクスチャの設定　テクスチャが複数ならtexを配列化して選択させるように
+			pDevice->SetTexture(0, this->tex.Texture());
+			// ポリゴンの描画　引数二個目の描画開始頂点を設定することが大事
+			pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, (NetMyNumber * 4), POLYGON_2D_NUM);
 		}
 	}
 	pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);		// αソースカラーの指定
 	pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);	// αデスティネーションカラーの指定
 	pDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
 	pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);				// Z比較あり
-}
-
-//=============================================================================
-// 頂点の作成
-//=============================================================================
-HRESULT DAMEGE::MakeVertexDamege(void)
-{
-	for (int CntDamege = 0; CntDamege < OBJECT_DAMEGE_MAX; CntDamege++)
-	{
-		D3DXVECTOR3 pos = this[CntDamege].GetPos();
-
-		// 頂点座標の設定
-		this[CntDamege].tex2D.textureVTX[0].vtx = D3DXVECTOR3(pos.x - DAMEGE_SIZE_X, pos.y - DAMEGE_SIZE_Y, 0.0f);
-		this[CntDamege].tex2D.textureVTX[1].vtx = D3DXVECTOR3(pos.x + DAMEGE_SIZE_X, pos.y - DAMEGE_SIZE_Y, 0.0f);
-		this[CntDamege].tex2D.textureVTX[2].vtx = D3DXVECTOR3(pos.x - DAMEGE_SIZE_X, pos.y + DAMEGE_SIZE_Y, 0.0f);
-		this[CntDamege].tex2D.textureVTX[3].vtx = D3DXVECTOR3(pos.x + DAMEGE_SIZE_X, pos.y + DAMEGE_SIZE_Y, 0.0f);
-		// テクスチャのパースペクティブコレクト用
-		this[CntDamege].tex2D.textureVTX[0].rhw =
-			this[CntDamege].tex2D.textureVTX[1].rhw =
-			this[CntDamege].tex2D.textureVTX[2].rhw =
-			this[CntDamege].tex2D.textureVTX[3].rhw = 1.0f;
-
-		// 反射光の設定
-		this[CntDamege].tex2D.textureVTX[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 0);
-		this[CntDamege].tex2D.textureVTX[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 0);
-		this[CntDamege].tex2D.textureVTX[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 0);
-		this[CntDamege].tex2D.textureVTX[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 0);
-
-		// テクスチャ座標の設定
-		this[CntDamege].tex2D.textureVTX[0].tex = D3DXVECTOR2(0.0f, 0.0f);
-		this[CntDamege].tex2D.textureVTX[1].tex = D3DXVECTOR2(1.0f, 0.0f);
-		this[CntDamege].tex2D.textureVTX[2].tex = D3DXVECTOR2(0.0f, 1.0f);
-		this[CntDamege].tex2D.textureVTX[3].tex = D3DXVECTOR2(1.0f, 1.0f);
-
-	}
-	return S_OK;
 }
 
