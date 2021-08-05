@@ -62,7 +62,7 @@ VITALGAUGE::VITALGAUGE(void)
 	for (int CntVital = 0; CntVital < OBJECT_VITAL_MAX; CntVital++)
 	{
 		//ベース座標取得
-		D3DXVECTOR3 pos = this->Transform[CntVital].Pos;
+		D3DXVECTOR3 pos = this->Transform[CntVital].Pos();
 		//カウントループ 弾数
 		for (int CntVitalTex = 0; CntVitalTex < VITAL_DRAW_TEX_NUM; CntVitalTex++)
 		{
@@ -144,7 +144,7 @@ void VITALGAUGE::Init(void)
 		this->VitalGaugePara[CntVital].VitalPower = PLAYER_VITAL_MAX;
 
 		//ベース座標取得
-		D3DXVECTOR3 pos = this->Transform[CntVital].Pos;
+		D3DXVECTOR3 pos = this->Transform[CntVital].Pos();
 		//カウントループ 弾数
 		for (int CntVitalTex = 0; CntVitalTex < VITAL_DRAW_TEX_NUM; CntVitalTex++)
 		{
@@ -203,7 +203,7 @@ void VITALGAUGE::ReinitNet(int MyNumber)
 //=============================================================================
 // 更新処理
 //=============================================================================
-void VITALGAUGE::Update(PLAYER_HONTAI *p, RANK *rank, bool Netflag, int NetMyNumber)
+void VITALGAUGE::Update(PLAYER *p, RANK *rank, bool Netflag, int NetMyNumber)
 {
 	//中身更新
 	//ローカル対戦時
@@ -212,7 +212,7 @@ void VITALGAUGE::Update(PLAYER_HONTAI *p, RANK *rank, bool Netflag, int NetMyNum
 		for (int CntPlayer = 0; CntPlayer < OBJECT_VITAL_MAX; CntPlayer++)
 		{
 			//バイタル記録
-			this->VitalGaugePara[CntPlayer].VitalPower = p->PlayerPara[CntPlayer].vital;
+			this->VitalGaugePara[CntPlayer].VitalPower = p->PlayerPara[CntPlayer].StandardPara.Vital;
 
 			//プレイヤーが生きているときにバイタルが0以下で未使用にする（死亡フラグ）　負けた時点での順位もセットする
 			bool puse = p->iUseType[CntPlayer].Use();
@@ -245,7 +245,7 @@ void VITALGAUGE::Update(PLAYER_HONTAI *p, RANK *rank, bool Netflag, int NetMyNum
 	else
 	{
 		//バイタル記録
-		this->VitalGaugePara[NetMyNumber].VitalPower = p->PlayerPara[NetMyNumber].vital;
+		this->VitalGaugePara[NetMyNumber].VitalPower = p->PlayerPara[NetMyNumber].StandardPara.Vital;
 
 		//プレイヤーが生きているときにバイタルが0以下で未使用にする（死亡フラグ）　負けた時点での順位もセットする
 		for (int CntPlayer = 0; CntPlayer < OBJECT_VITAL_MAX; CntPlayer++)
@@ -287,7 +287,7 @@ void VITALGAUGE::Draw(bool Netflag, int NetMyNumber, int CntPlayer)
 	{
 		//枠描画ー＞中身描画
 		// 頂点バッファをデバイスのデータストリームにバインド
-		pDevice->SetStreamSource(0, *this->vtx[CntPlayer].VtxBuff(), 0, sizeof(VERTEX_2D));
+		pDevice->SetStreamSource(0, this->vtx[CntPlayer].VtxBuff(), 0, sizeof(VERTEX_2D));
 		// 頂点フォーマットの設定
 		pDevice->SetFVF(FVF_VERTEX_2D);
 		// テクスチャの設定　テクスチャが複数ならtexを配列化して選択させるように
@@ -308,7 +308,7 @@ void VITALGAUGE::Draw(bool Netflag, int NetMyNumber, int CntPlayer)
 	{
 		//枠描画ー＞中身描画
 		// 頂点バッファをデバイスのデータストリームにバインド
-		pDevice->SetStreamSource(0, *this->vtx[NetMyNumber].VtxBuff(), 0, sizeof(VERTEX_2D));
+		pDevice->SetStreamSource(0, this->vtx[NetMyNumber].VtxBuff(), 0, sizeof(VERTEX_2D));
 		// 頂点フォーマットの設定
 		pDevice->SetFVF(FVF_VERTEX_2D);
 		// テクスチャの設定　テクスチャが複数ならtexを配列化して選択させるように

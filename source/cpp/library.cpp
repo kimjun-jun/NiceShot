@@ -13,6 +13,7 @@
 #define FIELD_PARTITION_SECOND_NUM		(16)
 #define FIELD_PARTITION_THIRD_NUM		(64)
 FIELD_COLLISION g_Field_Collision[FIELD_PARTITION_THIRD_NUM];
+
 //=============================================================================
 // 当たり判定高速化のフラグ初期化処理
 //=============================================================================
@@ -869,7 +870,7 @@ void HormingType01(D3DXVECTOR3 *StartPos, D3DXVECTOR3 EndPos, float MoveValue)
 //=============================================================================
 // ゲーム中モーフィング実行関数
 //=============================================================================
-void DoMorphing(GPUMODEL *FromModel, GPUMODEL *ToModel, float dt, float *time, int *SignalType)
+void DoMorphing(LPDIRECT3DVERTEXBUFFER9 FromModelVB, LPDIRECT3DVERTEXBUFFER9 ToModelVB, LPDIRECT3DINDEXBUFFER9 ModelIdx, ModelAttribute *Attribute, float dt, float *time, eMORPHING_TYPE *SignalType)
 {
 	//線形補間でモーフィング
 	{
@@ -877,11 +878,13 @@ void DoMorphing(GPUMODEL *FromModel, GPUMODEL *ToModel, float dt, float *time, i
 		VERTEX_3D *pVtx;
 		WORD *pIdx;
 		VERTEX_3D *pVtxG;
-		FromModel->pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
-		FromModel->pD3DIdxBuff->Lock(0, 0, (void**)&pIdx, 0);
-		ToModel->pD3DVtxBuff->Lock(0, 0, (void**)&pVtxG, 0);
+
+		FromModelVB->Lock(0, 0, (void**)&pVtx, 0);
+		ModelIdx->Lock(0, 0, (void**)&pIdx, 0);
+		ToModelVB->Lock(0, 0, (void**)&pVtxG, 0);
+
 		*time += dt;		// アニメーションの合計時間に足す
-		for (int CntPoly = 0; CntPoly < int(FromModel->nNumPolygon); CntPoly++, pIdx += 3)
+		for (int CntPoly = 0; CntPoly < int(Attribute->NumPolygon()); CntPoly++, pIdx += 3)
 		{
 			// 座標を求める	X = StartX + (EndX - StartX) * 今の時間
 			D3DXVECTOR3 vtxvec1 = pVtxG[pIdx[0]].vtx - pVtx[pIdx[0]].vtx;
@@ -893,9 +896,9 @@ void DoMorphing(GPUMODEL *FromModel, GPUMODEL *ToModel, float dt, float *time, i
 			pVtx[pIdx[2]].vtx = pVtx[pIdx[2]].vtx + vtxvec3 * *(time);
 		}
 		// 頂点データをアンロックする
-		ToModel->pD3DVtxBuff->Unlock();
-		FromModel->pD3DVtxBuff->Unlock();
-		FromModel->pD3DIdxBuff->Unlock();
+		ToModelVB->Unlock();
+		ModelIdx->Unlock();
+		FromModelVB->Unlock();
 
 		if (*time >= 1.0f)
 		{
@@ -908,25 +911,28 @@ void DoMorphing(GPUMODEL *FromModel, GPUMODEL *ToModel, float dt, float *time, i
 //=============================================================================
 // リセット時のモーフィング実行関数
 //=============================================================================
-void ResetModel(GPUMODEL *FromModel, GPUMODEL *ToModel)
+void ResetModel(LPDIRECT3DVERTEXBUFFER9 FromModelVB, LPDIRECT3DVERTEXBUFFER9 ToModelVB, LPDIRECT3DINDEXBUFFER9 ModelIdx, ModelAttribute *Attribute)
 {
 	// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
 	VERTEX_3D *pVtx;
 	WORD *pIdx;
 	VERTEX_3D *pVtxG;
-	FromModel->pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
-	FromModel->pD3DIdxBuff->Lock(0, 0, (void**)&pIdx, 0);
-	ToModel->pD3DVtxBuff->Lock(0, 0, (void**)&pVtxG, 0);
-	for (int CntPoly = 0; CntPoly < int(FromModel->nNumPolygon); CntPoly++, pIdx += 3)
+
+	FromModelVB->Lock(0, 0, (void**)&pVtx, 0);
+	ModelIdx->Lock(0, 0, (void**)&pIdx, 0);
+	ToModelVB->Lock(0, 0, (void**)&pVtxG, 0);
+
+	for (int CntPoly = 0; CntPoly < int(Attribute->NumPolygon()); CntPoly++, pIdx += 3)
 	{
 		pVtx[pIdx[0]].vtx = pVtxG[pIdx[0]].vtx;
 		pVtx[pIdx[1]].vtx = pVtxG[pIdx[1]].vtx;
 		pVtx[pIdx[2]].vtx = pVtxG[pIdx[2]].vtx;
 	}
+
 	// 頂点データをアンロックする
-	ToModel->pD3DVtxBuff->Unlock();
-	FromModel->pD3DVtxBuff->Unlock();
-	FromModel->pD3DIdxBuff->Unlock();
+	ToModelVB->Unlock();
+	ModelIdx->Unlock();
+	FromModelVB->Unlock();
 }
 //
 //---------------------------------------------------------------------------------モーフィング

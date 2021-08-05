@@ -38,7 +38,7 @@ RANK::RANK(void)
 	for (int CntRank = 0; CntRank < OBJECT_RANK_MAX; CntRank++)
 	{
 		//描画位置設定
-		D3DXVECTOR3 pos = this->Transform[CntRank].Pos;
+		D3DXVECTOR3 pos = this->Transform[CntRank].Pos();
 		D3DXVECTOR3 vtx[POLYGON_2D_VERTEX] =
 		{
 		D3DXVECTOR3(pos.x - RANK_SIZE_X,pos.y - RANK_SIZE_Y,0.0f),
@@ -114,7 +114,7 @@ void RANK::Draw(bool Netflag)
 			if (use == true)
 			{
 				// 頂点バッファをデバイスのデータストリームにバインド
-				pDevice->SetStreamSource(0, *this->vtx.VtxBuff(), 0, sizeof(VERTEX_2D));
+				pDevice->SetStreamSource(0, this->vtx.VtxBuff(), 0, sizeof(VERTEX_2D));
 				// 頂点フォーマットの設定
 				pDevice->SetFVF(FVF_VERTEX_2D);
 				// テクスチャの設定　テクスチャが複数ならtexを配列化して選択させるように
@@ -136,7 +136,7 @@ void RANK::Draw(bool Netflag)
 				if (this->RankParaOne.NetUse == true)
 				{
 					// 頂点バッファをデバイスのデータストリームにバインド
-					pDevice->SetStreamSource(0, *this->vtx.VtxBuff(), 0, sizeof(VERTEX_2D));
+					pDevice->SetStreamSource(0, this->vtx.VtxBuff(), 0, sizeof(VERTEX_2D));
 					// 頂点フォーマットの設定
 					pDevice->SetFVF(FVF_VERTEX_2D);
 					// テクスチャの設定　テクスチャが複数ならtexを配列化して選択させるように

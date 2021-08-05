@@ -26,7 +26,7 @@
 #define COUNTDOWN_TEXTURE_POS_Y				(SCREEN_CENTER_Y)					//!< 同上  
 #define COUNTDOWN_FPS_TIME					(240)								//!< 毎フレームカウントしてタイム計測
 #define COUNTDOWN_FPS_TIME_START			(4)									//!< カウントダウンスタート時点のタイム
-#define COUNTDOWN_ALPHA						(0.05)								//!< カウントダウンが0の時GOを描画してGOが薄くなるスピード
+#define COUNTDOWN_ALPHA						(0.05f)								//!< カウントダウンが0の時GOを描画してGOが薄くなるスピード
 #define COUNTDOWN_CHANGESIZE				(5)									//!< カウントダウン数字のサイズが拡大していく値
 
 //=============================================================================
@@ -45,7 +45,7 @@ COUNTDOWN::COUNTDOWN(void)
 	{
 		//描画位置設定
 		this->Transform[CntCountDown].Pos(D3DXVECTOR3(COUNTDOWN_TEXTURE_POS_X, COUNTDOWN_TEXTURE_POS_Y, 0.0f));
-		D3DXVECTOR3 pos = this->Transform[CntCountDown].Pos;
+		D3DXVECTOR3 pos = this->Transform[CntCountDown].Pos();
 		D3DXVECTOR3 vtx[POLYGON_2D_VERTEX] =
 		{
 		D3DXVECTOR3(pos.x - COUNTDOWN_TEXTURE_NUMBER_SIZE_X - this->CountdownPara.changeval,pos.y - COUNTDOWN_TEXTURE_NUMBER_SIZE_Y - this->CountdownPara.changeval,0.0f),
@@ -151,7 +151,7 @@ void COUNTDOWN::Draw(void)
 		if (use == true )
 		{
 			// 頂点バッファをデバイスのデータストリームにバインド
-			pDevice->SetStreamSource(0, *this->vtx.VtxBuff(), 0, sizeof(VERTEX_2D));
+			pDevice->SetStreamSource(0, this->vtx.VtxBuff(), 0, sizeof(VERTEX_2D));
 			// 頂点フォーマットの設定
 			pDevice->SetFVF(FVF_VERTEX_2D);
 			// テクスチャの設定　テクスチャが複数ならtexを配列化して選択させるように
@@ -216,7 +216,7 @@ void COUNTDOWN::NumberSizeUpdate(void)
 {
 	//描画位置設定
 	this->Transform[COUNTDOWN_TEX_NUMBER].Pos(D3DXVECTOR3(COUNTDOWN_TEXTURE_POS_X, COUNTDOWN_TEXTURE_POS_Y, 0.0f));
-	D3DXVECTOR3 pos = this->Transform[COUNTDOWN_TEX_NUMBER].Pos;
+	D3DXVECTOR3 pos = this->Transform[COUNTDOWN_TEX_NUMBER].Pos();
 	D3DXVECTOR3 vtx[POLYGON_2D_VERTEX] =
 	{
 	D3DXVECTOR3(pos.x - COUNTDOWN_TEXTURE_NUMBER_SIZE_X - this->CountdownPara.changeval,pos.y - COUNTDOWN_TEXTURE_NUMBER_SIZE_Y - this->CountdownPara.changeval,0.0f),

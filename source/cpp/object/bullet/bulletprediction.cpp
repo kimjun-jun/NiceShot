@@ -108,22 +108,22 @@ void BULLETPREDICTION::Init(void)
 //=============================================================================
 // 更新処理
 //=============================================================================
-void BULLETPREDICTION::Update(PLAYER_HONTAI *player)
+void BULLETPREDICTION::Update(PLAYER *player)
 {
 	//プレイヤーの情報から発射位置角度移動量を利用してバレットの着弾点を算出する
 	for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
 	{
 		//---------------------------------オブジェクト値読み込み
-		D3DXVECTOR3	BulletPredictionPos = player->Transform[CntPlayer].Pos();
+		D3DXVECTOR3	BulletPredictionPos = player->modelDraw[PLAYER_PARTS_TYPE_HOUDAI].Transform[CntPlayer].Pos();
 		BulletPredictionPos.y += 20.0f;
-		D3DXVECTOR3 HoudaiRot = player->Transform[CntPlayer].Rot();
-		D3DXVECTOR3 HoutouRot = player->parts[PARTSTYPE_HOUTOU].Transform[CntPlayer].Rot();
-		D3DXVECTOR3 HousinRot = player->parts[PARTSTYPE_HOUSIN].Transform[CntPlayer].Rot();
+		D3DXVECTOR3 HoudaiRot = player->modelDraw[PLAYER_PARTS_TYPE_HOUDAI].Transform[CntPlayer].Rot();
+		D3DXVECTOR3 HoutouRot = player->modelDraw[PLAYER_PARTS_TYPE_HOUTOU].Transform[CntPlayer].Rot();
+		D3DXVECTOR3 HousinRot = player->modelDraw[PLAYER_PARTS_TYPE_HOUSIN].Transform[CntPlayer].Rot();
 
 		//発射角度、発射座用計算
 		D3DXVECTOR3 BmoveRot;
 		BmoveRot.x = -sinf(HoutouRot.y + HoudaiRot.y);
-		BmoveRot.y = sinf(player->PlayerPara[CntPlayer].Brot - HousinRot.x);
+		BmoveRot.y = sinf(player->PlayerPara[CntPlayer].BulletPara.BulletRotY - HousinRot.x);
 		BmoveRot.z = -cosf(HoutouRot.y + HoudaiRot.y);
 		D3DXVECTOR3 bulletmove;
 		bulletmove.x = (BmoveRot.x) *VALUE_MOVE_BULLET;
@@ -159,7 +159,7 @@ void BULLETPREDICTION::Update(PLAYER_HONTAI *player)
 //=============================================================================
 // 描画処理
 //=============================================================================
-void BULLETPREDICTION::Draw(PLAYER_HONTAI *player, int CntPlayer)
+void BULLETPREDICTION::Draw(PLAYER *player, int CntPlayer)
 {
 	bool puse = player->iUseType[CntPlayer].Use();
 	if (puse)
@@ -208,7 +208,7 @@ void BULLETPREDICTION::Draw(PLAYER_HONTAI *player, int CntPlayer)
 			pDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
 
 			// 頂点バッファをデバイスのデータストリームにバインド
-			pDevice->SetStreamSource(0, *this->vtx[CntPlayer].VtxBuff(), 0, sizeof(VERTEX_3D));
+			pDevice->SetStreamSource(0, this->vtx[CntPlayer].VtxBuff(), 0, sizeof(VERTEX_3D));
 
 			// 頂点フォーマットの設定
 			pDevice->SetFVF(FVF_VERTEX_3D);

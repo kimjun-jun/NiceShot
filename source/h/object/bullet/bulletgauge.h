@@ -39,10 +39,11 @@ public:
 	BULLETGAUGE();	//!< データ読み込み　初期化
 	~BULLETGAUGE();	//!< 削除
 
-private:
 	void		Init(void);						//!< 初期化
-	void		Update(PLAYER_HONTAI *player);	//!< 更新
+	void		Update(PLAYER *player);	//!< 更新
 	void		Draw(bool Netflag, int NetMyNumber, int CntPlayer);		//!< 描画
+
+private:
 
 	void		ReinitNet(int MyNumber);		//!< 再初期化ネット対戦前	
 
@@ -51,7 +52,7 @@ private:
 	TransForm		Transform[OBJECT_BULLETGAUGE_MAX];			//!< トランスフォーム情報
 	BULLETGAUGE_PARAMETER	BulletGaugePara[OBJECT_BULLETGAUGE_MAX];//!< インスタンスに必要なデータ群
 
-	const char *c_aFileNameTex[] =
+	const char *c_aFileNameTex[BULLETGAUGE_TEX_MAX] =
 	{
 		"../data/TEXTURE/UI/UI_Shell.png" ,
 		"../data/TEXTURE/UI/UI_Shell_Empty.png",

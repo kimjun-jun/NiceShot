@@ -33,13 +33,14 @@ public:
 	EFFECT();	//!< データ読み込み　初期化
 	~EFFECT();	//!< 削除
 
+	void		Init(void);					//!< 初期化
+	void		Update(void);				//!< 更新
+	void		Draw(int CntPlayer);		//!< 描画
+
 	//インスタンス作成と解放　＊解放に関してはタイマーで自動未使用になるので用意しない
 	int		SetInstance(D3DXVECTOR3 pos, D3DXVECTOR3 move, D3DXCOLOR col, float fSizeX, float fSizeY, int nTimer);	//!< インスタンスセット
 
 private:
-	void		Init(void);					//!< 初期化
-	void		Update(void);				//!< 更新
-	void		Draw(int CntPlayer);		//!< 描画
 
 
 	TEXTURE		tex;				//!< テクスチャ情報　複数使用するならここを配列化

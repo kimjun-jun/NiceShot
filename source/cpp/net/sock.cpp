@@ -558,8 +558,8 @@ void SendPacket(void)
 				sprintf_s(SMsg, "%s%s", SMsg, NewSMsg);
 			}
 		}
-		//モーフィング モーフィング信号ON(アタックモデルの時、常時ON)のときメッセージ送信。receive側は1を受け続ける。
-		if (SendObjectP->player[MyNum].GetMorphing == true)
+		//モーフィング モーフィング信号ON(アタックモデルの時、常時ON)メッセージ送信。receive側は1を受け続ける。
+		if (SendObjectP->player[MyNum].GetMorphing == true)NetGetMorphing
 		{
 			g_SendMsgBuff.Morphing = SendObjectP->player[MyNum].GetMorphing;
 			SendObjectP->player[MyNum].NetChkMorphing = true;
@@ -572,7 +572,7 @@ void SendPacket(void)
 
 		//---------------------------バレット
 		//バレットを発射していなと0,通常モデルの発射1,アタックモデルの発射3
-		switch (SendObjectP->player[MyNum].BFlag)
+		switch (SendObjectP->player[MyNum].NetBulletShotFlagOneFrame)
 		{
 		case 0:
 			break;

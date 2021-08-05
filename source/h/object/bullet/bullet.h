@@ -39,19 +39,21 @@ public:
 	BULLET();		//!< データ読み込み　初期化
 	~BULLET();		//!< 削除
 
-private:
 	void	Init(void);						//!< 初期化
 	void	Update(SHADOW *s, EFFECT *e);	//!< 更新
 	//void	Draw(void);						//!< 描画
 
+	TransForm	Transform[OBJECT_BULLET_MAX];		//!< トランスフォーム情報
+	iUseCheak	iUseType[OBJECT_BULLET_MAX];		//!< 使用情報
+	BULLET_PARAMETER	BulletPara[OBJECT_BULLET_MAX];	//!< インスタンスに必要なデータ群
+
 	int		SetInstance(D3DXVECTOR3 pos, D3DXVECTOR3 move, float fSizeX, float fSizeY, int nTimer, ePLAYER_TYPE type, SHADOW *s);	//!< インスタンスセット
 	void	ReleaseInstance(int nIdxBullet, SHADOW *s);	//!< インスタンス解放
 
-	TransForm	Transform[OBJECT_BULLET_MAX];		//!< トランスフォーム情報
-	iUseCheak	iUseType[OBJECT_BULLET_MAX];		//!< 使用情報
+private:
+
 	Movement	move[OBJECT_BULLET_MAX];			//!< 移動量
 
-	BULLET_PARAMETER	BulletPara[OBJECT_BULLET_MAX];	//!< インスタンスに必要なデータ群
 } ;
 
 

@@ -36,7 +36,7 @@ using namespace std;
 #include "../../h/net/netmatch.h"
 #include "../../h/net/sock.h"
 
-void SetOjama(int type, int UsePlayer, PLAYER_HONTAI *p);
+void SetOjama(int type, int UsePlayer, PLAYER *p);
 
 //マッチフラグ
 bool NetMatchFlag = false;
@@ -560,18 +560,6 @@ void VTXBuffer::Vertex3D(const int Indx, const float HalfSizeX, const float Half
 	}
 }
 
-//頂点[作成]時設定(3D)
-void VTXBuffer::MakeIdxVertex(const int VTXIdxNum)
-{
-	// オブジェクトのインデックスバッファを生成
-	GetDevice()->CreateIndexBuffer(VTXIdxNum,						// 頂点データ用に確保するバッファサイズ(バイト単位)
-		D3DUSAGE_WRITEONLY,													// 頂点バッファの使用法　
-		D3DFMT_INDEX16,														// 使用するインデックスフォーマット
-		D3DPOOL_MANAGED,													// リソースのバッファを保持するメモリクラスを指定
-		&this->pD3DIdxBuff,														// インデックスバッファインターフェースへのポインタ
-		NULL);
-}
-
 //頂点サイズの設定　左右上下対称 (2D)
 void VTXBuffer::Vertex2D(const int Indx, const float HalfSizeX, const float HalfSizeY)
 {
@@ -952,7 +940,7 @@ static D3DXCOLOR PLAYER_COLOR[] = {
 
 void GAME_OBJECT::Generate()
 {
-	player = new PLAYER_HONTAI;
+	player = new PLAYER;
 	effect = new EFFECT;
 	bullet = new BULLET;
 	shadow = new SHADOW;
@@ -1053,6 +1041,7 @@ void GAME_OBJECT::Update()
 	UpdateInput();
 #ifdef _DEBUG
 
+	//一時停止処理
 	//if (GetKeyboardTrigger(DIK_F12) || IsButtonTriggered(0, BUTTON_SELECT)) stop++;
 	//if (GetKeyboardTrigger(DIK_F11) || IsButtonTriggered(0, BUTTON_L3))
 	//{
@@ -1229,7 +1218,7 @@ void GAME_OBJECT::Draw()
 				pD3DDevice->SetViewport(&vp[CntPlayer]);
 				pD3DDevice->Clear(0, NULL, (D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER), D3DCOLOR_RGBA(200, 100, 100, 150), 1.0f, 0);
 
-				if (player[CntPlayer].KiriSignal == true) pD3DDevice->SetRenderState(D3DRS_FOGENABLE, TRUE); //フォグ：ON
+				if (player->PlayerPara[CntPlayer].ItemPara.KiriSignal == true) pD3DDevice->SetRenderState(D3DRS_FOGENABLE, TRUE); //フォグ：ON
 				else pD3DDevice->SetRenderState(D3DRS_FOGENABLE, FALSE); //フォグ：OFF
 
 				// カメラの設定
@@ -1293,10 +1282,10 @@ void GAME_OBJECT::Draw()
 				pD3DDevice->SetViewport(&vp[CntPlayer]);
 				pD3DDevice->Clear(0, NULL, (D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER), D3DCOLOR_RGBA(200, 100, 100, 150), 1.0f, 0);
 
-				bool puse = player[CntPlayer].Use();
+				bool puse = player->iUseType[CntPlayer].Use();
 				if (puse == true)
 				{
-					if (player[CntPlayer].KiriSignal == true) pD3DDevice->SetRenderState(D3DRS_FOGENABLE, TRUE); //フォグ：ON
+					if (player->PlayerPara[CntPlayer].ItemPara.KiriSignal == true) pD3DDevice->SetRenderState(D3DRS_FOGENABLE, TRUE); //フォグ：ON
 					else pD3DDevice->SetRenderState(D3DRS_FOGENABLE, FALSE); //フォグ：OFF
 
 					// カメラの設定
@@ -1385,10 +1374,10 @@ void GAME_OBJECT::Draw()
 		}
 		case SCENE_NETGAME:
 		{
-			bool puseNet = player[NetMyNumber].Use();
+			bool puseNet = player->iUseType[NetMyNumber].Use();
 			if (puseNet == true)
 			{
-				if (player[NetMyNumber].KiriSignal == true) pD3DDevice->SetRenderState(D3DRS_FOGENABLE, TRUE); //フォグ：ON
+				if (player->PlayerPara[NetMyNumber].ItemPara.KiriSignal == true) pD3DDevice->SetRenderState(D3DRS_FOGENABLE, TRUE); //フォグ：ON
 				else pD3DDevice->SetRenderState(D3DRS_FOGENABLE, FALSE); //フォグ：OFF
 
 				// カメラの設定
@@ -1476,21 +1465,21 @@ void GAME_OBJECT::CheakHit(int scene)
 	//プレイヤーに対する当たり判定
 	for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
 	{
-		bool puse = player[CntPlayer].Use();
+		bool puse = player->iUseType[CntPlayer].Use();
 		if (puse == true)
 		{
 			//オブジェクト値読み込み
-			D3DXVECTOR3 ppos = player[CntPlayer].Pos();
-			D3DXVECTOR3 poldpos = player[CntPlayer].OldPos();
+			D3DXVECTOR3 ppos = player->modelDraw[PLAYER_PARTS_TYPE_HOUDAI].Transform[CntPlayer].Pos();
+			D3DXVECTOR3 poldpos = player->modelDraw[PLAYER_PARTS_TYPE_HOUDAI].Transform[CntPlayer].OldPos();
 
 			//保存
-			player[CntPlayer].oldvital = player[CntPlayer].vital;
+			player->PlayerPara[CntPlayer].StandardPara.OldVital = player->PlayerPara[CntPlayer].StandardPara.Vital;
 
 			//プレイヤー対壁
-			for (int CntWall = 0; CntWall < 4; CntWall++)
+			for (int CntWall = 0; CntWall < OBJECT_WALL_MAX; CntWall++)
 			{
 
-				D3DXVECTOR3 wpos = wall[CntWall].Pos();
+				D3DXVECTOR3 wpos = wall->Transform[CntWall].Pos();
 				switch (CntWall)
 				{
 				case 0:
@@ -1509,37 +1498,37 @@ void GAME_OBJECT::CheakHit(int scene)
 					break;
 				}
 				//オブジェクト値書き込み
-				player[CntPlayer].Pos(ppos);
+				player->modelDraw[PLAYER_PARTS_TYPE_HOUDAI].Transform[CntPlayer].Pos(ppos);
 			}
 
 			//プレイヤーバレット対プレイヤー、壁、床
 			for (int CntPlayerBullet = 0; CntPlayerBullet < OBJECT_BULLET_MAX; CntPlayerBullet++)
 			{
 				//オブジェクト値読み込み
-				D3DXVECTOR3 bpos = bullet[CntPlayerBullet].Pos();
-				bool buse = bullet[CntPlayerBullet].Use();
+				D3DXVECTOR3 bpos = bullet->Transform[CntPlayerBullet].Pos();
+				bool buse = bullet->iUseType[CntPlayerBullet].Use();
 
 				if (buse == true)
 				{
 					//対プレイヤー
-					if (bullet[CntPlayerBullet].UsePlayerType != CntPlayer)
+					if (bullet->BulletPara[CntPlayerBullet].UsePlayerType != CntPlayer)
 					{
 						if (CollisionBC(ppos, PLAYER_MODEL_SIZE, bpos, BULLET_MODEL_SIZE))
 						{
 							// エフェクト爆発の生成
-							effect->SetEffect(bpos, D3DXVECTOR3(0.0f, 0.0f, 0.0f),
-								PLAYER_COLOR[bullet[CntPlayerBullet].UsePlayerType], 150.0f, 150.0f, 40);
+							effect->SetInstance(bpos, D3DXVECTOR3(0.0f, 0.0f, 0.0f),
+								PLAYER_COLOR[bullet->BulletPara[CntPlayerBullet].UsePlayerType], 150.0f, 150.0f, 40);
 							if (scene == 1)
 							{
-								player[CntPlayer].vital -= PLAYER_ATTACK_NORMAL;
+								player->PlayerPara[CntPlayer].StandardPara.Vital -= PLAYER_ATTACK_NORMAL;
 							}
 							//画面ダメージエフェクト
-							damege[CntPlayer].Use(true);
-							damege[CntPlayer].time = 0.0f;
-							damege[CntPlayer].alpha = 0;
+							damege->iUseType[CntPlayer].Use(true);
+							damege->DamegePara[CntPlayer].time = 0;
+							damege->DamegePara[CntPlayer].alpha = 0;
 
 							// バレット破棄
-							bullet[0].ReleaseBullet(CntPlayerBullet,shadow);
+							bullet->ReleaseInstance(CntPlayerBullet,shadow);
 
 							// SE再生
 							PlaySound(SOUND_LABEL_SE_attack02);
@@ -1549,9 +1538,10 @@ void GAME_OBJECT::CheakHit(int scene)
 					//対壁
 					for (int CntWall = 0; CntWall < OBJECT_WALL_MAX; CntWall++)
 					{
-						D3DXVECTOR3 wpos = wall[CntWall].Pos();
+						D3DXVECTOR3 wpos = wall->Transform[CntWall].Pos();
 						switch (CntWall)
 						{
+							//フラグ立てて、関数呼び出し書く数減らす
 						case 0:
 							if (bpos.z >= wpos.z)
 							{
@@ -1559,7 +1549,7 @@ void GAME_OBJECT::CheakHit(int scene)
 								//D3DXVECTOR3 ExploPos = D3DXVECTOR3(bpos.x, bpos.y, bpos.z- EXPLOSION_COLLISIONPOS_BUFFSIZE);
 								//SetExplosion(ExploPos, 40.0f, 40.0f, EXPLOSIONTYPE_BULLET_PLAYER, PLAYER_COLOR[b[CntPlayerBullet].UsePlayerType]);
 								// バレット破棄
-								bullet[0].ReleaseBullet(CntPlayerBullet, shadow);
+								bullet->ReleaseInstance(CntPlayerBullet, shadow);
 								// SE再生
 								//PlaySound(SOUND_LABEL_SE_damage);
 							}
@@ -1571,7 +1561,7 @@ void GAME_OBJECT::CheakHit(int scene)
 								//D3DXVECTOR3 ExploPos = D3DXVECTOR3(bpos.x + EXPLOSION_COLLISIONPOS_BUFFSIZE, bpos.y, bpos.z);
 								//SetExplosion(ExploPos, 40.0f, 40.0f, EXPLOSIONTYPE_BULLET_PLAYER, PLAYER_COLOR[b[CntPlayerBullet].UsePlayerType]);
 								// バレット破棄
-								bullet[0].ReleaseBullet(CntPlayerBullet, shadow);
+								bullet->ReleaseInstance(CntPlayerBullet, shadow);
 								// SE再生
 								//PlaySound(SOUND_LABEL_SE_damage);
 							}
@@ -1583,7 +1573,7 @@ void GAME_OBJECT::CheakHit(int scene)
 								//D3DXVECTOR3 ExploPos = D3DXVECTOR3(bpos.x - EXPLOSION_COLLISIONPOS_BUFFSIZE, bpos.y, bpos.z);
 								//SetExplosion(ExploPos, 40.0f, 40.0f, EXPLOSIONTYPE_BULLET_PLAYER, PLAYER_COLOR[b[CntPlayerBullet].UsePlayerType]);
 								// バレット破棄
-								bullet[0].ReleaseBullet(CntPlayerBullet, shadow);
+								bullet->ReleaseInstance(CntPlayerBullet, shadow);
 								// SE再生
 								//PlaySound(SOUND_LABEL_SE_damage);
 							}
@@ -1595,7 +1585,7 @@ void GAME_OBJECT::CheakHit(int scene)
 								//D3DXVECTOR3 ExploPos = D3DXVECTOR3(bpos.x, bpos.y, bpos.z + EXPLOSION_COLLISIONPOS_BUFFSIZE);
 								//SetExplosion(ExploPos, 40.0f, 40.0f, EXPLOSIONTYPE_BULLET_PLAYER, PLAYER_COLOR[b[CntPlayerBullet].UsePlayerType]);
 								// バレット破棄
-								bullet[0].ReleaseBullet(CntPlayerBullet, shadow);
+								bullet->ReleaseInstance(CntPlayerBullet, shadow);
 								// SE再生
 								//PlaySound(SOUND_LABEL_SE_damage);
 							}
@@ -1612,78 +1602,82 @@ void GAME_OBJECT::CheakHit(int scene)
 			for (int CntItem = 0; CntItem < OBJECT_ITEM_MAX; CntItem++)
 			{
 				//オブジェクト値読み込み
-				D3DXVECTOR3 ipos = item[CntItem].Pos();
-				bool iuse = item[CntItem].Use();
-				if (iuse == false || item[CntItem].GettingSignal == true || item[CntItem].GettingSignalEnd == true) continue;
+				D3DXVECTOR3 ipos = item->Transform[CntItem].Pos();
+				bool iuse = item->iUseType[CntItem].Use();
+				if (iuse == false || item->ItemParaAll[CntItem].GettingSignal == true || item->ItemParaAll[CntItem].GettingSignalEnd == true) continue;
 				if (CollisionBC(ppos, PLAYER_MODEL_SIZE, ipos, ITEM_MODEL_SIZE))
 				{
-					switch (item[CntItem].nType)
+					switch (item->ItemParaAll[CntItem].eType)
 					{
-					case ITEMTYPE_TIKEI:
+					case ITEM_TYPE_TIKEI:
+						//地形変形信号ON
 						if (NetGameStartFlag==true&& CntPlayer== NetMyNumber)
 						{
-							this[0].field->GetPlayerNum = CntPlayer;
+							this->field->FieldPara.ItemGetPlayerNum = CntPlayer;
 							//ランダム関数のseed値を決める
-							this[0].field->TikeiSeed = (rand() % 1000000);
+							this->field->FieldPara.TikeiSeed = (rand() % 1000000);
 							//通信しているときはこのシード値を同期させて、これをもとに同じ地形を生成する
 							//srand(this[0].field->TikeiSeed);
 							//NetSetTikeiSeed(this[0].field->TikeiSeed, this[0].field->GetPlayerNum);
 						}
 						else if(NetGameStartFlag == false)
 						{
-							field->SetFieldInterPolationFieldType(FIELD_TYPE_PLAYERADVANTAGE, CntPlayer, &item[0]);
+							this->field->SetFieldInterPolationFieldType(FIELD_TYPE_PLAYERADVANTAGE, CntPlayer, &item[0]);
 							//SetFieldInterPolationFieldType(0);
 							PlaySound(SOUND_LABEL_SE_enter03);
 							PlaySound(SOUND_LABEL_SE_quake);
 
 						}
 						break;
-					case ITEMTYPE_LIFE:
-						player[CntPlayer].vital += PLAYER_ATTACK_NORMAL;
-						if (player[CntPlayer].vital >= PLAYER_VITAL_MAX) player[CntPlayer].vital = PLAYER_VITAL_MAX;
+					case ITEM_TYPE_LIFE:
+						//体力回復
+						player->PlayerPara[CntPlayer].StandardPara.Vital += PLAYER_ATTACK_NORMAL;
+						if (player->PlayerPara[CntPlayer].StandardPara.Vital >= PLAYER_VITAL_MAX) player->PlayerPara[CntPlayer].StandardPara.Vital = PLAYER_VITAL_MAX;
 						PlaySound(SOUND_LABEL_SE_enter03);
 						break;
-					case ITEMTYPE_SENSYA:
-						if (player[CntPlayer].ModelType == PLAYER_MODEL_NORMAL)
+					case ITEM_TYPE_SENSYA:
+						//通常モデルならモーフィング信号ON
+						if (player->PlayerPara[CntPlayer].StandardPara.eModelType == PLAYER_MODEL_TYPE_NORMAL)
 						{
-							player[CntPlayer].Morphing = true;
-							player[CntPlayer].ModelType = PLAYER_MODEL_ATTACK;
-							player[CntPlayer].MorphingSignal = NowMorphing;
-							player[CntPlayer].time = 0.0f;
-							player[CntPlayer].MorphingTime = MORPHING_TIME;
+							//モーフィング開始信号、モデルタイプ、モーフィング中信号、モーフィング時間、モーフィング終了カウントのセット
+							player->PlayerPara[CntPlayer].MorphingPara.MorphingStart = true;
+							player->PlayerPara[CntPlayer].StandardPara.eModelType = PLAYER_MODEL_TYPE_ATTACK;
+							player->PlayerPara[CntPlayer].MorphingPara.MorphingSignal = NowMorphing;
+							player->PlayerPara[CntPlayer].MorphingPara.MorphingTime = MORPHING_TIME;
 						}
-						else if (player[CntPlayer].Morphing == false && player[CntPlayer].MorphingTime <= 0.0f)
+						//モーフィング終了変化中にアイテムを拾った時はもう一度モーフィングさせる
+						else if (player->PlayerPara[CntPlayer].MorphingPara.MorphingStart && player->PlayerPara[CntPlayer].MorphingPara.MorphingTime <= 0.0f)
 						{
-							player[CntPlayer].Morphing = true;
-							player[CntPlayer].ModelType = PLAYER_MODEL_ATTACK;
-							player[CntPlayer].MorphingSignal = NowMorphing;
-							player[CntPlayer].time = 0.0f;
-							player[CntPlayer].MorphingTime = MORPHING_TIME;
+							player->PlayerPara[CntPlayer].MorphingPara.MorphingStart = true;
+							player->PlayerPara[CntPlayer].StandardPara.eModelType = PLAYER_MODEL_TYPE_ATTACK;
+							player->PlayerPara[CntPlayer].MorphingPara.MorphingSignal = NowMorphing;
+							player->PlayerPara[CntPlayer].MorphingPara.MorphingTime = MORPHING_TIME;
 						}
+						//アタックモデル中にアイテム拾ったら時間延長
 						else
 						{
-							player[CntPlayer].MorphingTime = MORPHING_TIME;
+							player->PlayerPara[CntPlayer].MorphingPara.MorphingTime = MORPHING_TIME;
 						}
-						player[CntPlayer].GetMorphing = true;
+						player->PlayerPara[CntPlayer].MorphingPara.NetGetMorphingOneFrame = true;
 						PlaySound(SOUND_LABEL_SE_rap1);
 						break;
-					case ITEMTYPE_BULLET:
-						player[CntPlayer].AmmoCnt = PLAYER_AMMOPOWER_NORMAL;
-						player[CntPlayer].AmmoBornTime = 0.0f;
+					case ITEM_TYPE_BULLET:
+						player->PlayerPara[CntPlayer].BulletPara.BulletStock = BULLET_MAX_STOCK;
+						player->PlayerPara[CntPlayer].BulletPara.BulletBornTime = 0.0f;
 						PlaySound(SOUND_LABEL_SE_enter03);
 						break;
-					case ITEMTYPE_SPEEDUP:
-						player[CntPlayer].speedbuff = MAX_SPEEDBUFF;
-						player[CntPlayer].speedbufftime = MAX_SPEEDBUFFTIME;
-						player[CntPlayer].speedbuffsignal = true;
+					case ITEM_TYPE_SPEEDUP:
+						player->PlayerPara[CntPlayer].ItemPara.SpeedBuff = MAX_SPEEDBUFF;
+						player->PlayerPara[CntPlayer].ItemPara.SpeedBuffTime = MAX_SPEEDBUFFTIME;
+						player->PlayerPara[CntPlayer].ItemPara.SpeedBuffSignal = true;
 						PlaySound(SOUND_LABEL_SE_speed);
 						break;
-					case ITEMTYPE_CAMERA:
-						SetOjama(ITEMTYPE_CAMERA, CntPlayer, &player[0]);
+					case ITEM_TYPE_CAMERA:
+						SetOjama(ITEM_TYPE_CAMERA, CntPlayer, &player[0]);
 						PlaySound(SOUND_LABEL_SE_enter03);
 						break;
-					case ITEMTYPE_KIRI:
-						SetOjama(ITEMTYPE_KIRI, CntPlayer, &player[0]);
+					case ITEM_TYPE_KIRI:
+						SetOjama(ITEM_TYPE_KIRI, CntPlayer, &player[0]);
 						PlaySound(SOUND_LABEL_SE_kiri);
 						break;
 					default:
@@ -1691,95 +1685,37 @@ void GAME_OBJECT::CheakHit(int scene)
 						break;
 					}
 					PlaySound(SOUND_LABEL_SE_kurukuru);
-					item[CntItem].GettingSignal = true;
-					item[CntItem].GetPlayerType = CntPlayer;
-					item[CntItem].NetGetItemFlag = true;
+					item->ItemParaAll[CntItem].GettingSignal = true;
+					item->ItemParaAll[CntItem].GetPlayerType = CntPlayer;
+					item->ItemParaAll[CntItem].NetGetItemFlag = true;
 				}
 			}
 		}
 	}
 }
 
-void SetOjama(int type, int UsePlayer, PLAYER_HONTAI *p)
+void SetOjama(int type, int UsePlayer, PLAYER *p)
 {
-	if (type == ITEMTYPE_CAMERA)
+	//カメラ反転
+	if (type == ITEM_TYPE_CAMERA)
 	{
-		switch (UsePlayer)
+		//対象プレイヤーのみカメラ反転
+		for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
 		{
-		case 0:
-			p[1].BackCameraItemSignal = true;
-			p[1].BackCameraItemTime = 0.0f;
-			p[2].BackCameraItemSignal = true;
-			p[2].BackCameraItemTime = 0.0f;
-			p[3].BackCameraItemSignal = true;
-			p[3].BackCameraItemTime = 0.0f;
-			break;
-		case 1:
-			p[0].BackCameraItemSignal = true;
-			p[0].BackCameraItemTime = 0.0f;
-			p[2].BackCameraItemSignal = true;
-			p[2].BackCameraItemTime = 0.0f;
-			p[3].BackCameraItemSignal = true;
-			p[3].BackCameraItemTime = 0.0f;
-			break;
-		case 2:
-			p[0].BackCameraItemSignal = true;
-			p[0].BackCameraItemTime = 0.0f;
-			p[1].BackCameraItemSignal = true;
-			p[1].BackCameraItemTime = 0.0f;
-			p[3].BackCameraItemSignal = true;
-			p[3].BackCameraItemTime = 0.0f;
-			break;
-		case 3:
-			p[0].BackCameraItemSignal = true;
-			p[0].BackCameraItemTime = 0.0f;
-			p[1].BackCameraItemSignal = true;
-			p[1].BackCameraItemTime = 0.0f;
-			p[2].BackCameraItemSignal = true;
-			p[2].BackCameraItemTime = 0.0f;
-			break;
-		default:
-			break;
+			if (UsePlayer == CntPlayer) continue;
+			p[CntPlayer].PlayerPara->ItemPara.BackCameraItemSignal = true;
+			p[CntPlayer].PlayerPara->ItemPara.BackCameraTime = 0.0f;
 		}
 	}
-	else if (type == ITEMTYPE_KIRI)
+	//フォグ
+	else if (type == ITEM_TYPE_KIRI)
 	{
-		switch (UsePlayer)
+		//対象プレイヤーのみフォグ発動
+		for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
 		{
-		case 0:
-			p[1].KiriSignal = true;
-			p[1].KiriItemTime = 0.0f;
-			p[2].KiriSignal = true;
-			p[2].KiriItemTime = 0.0f;
-			p[3].KiriSignal = true;
-			p[3].KiriItemTime = 0.0f;
-			break;
-		case 1:
-			p[0].KiriSignal = true;
-			p[0].KiriItemTime = 0.0f;
-			p[2].KiriSignal = true;
-			p[2].KiriItemTime = 0.0f;
-			p[3].KiriSignal = true;
-			p[3].KiriItemTime = 0.0f;
-			break;
-		case 2:
-			p[0].KiriSignal = true;
-			p[0].KiriItemTime = 0.0f;
-			p[1].KiriSignal = true;
-			p[1].KiriItemTime = 0.0f;
-			p[3].KiriSignal = true;
-			p[3].KiriItemTime = 0.0f;
-			break;
-		case 3:
-			p[0].KiriSignal = true;
-			p[0].KiriItemTime = 0.0f;
-			p[1].KiriSignal = true;
-			p[1].KiriItemTime = 0.0f;
-			p[2].KiriSignal = true;
-			p[2].KiriItemTime = 0.0f;
-			break;
-		default:
-			break;
+			if (UsePlayer == CntPlayer) continue;
+			p[CntPlayer].PlayerPara->ItemPara.KiriSignal = true;
+			p[CntPlayer].PlayerPara->ItemPara.KiriTime = 0.0f;
 		}
 	}
 }

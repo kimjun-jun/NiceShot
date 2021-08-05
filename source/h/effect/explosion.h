@@ -57,10 +57,11 @@ public:
 
 	int	SetInstance(D3DXVECTOR3 pos, float fSizeX, float fSizeY, eEXPLOSION_TYPE eType, D3DXCOLOR col);	//!< インスタンスセット
 
-private:
 	void		Init(void);					//!< 初期化
 	void		Update(void);				//!< 更新
 	void		Draw(int CntPlayer);		//!< 描画
+
+private:
 
 
 	TEXTURE		tex;	//!< テクスチャ情報　複数使用するならここを配列化

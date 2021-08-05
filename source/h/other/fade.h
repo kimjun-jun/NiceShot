@@ -46,12 +46,13 @@ public:
 	FADE();		//!< データ読み込み　初期化
 	~FADE();	//!< 削除
 
-	void		SetFade(FADE_TYPE fade, E_STAGE next, int sno);		//フェード効果セット
-
-private:
 	void		Init(void);						//!< 初期化
 	void		Update(GAME_OBJECT*obj);		//!< 更新
 	void		Draw(void);						//!< 描画
+
+	void		SetFade(FADE_TYPE fade, E_STAGE next, int sno);		//フェード効果セット
+
+private:
 
 	VTXBuffer	vtx;							//!< 頂点情報　複数使用するならここを配列化
 	FADE_PARAMETER	FadePara;					//!< マネージャーに必要なデータ群

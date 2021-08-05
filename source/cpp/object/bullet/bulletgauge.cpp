@@ -60,7 +60,7 @@ BULLETGAUGE::BULLETGAUGE(void)
 	for (int CntBulletGauge = 0; CntBulletGauge < OBJECT_BULLETGAUGE_MAX; CntBulletGauge++)
 	{
 		//ベース座標取得
-		D3DXVECTOR3 pos = this->Transform[CntBulletGauge].Pos;
+		D3DXVECTOR3 pos = this->Transform[CntBulletGauge].Pos();
 		//カウントループ 弾数
 		for (int CntAmmoStock = 0; CntAmmoStock < PLAYER_AMMOSTOCK*2; CntAmmoStock++)
 		{
@@ -168,13 +168,13 @@ void BULLETGAUGE::ReinitNet(int MyNumber)
 //=============================================================================
 // 更新処理
 //=============================================================================
-void BULLETGAUGE::Update(PLAYER_HONTAI *player)
+void BULLETGAUGE::Update(PLAYER *player)
 {
 	//カウントループ プレイヤー数(バレットゲージ数)
 	for (int CntBulletGauge = 0; CntBulletGauge < OBJECT_BULLETGAUGE_MAX; CntBulletGauge++)
 	{
 		//プレイヤーの弾数を記録
-		this->BulletGaugePara[CntBulletGauge].AmmoStock = player->PlayerPara[CntBulletGauge].AmmoStock;
+		this->BulletGaugePara[CntBulletGauge].AmmoStock = player->PlayerPara[CntBulletGauge].BulletPara.BulletStock;
 	}
 }
 
@@ -189,7 +189,7 @@ void BULLETGAUGE::Draw(bool Netflag, int NetMyNumber, int CntPlayer)
 	if (Netflag == false)
 	{
 		// 頂点バッファをデバイスのデータストリームにバインド
-		pDevice->SetStreamSource(0, *this->vtx[CntPlayer].VtxBuff(), 0, sizeof(VERTEX_2D));
+		pDevice->SetStreamSource(0, this->vtx[CntPlayer].VtxBuff(), 0, sizeof(VERTEX_2D));
 		// 頂点フォーマットの設定
 		pDevice->SetFVF(FVF_VERTEX_2D);
 		//カウントループ　枠の数
@@ -213,7 +213,7 @@ void BULLETGAUGE::Draw(bool Netflag, int NetMyNumber, int CntPlayer)
 	else
 	{
 		// 頂点バッファをデバイスのデータストリームにバインド
-		pDevice->SetStreamSource(0, *this->vtx[NetMyNumber].VtxBuff(), 0, sizeof(VERTEX_2D));
+		pDevice->SetStreamSource(0, this->vtx[NetMyNumber].VtxBuff(), 0, sizeof(VERTEX_2D));
 		// 頂点フォーマットの設定
 		pDevice->SetFVF(FVF_VERTEX_2D);
 		//カウントループ　枠の数

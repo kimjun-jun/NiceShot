@@ -104,7 +104,7 @@ void RESULT::Draw(void)
 	for (int CntResult = 0; CntResult < OBJECT_RESULT_MAX; CntResult++)
 	{
 		// 頂点バッファをデバイスのデータストリームにバインド
-		pDevice->SetStreamSource(0, *this->vtx.VtxBuff(), 0, sizeof(VERTEX_2D));
+		pDevice->SetStreamSource(0, this->vtx.VtxBuff(), 0, sizeof(VERTEX_2D));
 		// 頂点フォーマットの設定
 		pDevice->SetFVF(FVF_VERTEX_2D);
 		// テクスチャの設定　テクスチャが複数ならtexを配列化して選択させるように

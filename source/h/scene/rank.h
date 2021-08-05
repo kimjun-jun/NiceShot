@@ -44,6 +44,7 @@ class RANK : public GAME_OBJECT
 public:
 	RANK();		//!< データ読み込み　初期化
 	~RANK();	//!< 削除
+
 	void		Init(void);				//!< 初期化
 	//void		Update(void);			//!< 更新
 	void		Draw(bool Netflag);		//!< 描画

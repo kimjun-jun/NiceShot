@@ -63,15 +63,7 @@ using namespace std;
 #define	POLYGON_2D_VERTEX			(4)																					//!< 頂点数
 #define	POLYGON_2D_NUM				(2)																					//!< ポリゴン数
 																														
-//画像の参照名																											
-#define	TEXTURE_MEISAI				"../data/MODEL/28513607_p4_master1200.jpg"											//!< 読み込むテクスチャファイル名
 																													
-//モデルの参照																										
-#define	MODEL_HOUDAI				"../data/MODEL/PlayerSensyaHoudai.x"												//!< 読み込むモデル名
-#define	MODEL_HOUTOU				"../data/MODEL/PlayerSensyaHoutou.x"												//!< 読み込むモデル名
-#define	MODEL_HOUSIN				"../data/MODEL/PlayerSensyaHousin.x"												//!< 読み込むモデル名
-#define	MODEL_HOUSINMO				"../data/MODEL/PlayerSensyaHousinMo.x"												//!< 読み込むモデル名
-#define	MODEL_BULLETPOS				"../data/MODEL/PlayerSensyaBulletPos.x"												//!< 読み込むモデル名
 
 //キャラクターなどのパラメータ
 #define PLAYER_VITAL_MAX					(200)																		//!< プレイヤー体力
@@ -168,8 +160,6 @@ enum eOBJECT_COUNT
 #define	BULLETTEX_POS_Y						(LIFETEX_POS_Y+LIFETEX_SIZE_Y)												//!< ライフの表示基準位置Ｙ座標
 #define	EXPLOSION_COLLISIONPOS_BUFFSIZE		(5.0f)																		//!< 2D爆破を壁に当たった時の描画する座標を調整
 
-#define BORN_AMMO_ADDTIME					(1.0f)																		//!< 弾薬復活させるための加算タイム
-#define BORN_AMMO_MAXTIME					(120.0f)																	//!< 1弾薬復活するのに必要なタイム
 #define MORPHING_TIME						(300.0f)																	//!< モーフィングアイテム有効時間
 #define BACKCAMERA_TIME						(150.0f)																	//!< バックカメラアイテム有効時間
 #define KIRI_TIME							(150.0f)																	//!< フォグ霧アイテムの有効時間
@@ -181,6 +171,8 @@ enum eOBJECT_COUNT
 #define VEC3_ALL0						D3DXVECTOR3(0.0f,0.0f,0.0f)		//!< 頻出文字列を短く
 #define VEC3_ALL1						D3DXVECTOR3(1.0f,1.0f,1.0f)		//!< 頻出文字列を短く
 
+
+#define BULLET_MAX_STOCK			(10)				//!< 1弾薬復活するのに必要なタイム
 
 
 /**
@@ -266,9 +258,25 @@ enum ePLAYER_TYPE
  */
 enum ePLAYER_MODEL_TYPE
 {
-	PLAYER_MODEL_NORMAL,
-	PLAYER_MODEL_ATTACK
+	PLAYER_MODEL_TYPE_NORMAL,
+	PLAYER_MODEL_TYPE_ATTACK,
+	PLAYER_MODEL_TYPE_MAX,
 };
+
+
+/**
+ * @enum PLAYER_MODEL_NUM
+ * モデルタイプ定数
+ */
+//num PLAYER_MODEL_NUM
+//
+//	PLAYER_MODEL_NUM_HOUDAI,
+//	PLAYER_MODEL_NUM_HOUTOU,
+//	PLAYER_MODEL_NUM_HOUSIN,
+//	PLAYER_MODEL_NUM_HOUSIN_MORPHING,
+//	PLAYER_MODEL_NUM_MAX,
+//;
+
 
 /**
  * @enum ITEMTYPE
@@ -276,15 +284,15 @@ enum ePLAYER_MODEL_TYPE
  */
 enum eITEM_TYPE
 {
-	ITEMTYPE_NONE = -1,		//!< 未設定
-	ITEMTYPE_TIKEI,			//!< 地形
-	ITEMTYPE_LIFE,			//!< ライフ
-	ITEMTYPE_SENSYA,		//!< 戦車
-	ITEMTYPE_BULLET,		//!< バレット
-	ITEMTYPE_SPEEDUP,		//!< スピードアップ
-	ITEMTYPE_CAMERA,		//!< お邪魔アイテム　強制バックカメラ
-	ITEMTYPE_KIRI,			//!< お邪魔アイテム　霧
-	ITEMTYPE_MAX
+	ITEM_TYPE_NONE = -1,		//!< 未設定
+	ITEM_TYPE_TIKEI,			//!< 地形
+	ITEM_TYPE_LIFE,			//!< ライフ
+	ITEM_TYPE_SENSYA,		//!< 戦車
+	ITEM_TYPE_BULLET,		//!< バレット
+	ITEM_TYPE_SPEEDUP,		//!< スピードアップ
+	ITEM_TYPE_CAMERA,		//!< お邪魔アイテム　強制バックカメラ
+	ITEM_TYPE_KIRI,			//!< お邪魔アイテム　霧
+	ITEM_TYPE_MAX
 };
 
 /**
@@ -293,11 +301,11 @@ enum eITEM_TYPE
  */
 enum eSTATUS_TYPE
 {
-	STATUSTYPE_SPEED = 0,		//!< スピードアップ状態
-	STATUSTYPE_SENSYA,			//!< 戦車強化状態
-	STATUSTYPE_CAMERA,			//!< バックカメラ状態
-	STATUSTYPE_KIRI,			//!< もやもや状態
-	STATUSTYPE_MAX
+	STATUS_TYPE_SPEED = 0,		//!< スピードアップ状態
+	STATUS_TYPE_SENSYA,			//!< 戦車強化状態
+	STATUS_TYPE_CAMERA,			//!< バックカメラ状態
+	STATUS_TYPE_KIRI,			//!< もやもや状態
+	STATUS_TYPE_MAX
 };
 
 //*****************************************************************************

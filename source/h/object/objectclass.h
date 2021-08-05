@@ -17,7 +17,7 @@ void SetNetGameStartFlag(bool flag);
 void SetNetShareDateFlag(bool flag);
 bool GetNetShareDateFlag(void);
 
-class PLAYER_HONTAI;
+class PLAYER;
 class EFFECT;
 class BULLET;
 class SHADOW;
@@ -73,6 +73,9 @@ public:
 	virtual void Update();		//更新
 	virtual void Draw();		//描画
 
+	void Generate();			//メモリ確保　データ読み込み　初期化
+	void Delete();				//メモリ解放
+
 	//scene変更関数
 	inline void SetScene(int Scene){ nScene = Scene;}
 	inline int GetScene(void){	return nScene;}
@@ -81,9 +84,8 @@ public:
 	inline void CreateInstanceOBJ() { AllOBJCnt++; }
 	inline void DeleteInstanceOBJ() { AllOBJCnt--; }
 
+
 private:
-	void Generate();			//メモリ確保　データ読み込み　初期化
-	void Delete();				//メモリ解放
 
 	//処理の一時停止フラグ
 	inline void SetStop(int Flag) { stop = Flag; }
@@ -92,7 +94,7 @@ private:
 	//当たり判定
 	void CheakHit(int scene);
 
-	PLAYER_HONTAI *player;
+	PLAYER *player;
 	EFFECT *effect;
 	BULLET *bullet;
 	SHADOW *shadow;
@@ -264,14 +266,14 @@ public:
 	FieldNor() { FNVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f); FNUNCross = D3DXVECTOR3(0.0f, 0.0f, 0.0f); Qrot = 0.0f; }
 	~FieldNor() {}
 	//------------------------get関数
-	inline D3DXVECTOR3 FNVec() const { return this->FNVec; };				//!< くおの時に使う地形の法線ベクトル
-	inline D3DXVECTOR3 FNUNCross() const { return this->FNUNCross; };		//!< 地形法線とプレイヤーUpベクトルの外積値
-	inline float Qrot() const { return this->Qrot; };						//!< Upベクトルから地形法線への回転角度
+	inline D3DXVECTOR3 FNVecFunc() const { return this->FNVec; };				//!< クォータニオンで使う地形の法線ベクトル
+	inline D3DXVECTOR3 FNUNCrossFunc() const { return this->FNUNCross; };		//!< 地形法線とプレイヤーUpベクトルの外積値
+	inline float QrotFunc() const { return this->Qrot; };						//!< Upベクトルから地形法線への回転角度
 
 	//------------------------set関数
-	inline void FNVec(const D3DXVECTOR3 FieldNorVec) { this->FNVec = FieldNorVec; };						//!< くおの時に使う地形の法線ベクトル
-	inline void FNUNCross(const D3DXVECTOR3 FieldNorUpNorCross) { this->FNUNCross = FieldNorUpNorCross; }  //!< 地形法線とプレイヤーUpベクトルの外積値
-	inline void Qrot(const float Qrot) { this->Qrot = Qrot; };												//!< Upベクトルから地形法線への回転角度
+	inline void FNVecFunc(const D3DXVECTOR3 FieldNorVec) { this->FNVec = FieldNorVec; };						//!< クォータニオンで使う地形の法線ベクトル
+	inline void FNUNCrossFunc(const D3DXVECTOR3 FieldNorUpNorCross) { this->FNUNCross = FieldNorUpNorCross; }  //!< 地形法線とプレイヤーUpベクトルの外積値
+	inline void QrotFunc(const float Qrot) { this->Qrot = Qrot; };												//!< Upベクトルから地形法線への回転角度
 };
 
 /**
@@ -302,9 +304,9 @@ public:
 
 private:
 	D3DXVECTOR3		pos;				//!< 位置
-	D3DXVECTOR3		oldpos;				//!< 前回の位置
+	D3DXVECTOR3		oldpos;				//!< 前フレームの位置
 	D3DXVECTOR3		rot;				//!< 向き(回転)
-	D3DXVECTOR3		oldrot;				//!< 前回の向き(回転)
+	D3DXVECTOR3		oldrot;				//!< 前フレームの向き(回転)
 	D3DXVECTOR3		scl;				//!< 大きさ(スケール)
 
 };
@@ -403,9 +405,9 @@ public:
 
 	//------------------------バッファ群
 	//------------------------get関数
-	inline LPDIRECT3DVERTEXBUFFER9 *VtxBuff(void) { return &pD3DVtxBuff; };
+	inline LPDIRECT3DVERTEXBUFFER9 VtxBuff(void) { return pD3DVtxBuff; };
 	//inline LPDIRECT3DVERTEXBUFFER9 *VtxBuff(int pHeadNum) { return &pD3DVtxBuff[pHeadNum]; };
-	inline LPDIRECT3DINDEXBUFFER9 *IdxBuff(void) { return &pD3DIdxBuff; };
+	inline LPDIRECT3DINDEXBUFFER9 IdxBuff(void) { return pD3DIdxBuff; };
 	//inline LPDIRECT3DINDEXBUFFER9 *IdxBuff(int pHeadNum) { return &pD3DIdxBuff[pHeadNum]; };
 
 	//------------------------set関数
@@ -431,18 +433,18 @@ public:
 	~ModelAttribute() { SAFE_RELEASE(pD3DXBuffMat);}
 
 	//------------------------get関数
-	inline LPD3DXBUFFER *GetMat() { return &pD3DXBuffMat; };
-	inline DWORD GetNumMat() const { return nNumMat; };
-	inline DWORD GetNumVertex() const { return nNumVertex; };
-	inline DWORD GetNumVertexIndex() const { return nNumVertexIndex; };
-	inline DWORD GetNumPolygon() const { return nNumPolygon; };
+	inline LPD3DXBUFFER *Mat() { return &pD3DXBuffMat; };
+	inline DWORD NumMat() const { return nNumMat; };
+	inline DWORD NumVertex() const { return nNumVertex; };
+	inline DWORD NumVertexIndex() const { return nNumVertexIndex; };
+	inline DWORD NumPolygon() const { return nNumPolygon; };
 
 	//------------------------set関数
-	inline void SetMat(const LPD3DXBUFFER buffmat) { pD3DXBuffMat = buffmat; };
-	inline void SetNumMat(DWORD nummat) { nNumMat = nummat; };
-	inline void SetNumVertex(DWORD numvtx) { nNumVertex = numvtx; };
-	inline void SetNumVertexIndex(DWORD numidx) { nNumVertexIndex = numidx; };
-	inline void SetNumPolygon(DWORD numpoly) { nNumPolygon = numpoly; };
+	inline void Mat(const LPD3DXBUFFER buffmat) { pD3DXBuffMat = buffmat; };
+	inline void NumMat(DWORD nummat) { nNumMat = nummat; };
+	inline void NumVertex(DWORD numvtx) { nNumVertex = numvtx; };
+	inline void NumVertexIndex(DWORD numidx) { nNumVertexIndex = numidx; };
+	inline void NumPolygon(DWORD numpoly) { nNumPolygon = numpoly; };
 
 private:
 	LPD3DXBUFFER				pD3DXBuffMat;			//!< マテリアル情報へのポインタ

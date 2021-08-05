@@ -6,7 +6,6 @@
 */
 #pragma once
 
-
 /**
 *　@class TUTO
 *　@brief GAMEOBJECT派生クラス
@@ -17,10 +16,11 @@ public:
 	TUTO();		//!< データ読み込み　初期化
 	~TUTO();	//!< 削除
 
-private:
 	void	Init(void);								//!< 初期化
 	void	Update(GAME_OBJECT* obj, FADE *fade);	//!< 更新
 	void	Draw(void);								//!< 描画
+
+private:
 
 	TEXTURE		tex;								//!< テクスチャ情報　複数使用するならここを配列化
 	VTXBuffer	vtx;								//!< 頂点情報　複数使用するならここを配列化

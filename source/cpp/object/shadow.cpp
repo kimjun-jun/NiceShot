@@ -127,7 +127,7 @@ void SHADOW::Draw(void)
 			pDevice->SetTransform(D3DTS_WORLD, &mtxWorld);
 
 			// 頂点バッファをレンダリングパイプラインに設定
-			pDevice->SetStreamSource(0,*this->vtx.VtxBuff(), 0, sizeof(VERTEX_3D));
+			pDevice->SetStreamSource(0,this->vtx.VtxBuff(), 0, sizeof(VERTEX_3D));
 
 			// 頂点フォーマットの設定
 			pDevice->SetFVF(FVF_VERTEX_3D);

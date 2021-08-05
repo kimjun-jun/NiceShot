@@ -26,7 +26,7 @@ enum COUNTDOWN_TEX_TYPE
 class COUNTDOWN_PARAMETER
 {
 public:
-	COUNTDOWN_PARAMETER() { color = 0.0f; CountAnim = 0; PatternAnim = 0; changeval = 0;  time_maneger = 0; fps_maneger = 0; CountEnd = false }
+	COUNTDOWN_PARAMETER() { color = 0.0f; CountAnim = 0; PatternAnim = 0; changeval = 0;  time_maneger = 0; fps_maneger = 0; CountEnd = false; }
 	~COUNTDOWN_PARAMETER() {}
 	float		color;				//!< カラー値(今回はアルファ値として使用)
 	int			CountAnim;			//!< アニメカウント
@@ -47,12 +47,13 @@ public:
 	COUNTDOWN();	//!< データ読み込み　初期化
 	~COUNTDOWN();	//!< 削除
 
-	void		AddCountdown(int val);		//!< タイマーカウントを反映させる
-
-private:
 	void		Init(void);				//!< 初期化
 	void		Update(GAME_OBJECT*obj, bool Netflag);	//!< 更新
 	void		Draw(void);				//!< 描画
+
+	void		AddCountdown(int val);		//!< タイマーカウントを反映させる
+
+private:
 
 	void		NumberCountUpdate();	//!< カウントダウン数値の更新
 	void		NumberSizeUpdate();		//!< カウントダウンのスケール更新

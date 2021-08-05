@@ -42,7 +42,7 @@ TUTO::TUTO(void)
 	for (int CntTuto = 0; CntTuto < OBJECT_PLAYER_MAX*OBJECT_TUTORIAL_MAX; CntTuto++)
 	{
 		//描画位置反映
-		D3DXVECTOR3 pos = this->Transform[CntTuto].Pos;
+		D3DXVECTOR3 pos = this->Transform[CntTuto].Pos();
 		this->vtx.Vertex2D(CntTuto, TUTORIAL_SIZE_X / 2, TUTORIAL_SIZE_Y / 2, pos);
 
 		//RHW設定
@@ -125,10 +125,10 @@ void TUTO::Draw(void)
 	for (int CntTuto = 0; CntTuto < OBJECT_PLAYER_MAX*OBJECT_TUTORIAL_MAX; CntTuto++)
 	{
 		//描画判定　
-		if (this->iUseType[CntTuto].Use()== YesUseType1);
+		if (this->iUseType[CntTuto].Use()== YesUseType1)
 		{
 			// 頂点バッファをデバイスのデータストリームにバインド
-			pDevice->SetStreamSource(0, *this->vtx.VtxBuff(), 0, sizeof(VERTEX_2D));
+			pDevice->SetStreamSource(0, this->vtx.VtxBuff(), 0, sizeof(VERTEX_2D));
 			// 頂点フォーマットの設定
 			pDevice->SetFVF(FVF_VERTEX_2D);
 			// テクスチャの設定　テクスチャが複数ならtexを配列化して選択させるように

@@ -17,9 +17,6 @@
 //エフェクト関連定数
 #define	EFFECT_NORMALSET_SIZE_X				(16.0f)			//!< エフェクト標準の幅
 #define	EFFECT_NORMALSET_SIZE_Y				(16.0f)			//!< エフェクト標準の高さ
-#define	EFFECT_SPEEDUP_SIZE_X				(25.0f)			//!< エフェクトスピードアップの幅
-#define	EFFECT_SPEEDUP_SIZE_Y				(10.0f)			//!< エフェクトスピードアップの高さ
-#define	EFFECT_SPEEDUP_TIME					(10)			//!< エフェクトスピードアップの生存時間
 
 
 //=============================================================================
@@ -192,7 +189,7 @@ void  EFFECT::Draw(int CntPlayer)
 			pDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
 
 			// 頂点バッファをデバイスのデータストリームにバインド
-			pDevice->SetStreamSource(0, *this->vtx.VtxBuff(), 0, sizeof(VERTEX_3D));
+			pDevice->SetStreamSource(0, this->vtx.VtxBuff(), 0, sizeof(VERTEX_3D));
 
 			// 頂点フォーマットの設定
 			pDevice->SetFVF(FVF_VERTEX_3D);

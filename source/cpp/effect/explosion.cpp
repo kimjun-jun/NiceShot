@@ -193,7 +193,7 @@ void EXPLOSION::Draw(int CntPlayer)
 				pDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
 
 				// 頂点バッファをデバイスのデータストリームにバインド
-				pDevice->SetStreamSource(0, *this->vtx.VtxBuff(), 0, sizeof(VERTEX_3D));
+				pDevice->SetStreamSource(0, this->vtx.VtxBuff(), 0, sizeof(VERTEX_3D));
 
 				// 頂点フォーマットの設定
 				pDevice->SetFVF(FVF_VERTEX_3D);

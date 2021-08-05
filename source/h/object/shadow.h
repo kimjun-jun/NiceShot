@@ -20,14 +20,15 @@ public:
 	SHADOW();	//!< データ読み込み　初期化
 	~SHADOW();	//!< 削除
 
+	void		Init(void);		//!< 初期化
+	//void		Update(void);	//!< 更新
+	void		Draw(void);		//!< 描画
+
 	int			SetInstance(D3DXVECTOR3 pos, D3DXVECTOR3 scl);	//!< インスタンスセット
 	void		ReleaseInstance(int Idx);				//!< インスタンス解放
 	void		UpdateInstance(int Idx, D3DXVECTOR3 pos, D3DXVECTOR3 rot, D3DXVECTOR3 scl);	//インスタンスアップデート　各インスタンス毎に任意呼び出し
 
 private:
-	void		Init(void);		//!< 初期化
-	//void		Update(void);	//!< 更新
-	void		Draw(void);		//!< 描画
 
 	TEXTURE		tex;			//!< テクスチャ情報　複数使用するならここを配列化
 	VTXBuffer	vtx;			//!< 頂点情報　複数使用するならここを配列化

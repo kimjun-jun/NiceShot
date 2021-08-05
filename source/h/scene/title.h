@@ -41,11 +41,11 @@ public:
 	TITLE();	//!< データ読み込み　初期化
 	~TITLE();	//!< 削除
 
-private:
 	void	Init(void);								//!< 初期化
 	void	Update(GAME_OBJECT* obj, FADE *fade);	//!< 更新
 	void	Draw(void);								//!< 描画
 
+private:
 	void	ChangeHierarchy(int NextHierarchyType);	//!< 階層切り替え
 	void	CheckScene(FADE *fade);						//!< シーンチェック
 

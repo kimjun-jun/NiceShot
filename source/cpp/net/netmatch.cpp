@@ -20,38 +20,59 @@
 #define	NETMATCHRIAL_POS_Y			(SCREEN_CENTER_Y)									//!< チュートリアルの表示位置
 
 //=============================================================================
-// 初期化処理
+// コンストラクタ　「読み込み」「初期化」
+//=============================================================================
+NETMATCH::NETMATCH(void)
+{
+	//オブジェクトカウントアップ
+	this->CreateInstanceOBJ();
+
+	//頂点の作成
+	this->vtx.MakeVertex2D(1, FVF_VERTEX_2D);
+
+	//描画位置設定
+	this->Transform.Pos(D3DXVECTOR3(NETMATCHRIAL_POS_X - NETMATCHRIAL_SIZE_X, NETMATCHRIAL_POS_Y - NETMATCHRIAL_SIZE_Y, 0.0f));
+
+	//描画位置反映
+	D3DXVECTOR3 pos = this->Transform.Pos();
+	this->vtx.Vertex2D(0, NETMATCHRIAL_SIZE_X / 2, NETMATCHRIAL_SIZE_Y / 2, pos);
+
+	//RHW設定
+	this->vtx.RHW2D(0);
+
+	//UV設定
+	this->vtx.UV2D(0);
+
+	//カラー設定
+	this->vtx.Color2D(0, D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
+
+	// テクスチャの読み込み
+	this->tex.LoadTexture(TEXTURE_NETMATCHRIAL);
+}
+
+//=============================================================================
+// デストラクタ　削除
+//=============================================================================
+NETMATCH::~NETMATCH(void)
+{
+	//テクスチャ解放
+	this->tex.~TEXTURE();
+	//頂点解放
+	this->vtx.~VTXBuffer();
+	//オブジェクトカウントダウン
+	this->DeleteInstanceOBJ();
+}
+
+//=============================================================================
+// 初期化
 //=============================================================================
 void NETMATCH::Init(void)
 {
-	LPDIRECT3DDEVICE9 pDevice = GetDevice();
-	for (int CntTuto = 0; CntTuto < OBJECT_NETMATCH_MAX; CntTuto++)
-	{
-		D3DXCreateTextureFromFile(pDevice, TEXTURE_NETMATCHRIAL, &this[CntTuto].tex2D.pD3DTexture);
-	}
 
-	//描画位置設定
-	this[0].Pos(D3DXVECTOR3(NETMATCHRIAL_POS_X - NETMATCHRIAL_SIZE_X, NETMATCHRIAL_POS_Y - NETMATCHRIAL_SIZE_Y, 0.0f));
-	// 頂点情報の作成
-	MakeVertexTutorial();
 }
 
 //=============================================================================
-// 再初期化処理
-//=============================================================================
-void NETMATCH::Reinit(void)
-{
-}
-
-//=============================================================================
-// 終了処理
-//=============================================================================
-void NETMATCH::Uninit(void)
-{
-}
-
-//=============================================================================
-// 更新処理
+// 更新
 //=============================================================================
 void NETMATCH::Update(GAME_OBJECT* obj, FADE *fade)
 {
@@ -59,53 +80,17 @@ void NETMATCH::Update(GAME_OBJECT* obj, FADE *fade)
 }
 
 //=============================================================================
-// 描画処理
+// 描画
 //=============================================================================
 void NETMATCH::Draw(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
-
-	for (int CntTuto = 0; CntTuto < OBJECT_NETMATCH_MAX; CntTuto++)
-	{
-		pDevice->SetFVF(FVF_VERTEX_2D);
-		pDevice->SetTexture(0, this[CntTuto].tex2D.pD3DTexture);
-
-		pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, POLYGON_2D_NUM, this[CntTuto].tex2D.textureVTX, sizeof(VERTEX_2D));
-
-	}
+	// 頂点バッファをデバイスのデータストリームにバインド
+	pDevice->SetStreamSource(0, this->vtx.VtxBuff(), 0, sizeof(VERTEX_2D));
+	// 頂点フォーマットの設定
+	pDevice->SetFVF(FVF_VERTEX_2D);
+	// テクスチャの設定　テクスチャが複数ならtexを配列化して選択させるように
+	pDevice->SetTexture(0, this->tex.Texture());
+	// ポリゴンの描画　引数二個目の描画開始頂点を設定することが大事
+	pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, POLYGON_2D_NUM);
 }
-
-//=============================================================================
-// 頂点の作成
-//=============================================================================
-HRESULT NETMATCH::MakeVertexTutorial(void)
-{
-	for (int CntTuto = 0; CntTuto < OBJECT_NETMATCH_MAX; CntTuto++)
-	{
-		D3DXVECTOR3 pos = this[CntTuto].Pos();
-		// 頂点座標の設定
-		this[CntTuto].tex2D.textureVTX[0].vtx = D3DXVECTOR3(pos.x - NETMATCHRIAL_SIZE_X, pos.y - NETMATCHRIAL_SIZE_Y, 0.0f);
-		this[CntTuto].tex2D.textureVTX[1].vtx = D3DXVECTOR3(pos.x + NETMATCHRIAL_SIZE_X, pos.y - NETMATCHRIAL_SIZE_Y, 0.0f);
-		this[CntTuto].tex2D.textureVTX[2].vtx = D3DXVECTOR3(pos.x - NETMATCHRIAL_SIZE_X, pos.y + NETMATCHRIAL_SIZE_Y, 0.0f);
-		this[CntTuto].tex2D.textureVTX[3].vtx = D3DXVECTOR3(pos.x + NETMATCHRIAL_SIZE_X, pos.y + NETMATCHRIAL_SIZE_Y, 0.0f);
-		// テクスチャのパースペクティブコレクト用
-		this[CntTuto].tex2D.textureVTX[0].rhw =
-			this[CntTuto].tex2D.textureVTX[1].rhw =
-			this[CntTuto].tex2D.textureVTX[2].rhw =
-			this[CntTuto].tex2D.textureVTX[3].rhw = 1.0f;
-
-		// 反射光の設定
-		this[CntTuto].tex2D.textureVTX[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-		this[CntTuto].tex2D.textureVTX[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-		this[CntTuto].tex2D.textureVTX[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-		this[CntTuto].tex2D.textureVTX[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-
-		// テクスチャ座標の設定
-		this[CntTuto].tex2D.textureVTX[0].tex = D3DXVECTOR2(0.0f, 0.0f);
-		this[CntTuto].tex2D.textureVTX[1].tex = D3DXVECTOR2(1.0f, 0.0f);
-		this[CntTuto].tex2D.textureVTX[2].tex = D3DXVECTOR2(0.0f, 1.0f);
-		this[CntTuto].tex2D.textureVTX[3].tex = D3DXVECTOR2(1.0f, 1.0f);
-	}
-	return S_OK;
-}
-

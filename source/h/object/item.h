@@ -29,7 +29,7 @@ public:
 	ITEM_PARAMETER_ALL() {
 		nIdxShadow = -1; GetPlayerType = 0; GettingSignal = false; GettingSignalEnd = false;
 		CollisionFieldEnd = false; NetUse = false; NetGetItemFlag = false; NetGetItemFlagOld = false;
-		eType = ITEMTYPE_NONE;
+		eType = ITEM_TYPE_NONE;
 	}
 	~ITEM_PARAMETER_ALL() {}
 
@@ -43,7 +43,7 @@ public:
 	bool	NetGetItemFlag;			//!< アイテムを取得した1フレーム分だけtrueにする
 	bool	NetGetItemFlagOld;		//!< アイテムを取得した1フレーム分だけtrueにする 比較値
 
-	eITEMTYPE		eType;			//!< 種類
+	eITEM_TYPE		eType;			//!< 種類
 
 };
 
@@ -74,27 +74,29 @@ public:
 	ITEM();		//!< データ読み込み　初期化
 	~ITEM();	//!< 削除
 
-private:
 	void	Init(void);										//!< 初期化
-	void	Update(PLAYER_HONTAI *p,bool NetGameStartFlag);	//!< 更新
+	void	Update(PLAYER *p, bool NetGameStartFlag);		//!< 更新
 	void	Draw(void);										//!< 描画
+
+	ITEM_PARAMETER_ALL		ItemParaAll[OBJECT_ITEM_MAX];	//!< 各インスタンスに必要なデータ群
+	iUseCheak				iUseType[OBJECT_ITEM_MAX];			//!< 使用情報
+	TransForm				Transform[OBJECT_ITEM_MAX];			//!< トランスフォーム情報
+	FieldNor				PostureVec[OBJECT_ITEM_MAX];		//!< 姿勢ベクトル
+
+private:
 
 	//void	ReinitNet(void);								//!< 初期化　同期
 
 	void	SetInstance(D3DXVECTOR3 pos, D3DXVECTOR3 scl, D3DXVECTOR3 rot, eITEM_TYPE eType);
 	void	ReleaseInstance(int nIdxItem);
-	void	GettingItem(int nIdxItem, PLAYER_HONTAI *p);
+	void	GettingItem(int nIdxItem, PLAYER *p);
 
 	ModelAttribute			model;								//!< モデル情報　マテリアルや頂点数など　複数使用するならここを配列化
-	TEXTURE					tex[ITEMTYPE_MAX];					//!< テクスチャ情報　複数使用するならここを配列化　ITEMTYPE_MAX
+	TEXTURE					tex[ITEM_TYPE_MAX];					//!< テクスチャ情報　複数使用するならここを配列化　ITEMTYPE_MAX
 	VTXBuffer				vtx[OBJECT_ITEM_MAX];				//!< 頂点情報　複数使用するならここを配列化
-	TransForm				Transform[OBJECT_ITEM_MAX];			//!< トランスフォーム情報
-	iUseCheak				iUseType[OBJECT_ITEM_MAX];			//!< 使用情報
-	FieldNor				PostureVec[OBJECT_ITEM_MAX];		//!< 姿勢ベクトル
-	ITEM_PARAMETER_ALL		ItemParaAll[OBJECT_ITEM_MAX];		//!< 各インスタンスに必要なデータ群
 	ITEM_PARAMETER_ONE		ItemParaOne;						//!< マネージャーに必要なデータ群
 
-	const char *c_aFileNameModel[ITEMTYPE_MAX] =
+	const char *c_aFileNameModel[ITEM_TYPE_MAX] =
 	{
 		"../data/MODEL/tikeiItem.x",		// 地形変形アイテム
 		"../data/MODEL/lifeItem.x",			// ライフ回復
@@ -105,7 +107,7 @@ private:
 		"../data/MODEL/kiriItem.x",			// 霧アイテム
 	};
 
-	const char *c_aFileNameTex[ITEMTYPE_MAX] =
+	const char *c_aFileNameTex[ITEM_TYPE_MAX] =
 	{
 		"../data/MODEL/landmark_aogashima.png",			// 地形変形アイテム
 		"../data/MODEL/life000.png",					// ライフ回復

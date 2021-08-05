@@ -20,7 +20,7 @@
 #define	VALUE_FALLSPEED_ITEM	(2.0f)						// 落下速度
 #define	ITEM_RADIUS				(20.0f)						// 半径
 #define DROP_ITEM_MAX						(20)			//!< フィールドに落ちてるアイテムの数
-#define DROP_ITEM_CHARGE_ADDTIME			(1.0f)			//!< アイテムをリスポーンさせる時の加算タイム
+#define DROP_ITEM_CHARGE_ADDTIME			(1)				//!< アイテムをリスポーンさせる時の加算タイム
 #define DROP_ITEM_CHARGE_CNT				(60.0f)			//!< アイテムをリスポーンさせる時の所要タイム
 
 //=============================================================================
@@ -32,7 +32,7 @@ ITEM::ITEM(void)
 	this->CreateInstanceOBJ();
 
 	//カウントループ(アイテムの種類)　
-	for (int nCntItemType = 0; nCntItemType < ITEMTYPE_MAX; nCntItemType++)
+	for (int nCntItemType = 0; nCntItemType < ITEM_TYPE_MAX; nCntItemType++)
 	{
 		// テクスチャの読み込み
 		this->tex[nCntItemType].LoadTexture(this->c_aFileNameTex[nCntItemType]);
@@ -52,29 +52,29 @@ ITEM::ITEM(void)
 	for (int CntItem = 0; CntItem < OBJECT_ITEM_MAX; CntItem++)
 	{
 		//頂点の作成
-		LPDIRECT3DVERTEXBUFFER9 *VtxBuff;
-		LPDIRECT3DINDEXBUFFER9	*IdxBuff;
-		this->vtx[CntItem].MakeVertex3D(nv,FVF_VERTEX_3D);
+		this->vtx[CntItem].MakeVertex3D(nv, FVF_VERTEX_3D);
 		this->vtx[CntItem].MakeIdxVertex(nvi);
+		LPDIRECT3DVERTEXBUFFER9 VtxBuff;
+		LPDIRECT3DINDEXBUFFER9	IdxBuff;
 
 		//バッファの取得から反映
 		VtxBuff = this->vtx[CntItem].VtxBuff();
 		IdxBuff = this->vtx[CntItem].IdxBuff();
-		Mesh->GetVertexBuffer(VtxBuff);
-		Mesh->GetIndexBuffer(IdxBuff);
-		this->vtx[CntItem].VtxBuff(*VtxBuff);
-		this->vtx[CntItem].IdxBuff(*IdxBuff);
+		Mesh->GetVertexBuffer(&VtxBuff);
+		Mesh->GetIndexBuffer(&IdxBuff);
+		this->vtx[CntItem].VtxBuff(VtxBuff);
+		this->vtx[CntItem].IdxBuff(IdxBuff);
 
 		//使用の設定
 		this->iUseType[CntItem].ChangeUse(NoUse);
 	}
 
 	//モデルデータ反映
-	this->model.SetNumMat(nm);
-	this->model.SetMat(BuffMat);
-	this->model.SetNumVertex(nv);
-	this->model.SetNumPolygon(np);
-	this->model.SetNumVertexIndex(nvi);
+	this->model.NumMat(nm);
+	this->model.Mat(BuffMat);
+	this->model.NumVertex(nv);
+	this->model.NumPolygon(np);
+	this->model.NumVertexIndex(nvi);
 
 }
 
@@ -84,7 +84,8 @@ ITEM::ITEM(void)
 ITEM::~ITEM(void)
 {
 	//カウントループ(アイテムの種類)
-	for (int nCntItemType = 0; nCntItemType < ITEMTYPE_MAX; nCntItemType++) {
+	for (int nCntItemType = 0; nCntItemType < ITEM_TYPE_MAX; nCntItemType++)
+	{
 		//テクスチャ解放
 		this->tex[nCntItemType].~TEXTURE();
 		//モデル解放
@@ -112,7 +113,7 @@ void ITEM::Init(void)
 		//初期化設定
 		this->Transform[nCntItem].Scl(this->ItemParaOne.MaxSize);
 		this->ItemParaAll[nCntItem].nIdxShadow = -1;
-		this->ItemParaAll[nCntItem].eType = ITEMTYPE_NONE;
+		this->ItemParaAll[nCntItem].eType = ITEM_TYPE_NONE;
 		this->ItemParaAll[nCntItem].NetUse = false;
 		this->ItemParaAll[nCntItem].NetGetItemFlag = false;
 		this->ItemParaAll[nCntItem].NetGetItemFlagOld = false;
@@ -205,7 +206,7 @@ void ITEM::Init(void)
 //=============================================================================
 // 更新処理
 //=============================================================================
-void ITEM::Update(PLAYER_HONTAI *p, bool NetGameStartFlag)
+void ITEM::Update(PLAYER *Player, bool NetGameStartFlag)
 {
 	//カウントループ(アイテムのインスタンス数)
 	for (int nCntItem = 0; nCntItem < OBJECT_ITEM_MAX; nCntItem++)
@@ -218,9 +219,9 @@ void ITEM::Update(PLAYER_HONTAI *p, bool NetGameStartFlag)
 			//-------------------------------------------オブジェクトの値読み込み
 			D3DXVECTOR3 pos = this->Transform[nCntItem].Pos();
 			D3DXVECTOR3 rot = this->Transform[nCntItem].Rot();
-			D3DXVECTOR3 FieldNorVec = this->PostureVec[nCntItem].FNVec();
-			D3DXVECTOR3 FieldNorUpNorCross = this->PostureVec[nCntItem].FNUNCross();
-			float Qrot = this->PostureVec[nCntItem].Qrot();
+			D3DXVECTOR3 FieldNorVec = this->PostureVec[nCntItem].FNVecFunc();
+			D3DXVECTOR3 FieldNorUpNorCross = this->PostureVec[nCntItem].FNUNCrossFunc();
+			float Qrot = this->PostureVec[nCntItem].QrotFunc();
 
 			//フィールドに落ちてるときはくるくる回転させる
 			rot.y += VALUE_ROTATE_ITEM_LO;
@@ -248,16 +249,15 @@ void ITEM::Update(PLAYER_HONTAI *p, bool NetGameStartFlag)
 			//-------------------------------------------オブジェクトの値書き込み
 			this->Transform[nCntItem].Pos(pos);
 			this->Transform[nCntItem].Rot(rot);
-			this->PostureVec[nCntItem].FNUNCross(FieldNorUpNorCross);
-			this->PostureVec[nCntItem].Qrot(Qrot);
+			this->PostureVec[nCntItem].FNUNCrossFunc(FieldNorUpNorCross);
+			this->PostureVec[nCntItem].QrotFunc(Qrot);
 		}
 
 		//だれかがアイテムを取得したらそのプレイヤーに近づく処理
 		if (this->ItemParaAll[nCntItem].GettingSignal == true)
 		{
-			GettingItem(nCntItem,p);
+			GettingItem(nCntItem, Player);
 		}
-
 	}
 
 	//ローカル対戦ならここでリスポーン処理
@@ -284,13 +284,13 @@ void ITEM::Update(PLAYER_HONTAI *p, bool NetGameStartFlag)
 					if (x == 1) pos.x *= -1;
 					if (z == 1) pos.z *= -1;
 					//ランダムでアイテムの種類選択
-					int ItemNum = rand() % ITEMTYPE_MAX;
+					int ItemNum = rand() % ITEM_TYPE_MAX;
 					//確立設定のため　ライフ、カメラ、霧アイテムの時はもう一度抽選
-					if (ItemNum == ITEMTYPE_LIFE && ItemNum == ITEMTYPE_CAMERA && ItemNum == ITEMTYPE_KIRI) ItemNum = rand() % ITEMTYPE_MAX;
+					if (ItemNum == ITEM_TYPE_LIFE && ItemNum == ITEM_TYPE_CAMERA && ItemNum == ITEM_TYPE_KIRI) ItemNum = rand() % ITEM_TYPE_MAX;
 					//インスタンスセット　使用する
-					this[0].SetInstance(pos, D3DXVECTOR3(ITEM_BIG_SCL, ITEM_BIG_SCL, ITEM_BIG_SCL), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ITEMTYPE_TIKEI);
+					this[0].SetInstance(pos, D3DXVECTOR3(ITEM_BIG_SCL, ITEM_BIG_SCL, ITEM_BIG_SCL), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ITEM_TYPE_TIKEI);
 					this->ItemParaAll[nCntItem].CollisionFieldEnd = false;
-					this->ItemParaOne.Droptime = 0.0f;
+					this->ItemParaOne.Droptime = 0;
 					this->ItemParaOne.GoukeiDrop++;
 					PlaySound(SOUND_LABEL_SE_nyu);
 				}
@@ -330,8 +330,8 @@ void ITEM::Draw(void)
 			D3DXVECTOR3 pos = this->Transform[nCntItem].Pos();
 			D3DXVECTOR3 rot = this->Transform[nCntItem].Rot();
 			D3DXVECTOR3 scl = this->Transform[nCntItem].Scl();
-			D3DXVECTOR3 PlayerUpToFieldNorVec = this->PostureVec[nCntItem].FNUNCross();
-			float Qrot = this->PostureVec[nCntItem].Qrot();
+			D3DXVECTOR3 PlayerUpToFieldNorVec = this->PostureVec[nCntItem].FNUNCrossFunc();
+			float Qrot = this->PostureVec[nCntItem].QrotFunc();
 
 			//q=(rotVecAxis法線)*(g_Player.rot回転)  -がキモ？
 			D3DXQuaternionRotationAxis(&q, &PlayerUpToFieldNorVec, -Qrot);
@@ -359,12 +359,12 @@ void ITEM::Draw(void)
 			// マテリアル設定
 			pDevice->GetMaterial(&matDef);
 			LPD3DXBUFFER mat;
-			mat = *this->model.GetMat();
+			mat = *this->model.Mat();
 			pD3DXMat = (D3DXMATERIAL*)mat->GetBufferPointer();
 
 			// マテリアルをデフォルトに戻す
 			pDevice->SetMaterial(&matDef);
-			for (int nCntMat = 0; nCntMat < (int)this->model.GetNumMat(); nCntMat++)
+			for (int nCntMat = 0; nCntMat < (int)this->model.NumMat(); nCntMat++)
 			{
 				// デバイスにマテリアルの設定
 				pDevice->SetMaterial(&pD3DXMat->MatD3D);
@@ -374,11 +374,11 @@ void ITEM::Draw(void)
 				// 頂点フォーマットの設定
 				pDevice->SetFVF(FVF_VERTEX_3D);
 				// 頂点バッファをレンダリングパイプラインに設定
-				pDevice->SetStreamSource(0, *this->vtx[nCntItem].VtxBuff(), 0, sizeof(VERTEX_3D));
+				pDevice->SetStreamSource(0, this->vtx[nCntItem].VtxBuff(), 0, sizeof(VERTEX_3D));
 				// インデックスバッファをレンダリングパイプラインに設定
-				pDevice->SetIndices(*this->vtx[nCntItem].IdxBuff());
+				pDevice->SetIndices(this->vtx[nCntItem].IdxBuff());
 				//描画
-				pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, this->model.GetNumVertex(), 0, this->model.GetNumPolygon());
+				pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, this->model.NumVertex(), 0, this->model.NumPolygon());
 			}
 		}
 	}
@@ -426,7 +426,7 @@ void ITEM::ReleaseInstance(int nIdxItem)
 //=============================================================================
 // アイテムを取得したプレイヤーへ近づける関数
 //=============================================================================
-void ITEM::GettingItem(int nIdxItem, PLAYER_HONTAI *p)
+void ITEM::GettingItem(int nIdxItem, PLAYER *Player)
 {
 	//プレイヤーへ近づける処理
 	if (this->ItemParaAll[nIdxItem].GettingSignalEnd == false)
@@ -440,7 +440,7 @@ void ITEM::GettingItem(int nIdxItem, PLAYER_HONTAI *p)
 		irot.y += VALUE_ROTATE_ITEM_HI;
 		
 		//プレイヤーとアイテムの距離を計算し近づける
-		D3DXVECTOR3 ppos = p->Transform[this->ItemParaAll[nIdxItem].GetPlayerType].Pos();
+		D3DXVECTOR3 ppos = Player->modelDraw[PLAYER_PARTS_TYPE_HOUDAI].Transform[this->ItemParaAll[nIdxItem].GetPlayerType].Pos();
 
 		D3DXVECTOR3 distance = ppos - ipos;
 		distance *= APPROADHING_RATE;

@@ -37,7 +37,7 @@ HRESULT LoadMesh(const char *FileName, LPD3DXBUFFER *pD3DXBuffMat, DWORD *nNumMa
 * @details モーフィング用 現在は頂点情報を線形補間で変化させている
 * @author : 木村純(キムラジュン)
 */
-void DoMorphing(GPUMODEL *FromModel, GPUMODEL *ToModel, float dt, float *time, int *SignalType);
+void DoMorphing(LPDIRECT3DVERTEXBUFFER9 FromModelVB, LPDIRECT3DVERTEXBUFFER9 ToModelVB, LPDIRECT3DINDEXBUFFER9 ModelIdx, ModelAttribute *Attribute,float dt, float *time, eMORPHING_TYPE *SignalType);
 
 /**
 * @brief モデルリセット関数 ResetModel
@@ -46,7 +46,7 @@ void DoMorphing(GPUMODEL *FromModel, GPUMODEL *ToModel, float dt, float *time, i
 * @details モデルが変化した後のリセット用
 * @author : 木村純(キムラジュン)
 */
-void ResetModel(GPUMODEL *FromModel, GPUMODEL *ToModel);
+void ResetModel(LPDIRECT3DVERTEXBUFFER9 FromModelVB, LPDIRECT3DVERTEXBUFFER9 ToModelVB, LPDIRECT3DINDEXBUFFER9 ModelIdx, ModelAttribute *Attribute);
 
 /**
 * @brief レイキャスト関数 RayCast

@@ -53,9 +53,9 @@ STATUS::STATUS(void)
 		for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
 		{
 			//描画位置反映
-			D3DXVECTOR3 pos = this->Transform[CntPlayer].Pos;
+			D3DXVECTOR3 pos = this->Transform[CntPlayer].Pos();
 			//Halfサイズ+(オフセット値*ステータスカウント)
-			this->vtx[CntPlayer].SetVertex(CntStatus, STATUS_SIZE_Xhalf + CntStatus*(STATUS_SIZE_Xhalf + STATUS_POS_X_OFFSETBUFF), STATUS_SIZE_Yhalf, pos);
+			this->vtx[CntPlayer].Vertex2D(CntStatus, STATUS_SIZE_Xhalf + CntStatus*(STATUS_SIZE_Xhalf + STATUS_POS_X_OFFSETBUFF), STATUS_SIZE_Yhalf, pos);
 
 			//テクスチャ描画トリミング初期値　表示非表示もここで設定できる
 			this->PtternV[CntPlayer][CntStatus] = 0.0f;
@@ -132,23 +132,31 @@ void STATUS::ReinitNet(int MyNumber)
 //=============================================================================
 // 更新処理
 //=============================================================================
-void STATUS::Update(PLAYER_HONTAI *p)
+void STATUS::Update(PLAYER *p)
 {
 	//描画UVを設定する
+
+
+
+
+
+
+
+
 	for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
 	{
 		//スピード
-		if (p[CntPlayer].PlayerPara.speedbuffsignal == true) this[CntPlayer].use[STATUSTYPE_SPEED] = true;
-		else this[CntPlayer].use[STATUSTYPE_SPEED] = false;
+		if (p->PlayerPara[CntPlayer].ItemPara.SpeedBuffSignal == true) this->iUseType[CntPlayer][STATUS_TYPE_SPEED].Use(YesUse);
+		else this->iUseType[CntPlayer][STATUS_TYPE_SPEED].Use(NoUse);
 		//戦車
-		if (p[CntPlayer].ModelType == PLAYER_MODEL_ATTACK) this[CntPlayer].use[STATUSTYPE_SENSYA] = true;
-		else this[CntPlayer].use[STATUSTYPE_SENSYA] = false;
+		if (p->PlayerPara[CntPlayer].StandardPara.eModelType == PLAYER_MODEL_TYPE_ATTACK) this->iUseType[CntPlayer][STATUS_TYPE_SENSYA].Use(YesUse);
+		else this->iUseType[CntPlayer][STATUS_TYPE_SENSYA].Use(NoUse);
 		//カメラ
-		if (p[CntPlayer].PlayerPara.BackCameraItemSignal == true) this[CntPlayer].use[STATUSTYPE_CAMERA] = true;
-		else this[CntPlayer].use[STATUSTYPE_CAMERA] = false;
+		if (p->PlayerPara[CntPlayer].ItemPara.BackCameraItemSignal == true) this->iUseType[CntPlayer][STATUS_TYPE_CAMERA].Use(YesUse);
+		else this->iUseType[CntPlayer][STATUS_TYPE_CAMERA].Use(NoUse);
 		//霧
-		if (p[CntPlayer].PlayerPara.KiriSignal == true) this[CntPlayer].use[STATUSTYPE_KIRI] = true;
-		else this[CntPlayer].use[STATUSTYPE_KIRI] = false;
+		if (p->PlayerPara[CntPlayer].ItemPara.KiriSignal == true) this->iUseType[CntPlayer][STATUS_TYPE_KIRI].Use(YesUse);
+		else this->iUseType[CntPlayer][STATUS_TYPE_KIRI].Use(NoUse);
 	}
 }
 
@@ -163,14 +171,14 @@ void STATUS::Draw(bool Netflag, int NetMyNumber,int CntPlayer)
 	if (Netflag == false)
 	{
 		//カウントループ
-		for (int CntStatus = 0; CntStatus < STATUSTYPE_MAX; CntStatus++)
+		for (int CntStatus = 0; CntStatus < STATUS_TYPE_MAX; CntStatus++)
 		{
 				// 頂点バッファをデバイスのデータストリームにバインド
-				pDevice->SetStreamSource(0, *this->vtx[CntPlayer].GetVtxBuff(), 0, sizeof(VERTEX_2D));
+				pDevice->SetStreamSource(0, this->vtx[CntPlayer].VtxBuff(), 0, sizeof(VERTEX_2D));
 				// 頂点フォーマットの設定
 				pDevice->SetFVF(FVF_VERTEX_2D);
 				// テクスチャの設定　テクスチャが複数ならtexを配列化して選択させるように
-				pDevice->SetTexture(0, this->tex[CntStatus].GetTexture());
+				pDevice->SetTexture(0, this->tex[CntStatus].Texture());
 				// ポリゴンの描画　引数二個目の描画開始頂点を設定することが大事
 				pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, (CntStatus * 4), POLYGON_2D_NUM);
 		}
@@ -180,14 +188,14 @@ void STATUS::Draw(bool Netflag, int NetMyNumber,int CntPlayer)
 	else
 	{
 		//カウントループ
-		for (int CntStatus = 0; CntStatus < STATUSTYPE_MAX; CntStatus++)
+		for (int CntStatus = 0; CntStatus < STATUS_TYPE_MAX; CntStatus++)
 		{
 			// 頂点バッファをデバイスのデータストリームにバインド
-			pDevice->SetStreamSource(0, *this->vtx[NetMyNumber].GetVtxBuff(), 0, sizeof(VERTEX_2D));
+			pDevice->SetStreamSource(0, this->vtx[NetMyNumber].VtxBuff(), 0, sizeof(VERTEX_2D));
 			// 頂点フォーマットの設定
 			pDevice->SetFVF(FVF_VERTEX_2D);
 			// テクスチャの設定　テクスチャが複数ならtexを配列化して選択させるように
-			pDevice->SetTexture(0, this->tex[CntStatus].GetTexture());
+			pDevice->SetTexture(0, this->tex[CntStatus].Texture());
 			// ポリゴンの描画　引数二個目の描画開始頂点を設定することが大事
 			pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, (CntStatus * 4), POLYGON_2D_NUM);
 		}

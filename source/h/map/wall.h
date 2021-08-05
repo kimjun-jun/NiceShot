@@ -15,11 +15,17 @@
 class WALL : public GAME_OBJECT
 {
 public:
-	WALL();		//!< データ読み込み
+	WALL();		//!< データ読み込み　初期化
 	~WALL();	//!< 削除
-	void		Init(void);		//!< 初期化
-	void		Update(void);	//!< 更新
-	void		Draw(void);		//!< 描画
+	void		Init(void)override;		//!< 初期化
+	void		Update(void)override;	//!< 更新
+	void		Draw(void)override;		//!< 描画
+	TransForm				Transform[OBJECT_WALL_MAX];			//!< トランスフォーム情報
 
 private:
+	TEXTURE					tex;								//!< テクスチャ情報　複数使用するならここを配列化　ITEMTYPE_MAX
+	VTXBuffer				vtx[OBJECT_WALL_MAX];				//!< 頂点情報　複数使用するならここを配列化
+
+	void SetUpMesh(void);			// WALLセットアップ処理
+
 } ;

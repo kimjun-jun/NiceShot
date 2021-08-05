@@ -39,7 +39,7 @@ DAMEGE::DAMEGE(void)
 	for (int CntDamege = 0; CntDamege < OBJECT_DAMEGE_MAX; CntDamege++)
 	{
 		//描画位置反映
-		D3DXVECTOR3 pos = this->Transform[CntDamege].Pos;
+		D3DXVECTOR3 pos = this->Transform[CntDamege].Pos();
 		this->vtx.Vertex2D(CntDamege, DAMEGE_SIZE_X / 2, DAMEGE_SIZE_Y / 2, pos);
 
 		//RHW設定
@@ -130,7 +130,7 @@ void DAMEGE::Update(void)
 		bool use = this->iUseType[CntDamege].Use();
 		if (use==true)
 		{
-			this->DamegePara[CntDamege].time += 1.0f;
+			this->DamegePara[CntDamege].time += 1;
 			this->DamegePara[CntDamege].alpha = float((this->DamegePara[CntDamege].time / SCREENDAMEGE_TIME)*255.0f);
 
 			// 反射光の設定
@@ -140,7 +140,7 @@ void DAMEGE::Update(void)
 			//一定時間経過で終了
 			if (this->DamegePara[CntDamege].time >= SCREENDAMEGE_TIME)
 			{
-				this->DamegePara[CntDamege].time = 0.0f;
+				this->DamegePara[CntDamege].time = 0;
 				this->DamegePara[CntDamege].alpha = 0.0f;
 				this->iUseType[CntDamege].Use(false);
 			}
@@ -163,10 +163,10 @@ void DAMEGE::Draw(bool Netflag, int NetMyNumber, int CntPlayer)
 	if (Netflag==false)
 	{
 		//描画判定　
-		if (this->iUseType[CntPlayer].Use() == YesUseType1);
+		if (this->iUseType[CntPlayer].Use() == YesUseType1)
 		{
 			// 頂点バッファをデバイスのデータストリームにバインド
-			pDevice->SetStreamSource(0, *this->vtx.VtxBuff(), 0, sizeof(VERTEX_2D));
+			pDevice->SetStreamSource(0, this->vtx.VtxBuff(), 0, sizeof(VERTEX_2D));
 			// 頂点フォーマットの設定
 			pDevice->SetFVF(FVF_VERTEX_2D);
 			// テクスチャの設定　テクスチャが複数ならtexを配列化して選択させるように
@@ -179,10 +179,10 @@ void DAMEGE::Draw(bool Netflag, int NetMyNumber, int CntPlayer)
 	else
 	{
 		//描画判定　
-		if (this->iUseType[NetMyNumber].Use() == YesUseType1);
+		if (this->iUseType[NetMyNumber].Use() == YesUseType1)
 		{
 			// 頂点バッファをデバイスのデータストリームにバインド
-			pDevice->SetStreamSource(0, *this->vtx.VtxBuff(), 0, sizeof(VERTEX_2D));
+			pDevice->SetStreamSource(0, this->vtx.VtxBuff(), 0, sizeof(VERTEX_2D));
 			// 頂点フォーマットの設定
 			pDevice->SetFVF(FVF_VERTEX_2D);
 			// テクスチャの設定　テクスチャが複数ならtexを配列化して選択させるように

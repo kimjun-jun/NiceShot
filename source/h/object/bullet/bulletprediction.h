@@ -20,10 +20,11 @@ public:
 	BULLETPREDICTION();		//!< データ読み込み　初期化
 	~BULLETPREDICTION();	//!< 削除
 
-private:
 	void		Init(void);						//!< 初期化
-	void		Update(PLAYER_HONTAI *player);	//!< 更新
-	void		Draw(PLAYER_HONTAI *player, int CntPlayer);		//!< 描画
+	void		Update(PLAYER *player);	//!< 更新
+	void		Draw(PLAYER *player, int CntPlayer);		//!< 描画
+
+private:
 
 	void		UpdateInstance(D3DXVECTOR3 pos, int PlayerType, D3DXCOLOR col, float fSizeX, float fSizeY, int CntBulletPrediction);
 

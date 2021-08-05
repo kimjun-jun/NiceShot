@@ -52,13 +52,13 @@ TITLE::TITLE(void)
 	this->vtx.MakeVertex2D(OBJECT_TITLE_MAX, FVF_VERTEX_2D);
 
 	//描画位置設定
-	this->Transform[NAME_BG].Pos = D3DXVECTOR3(TITLE_BG_POS_X, TITLE_BG_POS_Y, 0.0f);
-	this->Transform[NAME_LOGO].Pos = D3DXVECTOR3(TITLE_LOGO_POS_X, TITLE_LOGO_POS_Y, 0.0f);
-	this->Transform[NAME_PRESS].Pos = D3DXVECTOR3(TITLE_PRESS_LOGO_POS_X, TITLE_PRESS_LOGO_POS_Y, 0.0f);
-	this->Transform[NAME_TUTO].Pos = D3DXVECTOR3(TITLE_SELECT_POS_X - TITLE_SELECT_OFFSET_X, TITLE_SELECT_POS_Y - TITLE_SELECT_OFFSET_Y, 0.0f);
-	this->Transform[NAME_LOCAL].Pos = D3DXVECTOR3(TITLE_SELECT_POS_X + TITLE_SELECT_OFFSET_X, TITLE_SELECT_POS_Y - TITLE_SELECT_OFFSET_Y, 0.0f);
-	this->Transform[NAME_NET].Pos = D3DXVECTOR3(TITLE_SELECT_POS_X - TITLE_SELECT_OFFSET_X, TITLE_SELECT_POS_Y + TITLE_SELECT_OFFSET_Y, 0.0f);
-	this->Transform[NAME_QUIT].Pos = D3DXVECTOR3(TITLE_SELECT_POS_X + TITLE_SELECT_OFFSET_X, TITLE_SELECT_POS_Y + TITLE_SELECT_OFFSET_Y, 0.0f);
+	this->Transform[NAME_BG].Pos(D3DXVECTOR3(TITLE_BG_POS_X, TITLE_BG_POS_Y, 0.0f));
+	this->Transform[NAME_LOGO].Pos(D3DXVECTOR3(TITLE_LOGO_POS_X, TITLE_LOGO_POS_Y, 0.0f));
+	this->Transform[NAME_PRESS].Pos(D3DXVECTOR3(TITLE_PRESS_LOGO_POS_X, TITLE_PRESS_LOGO_POS_Y, 0.0f));
+	this->Transform[NAME_TUTO].Pos(D3DXVECTOR3(TITLE_SELECT_POS_X - TITLE_SELECT_OFFSET_X, TITLE_SELECT_POS_Y - TITLE_SELECT_OFFSET_Y, 0.0f));
+	this->Transform[NAME_LOCAL].Pos(D3DXVECTOR3(TITLE_SELECT_POS_X + TITLE_SELECT_OFFSET_X, TITLE_SELECT_POS_Y - TITLE_SELECT_OFFSET_Y, 0.0f));
+	this->Transform[NAME_NET].Pos(D3DXVECTOR3(TITLE_SELECT_POS_X - TITLE_SELECT_OFFSET_X, TITLE_SELECT_POS_Y + TITLE_SELECT_OFFSET_Y, 0.0f));
+	this->Transform[NAME_QUIT].Pos(D3DXVECTOR3(TITLE_SELECT_POS_X + TITLE_SELECT_OFFSET_X, TITLE_SELECT_POS_Y + TITLE_SELECT_OFFSET_Y, 0.0f));
 
 	//描画位置反映
 	this->vtx.Vertex2D(NAME_BG, TITLE_BG_WIDTH / 2, TITLE_BG_HEIGHT / 2, this->Transform[NAME_BG].Pos());
@@ -243,7 +243,7 @@ void TITLE::Draw(void)
 		if (this->iUseType[CntTitle].Use() == YesUseType1)
 		{
 			// 頂点バッファをデバイスのデータストリームにバインド
-			pDevice->SetStreamSource(0, *this->vtx.VtxBuff(), 0, sizeof(VERTEX_2D));
+			pDevice->SetStreamSource(0,this->vtx.VtxBuff(), 0, sizeof(VERTEX_2D));
 			// 頂点フォーマットの設定
 			pDevice->SetFVF(FVF_VERTEX_2D);
 			// テクスチャの設定　テクスチャが複数ならtexを配列化して選択させるように
@@ -259,6 +259,7 @@ void TITLE::Draw(void)
 //=============================================================================
 void TITLE::ChangeHierarchy(int NextHierarchyType)
 {
+	D3DXCOLOR col = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
 	//ヒエラルキー選択
 	switch (NextHierarchyType)
 	{
@@ -269,7 +270,6 @@ void TITLE::ChangeHierarchy(int NextHierarchyType)
 		//ヒエラルキー変更
 		this->TitlePara.HierarchyNum = TITLE_HIERARCHY_NUM_ANIM;
 		//α値変更
-		D3DXCOLOR col = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
 		this->vtx.Color2D(NAME_LOGO, col);
 		this->vtx.Color2D(NAME_PRESS, col);
 		col = D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.0f);
@@ -290,7 +290,7 @@ void TITLE::ChangeHierarchy(int NextHierarchyType)
 		//ヒエラルキー変更
 		this->TitlePara.HierarchyNum = TITLE_HIERARCHY_NUM_SELECT;
 		//α値変更
-		D3DXCOLOR col = D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.0f);
+		col = D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.0f);
 		this->vtx.Color2D(NAME_LOGO, col);
 		this->vtx.Color2D(NAME_PRESS, col);
 		//使用変更

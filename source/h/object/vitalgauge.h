@@ -42,11 +42,11 @@ public:
 	VITALGAUGE();	//!< データ読み込み　初期化
 	~VITALGAUGE();	//!< 削除
 
-private:
 	void		Init(void);								//!< 初期化
-	void		Update(PLAYER_HONTAI *p, RANK *rank, bool Netflag, int NetMyNumber);	//!< 更新
+	void		Update(PLAYER *p, RANK *rank, bool Netflag, int NetMyNumber);	//!< 更新
 	void		Draw(bool Netflag, int NetMyNumber, int CntPlayer);						//!< 描画
 
+private:
 	void		ReinitNet(int MyNumber);		//!< 再初期化ネット対戦前	
 
 	TEXTURE			tex[VITAL_TEX_MAX];				//!< テクスチャ情報　複数使用するならここを配列化　0:枠　1,2,3:中身(カラーバリエーション)
