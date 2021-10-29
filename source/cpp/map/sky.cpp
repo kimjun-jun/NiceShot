@@ -2,7 +2,6 @@
 * @file field.cpp
 * @brief NiceShot(3D)戦車ゲーム
 * @author キムラジュン
-* @date 2020/01/15
 */
 #include "../../h/main.h"
 #include "../../h/other/input.h"
@@ -17,7 +16,7 @@ constexpr float	VALUE_MOVE_SKY		{ 5.0f };				// 移動速度
 constexpr int	SKY_BLOCK_H			{ 16 };					// 水平のポリゴン数
 constexpr int	SKY_BLOCK_V			{ 8 };					// 垂直のポリゴン数
 constexpr float	SKY_RADIUS			{ 4000.0f };			// SKY半径
-constexpr float	VALUE_ROTATE_SKY	{ D3DX_PI * 0.01f };	// 回転速度
+constexpr float	VALUE_ROTATE_SKY	{ D3DX_PI * 0.0001f };	// 回転速度
 constexpr float	VALUE_TIME_SKY		{ 0.01f };				// 移動速度
 constexpr float	SKY_HEIGHT_RATE		{ 2.0f };				// 空ドームの高さ係数
 constexpr int	TEX_COUNT_LOOP		{ 1 };					// テクスチャの繰り返し回数
@@ -63,9 +62,9 @@ SKY::SKY(void)
 
 	//頂点作成
 	this->vtx[SKY_MODEL_TYPE_SPHERE].MakeVertex3D(this->Attribute[SKY_MODEL_TYPE_SPHERE].NumVertex(), FVF_VERTEX_3D);
-	this->vtx[SKY_MODEL_TYPE_SPHERE].MakeIdxVertex(this->Attribute[SKY_MODEL_TYPE_SPHERE].NumVertexIndex());
-	this->vtx[SKY_MODEL_TYPE_TOP].MakeVertex3D(this->Attribute[SKY_MODEL_TYPE_TOP].NumVertex(), FVF_VERTEX_3D);
-	this->vtx[SKY_MODEL_TYPE_TOP].MakeIdxVertex(this->Attribute[SKY_MODEL_TYPE_TOP].NumVertexIndex());
+	this->vtx[SKY_MODEL_TYPE_SPHERE].MakeIdxVertex(this->Attribute[SKY_MODEL_TYPE_SPHERE].NumVertexIndex() * sizeof(WORD));
+	this->vtx[SKY_MODEL_TYPE_TOP].MakeVertex3D(this->SkyPara[SKY_MODEL_TYPE_TOP].nNumBlockH + 1, FVF_VERTEX_3D);
+	this->vtx[SKY_MODEL_TYPE_TOP].MakeIdxVertex((this->SkyPara[SKY_MODEL_TYPE_TOP].nNumBlockH + 2) * sizeof(WORD));
 
 	//頂点設定
 	this->SetUpMeshSphere();
@@ -112,7 +111,7 @@ void SKY::Update(void)
 	for (int nCntSky = 0; nCntSky < OBJECT_SKY_MAX; nCntSky++)
 	{
 		D3DXVECTOR3 rot = this->Transform[nCntSky].Rot();
-		rot.y += D3DX_PI * this->SkyPara[nCntSky].fRotY;
+		rot.y += this->SkyPara[nCntSky].fRotY;
 
 		if (rot.y > D3DX_PI)
 		{
@@ -184,7 +183,6 @@ void SKY::Draw(void)
 void SKY::SetUpMeshSphere(void)
 {
 	//サイズ設定用処理
-	VERTEX_3D *pVtx;
 	const float ANGLE_H = (D3DX_PI * 2.0f) / this->SkyPara[SKY_MODEL_TYPE_SPHERE].nNumBlockH;
 	const float ANGLE_V = (D3DX_PI / 8.0f) / (this->SkyPara[SKY_MODEL_TYPE_SPHERE].nNumBlockV + 1);
 	const float WIDTH = 1.0f / this->SkyPara[SKY_MODEL_TYPE_SPHERE].nNumBlockH;
@@ -193,8 +191,9 @@ void SKY::SetUpMeshSphere(void)
 	float fRadius = SKY_RADIUS;
 
 	//頂点バッファのセット
+	VERTEX_3D *pVtx;
 	LPDIRECT3DVERTEXBUFFER9 VtxBuff;
-	VtxBuff = this->vtx[SKY_MODEL_TYPE_SPHERE].VtxBuff();
+	VtxBuff = *this->vtx[SKY_MODEL_TYPE_SPHERE].pVtxBuff();
 
 	// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
 	VtxBuff->Lock(0, 0, (void**)&pVtx, 0);
@@ -233,7 +232,7 @@ void SKY::SetUpMeshSphere(void)
 
 	//頂点インデックスのセット
 	LPDIRECT3DINDEXBUFFER9	IdxBuff;
-	IdxBuff = this->vtx[SKY_MODEL_TYPE_SPHERE].IdxBuff();
+	IdxBuff = *this->vtx[SKY_MODEL_TYPE_SPHERE].pIdxBuff();
 	WORD *pIdx;
 	// インデックスデータの範囲をロックし、頂点バッファへのポインタを取得
 	IdxBuff->Lock(0, 0, (void**)&pIdx, 0);
@@ -286,7 +285,7 @@ void SKY::SetUpMeshTop(void)
 
 	//頂点バッファのセット
 	LPDIRECT3DVERTEXBUFFER9 VtxBuff;
-	VtxBuff = this->vtx[SKY_MODEL_TYPE_TOP].VtxBuff();
+	VtxBuff = *this->vtx[SKY_MODEL_TYPE_TOP].pVtxBuff();
 
 	// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
 	VtxBuff->Lock(0, 0, (void**)&pVtx, 0);
@@ -309,7 +308,7 @@ void SKY::SetUpMeshTop(void)
 	pVtx++;
 
 	fLengthXZ = cosf(ANGLE_V * this->SkyPara[SKY_MODEL_TYPE_TOP].nNumBlockV) * fRadius;
-	for (int nCntH = 0; nCntH < this->SkyPara[SKY_MODEL_TYPE_TOP].nNumBlockV; nCntH++, pVtx++)
+	for (int nCntH = 0; nCntH < this->SkyPara[SKY_MODEL_TYPE_TOP].nNumBlockH; nCntH++, pVtx++)
 	{
 		// 頂点座標の設定
 		pVtx->vtx.x = -sinf(ANGLE_H * nCntH) * fLengthXZ;
@@ -332,7 +331,7 @@ void SKY::SetUpMeshTop(void)
 
 	//頂点インデックスのセット
 	LPDIRECT3DINDEXBUFFER9	IdxBuff;
-	IdxBuff = this->vtx[SKY_MODEL_TYPE_TOP].IdxBuff();
+	IdxBuff = *this->vtx[SKY_MODEL_TYPE_TOP].pIdxBuff();
 	WORD *pIdx;
 
 	// インデックスデータの範囲をロックし、頂点バッファへのポインタを取得

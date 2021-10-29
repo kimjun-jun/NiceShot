@@ -2,7 +2,6 @@
 * @file player.h
 * @brief NiceShot(3D)戦車ゲーム
 * @author キムラジュン
-* @date 2020/01/15
 */
 #pragma once
 
@@ -206,7 +205,7 @@ public:
 
 	void				Init(FIELD *field);			//!< 初期化
 	void				Update(EFFECT*effect, BULLET*bullet, SHADOW*shadow, FADE *fade, bool Netflag, int MyNumber); //!< 更新
-	void				Draw();						//!< 描画
+	void				Draw(void);						//!< 描画
 
 	//PLAYER_PRATS				parts[OBJECT_PLAYER_MAX];			//!< モデルのパーツ階層　親本体(砲台)、子パーツ[0](砲塔)、孫パーツ[1](砲身)
 	//PLAYER_HONTAI				*Parent[OBJECT_PLAYER_MAX];			//!< 親子判定 ワールドマトリクスで親→子→孫のように使う
@@ -223,13 +222,14 @@ public:
 private:
 
 	//------カラー
-	void	PlayerMeshColor(LPDIRECT3DVERTEXBUFFER9 pD3DVtxBuff, LPDIRECT3DINDEXBUFFER9 pD3DIdxBuff, DWORD nNumPolygon, int CntPlayer);
+	void	PlayerMeshColor(LPDIRECT3DVERTEXBUFFER9 *pD3DVtxBuff, LPDIRECT3DINDEXBUFFER9 *pD3DIdxBuff, DWORD nNumPolygon, int CntPlayer);
 
 	//------移動制御
-	void	MoveABL(int CntPlayer, EFFECT *effect);						//!< 移動制御(ABボタンLスティックで移動制御)
+	void	MoveABL(int CntPlayer, EFFECT *effect, bool Netflag);		//!< 移動制御(ABボタンLスティックで移動制御)
 	void	MoveL(int CntPlayer, EFFECT *effect, bool Netflag);			//!< 移動制御(LRスティックで移動制御)
 	void	MoveLtype0(int CntPlayer, EFFECT *effect, bool Netflag);	//!< 移動制御(LRスティックで移動制御)
 	void	MoveL2R2(int CntPlayer, EFFECT *effect, bool Netflag);		//!< 移動制御(L2R2で移動制御)
+	void	MoveKeybord(int CntPlayer, EFFECT *effect, bool Netflag);	//!< 移動制御(ki-bo-doで移動制御)
 
 	//------カメラ制御
 	void	CameraRevers(int CntPlayer, bool Netflag);		//!< カメラ制御
@@ -252,7 +252,6 @@ private:
 		"../data/MODEL/PlayerSensyaHoudai.x",
 		"../data/MODEL/PlayerSensyaHoutou.x",
 		"../data/MODEL/PlayerSensyaHousin.x",
-		"../data/MODEL/PlayerSensyaHousinMo.x"
 	};
 
 	//読み込むモデル　オリジナル用　モーフィング時の基準データ

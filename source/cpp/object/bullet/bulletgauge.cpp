@@ -2,7 +2,6 @@
 * @file bulletgauge.cpp
 * @brief NiceShot(3D)戦車ゲーム
 * @author キムラジュン
-* @date 2020/01/15
 */
 #include "../../../h/main.h"
 #include "../../../h/object/objectclass.h"
@@ -138,7 +137,7 @@ void BULLETGAUGE::Init(void)
 //=============================================================================
 // 再初期化処理　ネット対戦前
 //=============================================================================
-void BULLETGAUGE::ReinitNet(int MyNumber)
+void BULLETGAUGE::InitNet(int MyNumber)
 {
 	/*
 	this[MyNumber].Pos(D3DXVECTOR3(BULLETGAUGE_NET_POS_X, BULLETGAUGE_NET_POS_Y, 0.0f));
@@ -206,7 +205,7 @@ void BULLETGAUGE::Draw(bool Netflag, int NetMyNumber, int CntPlayer)
 			// テクスチャの設定　テクスチャが複数ならtexを配列化して選択させるように
 			pDevice->SetTexture(0, this->tex[BULLETGAUGE_TEX_SHELL].Texture());		//枠なので[1]
 			// 中身を描画　引数二個目の描画開始頂点を設定することが大事
-			pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, (CntAmmo * 4)+ PLAYER_AMMOSTOCK, POLYGON_2D_NUM);
+			pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, (CntAmmo * 4)+ (PLAYER_AMMOSTOCK*4), POLYGON_2D_NUM);
 		}
 	}
 	//ネット対戦時

@@ -2,7 +2,6 @@
 * @file objectclass.h
 * @brief NiceShot(3D)戦車ゲーム
 * @author キムラジュン
-* @date 2020/01/15
 */
 #pragma once
 
@@ -38,6 +37,7 @@ class FIELD;
 class SKY;
 class WALL;
 class FADE;
+class MySOCKET;
 
 /**
  * @class GAMEOBJECT
@@ -70,6 +70,7 @@ public:
 	~GAME_OBJECT() {}
 
 	virtual void Init();		//初期化(数値など)
+	virtual void InitNet();		//初期化(ネット対戦時専用の初期化)
 	virtual void Update();		//更新
 	virtual void Draw();		//描画
 
@@ -84,6 +85,13 @@ public:
 	inline void CreateInstanceOBJ() { AllOBJCnt++; }
 	inline void DeleteInstanceOBJ() { AllOBJCnt--; }
 
+	void MultThreadFlagFunc(bool flag) { this->MultThreadFlag = flag; }
+	bool MultThreadFlagFunc(void) { return this->MultThreadFlag; }
+	void GameSceneFlagFunc(bool flag) { this->GameSceneFlag = flag; }
+	bool GameSceneFlagFunc(void) { return this->GameSceneFlag; }
+
+	//データ通信処理
+	void PackectAll(void);
 
 private:
 
@@ -93,6 +101,11 @@ private:
 
 	//当たり判定
 	void CheakHit(int scene);
+
+	//マルチスレッド判定用
+	bool MultThreadFlag = false;
+	//ネット対戦中ループ　trueでネット対戦中　falseで対戦していない  これで同期するか判定している
+	bool GameSceneFlag = false;
 
 	PLAYER *player;
 	EFFECT *effect;
@@ -115,10 +128,11 @@ private:
 	SKY *sky;
 	WALL *wall;
 	FADE *fade;
+	MySOCKET *mysocket;
 
 	int	nScene = SCENE_TITLE;		//!< ステージ番号
 	bool stop = 0;					//!< デバッグ時の一時停止用変数 true=停止　false=停止しない
-	static int AllOBJCnt;				//!< 派生クラスでコンストラクト・デストラクトが呼ばれるときに必ず計測する。CreateInstanceOBJ()・DeleteInstanceOBJ()を呼ぶ
+	static int AllOBJCnt;			//!< 派生クラスでコンストラクト・デストラクトが呼ばれるときに必ず計測する。CreateInstanceOBJ()・DeleteInstanceOBJ()を呼ぶ
 };
 
 /**
@@ -236,18 +250,18 @@ private:
 class iUseCheak
 {
 public:
-	iUseCheak() { use = -1; }
+	iUseCheak() { use = NullUse; }
 	~iUseCheak() {}
 	//------------------------get関数
-	inline int Use() const { return this->use; };
+	inline eUse_Type Use() const { return this->use; };
 
 	//------------------------set関数
-	inline void Use(const int usetype) { this->use = usetype; };
+	inline void Use(const eUse_Type UseType) { this->use = UseType; };
 
 	//使用するタイプを変更する
-	void ChangeUse(int NowUseType);
+	//void ChangeUse(eUse_Type UseType);
 private:
-	int		use;		//!< 使用判定
+	eUse_Type		use;		//!< 使用判定
 
 };
 
@@ -319,13 +333,14 @@ class TEXTURE
 {
 public:
 	TEXTURE() { pD3DTexture = NULL; }
-	~TEXTURE() { SAFE_DELETE_ARRAY(pD3DTexture); }
+	~TEXTURE() { SafeRelease(pD3DTexture); }
 
 	//------------------------読み込み関数
 	void LoadTexture(const char *FileName);
 
 	//------------------------get関数
-	inline LPDIRECT3DTEXTURE9 Texture(void) const { return pD3DTexture; };
+	inline LPDIRECT3DTEXTURE9 Texture(void) { return pD3DTexture; };
+	inline LPDIRECT3DTEXTURE9 *pTexture(void) { return &pD3DTexture; };
 	//inline LPDIRECT3DTEXTURE9 Texture(int pHeadNum) const { return pD3DTexture[pHeadNum]; };
 
 private:
@@ -340,7 +355,7 @@ class VTXBuffer
 {
 public:
 	VTXBuffer() { pD3DVtxBuff = NULL; pD3DIdxBuff = NULL; }
-	~VTXBuffer() { SAFE_RELEASE(pD3DVtxBuff); SAFE_RELEASE(pD3DIdxBuff); }
+	~VTXBuffer() { SafeRelease(pD3DVtxBuff); SafeRelease(pD3DIdxBuff); }
 
 	//------------------------設定関数
 	//頂点[作成]時設定(3D)
@@ -388,7 +403,6 @@ public:
 
 	//UV設定
 	void UV3D(const int Indx);
-	void UV3D(const int Indx, const float PatternU, const float PatternV);
 	void UV3D(const int Indx, const float uStart, const float uEnd, const float vStart, const float vEnd);
 	void UV3D(const int Indx, const float uStart1, const float uEnd1, const float vStart1, const float vEnd1
 		, const float uStart2, const float uEnd2, const float vStart2, const float vEnd2);
@@ -406,9 +420,9 @@ public:
 	//------------------------バッファ群
 	//------------------------get関数
 	inline LPDIRECT3DVERTEXBUFFER9 VtxBuff(void) { return pD3DVtxBuff; };
-	//inline LPDIRECT3DVERTEXBUFFER9 *VtxBuff(int pHeadNum) { return &pD3DVtxBuff[pHeadNum]; };
+	inline LPDIRECT3DVERTEXBUFFER9 *pVtxBuff(void) { return &pD3DVtxBuff; };
 	inline LPDIRECT3DINDEXBUFFER9 IdxBuff(void) { return pD3DIdxBuff; };
-	//inline LPDIRECT3DINDEXBUFFER9 *IdxBuff(int pHeadNum) { return &pD3DIdxBuff[pHeadNum]; };
+	inline LPDIRECT3DINDEXBUFFER9 *pIdxBuff(void) { return &pD3DIdxBuff; };
 
 	//------------------------set関数
 	inline void VtxBuff(const LPDIRECT3DVERTEXBUFFER9 vtxbuff) { pD3DVtxBuff = vtxbuff; };
@@ -430,7 +444,7 @@ class ModelAttribute
 {
 public:
 	ModelAttribute() { pD3DXBuffMat = NULL; nNumMat = 0;nNumVertex = 0; nNumVertexIndex = 0; nNumPolygon = 0;}
-	~ModelAttribute() { SAFE_RELEASE(pD3DXBuffMat);}
+	~ModelAttribute() { SafeRelease(pD3DXBuffMat);}
 
 	//------------------------get関数
 	inline LPD3DXBUFFER *Mat() { return &pD3DXBuffMat; };

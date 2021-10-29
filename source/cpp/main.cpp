@@ -2,7 +2,6 @@
 * @file main.cpp
 * @brief NiceShot(3D)戦車ゲーム
 * @author キムラジュン
-* @date 2020/01/15
 */
 #include "../h/main.h"
 #include "../h/other/debugproc.h"
@@ -92,21 +91,12 @@ bool GetEndGame(void)
 	return EndGame;
 }
 
-//Send()用オブジェクト
-GAME_OBJECT *SendObject;
-
-GAME_OBJECT *GetSendObjectP(void)
-{
-	return &SendObject[0];
-}
-
 //=============================================================================
 // メイン関数
 //=============================================================================
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
 	//DialogBox(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), HWND_DESKTOP, IDD_DIALOG);
-
 
 	srand((unsigned)time(NULL));
 	
@@ -152,8 +142,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		hInstance,
 		NULL);
 	
-
-
 	// DirectXの初期化(ウィンドウを作成してから行う)
 	bool mode;
 	//戻り値がint型で戻ってくる
@@ -179,19 +167,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		break;
 	}
 
-	//-----------------------------------------------------オブジェクト生成
-	GAME_OBJECT* ObjectAll = { NULL };
-	ObjectAll = new GAME_OBJECT;
-	ObjectAll->Generate();
-
-
-	//Send()オブジェクトにゲームで使用するオブジェクトのアドレスを格納
-	SendObject = ObjectAll;
-
-	//マルチスレッドで受信プログラム(受信関数)起動　細かく通信する　1/60じゃない　関数一つで出来る
-	//マルチスレッド開始
-	std::thread t1(Packet);
-	
 	//注意　メインで書き込む変数とマルチ変数　ぶつかるとやばい　資源の共有　タイミングぶつからないようにする
 	//ざっくりとした関数一つでいいから作る　書き換える可能性のある時にアクセス許可をとる
 	//同期化する変数だけ信号を待つ(ざっくりした関数のアクセス許可)　シンクロライズ?　
@@ -200,12 +175,21 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	{
 		return -1;
 	}
-	//-----------------------------------------------------オブジェクト初期化
-	ObjectAll->Init();
 
+	//-----------------------------------------------------オブジェクト生成
+	GAME_OBJECT ObjectAll;
+	ObjectAll.Generate();
+
+	//-----------------------------------------------------オブジェクト初期化
+	ObjectAll.Init();
 
 	// 入力処理の初期化
 	InitInput(hInstance, hWnd);
+
+	//マルチスレッドで受信プログラム(受信関数)起動　細かく通信する　1/60じゃない　関数一つで出来る
+	//マルチスレッド開始
+	//std::thread SubThread(&GAME_OBJECT::ObjectAll->PackectAll(),);
+	std::thread SubThread([&ObjectAll]() {ObjectAll.PackectAll(); });
 
 	//フレームカウント初期化
 	timeBeginPeriod(1);				// 分解能を設定
@@ -262,15 +246,26 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 				dwExecLastTime = dwCurrentTime;
 
 				// 更新処理
-				ObjectAll->Update();
+				ObjectAll.Update();
 
 				// 描画処理
-				ObjectAll->Draw();
+				ObjectAll.Draw();
 
 				dwFrameCount++;
 			}
 		}
 	}
+
+	//-----------------------------------------------------オブジェクト終了 koko
+	ObjectAll.Delete();
+
+	//シーケンス終了フラグ
+	EndGame = true;
+	ObjectAll.MultThreadFlagFunc(false);
+	ObjectAll.GameSceneFlagFunc(false);
+
+	//スレッド破棄
+	SubThread.join();
 
 	// ウィンドウクラスの登録を解除
 	UnregisterClass(CLASS_NAME, wcex.hInstance);
@@ -278,16 +273,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	// 終了処理
 	Uninit();
 
-	//-----------------------------------------------------オブジェクト終了
-	ObjectAll->Delete();
-
-
-	EndGame = true;
-	SetMultThreadFlag(false);
-	SetGameSceneFlag(false);
-
-	//スレッド破棄
-	t1.join();
 
 	timeEndPeriod(1);				// 分解能を戻す
 
@@ -575,7 +560,6 @@ void SetText(char *moji)
 	strcpy(g_text, moji);
 }
 
-
 //=============================================================================
 // FPS表示処理
 //=============================================================================
@@ -610,7 +594,6 @@ void DrawFPS(void)
 }
 #endif
 
-
 //=============================================================================
 // 自作乱数　線形合同法
 //=============================================================================
@@ -630,9 +613,6 @@ int MyRandFunc(int *X, int Max)
 	ret = abs(ret % Max);
 	return ret;
 }
-
-
-
 
 //ピークメッセージのセット 終了するときにQuitを代入する
 void SetMsg(UINT Setmsg)

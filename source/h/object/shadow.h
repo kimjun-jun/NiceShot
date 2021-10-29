@@ -2,7 +2,6 @@
 * @file shadow.h
 * @brief NiceShot(3D)戦車ゲーム
 * @author キムラジュン
-* @date 2020/01/15
 */
 #pragma once
 #include "../../h/object/objectclass.h"
@@ -21,7 +20,7 @@ public:
 	~SHADOW();	//!< 削除
 
 	void		Init(void);		//!< 初期化
-	//void		Update(void);	//!< 更新
+	void		Update(void);	//!< 更新
 	void		Draw(void);		//!< 描画
 
 	int			SetInstance(D3DXVECTOR3 pos, D3DXVECTOR3 scl);	//!< インスタンスセット

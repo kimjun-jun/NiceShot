@@ -2,7 +2,6 @@
 * @file item.h
 * @brief NiceShot(3D)戦車ゲーム
 * @author キムラジュン
-* @date 2020/01/15
 */
 #pragma once
 
@@ -75,20 +74,21 @@ public:
 	~ITEM();	//!< 削除
 
 	void	Init(void);										//!< 初期化
-	void	Update(PLAYER *p, bool NetGameStartFlag);		//!< 更新
+	void	Update(PLAYER *Player, bool NetGameStartFlag);		//!< 更新
 	void	Draw(void);										//!< 描画
 
 	ITEM_PARAMETER_ALL		ItemParaAll[OBJECT_ITEM_MAX];	//!< 各インスタンスに必要なデータ群
-	iUseCheak				iUseType[OBJECT_ITEM_MAX];			//!< 使用情報
-	TransForm				Transform[OBJECT_ITEM_MAX];			//!< トランスフォーム情報
-	FieldNor				PostureVec[OBJECT_ITEM_MAX];		//!< 姿勢ベクトル
+	iUseCheak				iUseType[OBJECT_ITEM_MAX];		//!< 使用情報
+	TransForm				Transform[OBJECT_ITEM_MAX];		//!< トランスフォーム情報
+	FieldNor				PostureVec[OBJECT_ITEM_MAX];	//!< 姿勢ベクトル
+	void					SetInstance(D3DXVECTOR3 pos, D3DXVECTOR3 scl, D3DXVECTOR3 rot, eITEM_TYPE eType);
+	void					SetInstance(int Index, D3DXVECTOR3 pos, D3DXVECTOR3 scl, D3DXVECTOR3 rot, eITEM_TYPE eType);
+	void					ReleaseInstance(int nIdxItem);
 
 private:
 
 	//void	ReinitNet(void);								//!< 初期化　同期
 
-	void	SetInstance(D3DXVECTOR3 pos, D3DXVECTOR3 scl, D3DXVECTOR3 rot, eITEM_TYPE eType);
-	void	ReleaseInstance(int nIdxItem);
 	void	GettingItem(int nIdxItem, PLAYER *p);
 
 	ModelAttribute			model;								//!< モデル情報　マテリアルや頂点数など　複数使用するならここを配列化

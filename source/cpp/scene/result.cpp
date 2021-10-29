@@ -2,7 +2,6 @@
 * @file result.cpp
 * @brief NiceShot(3D)戦車ゲーム
 * @author キムラジュン
-* @date 2020/01/15
 */
 #include "../../h/main.h"
 #include "../../h/other/input.h"
@@ -33,7 +32,6 @@ RESULT::RESULT(void)
 	//頂点の作成
 	this->vtx.MakeVertex2D(OBJECT_RESULT_MAX, FVF_VERTEX_2D);
 
-
 	//描画位置反映　スクリーンサイズで作成 BGとLOGO
 	D3DXVECTOR3 vtxBG[POLYGON_2D_VERTEX] = {
 	D3DXVECTOR3(0.0f, 0.0f, 0.0f),
@@ -43,7 +41,6 @@ RESULT::RESULT(void)
 	};
 	this->vtx.Vertex2D(RESULT_TEX_BG, vtxBG);
 
-
 	D3DXVECTOR3 vtxLOGO[POLYGON_2D_VERTEX] = {
 	D3DXVECTOR3(RESULT_LOGO_POS_X - RESULT_LOGO_SIZE_X, RESULT_LOGO_POS_Y - RESULT_LOGO_SIZE_Y, 0.0f),
 	D3DXVECTOR3(RESULT_LOGO_POS_X + RESULT_LOGO_SIZE_X, RESULT_LOGO_POS_Y - RESULT_LOGO_SIZE_Y, 0.0f),
@@ -52,10 +49,15 @@ RESULT::RESULT(void)
 	};
 	this->vtx.Vertex2D(RESULT_TEX_LOGO, vtxLOGO);
 
-
 	for (int CntResult = 0; CntResult < OBJECT_RESULT_MAX; CntResult++)
 	{
-		this->tex->LoadTexture(this->c_aFileNameTex[CntResult]);
+		//RHW設定
+		this->vtx.RHW2D(CntResult);
+		//UVの設定
+		this->vtx.UV2D(CntResult);
+		//カラー設定
+		this->vtx.Color2D(CntResult, D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
+		this->tex[CntResult].LoadTexture(this->c_aFileNameTex[CntResult]);
 	}
 }
 

@@ -2,7 +2,6 @@
 * @file bullet.cpp
 * @brief NiceShot(3D)íŽÔƒQ[ƒ€
 * @author ƒLƒ€ƒ‰ƒWƒ…ƒ“
-* @date 2020/01/15
 */
 #include "../../../h/main.h"
 #include "../../../h/other/input.h"
@@ -156,6 +155,14 @@ void BULLET::Update(SHADOW *shadow, EFFECT *effect)
 }
 
 //=============================================================================
+// •`‰æˆ—
+//=============================================================================
+void BULLET::Draw(void)
+{
+
+}
+
+//=============================================================================
 // ’e‚ÌÝ’è
 //=============================================================================
 int BULLET::SetInstance(D3DXVECTOR3 pos, D3DXVECTOR3 move, float fSizeX, float fSizeY, int nTimer, ePLAYER_TYPE type,SHADOW *s)
@@ -168,11 +175,11 @@ int BULLET::SetInstance(D3DXVECTOR3 pos, D3DXVECTOR3 move, float fSizeX, float f
 		if (use != true)
 		{
 			//ˆø”‚Å‰Šú’l‚ðÝ’è rot‚âscl‚ÍŽg—p‚µ‚È‚¢
-			this->Transform[CntBullet].Pos(pos);
+   			this->Transform[CntBullet].Pos(pos);
 			this->Transform[CntBullet].Rot(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
 			this->Transform[CntBullet].Scl(D3DXVECTOR3(1.0f, 1.0f, 1.0f));
 			this->move[CntBullet].Move(move);
-			this->iUseType[CntBullet].Use(YesUse);
+			this->iUseType[CntBullet].Use(YesUseType1);
 			this->BulletPara[CntBullet].Timer = nTimer;
 			this->BulletPara[CntBullet].UsePlayerType = type;
 			this->BulletPara[CntBullet].Gravity = 0.0f;

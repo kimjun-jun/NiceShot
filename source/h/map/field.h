@@ -2,7 +2,6 @@
 * @file field.h
 * @brief NiceShot(3D)íÔƒQ[ƒ€
 * @author ƒLƒ€ƒ‰ƒWƒ…ƒ“
-* @date 2020/01/15
 */
 #pragma once
 

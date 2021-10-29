@@ -2,7 +2,6 @@
 * @file bulletprediction.h
 * @brief NiceShot(3D)戦車ゲーム
 * @author キムラジュン
-* @date 2020/01/15
 */
 #pragma once
 #include "../../../h/object/objectclass.h"
@@ -30,7 +29,7 @@ private:
 
 	TEXTURE		tex;				//!< テクスチャ情報　複数使用するならここを配列化
 	VTXBuffer	vtx[OBJECT_PLAYER_MAX];				//!< 頂点情報　複数使用するならここを配列化
-	TransForm	Transform[OBJECT_PLAYER_MAX][OBJECT_BULLETPREDICTION_MAX];		//!< トランスフォーム情報
+	TransForm	Transform[OBJECT_PLAYER_MAX][OBJECT_BULLETPREDICTION_MAX/ OBJECT_PLAYER_MAX];		//!< トランスフォーム情報
 
 };
 

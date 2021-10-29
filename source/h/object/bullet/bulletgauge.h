@@ -2,7 +2,6 @@
 * @file bulletgauge.h
 * @brief NiceShot(3D)戦車ゲーム
 * @author キムラジュン
-* @date 2020/01/15
 */
 #pragma once
 #include "../../../h/object/objectclass.h"
@@ -40,12 +39,11 @@ public:
 	~BULLETGAUGE();	//!< 削除
 
 	void		Init(void);						//!< 初期化
+	void		InitNet(int MyNumber);	//!< 初期化
 	void		Update(PLAYER *player);	//!< 更新
 	void		Draw(bool Netflag, int NetMyNumber, int CntPlayer);		//!< 描画
 
 private:
-
-	void		ReinitNet(int MyNumber);		//!< 再初期化ネット対戦前	
 
 	TEXTURE			tex[BULLETGAUGE_TEX_MAX];					//!< テクスチャ情報　複数使用するならここを配列化　0:枠　1:中身
 	VTXBuffer		vtx[OBJECT_BULLETGAUGE_MAX];				//!< 頂点情報　複数使用するならここを配列化

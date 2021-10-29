@@ -2,7 +2,6 @@
 * @file bullet.h
 * @brief NiceShot(3D)戦車ゲーム
 * @author キムラジュン
-* @date 2020/01/15
 */
 #pragma once
 #include "../../../h/object/objectclass.h"
@@ -41,7 +40,7 @@ public:
 
 	void	Init(void);						//!< 初期化
 	void	Update(SHADOW *s, EFFECT *e);	//!< 更新
-	//void	Draw(void);						//!< 描画
+	void	Draw(void);						//!< 描画
 
 	TransForm	Transform[OBJECT_BULLET_MAX];		//!< トランスフォーム情報
 	iUseCheak	iUseType[OBJECT_BULLET_MAX];		//!< 使用情報

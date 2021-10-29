@@ -2,7 +2,6 @@
 * @file wall.cpp
 * @brief NiceShot(3D)戦車ゲーム
 * @author キムラジュン
-* @date 2020/01/15
 */
 #include "../../h/main.h"
 #include "../../h/other/input.h"
@@ -138,7 +137,7 @@ void WALL::SetUpMesh(void)
 		//頂点バッファのセット
 		VERTEX_3D *pVtx;
 		LPDIRECT3DVERTEXBUFFER9 VtxBuff;
-		VtxBuff = this->vtx[nCntMeshField].VtxBuff();
+		VtxBuff = *this->vtx[nCntMeshField].pVtxBuff();
 
 		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
 		VtxBuff->Lock(0, 0, (void**)&pVtx, 0);

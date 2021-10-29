@@ -2,7 +2,6 @@
 * @file sky.h
 * @brief NiceShot(3D)戦車ゲーム
 * @author キムラジュン
-* @date 2020/01/15
 */
 #pragma once
 
@@ -44,9 +43,9 @@ class SKY : public GAME_OBJECT
 public:
 	SKY();		//!< データ読み込み　初期化
 	~SKY();		//!< 削除
-	void		Init(void)override;		//!< 初期化
-	void		Update(void)override;	//!< 更新
-	void		Draw(void)override;		//!< 描画
+	void		Init(void);		//!< 初期化
+	void		Update(void);	//!< 更新
+	void		Draw(void);		//!< 描画
 
 private:
 	ModelAttribute			Attribute[OBJECT_SKY_MAX];			//!< モデル情報　マテリアルや頂点数など　複数使用するならここを配列化

@@ -2,7 +2,6 @@
 * @file item.cpp
 * @brief NiceShot(3D)戦車ゲーム
 * @author キムラジュン
-* @date 2020/01/15
 */
 #include "../../h/main.h"
 #include "../../h/map/field.h"
@@ -66,7 +65,7 @@ ITEM::ITEM(void)
 		this->vtx[CntItem].IdxBuff(IdxBuff);
 
 		//使用の設定
-		this->iUseType[CntItem].ChangeUse(NoUse);
+		this->iUseType[CntItem].Use(NoUse);
 	}
 
 	//モデルデータ反映
@@ -260,6 +259,7 @@ void ITEM::Update(PLAYER *Player, bool NetGameStartFlag)
 		}
 	}
 
+	
 	//ローカル対戦ならここでリスポーン処理
 	if (NetGameStartFlag == false)
 	{
@@ -287,8 +287,11 @@ void ITEM::Update(PLAYER *Player, bool NetGameStartFlag)
 					int ItemNum = rand() % ITEM_TYPE_MAX;
 					//確立設定のため　ライフ、カメラ、霧アイテムの時はもう一度抽選
 					if (ItemNum == ITEM_TYPE_LIFE && ItemNum == ITEM_TYPE_CAMERA && ItemNum == ITEM_TYPE_KIRI) ItemNum = rand() % ITEM_TYPE_MAX;
+					this->ItemParaAll[nCntItem].eType = eITEM_TYPE(ItemNum);
 					//インスタンスセット　使用する
-					this[0].SetInstance(pos, D3DXVECTOR3(ITEM_BIG_SCL, ITEM_BIG_SCL, ITEM_BIG_SCL), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ITEM_TYPE_TIKEI);
+					this->SetInstance(pos, D3DXVECTOR3(ITEM_BIG_SCL, ITEM_BIG_SCL, ITEM_BIG_SCL), D3DXVECTOR3(0.0f, 0.0f, 0.0f), this->ItemParaAll[nCntItem].eType);
+					//this->SetInstance(pos, D3DXVECTOR3(ITEM_BIG_SCL, ITEM_BIG_SCL, ITEM_BIG_SCL), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ITEM_TYPE_TIKEI);
+					//this->SetInstance(pos, D3DXVECTOR3(ITEM_BIG_SCL, ITEM_BIG_SCL, ITEM_BIG_SCL), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ITEM_TYPE_SENSYA);
 					this->ItemParaAll[nCntItem].CollisionFieldEnd = false;
 					this->ItemParaOne.Droptime = 0;
 					this->ItemParaOne.GoukeiDrop++;
@@ -368,7 +371,6 @@ void ITEM::Draw(void)
 			{
 				// デバイスにマテリアルの設定
 				pDevice->SetMaterial(&pD3DXMat->MatD3D);
-
 				// デバイスにテクスチャの設定
 				pDevice->SetTexture(0, this->tex[this->ItemParaAll[nCntItem].eType].Texture());
 				// 頂点フォーマットの設定
@@ -380,6 +382,8 @@ void ITEM::Draw(void)
 				//描画
 				pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, this->model.NumVertex(), 0, this->model.NumPolygon());
 			}
+			// マテリアルをデフォルトに戻す
+			pDevice->SetMaterial(&matDef);
 		}
 	}
 	// ライティングを有効に
@@ -402,10 +406,25 @@ void ITEM::SetInstance(D3DXVECTOR3 pos, D3DXVECTOR3 scl, D3DXVECTOR3 rot, eITEM_
 			this->Transform[nCntItem].Pos(pos);
 			this->Transform[nCntItem].Scl(scl);
 			this->Transform[nCntItem].Rot(rot);
-			this->iUseType[nCntItem].Use(YesUse);
+			this->iUseType[nCntItem].Use(YesUseType1);
 			this->ItemParaAll[nCntItem].eType = eType;
 			break;
 		}
+	}
+}
+
+//未使用
+void ITEM::SetInstance(int Index, D3DXVECTOR3 pos, D3DXVECTOR3 scl, D3DXVECTOR3 rot, eITEM_TYPE eType)
+{
+	//使用されていないインスタンスが存在すれば一個だけ使用(出現)する
+	if (this->iUseType[Index].Use() == NoUse)
+	{
+		//基本パラメータの設定
+		this->Transform[Index].Pos(pos);
+		this->Transform[Index].Scl(scl);
+		this->Transform[Index].Rot(rot);
+		this->iUseType[Index].Use(YesUseType1);
+		this->ItemParaAll[Index].eType = eType;
 	}
 }
 

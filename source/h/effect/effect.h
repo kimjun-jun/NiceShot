@@ -2,7 +2,6 @@
 * @file effect.h
 * @brief NiceShot(3D)戦車ゲーム
 * @author キムラジュン
-* @date 2020/01/15
 */
 #pragma once
 #include "../../h/object/objectclass.h"
@@ -45,6 +44,7 @@ private:
 
 	TEXTURE		tex;				//!< テクスチャ情報　複数使用するならここを配列化
 	VTXBuffer	vtx;				//!< 頂点情報　複数使用するならここを配列化
+
 	TransForm	Transform[OBJECT_EFFECT_MAX];		//!< トランスフォーム情報
 	iUseCheak	iUseType[OBJECT_EFFECT_MAX];		//!< 使用情報
 	Movement	move[OBJECT_EFFECT_MAX];			//!< 移動量

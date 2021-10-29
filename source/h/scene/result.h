@@ -2,7 +2,6 @@
 * @file result.h
 * @brief NiceShot(3D)戦車ゲーム
 * @author キムラジュン
-* @date 2020/01/15
 */
 #pragma once
 
@@ -37,7 +36,7 @@ private:
 	const char *c_aFileNameTex[OBJECT_RESULT_MAX] =
 	{
 		"../data/TEXTURE/other/GameClear_Background.png",	//!< リザルト背景
-		"../data/TEXTURE/other/GameClear.png",				//!< リザルトロゴ
+		"../data/TEXTURE/other/GameClear.png"				//!< リザルトロゴ
 	};
 
 };

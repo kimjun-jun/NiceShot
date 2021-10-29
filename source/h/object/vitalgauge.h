@@ -2,7 +2,6 @@
 * @file vitalgauge.h
 * @brief NiceShot(3D)戦車ゲーム
 * @author キムラジュン
-* @date 2020/01/15
 */
 #pragma once
 #include "../../h/object/objectclass.h"
@@ -43,11 +42,11 @@ public:
 	~VITALGAUGE();	//!< 削除
 
 	void		Init(void);								//!< 初期化
+	void		InitNet(int MyNumber);	//!< 初期化
 	void		Update(PLAYER *p, RANK *rank, bool Netflag, int NetMyNumber);	//!< 更新
 	void		Draw(bool Netflag, int NetMyNumber, int CntPlayer);						//!< 描画
 
 private:
-	void		ReinitNet(int MyNumber);		//!< 再初期化ネット対戦前	
 
 	TEXTURE			tex[VITAL_TEX_MAX];				//!< テクスチャ情報　複数使用するならここを配列化　0:枠　1,2,3:中身(カラーバリエーション)
 	VTXBuffer		vtx[OBJECT_VITAL_MAX];			//!< 頂点情報　複数使用するならここを配列化 

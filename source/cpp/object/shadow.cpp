@@ -2,7 +2,6 @@
 * @file shadow.cpp
 * @brief NiceShot(3D)戦車ゲーム
 * @author キムラジュン
-* @date 2020/01/15
 */
 #include "../../h/main.h"
 #include "../../h/other/input.h"
@@ -49,7 +48,7 @@ SHADOW::SHADOW(void)
 		this->vtx.Color3D(CntShadow, D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
 
 		//使用設定
-		this->iUseType[CntShadow].ChangeUse(NoUse);
+		this->iUseType[CntShadow].Use(NoUse);
 	}
 
 	// テクスチャの読み込み
@@ -80,8 +79,16 @@ void SHADOW::Init(void)
 		this->Transform[CntShadow].Pos(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
 		this->Transform[CntShadow].Rot(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
 		this->Transform[CntShadow].Scl(D3DXVECTOR3(1.0f, 1.0f, 1.0f));
-		this->iUseType[CntShadow].Use(false);
+		this->iUseType[CntShadow].Use(NoUse);
 	}
+}
+
+//=============================================================================
+// 更新処理
+//=============================================================================
+void SHADOW::Update(void)
+{
+
 }
 
 //=============================================================================
@@ -136,7 +143,7 @@ void SHADOW::Draw(void)
 			pDevice->SetTexture(0, this->tex.Texture());
 
 			// ポリゴンの描画
-			pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, POLYGON_2D_NUM);
+			pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, (CntShadow*4), POLYGON_2D_NUM);
 		}
 	}
 
@@ -156,13 +163,12 @@ int SHADOW::SetInstance(D3DXVECTOR3 pos, D3DXVECTOR3 scl)
 
 	for(int CntShadow = 0; CntShadow < OBJECT_SHADOW_MAX; CntShadow++)
 	{
-		bool use = this->iUseType[CntShadow].Use();
-		if(use != true)
+		if(this->iUseType[CntShadow].Use() == NoUse)
 		{
 			this->Transform[CntShadow].Pos(pos);
 			this->Transform[CntShadow].Rot(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
 			this->Transform[CntShadow].Scl(scl);
-			this->iUseType[CntShadow].Use(YesUse);
+			this->iUseType[CntShadow].Use(YesUseType1);
 
 			IdxShadow = CntShadow;
 			break;

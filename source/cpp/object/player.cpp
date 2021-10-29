@@ -2,7 +2,6 @@
 * @file player.cpp
 * @brief NiceShot(3D)戦車ゲーム
 * @author キムラジュン
-* @date 2020/01/15
 */
 #include "../../h/main.h"
 #include "../../h/library.h"
@@ -60,33 +59,31 @@ PLAYER::PLAYER(void)
 				&nm, &Mesh, &nv, &np, &nvi, NULL);
 
 			//頂点の作成
-			LPDIRECT3DVERTEXBUFFER9 VtxBuff;
-			LPDIRECT3DINDEXBUFFER9	IdxBuff;
 			this->modelDraw[CntPlayer].Vtx[CntDrawPartsNum].MakeVertex3D(nv, FVF_VERTEX_3D);
 			this->modelDraw[CntPlayer].Vtx[CntDrawPartsNum].MakeIdxVertex(nvi);
 
 			//バッファの取得から反映
-			VtxBuff = this->modelDraw[CntPlayer].Vtx[CntDrawPartsNum].VtxBuff();
-			IdxBuff = this->modelDraw[CntPlayer].Vtx[CntDrawPartsNum].IdxBuff();
-			Mesh->GetVertexBuffer(&VtxBuff);
-			Mesh->GetIndexBuffer(&IdxBuff);
-			this->modelDraw[CntPlayer].Vtx[CntDrawPartsNum].VtxBuff(VtxBuff);
-			this->modelDraw[CntPlayer].Vtx[CntDrawPartsNum].IdxBuff(IdxBuff);
+			LPDIRECT3DVERTEXBUFFER9 *VtxBuff;
+			LPDIRECT3DINDEXBUFFER9	*IdxBuff;
+			VtxBuff = this->modelDraw[CntPlayer].Vtx[CntDrawPartsNum].pVtxBuff();
+			IdxBuff = this->modelDraw[CntPlayer].Vtx[CntDrawPartsNum].pIdxBuff();
+			Mesh->GetVertexBuffer(VtxBuff);
+			Mesh->GetIndexBuffer(IdxBuff);
 
 			//頂点カラーをプレイヤー色に変更
-			this->PlayerMeshColor(this->modelDraw[CntPlayer].Vtx->VtxBuff(), this->modelDraw[CntPlayer].Vtx->IdxBuff(), np, CntPlayer);
+			this->PlayerMeshColor(this->modelDraw[CntPlayer].Vtx[CntDrawPartsNum].pVtxBuff(), this->modelDraw[CntPlayer].Vtx[CntDrawPartsNum].pIdxBuff(), np, CntPlayer);
 
 			//データ反映
-			this->modelDraw->ModelAttribute[CntDrawPartsNum].NumMat(nm);
-			this->modelDraw->ModelAttribute[CntDrawPartsNum].Mat(BuffMat);
-			this->modelDraw->ModelAttribute[CntDrawPartsNum].NumVertex(nv);
-			this->modelDraw->ModelAttribute[CntDrawPartsNum].NumPolygon(np);
-			this->modelDraw->ModelAttribute[CntDrawPartsNum].NumVertexIndex(nvi);
+			this->modelDraw[CntPlayer].ModelAttribute[CntDrawPartsNum].NumMat(nm);
+			this->modelDraw[CntPlayer].ModelAttribute[CntDrawPartsNum].Mat(BuffMat);
+			this->modelDraw[CntPlayer].ModelAttribute[CntDrawPartsNum].NumVertex(nv);
+			this->modelDraw[CntPlayer].ModelAttribute[CntDrawPartsNum].NumPolygon(np);
+			this->modelDraw[CntPlayer].ModelAttribute[CntDrawPartsNum].NumVertexIndex(nvi);
 		}
 
 
 		//使用の設定
-		this->iUseType[CntPlayer].ChangeUse(YesUse);
+		this->iUseType[CntPlayer].Use(YesUseType1);
 	}
 
 	//カウントループ　オリジナル用モデルの数(モーフィング基準データ)
@@ -102,18 +99,16 @@ PLAYER::PLAYER(void)
 			&nm, &Mesh, &nv, &np, &nvi, NULL);
 
 		//頂点の作成
-		LPDIRECT3DVERTEXBUFFER9 VtxBuff;
-		LPDIRECT3DINDEXBUFFER9	IdxBuff;
 		this->modelOri.Vtx[CntOriginalModelNum].MakeVertex3D(nv, FVF_VERTEX_3D);
 		this->modelOri.Vtx[CntOriginalModelNum].MakeIdxVertex(nvi);
 
 		//バッファの取得から反映
-		VtxBuff = this->modelOri.Vtx[CntOriginalModelNum].VtxBuff();
-		IdxBuff = this->modelOri.Vtx[CntOriginalModelNum].IdxBuff();
-		Mesh->GetVertexBuffer(&VtxBuff);
-		Mesh->GetIndexBuffer(&IdxBuff);
-		this->modelOri.Vtx[CntOriginalModelNum].VtxBuff(VtxBuff);
-		this->modelOri.Vtx[CntOriginalModelNum].IdxBuff(IdxBuff);
+		LPDIRECT3DVERTEXBUFFER9 *VtxBuff;
+		LPDIRECT3DINDEXBUFFER9	*IdxBuff;
+		VtxBuff = this->modelOri.Vtx[CntOriginalModelNum].pVtxBuff();
+		IdxBuff = this->modelOri.Vtx[CntOriginalModelNum].pIdxBuff();
+		Mesh->GetVertexBuffer(VtxBuff);
+		Mesh->GetIndexBuffer(IdxBuff);
 
 		//モデルデータ反映
 		this->modelOri.ModelAttribute[CntOriginalModelNum].NumMat(nm);
@@ -171,7 +166,7 @@ void PLAYER::Init(FIELD *field)
 	//PLAYER 初期化　各初期化を関数化
 	for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
 	{
-		this->iUseType[CntPlayer].Use(YesUse);
+		this->iUseType[CntPlayer].Use(YesUseType1);
 
 		//標準パラメータ
 		this->PlayerPara[CntPlayer].StandardPara.Vital = this->PlayerPara[CntPlayer].StandardPara.OldVital = PLAYER_VITAL_MAX;
@@ -242,7 +237,7 @@ void PLAYER::Init(FIELD *field)
 	for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
 	{
 		//レイキャスト処理準備
-		D3DXVECTOR3 RayStart = this->modelDraw->Transform[CntPlayer].Pos();
+		D3DXVECTOR3 RayStart = this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos();
 		RayStart.y += 10.0f;
 		D3DXVECTOR3 RayEnd = RayStart;
 		RayEnd.y -= 1000.0f;
@@ -256,7 +251,7 @@ void PLAYER::Init(FIELD *field)
 		//レイキャスト結果を反映
 		D3DXVECTOR3 Pos = RayStart;
 		Pos.y = ReturnPosY;
-		this->modelDraw->Transform[CntPlayer].Pos(Pos);
+		this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos(Pos);
 		this->PostureVec[CntPlayer].FNVecFunc(FieldNorVec);
 		this->Quaternion(CntPlayer);
 		this->CameraRevers(CntPlayer, false);
@@ -293,7 +288,7 @@ void PLAYER::Update(EFFECT*effect, BULLET*bullet, SHADOW*shadow, FADE *fade, boo
 		if (deadcnt >= 3)
 		{
 			fade->SetFade(FADE_OUT, SCENE_RESULT, SOUND_LABEL_BGM_gameclear01);
-			SetGameSceneFlag(false);
+			//this->GameSceneFlagFuncSetGameSceneFlag(false);
 		}
 	}
 
@@ -301,6 +296,7 @@ void PLAYER::Update(EFFECT*effect, BULLET*bullet, SHADOW*shadow, FADE *fade, boo
 	//プレイヤー人数分ループ ローカル対戦
 	if (Netflag == false)
 	{
+		this->MoveKeybord(0, &effect[0], Netflag);
 		for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
 		{
 			bool use = this->iUseType[CntPlayer].Use();
@@ -308,7 +304,7 @@ void PLAYER::Update(EFFECT*effect, BULLET*bullet, SHADOW*shadow, FADE *fade, boo
 			if (use)
 			{
 				//this->SetMoveL2R2(CntPlayer, Netflag);
-				this->MoveL(CntPlayer, &effect[0], Netflag);
+				//this->MoveL(CntPlayer, &effect[0], Netflag);
 				this->Quaternion(CntPlayer);
 				this->CameraRevers(CntPlayer, Netflag);
 				this->BulletALL(CntPlayer, &bullet[0], shadow, Netflag);
@@ -341,6 +337,7 @@ void PLAYER::Update(EFFECT*effect, BULLET*bullet, SHADOW*shadow, FADE *fade, boo
 	//ネット対戦
 	else
 	{
+		this->MoveKeybord(0, &effect[0], Netflag);
 		bool use = this->iUseType[MyNumber].Use();
 
 		//生きていれば操作可能
@@ -681,14 +678,16 @@ void PLAYER::Draw(void)
 //=============================================================================
 // メッシュカラーをセット
 //=============================================================================
-void PLAYER::PlayerMeshColor(LPDIRECT3DVERTEXBUFFER9 pD3DVtxBuff, LPDIRECT3DINDEXBUFFER9 pD3DIdxBuff, DWORD nNumPolygon, int CntPlayer)
+void PLAYER::PlayerMeshColor(LPDIRECT3DVERTEXBUFFER9 *pD3DVtxBuff, LPDIRECT3DINDEXBUFFER9 *pD3DIdxBuff, DWORD nNumPolygon, int CntPlayer)
 {
 	VERTEX_3D *pVtx;
 	WORD *pIdx;
 
+	LPDIRECT3DVERTEXBUFFER9 vtx = *pD3DVtxBuff;
+	LPDIRECT3DINDEXBUFFER9 idx = *pD3DIdxBuff;
 	// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
-	pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
-	pD3DIdxBuff->Lock(0, 0, (void**)&pIdx, 0);
+	vtx->Lock(0, 0, (void**)&pVtx, 0);
+	idx->Lock(0, 0, (void**)&pIdx, 0);
 	for (int nCntPoly = 0; nCntPoly < int(nNumPolygon); nCntPoly++, pIdx += 3)
 	{
 		// 反射光の設定
@@ -697,14 +696,14 @@ void PLAYER::PlayerMeshColor(LPDIRECT3DVERTEXBUFFER9 pD3DVtxBuff, LPDIRECT3DINDE
 			pVtx[pIdx[2]].diffuse = PLAYER_COLOR[CntPlayer];
 	}
 	// 頂点データをアンロックする
-	pD3DVtxBuff->Unlock();
-	pD3DIdxBuff->Unlock();
+	vtx->Unlock();
+	idx->Unlock();
 }
 
 //=============================================================================
 // 移動制御(ABボタンLスティックで移動制御)
 //=============================================================================
-void PLAYER::MoveABL(int CntPlayer, EFFECT *effect)
+void PLAYER::MoveABL(int CntPlayer, EFFECT *effect, bool Netflag)
 {
 	//---------------------------------------------------------オブジェクト値呼び出し
 	D3DXVECTOR3 pos = this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos();
@@ -727,6 +726,7 @@ void PLAYER::MoveABL(int CntPlayer, EFFECT *effect)
 		dir = BACK_VEC;
 		this->PlayerPara[CntPlayer].StandardPara.Speed -= VALUE_MOVE;
 	}
+
 	// 無移動時は移動量に慣性をかける
 	else
 	{
@@ -742,17 +742,17 @@ void PLAYER::MoveABL(int CntPlayer, EFFECT *effect)
 	{
 		dir = FRONT_VEC;
 	}
-	else if (GetKeyboardPress(DIK_RIGHT) || IsButtonPressed(CntPlayer, BUTTON_ANALOG_L_RIGHT))
+	else if (IsButtonPressed(CntPlayer, BUTTON_ANALOG_L_RIGHT))
 	{
 		HoudaiRot.y += LAnalogX * dir*this->PlayerPara[CntPlayer].ItemPara.SpeedBuff;
 	}
-	else if (GetKeyboardPress(DIK_LEFT) || IsButtonPressed(CntPlayer, BUTTON_ANALOG_L_LEFT))
+	else if (IsButtonPressed(CntPlayer, BUTTON_ANALOG_L_LEFT))
 	{
 		HoudaiRot.y += LAnalogX * dir*this->PlayerPara[CntPlayer].ItemPara.SpeedBuff;
 	}
 
 	//角度の制限値
-	if (HoudaiRot.y >= D3DX_PI*2) HoudaiRot.y = 0.0f;
+	if (HoudaiRot.y >= D3DX_PI * 2) HoudaiRot.y = 0.0f;
 	else if (HoudaiRot.y <= -D3DX_PI * 2) HoudaiRot.y = 0.0f;
 
 	// 移動速度の制限
@@ -798,6 +798,110 @@ void PLAYER::MoveABL(int CntPlayer, EFFECT *effect)
 		if (HousinRot.x >= VALUE_ROTATE_PLAYER_HOUSIN_MAX) HousinRot.x = VALUE_ROTATE_PLAYER_HOUSIN_MAX;
 	}
 	else if (GetKeyboardPress(DIK_S) || IsButtonPressed(CntPlayer, BUTTON_L2))
+	{
+		HousinRot.x -= VALUE_ROTATE_PLAYER_HOUSIN;
+		if (HousinRot.x <= -VALUE_ROTATE_PLAYER_HOUSIN_MAX) HousinRot.x = -VALUE_ROTATE_PLAYER_HOUSIN_MAX;
+	}
+
+	//---------------------------------------------------------オブジェクト値セット
+	this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos(pos);
+	this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Rot(HoudaiRot);
+	this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUTOU].Rot(HoutouRot);
+	this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUSIN].Rot(HousinRot);
+
+}
+
+//=============================================================================
+// 移動制御(ki-bo-doで移動制御)
+//=============================================================================
+void PLAYER::MoveKeybord(int CntPlayer, EFFECT *effect, bool Netflag)
+{
+	//---------------------------------------------------------オブジェクト値呼び出し
+	D3DXVECTOR3 pos = this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos();
+	D3DXVECTOR3 HoudaiRot = this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Rot();
+	D3DXVECTOR3 HoutouRot = this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUTOU].Rot();
+	D3DXVECTOR3 HousinRot = this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUSIN].Rot();
+
+	//Old保存
+	this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos(pos);
+
+	int dir = FRONT_VEC;
+	//移動処理
+	if (GetKeyboardPress(DIK_W))
+	{
+		dir = FRONT_VEC;
+		this->PlayerPara[CntPlayer].StandardPara.Speed += VALUE_MOVE * 10*4;
+	}
+	else if (GetKeyboardPress(DIK_S))
+	{
+		dir = BACK_VEC;
+		this->PlayerPara[CntPlayer].StandardPara.Speed -= VALUE_MOVE * 10*4;
+	}
+
+	// 無移動時は移動量に慣性をかける
+	else
+	{
+		this->PlayerPara[CntPlayer].StandardPara.Speed *= MOVE_INERTIA_MOMENT;
+	}
+
+	//旋回
+	if (GetKeyboardPress(DIK_D))
+	{
+		HoudaiRot.y += 0.02f * dir*this->PlayerPara[CntPlayer].ItemPara.SpeedBuff*2;
+	}
+	else if (GetKeyboardPress(DIK_A))
+	{
+		HoudaiRot.y -= 0.02f * dir*this->PlayerPara[CntPlayer].ItemPara.SpeedBuff*2;
+	}
+
+
+	//角度の制限値
+	if (HoudaiRot.y >= D3DX_PI * 2) HoudaiRot.y = 0.0f;
+	else if (HoudaiRot.y <= -D3DX_PI * 2) HoudaiRot.y = 0.0f;
+
+	// 移動速度の制限
+	if (this->PlayerPara[CntPlayer].StandardPara.Speed >= VALUE_MOVE_MAX) this->PlayerPara[CntPlayer].StandardPara.Speed = VALUE_MOVE_MAX;
+	else if (this->PlayerPara[CntPlayer].StandardPara.Speed <= -VALUE_MOVE_MAX) this->PlayerPara[CntPlayer].StandardPara.Speed = -VALUE_MOVE_MAX;
+
+	// プレイヤーの座標を更新
+	pos.x -= sinf(HoudaiRot.y) * (this->PlayerPara[CntPlayer].StandardPara.Speed * this->PlayerPara[CntPlayer].ItemPara.SpeedBuff);
+	pos.z -= cosf(HoudaiRot.y) * (this->PlayerPara[CntPlayer].StandardPara.Speed * this->PlayerPara[CntPlayer].ItemPara.SpeedBuff);
+
+	//スピードバフ時間減少
+	if (this->PlayerPara[CntPlayer].ItemPara.SpeedBuffSignal == true)
+	{
+		this->PlayerPara[CntPlayer].ItemPara.SpeedBuffTime -= VALUE_SPEEDBUFF_SUB;
+
+		// エフェクトスピードアップの生成
+		D3DXVECTOR3 EffctSpeedupPos = D3DXVECTOR3(pos.x, pos.y, pos.z);
+		effect->SetInstance(EffctSpeedupPos, D3DXVECTOR3(0.0f, 0.0f, 0.0f), PLAYER_COLOR[CntPlayer], EFFECT_SPEEDUP_SIZE_X, EFFECT_SPEEDUP_SIZE_Y, EFFECT_SPEEDUP_TIME);
+
+		if (this->PlayerPara[CntPlayer].ItemPara.SpeedBuffTime <= 0.0f)
+		{
+			this->PlayerPara[CntPlayer].ItemPara.SpeedBuffSignal = false;
+			this->PlayerPara[CntPlayer].ItemPara.SpeedBuff = VALUE_SPEEDBUFF_SUB;
+		}
+	}
+
+	//砲塔操作　バレット着弾点(左右エイム)
+	if (GetKeyboardPress(DIK_RIGHT))
+	{
+		HoutouRot.y += VALUE_ROTATE_PLAYER_HOUTOU;
+		if (HoutouRot.y >= VALUE_ROTATE_PLAYER_HOUTOU_MAX) HoutouRot.y = VALUE_ROTATE_PLAYER_HOUTOU_MAX;
+	}
+	else if (GetKeyboardPress(DIK_LEFT))
+	{
+		HoutouRot.y -= VALUE_ROTATE_PLAYER_HOUTOU;
+		if (HoutouRot.y <= -VALUE_ROTATE_PLAYER_HOUTOU_MAX) HoutouRot.y = -VALUE_ROTATE_PLAYER_HOUTOU_MAX;
+	}
+
+	//砲身操作　バレット着弾点(前後エイム)
+	if (GetKeyboardPress(DIK_UP))
+	{
+		HousinRot.x += VALUE_ROTATE_PLAYER_HOUSIN;
+		if (HousinRot.x >= VALUE_ROTATE_PLAYER_HOUSIN_MAX) HousinRot.x = VALUE_ROTATE_PLAYER_HOUSIN_MAX;
+	}
+	else if (GetKeyboardPress(DIK_DOWN))
 	{
 		HousinRot.x -= VALUE_ROTATE_PLAYER_HOUSIN;
 		if (HousinRot.x <= -VALUE_ROTATE_PLAYER_HOUSIN_MAX) HousinRot.x = -VALUE_ROTATE_PLAYER_HOUSIN_MAX;
@@ -1120,7 +1224,7 @@ void PLAYER::CameraRevers(int CntPlayer, bool Netflag)
 	}
 
 	//バックカメラ処理　バックカメラオン　カメラ視点、注視点、Yボタンを押しているもしくは、バックカメラアイテムがONになっているときはカメラ反転
-	if (IsButtonPressed(PadNum, BUTTON_Y) || this->PlayerPara[CntPlayer].ItemPara.BackCameraItemSignal == true)
+	if (GetKeyboardPress(DIK_B) || IsButtonPressed(PadNum, BUTTON_Y) || this->PlayerPara[CntPlayer].ItemPara.BackCameraItemSignal == true)
 	{
 		cam[CntPlayer].at.x = pos.x + (AT_W_CAM * sinf(HoudaiRot.y + HoutouRot.y));
 		cam[CntPlayer].at.y = pos.y + (HousinRot.x*100.0f);
@@ -1350,7 +1454,7 @@ void PLAYER::BulletALL(int CntPlayer, BULLET *bullet, SHADOW *shadow, bool Netfl
 	{
 		//if (IsButtonTriggered(PadNum, BUTTON_X))
 		//{
-		if (IsButtonTriggered(PadNum, BUTTON_R1))
+		if (IsButtonTriggered(PadNum, BUTTON_R1) || GetKeyboardTrigger(DIK_SPACE))
 		{
 			bullet->SetInstance(BposStart, bulletmove, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, ePLAYER_TYPE(CntPlayer), shadow);
 			//拡散弾処理
@@ -1519,7 +1623,7 @@ void PLAYER::ItemTimeMorphing(int CntPlayer)
 				this->modelOri.Vtx[PLAYER_MODEL_ORIGINAL_TYPE_HOUSIN_MORPHING].VtxBuff(),
 				this->modelDraw[CntPlayer].Vtx[PLAYER_PARTS_TYPE_HOUSIN].IdxBuff(), 
 				&this->modelDraw[CntPlayer].ModelAttribute[PLAYER_PARTS_TYPE_HOUSIN],
-				0.01f, &this->PlayerPara[CntPlayer].MorphingPara.MorphingTime, &this->PlayerPara[CntPlayer].MorphingPara.MorphingSignal);
+				0.01f, &this->PlayerPara[CntPlayer].MorphingPara.MorphingDTtime, &this->PlayerPara[CntPlayer].MorphingPara.MorphingSignal);
 		}
 		///////////////////////////////////////////////////////////////////////バレット3つ時間終了
 
@@ -1540,7 +1644,7 @@ void PLAYER::ItemTimeMorphing(int CntPlayer)
 			this->modelOri.Vtx[PLAYER_MODEL_ORIGINAL_TYPE_HOUSIN].VtxBuff(),
 			this->modelDraw[CntPlayer].Vtx[PLAYER_PARTS_TYPE_HOUSIN].IdxBuff(),
 			&this->modelDraw[CntPlayer].ModelAttribute[PLAYER_PARTS_TYPE_HOUSIN],
-			0.01f, &this->PlayerPara[CntPlayer].MorphingPara.MorphingTime, &this->PlayerPara[CntPlayer].MorphingPara.MorphingSignal);
+			0.01f, &this->PlayerPara[CntPlayer].MorphingPara.MorphingDTtime, &this->PlayerPara[CntPlayer].MorphingPara.MorphingSignal);
 		if (this->PlayerPara[CntPlayer].MorphingPara.MorphingSignal == EndMorphing)
 		{
 			this->PlayerPara[CntPlayer].MorphingPara.MorphingTime = MORPHING_TIME;

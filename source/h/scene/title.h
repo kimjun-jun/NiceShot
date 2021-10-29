@@ -2,7 +2,6 @@
 * @file title.h
 * @brief NiceShot(3D)戦車ゲーム
 * @author キムラジュン
-* @date 2020/01/15
 */
 #pragma once
 
@@ -70,13 +69,13 @@ private:
 
 	const char *c_FileNameTex[OBJECT_TITLE_MAX] =
 	{
-		"../data/TEXTURE/other/Title.png"					// 読み込むテクスチャファイル名
-		"../data/TEXTURE/other/TItle_Background.png"		// 読み込むテクスチャファイル名
-		"../data/TEXTURE/UI/UI_Press.png"					// 読み込むテクスチャファイル名
-		"../data/TEXTURE/UI/UI_Tutorial.png"				// 読み込むテクスチャファイル名
-		"../data/TEXTURE/UI/UI_LocalBattle.png"				// 読み込むテクスチャファイル名
-		"../data/TEXTURE/UI/UI_NetorkBattle.png"			// 読み込むテクスチャファイル名
-		"../data/TEXTURE/UI/UI_Quit.png"					// 読み込むテクスチャファイル名
+		"../data/TEXTURE/other/TItle_Background.png",		// 読み込むテクスチャファイル名
+		"../data/TEXTURE/other/Title.png",					// 読み込むテクスチャファイル名
+		"../data/TEXTURE/UI/UI_Press.png",					// 読み込むテクスチャファイル名
+		"../data/TEXTURE/UI/UI_Tutorial.png",				// 読み込むテクスチャファイル名
+		"../data/TEXTURE/UI/UI_LocalBattle.png",			// 読み込むテクスチャファイル名
+		"../data/TEXTURE/UI/UI_NetorkBattle.png",			// 読み込むテクスチャファイル名
+		"../data/TEXTURE/UI/UI_Quit.png",					// 読み込むテクスチャファイル名
 	};
 
 };

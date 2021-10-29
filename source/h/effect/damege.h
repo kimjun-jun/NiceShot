@@ -2,7 +2,6 @@
 * @file damege.h
 * @brief NiceShot(3D)戦車ゲーム
 * @author キムラジュン
-* @date 2020/01/15
 */
 #pragma once
 
@@ -15,10 +14,10 @@
 class DAMEGE_PARAMETER 
 {
 public:
-	DAMEGE_PARAMETER() { alpha = 0; time = 0; }
+	DAMEGE_PARAMETER() { alpha = 0.0f; time = 0.0f; }
 	~DAMEGE_PARAMETER() {}
 
-	int		time;		//!< 描画時間
+	float	time;		//!< 描画時間
 	float	alpha;		//!< アルファ値
 };
 
@@ -33,6 +32,7 @@ public:
 	~DAMEGE();	//!< 削除
 
 	void	Init(void);			//!< 初期化
+	void	InitNet(int MyNumber);	//!< 初期化
 	void	Update(void);		//!< 更新
 	void	Draw(bool Netflag, int NetMyNumber, int CntPlayer);			//!< 描画
 	iUseCheak	iUseType[OBJECT_DAMEGE_MAX];			//!< 使用情報
@@ -40,7 +40,6 @@ public:
 
 private:
 
-	void	ReinitNet(void);	//!< 再初期化
 
 	TEXTURE		tex;	//!< テクスチャ情報　複数使用するならここを配列化
 	VTXBuffer	vtx;	//!< 頂点情報　複数使用するならここを配列化

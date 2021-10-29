@@ -2,7 +2,6 @@
 * @file tutorial.cpp
 * @brief NiceShot(3D)戦車ゲーム
 * @author キムラジュン
-* @date 2020/01/15
 */
 #include "../../h/main.h"
 #include "../../h/other/input.h"
@@ -15,10 +14,12 @@
 // マクロ定義
 //*****************************************************************************
 #define	TEXTURE_TUTORIAL		("../data/TEXTURE/other/tutorialbg.png")			//!< 読み込むテクスチャファイル名
-#define	TUTORIAL_SIZE_X			(SCREEN_W/4-50)										//!< チュートリアルの幅
-#define	TUTORIAL_SIZE_Y			(SCREEN_H/4-50)										//!< チュートリアルの高さ
+#define	TUTORIAL_SIZE_X			(300)										//!< チュートリアルの幅
+#define	TUTORIAL_SIZE_Y			(200)										//!< チュートリアルの高さ
 #define	TUTORIAL_POS_X			(SCREEN_CENTER_X)									//!< チュートリアルの表示位置
 #define	TUTORIAL_POS_Y			(SCREEN_CENTER_Y)									//!< チュートリアルの表示位置
+#define	TUTORIAL_POS_X_OFFSET	(170)									//!< チュートリアルの表示位置
+#define	TUTORIAL_POS_Y_OFFSET	(200)									//!< チュートリアルの表示位置
 
 //=============================================================================
 // コンストラクタ　「読み込み」「初期化」
@@ -32,10 +33,10 @@ TUTO::TUTO(void)
 	this->vtx.MakeVertex2D(OBJECT_PLAYER_MAX*OBJECT_TUTORIAL_MAX, FVF_VERTEX_2D);
 
 	//描画位置設定
-	this->Transform[PLAYER01].Pos(D3DXVECTOR3(TUTORIAL_POS_X - TUTORIAL_SIZE_X, TUTORIAL_POS_Y - TUTORIAL_SIZE_Y, 0.0f));
-	this->Transform[PLAYER02].Pos(D3DXVECTOR3(TUTORIAL_POS_X + TUTORIAL_SIZE_X, TUTORIAL_POS_Y - TUTORIAL_SIZE_Y, 0.0f));
-	this->Transform[PLAYER03].Pos(D3DXVECTOR3(TUTORIAL_POS_X - TUTORIAL_SIZE_X, TUTORIAL_POS_Y + TUTORIAL_SIZE_Y, 0.0f));
-	this->Transform[PLAYER04].Pos(D3DXVECTOR3(TUTORIAL_POS_X + TUTORIAL_SIZE_X, TUTORIAL_POS_Y + TUTORIAL_SIZE_Y, 0.0f));
+	this->Transform[PLAYER01].Pos(D3DXVECTOR3(TUTORIAL_POS_X - TUTORIAL_POS_X_OFFSET, TUTORIAL_POS_Y - TUTORIAL_POS_Y_OFFSET, 0.0f));
+	this->Transform[PLAYER02].Pos(D3DXVECTOR3(TUTORIAL_POS_X * 2 - TUTORIAL_POS_X_OFFSET, TUTORIAL_POS_Y - TUTORIAL_POS_Y_OFFSET, 0.0f));
+	this->Transform[PLAYER03].Pos(D3DXVECTOR3(TUTORIAL_POS_X - TUTORIAL_POS_X_OFFSET, TUTORIAL_POS_Y * 2 - TUTORIAL_POS_Y_OFFSET, 0.0f));
+	this->Transform[PLAYER04].Pos(D3DXVECTOR3(TUTORIAL_POS_X * 2 - TUTORIAL_POS_X_OFFSET, TUTORIAL_POS_Y * 2 - TUTORIAL_POS_Y_OFFSET, 0.0f));
 
 
 	//カウントループ
@@ -43,7 +44,7 @@ TUTO::TUTO(void)
 	{
 		//描画位置反映
 		D3DXVECTOR3 pos = this->Transform[CntTuto].Pos();
-		this->vtx.Vertex2D(CntTuto, TUTORIAL_SIZE_X / 2, TUTORIAL_SIZE_Y / 2, pos);
+		this->vtx.Vertex2D(CntTuto, TUTORIAL_SIZE_X/2, TUTORIAL_SIZE_Y/2, pos);
 
 		//RHW設定
 		this->vtx.RHW2D(CntTuto);
@@ -52,10 +53,10 @@ TUTO::TUTO(void)
 		this->vtx.UV2D(CntTuto);
 
 		//カラー設定
-		this->vtx.Color2D(CntTuto, D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
+		this->vtx.Color2D(CntTuto, D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.8f));
 
 		//使用設定
-		this->iUseType[CntTuto].Use(YesUse);
+		this->iUseType[CntTuto].Use(YesUseType1);
 	}
 
 	// テクスチャの読み込み
@@ -85,7 +86,7 @@ void TUTO::Init(void)
 	for (int CntTuto = 0; CntTuto < OBJECT_PLAYER_MAX*OBJECT_TUTORIAL_MAX; CntTuto++)
 	{
 		//初期値では全部表示させる
-		this->iUseType[CntTuto].Use(YesUse);
+		this->iUseType[CntTuto].Use(YesUseType1);
 	}
 }
 
@@ -109,7 +110,14 @@ void TUTO::Update(GAME_OBJECT* obj, FADE *fade)
 		//操作方法画像　表示非表示切り替え
 		if (GetKeyboardTrigger(DIK_M) || IsButtonTriggered(CntTuto, BUTTON_R3))
 		{
-			this->iUseType[CntTuto].ChangeUse(this->iUseType[CntTuto].Use());
+			if (this->iUseType[CntTuto].Use() == YesUseType1)
+			{
+				this->iUseType[CntTuto].Use(NoUse);
+			}
+			else if (this->iUseType[CntTuto].Use() == NoUse)
+			{
+				this->iUseType[CntTuto].Use(YesUseType1);
+			}
 		}
 	}
 }

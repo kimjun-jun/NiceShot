@@ -2,7 +2,6 @@
 * @file this.cpp
 * @brief NiceShot(3D)戦車ゲーム
 * @author キムラジュン
-* @date 2020/01/15
 */
 #include "../../h/main.h"
 #include "../../../h/object/objectclass.h"
@@ -12,17 +11,14 @@
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define	STATUS_SIZE_X			(20.0f)							// ステータスの幅
-#define	STATUS_SIZE_Xhalf		(STATUS_SIZE_X/2)				// ステータスの幅 半分
-#define	STATUS_SIZE_Y			(20.0f)							// ステータスの高さ
-#define	STATUS_SIZE_Yhalf		(STATUS_SIZE_Y/2)				// ステータスの高さ 半分
-#define	STATUS_SIZE_X_OFFSET	(0.8f)							// ステータスの幅
-#define	STATUS_SIZE_Y_OFFSET	(0.8f)							// ステータスの高さ
+#define	STATUS_SIZE_X			(40.0f)							// ステータスの幅
+#define	STATUS_SIZE_Y			(40.0f)							// ステータスの高さ
+#define	STATUS_SIZE_X_OFFSET	(5.0f)							// ステータスの幅
+#define	STATUS_POS_X_OFFSET		(240.0f)						// ステータスの表示位置オフセット
+#define	STATUS_POS_Y_OFFSET		(100.0f)						// ステータスの表示位置オフセット
+#define	STATUS_POS_X_OFFSETBUFF	(1.0f)							// ステータスの表示位置オフセット
 #define	STATUS_POS_X			(SCREEN_CENTER_X)				// ステータスの表示位置
 #define	STATUS_POS_Y			(SCREEN_CENTER_Y)				// ステータスの表示位置
-#define	STATUS_POS_X_OFFSET		(220.0f)						// ステータスの表示位置オフセット
-#define	STATUS_POS_Y_OFFSET		(80.0f)							// ステータスの表示位置オフセット
-#define	STATUS_POS_X_OFFSETBUFF	(1.0f)							// ステータスの表示位置オフセット
 
 #define STATUS_NET_POS_X_OFFSET		(260.0f)
 #define STATUS_NET_POS_Y_OFFSET		(48.0f)
@@ -42,10 +38,10 @@ STATUS::STATUS(void)
 	this->vtx[PLAYER04].MakeVertex2D(OBJECT_STATUS_MAX, FVF_VERTEX_2D);
 
 	//描画位置設定
-	this->Transform[PLAYER01].Pos(D3DXVECTOR3(STATUS_POS_X - STATUS_POS_X_OFFSET, STATUS_POS_Y - STATUS_POS_Y_OFFSET, 0.0f));
-	this->Transform[PLAYER02].Pos(D3DXVECTOR3(STATUS_POS_X * 2 - STATUS_POS_X_OFFSET, STATUS_POS_Y - STATUS_POS_Y_OFFSET, 0.0f));
-	this->Transform[PLAYER03].Pos(D3DXVECTOR3(STATUS_POS_X - STATUS_POS_X_OFFSET, STATUS_POS_Y * 2 - STATUS_POS_Y_OFFSET, 0.0f));
-	this->Transform[PLAYER04].Pos(D3DXVECTOR3(STATUS_POS_X * 2 - STATUS_POS_X_OFFSET, STATUS_POS_Y * 2 - STATUS_POS_Y_OFFSET, 0.0f));
+	this->Transform[PLAYER01].Pos(D3DXVECTOR3(SCREEN_CENTER_X - STATUS_POS_X_OFFSET, SCREEN_CENTER_Y - STATUS_POS_Y_OFFSET, 0.0f));
+	this->Transform[PLAYER02].Pos(D3DXVECTOR3(SCREEN_CENTER_X * 2 - STATUS_POS_X_OFFSET, SCREEN_CENTER_Y - STATUS_POS_Y_OFFSET, 0.0f));
+	this->Transform[PLAYER03].Pos(D3DXVECTOR3(SCREEN_CENTER_X - STATUS_POS_X_OFFSET, SCREEN_CENTER_Y * 2 - STATUS_POS_Y_OFFSET, 0.0f));
+	this->Transform[PLAYER04].Pos(D3DXVECTOR3(SCREEN_CENTER_X * 2 - STATUS_POS_X_OFFSET, SCREEN_CENTER_Y * 2 - STATUS_POS_Y_OFFSET, 0.0f));
 
 	//カウントループ　ステータス数とプレイヤー数の二重ループ
 	for (int CntStatus = 0; CntStatus < OBJECT_STATUS_MAX; CntStatus++)
@@ -54,11 +50,26 @@ STATUS::STATUS(void)
 		{
 			//描画位置反映
 			D3DXVECTOR3 pos = this->Transform[CntPlayer].Pos();
-			//Halfサイズ+(オフセット値*ステータスカウント)
-			this->vtx[CntPlayer].Vertex2D(CntStatus, STATUS_SIZE_Xhalf + CntStatus*(STATUS_SIZE_Xhalf + STATUS_POS_X_OFFSETBUFF), STATUS_SIZE_Yhalf, pos);
+			D3DXVECTOR3 vtx[POLYGON_2D_VERTEX];
+				vtx[0] = D3DXVECTOR3(pos.x + (CntStatus*STATUS_SIZE_X+ STATUS_SIZE_X_OFFSET), pos.y, 0.0f);
+				vtx[1] = D3DXVECTOR3(pos.x + (CntStatus*STATUS_SIZE_X+ STATUS_SIZE_X_OFFSET) + STATUS_SIZE_X, pos.y, 0.0f);
+				vtx[2] = D3DXVECTOR3(pos.x + (CntStatus*STATUS_SIZE_X+ STATUS_SIZE_X_OFFSET), pos.y + STATUS_SIZE_Y, 0.0f);
+				vtx[3] = D3DXVECTOR3(pos.x + (CntStatus*STATUS_SIZE_X+ STATUS_SIZE_X_OFFSET) + STATUS_SIZE_X, pos.y + STATUS_SIZE_Y, 0.0f);
+
+			//描画位置反映
+			this->vtx[CntPlayer].Vertex2D(CntStatus, vtx);
 
 			//テクスチャ描画トリミング初期値　表示非表示もここで設定できる
 			this->PtternV[CntPlayer][CntStatus] = 0.0f;
+
+			//RHW設定
+			this->vtx[CntPlayer].RHW2D(CntStatus);
+
+			//UV設定
+			this->vtx[CntPlayer].UV2D(CntStatus);
+
+			//カラー設定
+			this->vtx[CntPlayer].Color2D(CntStatus, D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.3f));
 		}
 		// テクスチャの読み込み
 		this->tex[CntStatus].LoadTexture(this->c_FileNameTex[CntStatus]);
@@ -71,7 +82,7 @@ STATUS::STATUS(void)
 STATUS::~STATUS(void)
 {
 	//カウントループ
-	for (int CntStatus = 0; CntStatus < OBJECT_STATUS_MAX*OBJECT_PLAYER_MAX; CntStatus++)
+	for (int CntStatus = 0; CntStatus < OBJECT_STATUS_MAX; CntStatus++)
 	{
 		//テクスチャ解放
 		this->tex[CntStatus].~TEXTURE();
@@ -91,13 +102,13 @@ STATUS::~STATUS(void)
 //=============================================================================
 void STATUS::Init(void)
 {
-	//描画UVを設定する
+
 }
 
 //=============================================================================
 // 再初期化処理
 //=============================================================================
-void STATUS::ReinitNet(int MyNumber)
+void STATUS::InitNet(int MyNumber)
 {
 	/*
 		float buffsize = 48.0f;
@@ -134,29 +145,53 @@ void STATUS::ReinitNet(int MyNumber)
 //=============================================================================
 void STATUS::Update(PLAYER *p)
 {
-	//描画UVを設定する
-
-
-
-
-
-
-
-
+	//カウントループ　プレイヤー数の二重ループ
 	for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
 	{
-		//スピード
-		if (p->PlayerPara[CntPlayer].ItemPara.SpeedBuffSignal == true) this->iUseType[CntPlayer][STATUS_TYPE_SPEED].Use(YesUse);
-		else this->iUseType[CntPlayer][STATUS_TYPE_SPEED].Use(NoUse);
+		//speed
+		if (p->PlayerPara[CntPlayer].ItemPara.SpeedBuffSignal == true)
+		{
+			this->iUseType[CntPlayer][STATUS_TYPE_SPEED].Use(YesUseType1);
+			this->vtx[CntPlayer].Color2D(STATUS_TYPE_SPEED, D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
+		}
+		else
+		{
+			this->iUseType[CntPlayer][STATUS_TYPE_SPEED].Use(NoUse);
+			this->vtx[CntPlayer].Color2D(STATUS_TYPE_SPEED, D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.3f));
+		}
 		//戦車
-		if (p->PlayerPara[CntPlayer].StandardPara.eModelType == PLAYER_MODEL_TYPE_ATTACK) this->iUseType[CntPlayer][STATUS_TYPE_SENSYA].Use(YesUse);
-		else this->iUseType[CntPlayer][STATUS_TYPE_SENSYA].Use(NoUse);
+		if (p->PlayerPara[CntPlayer].StandardPara.eModelType == PLAYER_MODEL_TYPE_ATTACK)
+		{
+			this->iUseType[CntPlayer][STATUS_TYPE_SENSYA].Use(YesUseType1);
+			this->vtx[CntPlayer].Color2D(STATUS_TYPE_SENSYA, D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
+		}
+		else
+		{
+			this->iUseType[CntPlayer][STATUS_TYPE_SENSYA].Use(NoUse);
+			this->vtx[CntPlayer].Color2D(STATUS_TYPE_SENSYA, D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.3f));
+		}
 		//カメラ
-		if (p->PlayerPara[CntPlayer].ItemPara.BackCameraItemSignal == true) this->iUseType[CntPlayer][STATUS_TYPE_CAMERA].Use(YesUse);
-		else this->iUseType[CntPlayer][STATUS_TYPE_CAMERA].Use(NoUse);
+		if (p->PlayerPara[CntPlayer].ItemPara.BackCameraItemSignal == true)
+		{
+			this->iUseType[CntPlayer][STATUS_TYPE_CAMERA].Use(YesUseType1);
+			this->vtx[CntPlayer].Color2D(STATUS_TYPE_CAMERA, D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
+		}
+		else
+		{
+			this->iUseType[CntPlayer][STATUS_TYPE_CAMERA].Use(NoUse);
+			this->vtx[CntPlayer].Color2D(STATUS_TYPE_CAMERA, D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.3f));
+		}
 		//霧
-		if (p->PlayerPara[CntPlayer].ItemPara.KiriSignal == true) this->iUseType[CntPlayer][STATUS_TYPE_KIRI].Use(YesUse);
-		else this->iUseType[CntPlayer][STATUS_TYPE_KIRI].Use(NoUse);
+		if (p->PlayerPara[CntPlayer].ItemPara.KiriSignal == true)
+		{
+			this->iUseType[CntPlayer][STATUS_TYPE_KIRI].Use(YesUseType1);
+			this->vtx[CntPlayer].Color2D(STATUS_TYPE_KIRI, D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
+		}
+		else
+		{
+			this->iUseType[CntPlayer][STATUS_TYPE_KIRI].Use(NoUse);
+			this->vtx[CntPlayer].Color2D(STATUS_TYPE_KIRI, D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.3f));
+		}
 	}
 }
 
@@ -173,6 +208,8 @@ void STATUS::Draw(bool Netflag, int NetMyNumber,int CntPlayer)
 		//カウントループ
 		for (int CntStatus = 0; CntStatus < STATUS_TYPE_MAX; CntStatus++)
 		{
+			//if (this->iUseType[CntPlayer][CntStatus].Use() == YesUseType1)
+			{
 				// 頂点バッファをデバイスのデータストリームにバインド
 				pDevice->SetStreamSource(0, this->vtx[CntPlayer].VtxBuff(), 0, sizeof(VERTEX_2D));
 				// 頂点フォーマットの設定
@@ -180,7 +217,8 @@ void STATUS::Draw(bool Netflag, int NetMyNumber,int CntPlayer)
 				// テクスチャの設定　テクスチャが複数ならtexを配列化して選択させるように
 				pDevice->SetTexture(0, this->tex[CntStatus].Texture());
 				// ポリゴンの描画　引数二個目の描画開始頂点を設定することが大事
-				pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, (CntStatus * 4), POLYGON_2D_NUM);
+				pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, (CntStatus * 4) , POLYGON_2D_NUM);
+			}
 		}
 	}
 

@@ -2,12 +2,14 @@
 * @file rank.h
 * @brief NiceShot(3D)戦車ゲーム
 * @author キムラジュン
-* @date 2020/01/15
 */
 #pragma once
 
 
 #include "../../h/object/objectclass.h"
+
+#define	RANK_COUNTDOWN_NUM		(2)							//!< 順位の数　4人なので2,1,0,を使う
+
 //*****************************************************************************
 // クラス定義
 //*****************************************************************************
@@ -18,7 +20,7 @@
 class RANK_PARAMETER_ALL
 {
 public:
-	RANK_PARAMETER_ALL() { RankNum = 0; }
+	RANK_PARAMETER_ALL() { RankNum = 2; }
 	~RANK_PARAMETER_ALL() {}
 	int			RankNum;			//!< 自分の順位	
 };
@@ -46,7 +48,7 @@ public:
 	~RANK();	//!< 削除
 
 	void		Init(void);				//!< 初期化
-	//void		Update(void);			//!< 更新
+	void		Update(void);			//!< 更新
 	void		Draw(bool Netflag);		//!< 描画
 
 	void		SetRank(int PlayerNum);
@@ -64,8 +66,8 @@ private:
 	//ちょっとケチって-1　一位の分はない
 	const char *c_aFileNameTex[OBJECT_RANK_MAX - 1] =
 	{
-		"../data/TEXTURE/rank/4i.png",	//!< 四位
-		"../data/TEXTURE/rank/3i.png",	//!< 三位
 		"../data/TEXTURE/rank/2i.png",	//!< 二位
+		"../data/TEXTURE/rank/3i.png",	//!< 三位
+		"../data/TEXTURE/rank/4i.png",	//!< 四位
 	};
 };

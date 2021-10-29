@@ -2,7 +2,6 @@
 * @file fade.h
 * @brief NiceShot(3D)戦車ゲーム
 * @author キムラジュン
-* @date 2020/01/15
 */
 #pragma once
 #include "../../h/object/objectclass.h"
@@ -52,8 +51,9 @@ public:
 
 	void		SetFade(FADE_TYPE fade, E_STAGE next, int sno);		//フェード効果セット
 
+	FADE_PARAMETER	FadePara;					//!< マネージャーに必要なデータ群
+
 private:
 
 	VTXBuffer	vtx;							//!< 頂点情報　複数使用するならここを配列化
-	FADE_PARAMETER	FadePara;					//!< マネージャーに必要なデータ群
 };

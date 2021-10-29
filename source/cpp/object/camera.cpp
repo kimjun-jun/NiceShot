@@ -2,7 +2,6 @@
 * @file camera.cpp
 * @brief NiceShot(3D)íÔƒQ[ƒ€
 * @author ƒLƒ€ƒ‰ƒWƒ…ƒ“
-* @date 2020/01/15
 */
 #include "../../h/main.h"
 #include "../../h/other/debugproc.h"

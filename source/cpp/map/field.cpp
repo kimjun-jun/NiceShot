@@ -2,7 +2,6 @@
 * @file field.cpp
 * @brief NiceShot(3D)戦車ゲーム
 * @author キムラジュン
-* @date 2020/01/15
 */
 #include "../../h/main.h"
 #include "../../h/other/input.h"
@@ -42,7 +41,6 @@ FIELD::FIELD(void)
 	// テクスチャの読み込み
 	this->tex.LoadTexture(TEXTURE_FILENAME);
 
-
 	// ブロック数の設定
 	this->FieldPara.nNumBlockXField = 32;
 	this->FieldPara.nNumBlockZField = 32;
@@ -70,21 +68,12 @@ FIELD::FIELD(void)
 	this->FieldPara.fSideSizeXEighth = this->FieldPara.fSideSizeXQuarter / 2.0f;
 	this->FieldPara.fSideSizeZEighth = this->FieldPara.fSideSizeZQuarter / 2.0f;
 
-
-
 	for (int CntField = 0; CntField < FIELD_VTX_MAX; CntField++)
 	{
 		//頂点作成
 		this->vtx[CntField].MakeVertex3D(this->Attribute.NumVertex(), FVF_VERTEX_3D);
-		this->vtx[CntField].MakeIdxVertex(sizeof(WORD) *this->Attribute.NumVertex());
+		this->vtx[CntField].MakeIdxVertex(sizeof(WORD) *this->Attribute.NumVertexIndex());
 	}
-
-
-
-
-
-
-
 
 	//標準初期化
 	this->FieldPara.InterPolationFieldSignal = true;
@@ -92,8 +81,6 @@ FIELD::FIELD(void)
 	this->FieldPara.InterPolationFieldType = -1;
 	this->FieldPara.InterPolationFieldPlayerNum = -1;
 
-
-	//頂点設定
 }
 
 //=============================================================================
@@ -128,6 +115,7 @@ void FIELD::Init(void)
 	this->FieldPara.NetTikei = false;
 
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
+	//頂点設定
 	//初期セット
 	{//頂点バッファの中身を埋める
 		VERTEX_3D *pVtx;
@@ -143,11 +131,11 @@ void FIELD::Init(void)
 
 		//頂点バッファのセット
 		LPDIRECT3DVERTEXBUFFER9 VtxBuffD;
-		VtxBuffD = this->vtx[FIELD_VTX_DRAW].VtxBuff();
+		VtxBuffD = *this->vtx[FIELD_VTX_DRAW].pVtxBuff();
 		LPDIRECT3DVERTEXBUFFER9 VtxBuffS;
-		VtxBuffS = this->vtx[FIELD_VTX_START].VtxBuff();
+		VtxBuffS = *this->vtx[FIELD_VTX_START].pVtxBuff();
 		LPDIRECT3DVERTEXBUFFER9 VtxBuffE;
-		VtxBuffE = this->vtx[FIELD_VTX_END].VtxBuff();
+		VtxBuffE = *this->vtx[FIELD_VTX_END].pVtxBuff();
 
 		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
 		VtxBuffD->Lock(0, 0, (void**)&pVtx, 0);
@@ -165,9 +153,11 @@ void FIELD::Init(void)
 
 				// 頂点座標の設定　補間用
 				pVtxS[nCntVtxZ * (this->FieldPara.nNumBlockZField + 1) + nCntVtxX].vtx.x = -(this->FieldPara.nNumBlockZField / 2.0f) * this->FieldPara.fBlockSizeXField + nCntVtxX * this->FieldPara.fBlockSizeXField;
+				pVtxS[nCntVtxZ * (this->FieldPara.nNumBlockZField + 1) + nCntVtxX].vtx.y = 0.0f;
 				pVtxS[nCntVtxZ * (this->FieldPara.nNumBlockZField + 1) + nCntVtxX].vtx.z = (this->FieldPara.nNumBlockZField / 2.0f) * this->FieldPara.fBlockSizeZField - nCntVtxZ * this->FieldPara.fBlockSizeZField;
-				pVtxS[nCntVtxZ * (this->FieldPara.nNumBlockZField + 1) + nCntVtxX].vtx.x = -(this->FieldPara.nNumBlockZField / 2.0f) * this->FieldPara.fBlockSizeXField + nCntVtxX * this->FieldPara.fBlockSizeXField;
-				pVtxS[nCntVtxZ * (this->FieldPara.nNumBlockZField + 1) + nCntVtxX].vtx.z = (this->FieldPara.nNumBlockZField / 2.0f) * this->FieldPara.fBlockSizeZField - nCntVtxZ * this->FieldPara.fBlockSizeZField;
+				pVtxE[nCntVtxZ * (this->FieldPara.nNumBlockZField + 1) + nCntVtxX].vtx.x = -(this->FieldPara.nNumBlockZField / 2.0f) * this->FieldPara.fBlockSizeXField + nCntVtxX * this->FieldPara.fBlockSizeXField;
+				pVtxE[nCntVtxZ * (this->FieldPara.nNumBlockZField + 1) + nCntVtxX].vtx.y = 0.0f;
+				pVtxE[nCntVtxZ * (this->FieldPara.nNumBlockZField + 1) + nCntVtxX].vtx.z = (this->FieldPara.nNumBlockZField / 2.0f) * this->FieldPara.fBlockSizeZField - nCntVtxZ * this->FieldPara.fBlockSizeZField;
 
 				// 法線の設定
 				pVtx[nCntVtxZ * (this->FieldPara.nNumBlockZField + 1) + nCntVtxX].nor = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
@@ -322,22 +312,31 @@ void FIELD::Update(PLAYER *player,ITEM *item, BULLET *bullet, EXPLOSION *explosi
 	//アイテムを拾うとInterPolationFieldTypeが変わる。このスイッチ文SetFieldType関数最後に-1を入れる
 	switch (this->FieldPara.InterPolationFieldType)
 	{
-		//地形変形するときはまず地形クリア
-		this->vtx[FIELD_VTX_DRAW].VtxBuff(this->ClearField(this->vtx[FIELD_VTX_DRAW].VtxBuff()));
 		//地形の種類によってアルゴリズムを分ける
 	case FIELD_TYPE_BOKOBOKO:
-		this->vtx[FIELD_VTX_END].VtxBuff(this->SetFieldType01(this->vtx[FIELD_VTX_END].VtxBuff()));
-		break;
-	case FIELD_TYPE_NADARAKA:
-		this->vtx[FIELD_VTX_END].VtxBuff(this->SetFieldType02(this->vtx[FIELD_VTX_END].VtxBuff()));
-		break;
-	case FIELD_TYPE_PLAYERADVANTAGE:
-		this->vtx[FIELD_VTX_END].VtxBuff(this->SetFieldType03(&player[0], this->vtx[FIELD_VTX_END].VtxBuff(), this->vtx[FIELD_VTX_DRAW].IdxBuff()));
-		break;
-
+		//地形変形するときはまず地形クリア
+		this->vtx[FIELD_VTX_DRAW].VtxBuff(this->ClearField(*this->vtx[FIELD_VTX_DRAW].pVtxBuff()));
+		this->vtx[FIELD_VTX_END].VtxBuff(this->SetFieldType01(*this->vtx[FIELD_VTX_END].pVtxBuff()));
 		//処理後にフラグセット
 		this->FieldPara.InterPolationFieldType = -1;
 		this->FieldPara.InterPolationFieldSignal = false;
+		break;
+	case FIELD_TYPE_NADARAKA:
+		//地形変形するときはまず地形クリア
+		this->vtx[FIELD_VTX_DRAW].VtxBuff(this->ClearField(*this->vtx[FIELD_VTX_DRAW].pVtxBuff()));
+		this->vtx[FIELD_VTX_END].VtxBuff(this->SetFieldType02(*this->vtx[FIELD_VTX_END].pVtxBuff()));
+		//処理後にフラグセット
+		this->FieldPara.InterPolationFieldType = -1;
+		this->FieldPara.InterPolationFieldSignal = false;
+		break;
+	case FIELD_TYPE_PLAYERADVANTAGE:
+		//地形変形するときはまず地形クリア
+		this->vtx[FIELD_VTX_END].VtxBuff(this->ClearField(*this->vtx[FIELD_VTX_END].pVtxBuff()));
+		this->vtx[FIELD_VTX_END].VtxBuff(this->SetFieldType03(&player[0], *this->vtx[FIELD_VTX_END].pVtxBuff(), *this->vtx[FIELD_VTX_DRAW].pIdxBuff()));
+		//処理後にフラグセット
+		this->FieldPara.InterPolationFieldType = -1;
+		this->FieldPara.InterPolationFieldSignal = false;
+		break;
 	}
 
 	//SetFieldTypeでInterPolationFieldSignalをfalseにしている。InterPolationField()の返り値で地形の補間が終わったか判定
@@ -399,7 +398,7 @@ void FIELD::FieldHitCheck(PLAYER *player, ITEM *item, BULLET *bullet, EXPLOSION 
 	for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
 	{
 		//-------------------オブジェクト値読み込み
-		D3DXVECTOR3 rayS = player->modelDraw[PLAYER_PARTS_TYPE_HOUDAI].Transform[CntPlayer].Pos();
+		D3DXVECTOR3 rayS = player->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos();
 		D3DXVECTOR3 rayG = rayS;
 		D3DXVECTOR3 ReturnPos = rayS;
 		D3DXVECTOR3 FieldNor = player->PostureVec[CntPlayer].FNVecFunc();
@@ -410,16 +409,16 @@ void FIELD::FieldHitCheck(PLAYER *player, ITEM *item, BULLET *bullet, EXPLOSION 
 		this->FieldHitGetSphereVec(rayS, rayG, &FieldNor, &ReturnPos.y);
 
 		//-------------------オブジェクト値書き込み
-		player->modelDraw[PLAYER_PARTS_TYPE_HOUDAI].Transform[CntPlayer].Pos(ReturnPos);
+		player->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos(ReturnPos);
 		player->PostureVec[CntPlayer].FNVecFunc(FieldNor);
 	}
 
+	
 	//アイテムと地面の当たり判定
 	//-----------------------------------オブジェクト先頭アドレスを読み込み
 	for (int CntItem = 0; CntItem < OBJECT_ITEM_MAX; CntItem++)
 	{
-		bool use = item->iUseType[CntItem].Use();
-		if (use == true)
+		if (item->iUseType[CntItem].Use() == YesUseType1)
 		{
 			//-------------------オブジェクト値読み込み
 			D3DXVECTOR3 rayS = item->Transform[CntItem].Pos();
@@ -449,12 +448,11 @@ void FIELD::FieldHitCheck(PLAYER *player, ITEM *item, BULLET *bullet, EXPLOSION 
 			item->PostureVec[CntItem].FNVecFunc(FieldNor);
 		}
 	}
-
+	
 	//バレットと地面の当たり判定
 	for (int Cntbullet = 0; Cntbullet < OBJECT_BULLET_MAX; Cntbullet++)
 	{
-		bool buse = bullet->iUseType[Cntbullet].Use();
-		if (buse == true)
+		if (bullet->iUseType[Cntbullet].Use() == YesUseType1)
 		{
 			D3DXVECTOR3 kari = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 			//-------------------オブジェクト値読み込み
@@ -480,6 +478,7 @@ void FIELD::FieldHitCheck(PLAYER *player, ITEM *item, BULLET *bullet, EXPLOSION 
 			}
 		}
 	}
+
 }
 
 //=============================================================================
@@ -722,7 +721,7 @@ LPDIRECT3DVERTEXBUFFER9 FIELD::SetFieldType03(PLAYER *player, LPDIRECT3DVERTEXBU
 
 			//プレイヤーの乗っているエリアを特定。4分木で範囲を絞る。
 			//-------------------オブジェクト値読み込み
-			D3DXVECTOR3 pos = player->modelDraw[PLAYER_PARTS_TYPE_HOUDAI].Transform[CntPlayer].Pos();
+			D3DXVECTOR3 pos = player->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos();
 			//高速化当たり判定
 			SpeedUpFieldHitPoly(pos, &HitPosUp, &HitPosDown, &HitPosLeft, &HitPosRight,
 				this->FieldPara.fSideSizeXEighth, this->FieldPara.fSideSizeZEighth,
@@ -853,7 +852,7 @@ void FIELD::SetDegenerationPoly(void)
 	VERTEX_3D *pVtx;
 	//頂点バッファのセット
 	LPDIRECT3DVERTEXBUFFER9 VtxBuffD;
-	VtxBuffD = this->vtx[FIELD_VTX_DRAW].VtxBuff();
+	VtxBuffD = *this->vtx[FIELD_VTX_DRAW].pVtxBuff();
 
 	// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
 	VtxBuffD->Lock(0, 0, (void**)&pVtx, 0);
@@ -900,8 +899,8 @@ void FIELD::FieldHit(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVECTOR3 *vtxNor
 		this->FieldPara.fSideSizeXEighth, this->FieldPara.fSideSizeZEighth);
 
 	// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
-	LPDIRECT3DVERTEXBUFFER9 VtxBuffEnd = this->vtx[FIELD_VTX_DRAW].VtxBuff();
-	LPDIRECT3DINDEXBUFFER9 IdxBuff = this->vtx[FIELD_VTX_DRAW].IdxBuff();
+	LPDIRECT3DVERTEXBUFFER9 VtxBuffEnd = *this->vtx[FIELD_VTX_DRAW].pVtxBuff();
+	LPDIRECT3DINDEXBUFFER9 IdxBuff = *this->vtx[FIELD_VTX_DRAW].pIdxBuff();
 	VtxBuffEnd->Lock(0, 0, (void**)&pVtx, 0);
 	IdxBuff->Lock(0, 0, (void**)&pIdx, 0);
 
@@ -973,7 +972,7 @@ void FIELD::FieldHitGetSphereVec(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVEC
 		this->FieldPara.fSideSizeXEighth, this->FieldPara.fSideSizeZEighth);
 
 	// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
-	LPDIRECT3DVERTEXBUFFER9 VtxBuffEnd = this->vtx[FIELD_VTX_DRAW].VtxBuff();
+	LPDIRECT3DVERTEXBUFFER9 VtxBuffEnd = *this->vtx[FIELD_VTX_DRAW].pVtxBuff();
 	LPDIRECT3DINDEXBUFFER9 IdxBuff = this->vtx[FIELD_VTX_DRAW].IdxBuff();
 	VtxBuffEnd->Lock(0, 0, (void**)&pVtx, 0);
 	IdxBuff->Lock(0, 0, (void**)&pIdx, 0);
@@ -1431,8 +1430,8 @@ bool FIELD::FieldHitItem(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVECTOR3 *vt
 		this->FieldPara.fSideSizeXEighth, this->FieldPara.fSideSizeZEighth);
 
 	// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
-	LPDIRECT3DVERTEXBUFFER9 VtxBuffEnd = this->vtx[FIELD_VTX_DRAW].VtxBuff();
-	LPDIRECT3DINDEXBUFFER9 IdxBuff = this->vtx[FIELD_VTX_DRAW].IdxBuff();
+	LPDIRECT3DVERTEXBUFFER9 VtxBuffEnd = *this->vtx[FIELD_VTX_DRAW].pVtxBuff();
+	LPDIRECT3DINDEXBUFFER9 IdxBuff = *this->vtx[FIELD_VTX_DRAW].pIdxBuff();
 	VtxBuffEnd->Lock(0, 0, (void**)&pVtx, 0);
 	IdxBuff->Lock(0, 0, (void**)&pIdx, 0);
 

@@ -1,17 +1,12 @@
+/**
+* @file sock.h
+* @brief NiceShot(3D)戦車ゲーム
+* @author キムラジュン
+*/
 #pragma once
-void SetMultThreadFlag(bool flag);
-bool GetMultThreadFlag(void);
-void SetGameSceneFlag(bool flag);
-bool GetGameSceneFlag(void);
-int NetClientSocketCreate(void);
-int NetClientSocketDelete(void);
-void NetMatch(void);
-void NetMyNumberGet(void);
-void NetItemGet(void);
-void NetCountdown(void);
-void Packet(void);
-void SendPacket(void);
-void ReceivePacket(void);
+
+#define BUFFER_SIZE 500
+#define BUFFER_SIZE_STRING 501					//!< 送信データバッファサイズ
 
 enum
 {
@@ -22,23 +17,72 @@ enum
 
 };
 
-void MsgAnalys(char* argRMsg);
 
-//RMsgBlockはデータのブロック　TypeはPosやRotなどの種類
-void SetBuff(char* RMsgBlock,int Type, int PlayerNum);
+/**
+*　@class MySOCKET
+*　@brief GAMEOBJECT派生クラス
+*/
+class MySOCKET : public GAME_OBJECT
+{
+public:
+	MySOCKET();	//!< ソケット設定
+	~MySOCKET();	//!< ソケット削除
 
-void NetSetItem(D3DXVECTOR3 buff, int index, int type);
-void NetSetTikeiSeed(int Seed, int PlayerNum);
-void NetPos(D3DXVECTOR3 buff, int PlayerNum);
-void NetSetHoudaiRot(D3DXVECTOR3 buff, int PlayerNum);
-void NetSetHoutouRot(D3DXVECTOR3 buff, int PlayerNum);
-void NetSetHousinRot(D3DXVECTOR3 buff, int PlayerNum);
-void NetSetVital(int buff, int PlayerNum);
-void NetSetMorphing(int PlayerNum);
+	//ネット対戦開始処理
+	void NetMatch(void);
+	void NetMyNumberGet(void);
+	void NetItemGet(ITEM *item);
+	void NetCountdown(void);
 
-void NetSetBulletType1(D3DXVECTOR3 buffpos, D3DXVECTOR3 buffmove, int PlayerNum);
-void NetSetBulletType3(D3DXVECTOR3 buffpos, D3DXVECTOR3 *buffmove, int PlayerNum);
+	//---------マルチスレッド環境で実行　アプリ起動時にマルチスレッドで永久ループ
+	void Packet(PLAYER *Player, ITEM *Item, FIELD *Field, BULLET *Bullet,SHADOW *Shadow);
+	//ネット対戦実行中処理
+	void SendPacket(PLAYER *Player, ITEM *Item, FIELD *Field, BULLET *Bullet);	//送信処理
+	void ReceivePacket(PLAYER *Player, ITEM *Item, FIELD *Field, BULLET *Bullet, SHADOW *Shadow);		//受信処理
+	void MsgAnalys(char* argRMsg, PLAYER *Player, ITEM *Item, FIELD *Field, BULLET *Bullet, SHADOW *Shadow);	//解析処理
 
+	//同期処理
+	void SetBuff(char* RMsgBlock, int Type, int PlayerNum);	//RMsgBlockはデータのブロック　TypeはPosやRotなどの種類
+
+	//アイテム反映
+	void NetSetItem(ITEM *Item, D3DXVECTOR3 buff, int index, int type);
+
+	//地形反映
+	void NetSetTikeiSeed(FIELD *Field, ITEM *Item, int Seed, int PlayerNum);
+	
+	//プレイヤー反映群
+	void NetSetPos(PLAYER *Player, D3DXVECTOR3 buff, int PlayerNum);
+	void NetSetHoudaiRot(PLAYER *Player, D3DXVECTOR3 buff, int PlayerNum);
+	void NetSetHoutouRot(PLAYER *Player, D3DXVECTOR3 buff, int PlayerNum);
+	void NetSetHousinRot(PLAYER *Player, D3DXVECTOR3 buff, int PlayerNum);
+	void NetSetVital(PLAYER *Player, int buff, int PlayerNum);
+	void NetSetMorphing(PLAYER *Player, int PlayerNum);
+	void NetSetBulletType1(PLAYER *Player, BULLET *Bullet, SHADOW *Shadow, D3DXVECTOR3 buffpos, D3DXVECTOR3 buffmove, int PlayerNum);
+	void NetSetBulletType3(PLAYER *Player, BULLET *Bullet, SHADOW *Shadow, D3DXVECTOR3 buffpos, D3DXVECTOR3 *buffmove, int PlayerNum);
+	//---------マルチスレッド環境で実行　アプリ起動時にマルチスレッドで永久ループ
+
+
+private:
+	/* IP アドレス、ポート番号、ソケット */
+	char* Destination;
+	unsigned short Port;
+	int DstSocket;
+
+	/* sockaddr_in 構造体 */
+	sockaddr_in DstAddr;
+
+	//メンバ関数　ゲッターセッター
+	void DestinationFunc(char* InIP) { Destination = InIP; }
+	char* DestinationFunc(void) { return Destination; }
+	void PortFunc(unsigned short InPort) { Port = InPort; }
+	unsigned short PortFunc(void) { return Port; }
+	void DstSocketFunc(int InDstSocket) { DstSocket = InDstSocket; }
+	int DstSocketFunc(void) { return DstSocket; }
+	void DstAddrFunc(sockaddr_in InDstAddr) { DstAddr = InDstAddr; }
+	sockaddr_in DstAddrFunc(void) { return DstAddr; }
+	sockaddr_in* pDstAddrFunc(void) { return &DstAddr; }
+
+};
 
 
 

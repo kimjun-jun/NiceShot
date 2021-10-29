@@ -2,7 +2,6 @@
 * @file damege.cpp
 * @brief NiceShot(3D)戦車ゲーム
 * @author キムラジュン
-* @date 2020/01/15
 */
 #include "../../h/main.h"
 #include "../../h/effect/damege.h"
@@ -16,7 +15,7 @@
 #define	DAMEGE_POS_X			(SCREEN_CENTER_X)									// チュートリアルの表示位置
 #define	DAMEGE_POS_Y			(SCREEN_CENTER_Y)									// チュートリアルの表示位置
 
-#define SCREENDAMEGE_TIME					(30)									//!< 被ダメージ時の画面フェード時間
+#define SCREENDAMEGE_TIME		(20.0f)									//!< 被ダメージ時の画面フェード時間
 
 //=============================================================================
 // コンストラクタ　「読み込み」「初期化」
@@ -40,7 +39,7 @@ DAMEGE::DAMEGE(void)
 	{
 		//描画位置反映
 		D3DXVECTOR3 pos = this->Transform[CntDamege].Pos();
-		this->vtx.Vertex2D(CntDamege, DAMEGE_SIZE_X / 2, DAMEGE_SIZE_Y / 2, pos);
+		this->vtx.Vertex2D(CntDamege, DAMEGE_SIZE_X, DAMEGE_SIZE_Y, pos);
 
 		//RHW設定
 		this->vtx.RHW2D(CntDamege);
@@ -49,10 +48,10 @@ DAMEGE::DAMEGE(void)
 		this->vtx.UV2D(CntDamege);
 
 		//カラー設定
-		this->vtx.Color2D(CntDamege, D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.0f));
+		this->vtx.Color2D(CntDamege, D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
 
 		//使用設定
-		this->iUseType[CntDamege].ChangeUse(NoUse);
+		this->iUseType[CntDamege].Use(NoUse);
 	}
 
 	// テクスチャの読み込み
@@ -85,10 +84,10 @@ void DAMEGE::Init(void)
 		this->vtx.Color2D(CntDamege, D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
 
 		//使用設定
-		this->iUseType[CntDamege].ChangeUse(NoUse);
+		this->iUseType[CntDamege].Use(NoUse);
 
 		//パラメータ設定
-		this->DamegePara[CntDamege].time = 0;
+		this->DamegePara[CntDamege].time = 0.0f;
 		this->DamegePara[CntDamege].alpha = 0.0f;
 
 	}
@@ -97,7 +96,7 @@ void DAMEGE::Init(void)
 //=============================================================================
 // 再初期化処理
 //=============================================================================
-void DAMEGE::ReinitNet(void)
+void DAMEGE::InitNet(int MyNumber)
 {
 	/*
 	D3DXVECTOR3 pos;
@@ -127,11 +126,10 @@ void DAMEGE::Update(void)
 	for (int CntDamege = 0; CntDamege < OBJECT_DAMEGE_MAX; CntDamege++)
 	{
 		//使用中なら徐々にαを高くする
-		bool use = this->iUseType[CntDamege].Use();
-		if (use==true)
+		if (this->iUseType[CntDamege].Use() ==YesUseType1)
 		{
-			this->DamegePara[CntDamege].time += 1;
-			this->DamegePara[CntDamege].alpha = float((this->DamegePara[CntDamege].time / SCREENDAMEGE_TIME)*255.0f);
+			this->DamegePara[CntDamege].time += 1.0f;
+			this->DamegePara[CntDamege].alpha = this->DamegePara[CntDamege].time / SCREENDAMEGE_TIME;
 
 			// 反射光の設定
 			D3DXCOLOR col = D3DXCOLOR(1.0f, 1.0f, 1.0f, this->DamegePara[CntDamege].alpha);
@@ -142,7 +140,7 @@ void DAMEGE::Update(void)
 			{
 				this->DamegePara[CntDamege].time = 0;
 				this->DamegePara[CntDamege].alpha = 0.0f;
-				this->iUseType[CntDamege].Use(false);
+				this->iUseType[CntDamege].Use(NoUse);
 			}
 		}
 	}

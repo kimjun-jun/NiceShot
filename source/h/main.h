@@ -2,7 +2,6 @@
 * @file main.h
 * @brief NiceShot(3D)戦車ゲーム
 * @author キムラジュン
-* @date 2020/01/15
 */
 #pragma once
 #define _CRT_SECURE_NO_WARNINGS			//!< scanf のwarning防止
@@ -48,16 +47,29 @@ using namespace std;
 #define SCREEN_SEPARATE_BUFF		(2.5f)																				//!< 画面分割時の描画範囲と描画範囲の隙間
 
 //開放マクロ
-#ifndef SAFE_DELETE
-#define SAFE_DELETE(p)       { if (p) { delete (p);     (p)=NULL; } }
-#endif    
-#ifndef SAFE_DELETE_ARRAY
-#define SAFE_DELETE_ARRAY(p) { if (p) { delete[] (p);   (p)=NULL; } }
-#endif    
-#ifndef SAFE_RELEASE
-#define SAFE_RELEASE(p)      { if (p) { (p)->Release(); (p)=NULL; } }
-#endif
+template <typename T>
+inline void SafeDelete(T*& p) {
+	if (p != NULL) {
+		delete (p);
+		(p) = NULL;
+	}
+}
 
+template <typename T>
+inline void SafeDeleteArray(T*& p) {
+	if (p != NULL) {
+		delete[](p);
+		(p) = NULL;
+	}
+}
+
+template <typename T>
+inline void SafeRelease(T*& p) {
+	if (p != NULL) {
+		(p)->Release();
+		(p) = NULL;
+	}
+}
 
 //2Dポリゴンに関するパラメータ																							
 #define	POLYGON_2D_VERTEX			(4)																					//!< 頂点数
@@ -91,7 +103,7 @@ enum eOBJECT_COUNT
 	OBJECT_VITAL_MAX = OBJECT_PLAYER_MAX,
 	OBJECT_BULLETGAUGE_MAX = OBJECT_PLAYER_MAX,
 	OBJECT_DAMEGE_MAX = 4,
-	OBJECT_EFFECT_MAX = 8000,
+	OBJECT_EFFECT_MAX = 4000,
 	OBJECT_EXPLOSION_MAX = 240,
 	OBJECT_BULLET_MAX = 240,
 	OBJECT_ITEM_MAX = 20,
@@ -198,8 +210,8 @@ enum E_STAGE//列挙型。defineの番号を自動で割り当ててくれる。
  */
 enum eUse_Type
 {
+	NullUse = -1,
 	NoUse=0,
-	YesUse,
 	YesUseType1=1,
 	YesUseType2,
 	YesUseType3,
@@ -301,8 +313,8 @@ enum eITEM_TYPE
  */
 enum eSTATUS_TYPE
 {
-	STATUS_TYPE_SPEED = 0,		//!< スピードアップ状態
-	STATUS_TYPE_SENSYA,			//!< 戦車強化状態
+	STATUS_TYPE_SENSYA = 0,			//!< 戦車強化状態
+	STATUS_TYPE_SPEED,		//!< スピードアップ状態
 	STATUS_TYPE_CAMERA,			//!< バックカメラ状態
 	STATUS_TYPE_KIRI,			//!< もやもや状態
 	STATUS_TYPE_MAX

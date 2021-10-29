@@ -2,7 +2,6 @@
 * @file vitalgauge.cpp
 * @brief NiceShot(3D)戦車ゲーム
 * @author キムラジュン
-* @date 2020/01/15
 */
 #include "../../h/main.h"
 #include "../../../h/object/objectclass.h"
@@ -174,7 +173,7 @@ void VITALGAUGE::Init(void)
 //=============================================================================
 // 再初期化処理　ネット対戦前
 //=============================================================================
-void VITALGAUGE::ReinitNet(int MyNumber)
+void VITALGAUGE::InitNet(int MyNumber)
 {
 	/*
 	this[MyNumber].Pos(D3DXVECTOR3(VITALGAUGE_NET_POS_X, VITALGAUGE_NET_POS_Y, 0.0f));
@@ -215,12 +214,11 @@ void VITALGAUGE::Update(PLAYER *p, RANK *rank, bool Netflag, int NetMyNumber)
 			this->VitalGaugePara[CntPlayer].VitalPower = p->PlayerPara[CntPlayer].StandardPara.Vital;
 
 			//プレイヤーが生きているときにバイタルが0以下で未使用にする（死亡フラグ）　負けた時点での順位もセットする
-			bool puse = p->iUseType[CntPlayer].Use();
-			if (puse == true)
+			if (p->iUseType[CntPlayer].Use() == YesUseType1)
 			{
 				if (this->VitalGaugePara[CntPlayer].VitalPower <= 0)
 				{
-					p->iUseType[CntPlayer].Use(false);
+					p->iUseType[CntPlayer].Use(NoUse);
 					rank->SetRank(CntPlayer);
 				}
 			}
@@ -255,7 +253,7 @@ void VITALGAUGE::Update(PLAYER *p, RANK *rank, bool Netflag, int NetMyNumber)
 			{
 				if (this->VitalGaugePara[CntPlayer].VitalPower <= 0)
 				{
-					p->iUseType[CntPlayer].Use(false);
+					p->iUseType[CntPlayer].Use(NoUse);
 					rank->SetRankNet(CntPlayer, NetMyNumber);
 				}
 			}

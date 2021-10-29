@@ -2,7 +2,6 @@
 * @file effect.cpp
 * @brief NiceShot(3D)戦車ゲーム
 * @author キムラジュン
-* @date 2020/01/15
 */
 #include "../../h/main.h"
 #include "../../h/other/input.h"
@@ -34,7 +33,16 @@ EFFECT::EFFECT(void)
 	for (int CntEffect = 0; CntEffect < OBJECT_EFFECT_MAX; CntEffect++)
 	{
 		//描画位置反映
-		this->vtx.Vertex3D(CntEffect, EFFECT_NORMALSET_SIZE_X / 2, EFFECT_NORMALSET_SIZE_Y / 2);
+		D3DXVECTOR3 pos[POLYGON_2D_VERTEX] =
+		{
+		D3DXVECTOR3(-EFFECT_NORMALSET_SIZE_X / 2, EFFECT_NORMALSET_SIZE_Y / 2, 0.0f),
+		D3DXVECTOR3(EFFECT_NORMALSET_SIZE_X / 2, EFFECT_NORMALSET_SIZE_Y / 2, 0.0f),
+		D3DXVECTOR3(-EFFECT_NORMALSET_SIZE_X / 2, -EFFECT_NORMALSET_SIZE_Y / 2, 0.0f),
+		D3DXVECTOR3(EFFECT_NORMALSET_SIZE_X / 2, -EFFECT_NORMALSET_SIZE_Y / 2, 0.0f),
+		};
+		//描画位置反映
+		//this->vtx.Vertex3D(CntEffect, EFFECT_NORMALSET_SIZE_X / 2, EFFECT_NORMALSET_SIZE_Y / 2);
+		this->vtx.Vertex3D(CntEffect, pos);
 
 		//RHW設定
 		this->vtx.Nor3D(CntEffect);
@@ -46,7 +54,7 @@ EFFECT::EFFECT(void)
 		this->vtx.Color3D(CntEffect, D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
 
 		//使用設定
-		this->iUseType[CntEffect].ChangeUse(NoUse);
+		this->iUseType[CntEffect].Use(NoUse);
 
 		//移動量設定
 		this->move[CntEffect].Move(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
@@ -82,7 +90,7 @@ void EFFECT::Init(void)
 		this->vtx.Color3D(CntEffect, D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
 
 		//使用設定
-		this->iUseType[CntEffect].ChangeUse(NoUse);
+		this->iUseType[CntEffect].Use(NoUse);
 
 		//移動量設定
 		this->move[CntEffect].Move(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
@@ -129,7 +137,7 @@ void  EFFECT::Update(void)
 
 			//--------------------------------------------オブジェクト値書き込み
 			this->Transform[nCntEffect].Pos(pos);
-			this->vtx.Color3D(col);
+			this->vtx.Color3D(nCntEffect,col);
 
 		}
 	}
@@ -146,24 +154,29 @@ void  EFFECT::Draw(int CntPlayer)
 	pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);			// αデスティネーションカラーの指定
 	pDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
 
+	pDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
+
+	//処理負荷軽減のためループ外で設定
+	// 頂点バッファをデバイスのデータストリームにバインド
+	pDevice->SetStreamSource(0, this->vtx.VtxBuff(), 0, sizeof(VERTEX_3D));
+	// 頂点フォーマットの設定
+	pDevice->SetFVF(FVF_VERTEX_3D);
+	// テクスチャの設定
+	pDevice->SetTexture(0, this->tex.Texture());
+	// カメラビューマトリックスを取得
+	CAMERA *cam = GetCamera();
+	D3DXMATRIX mtxWorldEffect, mtxScale, mtxTranslate;
+
 	for (int nCntEffect = 0; nCntEffect < OBJECT_EFFECT_MAX; nCntEffect++)
 	{
-		bool use = this->iUseType[nCntEffect].Use();
-		if (use)
+		if (this->iUseType[nCntEffect].Use() == YesUseType1)
 		{
 			//--------------------------------------------オブジェクト値読み込み
 			D3DXVECTOR3 pos = this->Transform[nCntEffect].Pos();
 			D3DXVECTOR3 scl = this->Transform[nCntEffect].Scl();
-			D3DXCOLOR col = this->vtx.GetColor3D(nCntEffect);
-			D3DXMATRIX mtxWorldEffect;
-
-			D3DXMATRIX mtxView, mtxScale, mtxTranslate;
 
 			// ワールドマトリックスの初期化
 			D3DXMatrixIdentity(&mtxWorldEffect);
-
-			// ビューマトリックスを取得
-			CAMERA *cam = GetCamera();
 
 			mtxWorldEffect._11 = cam[CntPlayer].mtxView._11;
 			mtxWorldEffect._12 = cam[CntPlayer].mtxView._21;
@@ -186,23 +199,14 @@ void  EFFECT::Draw(int CntPlayer)
 			// ワールドマトリックスの設定
 			pDevice->SetTransform(D3DTS_WORLD, &mtxWorldEffect);
 
-			pDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
-
-			// 頂点バッファをデバイスのデータストリームにバインド
-			pDevice->SetStreamSource(0, this->vtx.VtxBuff(), 0, sizeof(VERTEX_3D));
-
-			// 頂点フォーマットの設定
-			pDevice->SetFVF(FVF_VERTEX_3D);
-
-			// テクスチャの設定
-			pDevice->SetTexture(0, this->tex.Texture());
-
 			// ポリゴンの描画
 			pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, (nCntEffect * 4), POLYGON_2D_NUM);
 
-			pDevice->SetRenderState(D3DRS_LIGHTING, TRUE);
 		}
 	}
+
+	pDevice->SetRenderState(D3DRS_LIGHTING, TRUE);
+
 	pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);		// αソースカラーの指定
 	pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);	// αデスティネーションカラーの指定
 	pDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
@@ -218,20 +222,27 @@ int EFFECT::SetInstance(D3DXVECTOR3 pos, D3DXVECTOR3 move, D3DXCOLOR col, float 
 
 	for (int nCntEffect = 0; nCntEffect < OBJECT_EFFECT_MAX; nCntEffect++)
 	{
-		bool use = this->iUseType[nCntEffect].Use();
-		if (use != true)
+		 
+		if (this->iUseType[nCntEffect].Use() == NoUse)
 		{
 			this->Transform[nCntEffect].Pos(pos);
 			this->Transform[nCntEffect].Rot(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
 			this->Transform[nCntEffect].Scl(D3DXVECTOR3(1.0f, 1.0f, 1.0f));
 			this->move[nCntEffect].Move(move);
-			this->vtx.Color3D(col);
 			this->EffectPara[nCntEffect].nTimer = nTimer;
-			this->EffectPara[nCntEffect].nDecAlpha = col.a / nTimer;
-			this->iUseType[nCntEffect].Use(YesUse);
+			this->EffectPara[nCntEffect].nDecAlpha = float(col.a / nTimer);
+			this->iUseType[nCntEffect].Use(YesUseType1);
 
+			//描画位置反映
+			D3DXVECTOR3 pos[POLYGON_2D_VERTEX] =
+			{
+			D3DXVECTOR3(-fSizeX / 2, fSizeY / 2, 0.0f),
+			D3DXVECTOR3(fSizeX / 2, fSizeY / 2, 0.0f),
+			D3DXVECTOR3(-fSizeX / 2, -fSizeY / 2, 0.0f),
+			D3DXVECTOR3(fSizeX / 2, -fSizeY / 2, 0.0f),
+			};
 			// 頂点座標の設定
-			this->vtx.Vertex3D(nCntEffect, fSizeX, fSizeY);
+			this->vtx.Vertex3D(nCntEffect, pos);
 
 			// 頂点カラーの設定
 			this->vtx.Color3D(nCntEffect, col);

@@ -775,7 +775,6 @@ HRESULT LoadMesh(const char *FileName, LPD3DXBUFFER *pD3DXBuffMat, DWORD *nNumMa
 	}
 	pMesh->GetVertexBuffer(pD3DVtxBuff);
 
-
 	// オブジェクトのインデックスバッファを生成
 	if (FAILED(pDevice->CreateIndexBuffer(VertexIndex,						// 頂点データ用に確保するバッファサイズ(バイト単位)
 		D3DUSAGE_WRITEONLY,													// 頂点バッファの使用法　
@@ -828,12 +827,6 @@ HRESULT LoadMesh(const char *FileName, LPD3DXBUFFER *pD3DXBuffMat, DWORD *nNumMa
 	*nNumVertexIndex = VertexIndex;
 	NumMat = *nNumMat;
 	//pD3DTexture = (LPDIRECT3DTEXTURE9*)malloc(sizeof(LPDIRECT3DTEXTURE9) * NumMat);
-
-	if (pMesh != NULL)
-	{// メッシュの開放
-		pMesh->Release();
-		pMesh = NULL;
-	}
 
 	return S_OK;
 
@@ -1487,7 +1480,7 @@ HRESULT CAllocateHierarchy::CreateMeshContainer(
 	pMeshContainer = NULL;
 
 e_Exit:
-	SAFE_RELEASE(pd3dDevice);
+	SafeDelete(pd3dDevice);
 
 	// call Destroy function to properly clean up the memory allocated 
 	if (pMeshContainer != NULL)
@@ -1504,8 +1497,8 @@ e_Exit:
 //--------------------------------------------------------------------------------------
 HRESULT CAllocateHierarchy::DestroyFrame(LPD3DXFRAME pFrameToFree)
 {
-	SAFE_DELETE_ARRAY(pFrameToFree->Name);
-	SAFE_DELETE(pFrameToFree);
+	SafeDeleteArray(pFrameToFree->Name);
+	SafeDelete(pFrameToFree);
 	return S_OK;
 }
 
@@ -1518,27 +1511,27 @@ HRESULT CAllocateHierarchy::DestroyMeshContainer(LPD3DXMESHCONTAINER pMeshContai
 	UINT iMaterial;
 	D3DXMESHCONTAINER_DERIVED* pMeshContainer = (D3DXMESHCONTAINER_DERIVED*)pMeshContainerBase;
 
-	SAFE_DELETE_ARRAY(pMeshContainer->Name);
-	SAFE_DELETE_ARRAY(pMeshContainer->pAdjacency);
-	SAFE_DELETE_ARRAY(pMeshContainer->pMaterials);
-	SAFE_DELETE_ARRAY(pMeshContainer->pBoneOffsetMatrices);
+	SafeDeleteArray(pMeshContainer->Name);
+	SafeDeleteArray(pMeshContainer->pAdjacency);
+	SafeDeleteArray(pMeshContainer->pMaterials);
+	SafeDeleteArray(pMeshContainer->pBoneOffsetMatrices);
 
 	// release all the allocated textures
 	if (pMeshContainer->ppTextures != NULL)
 	{
 		for (iMaterial = 0; iMaterial < pMeshContainer->NumMaterials; iMaterial++)
 		{
-			SAFE_RELEASE(pMeshContainer->ppTextures[iMaterial]);
+			SafeDelete(pMeshContainer->ppTextures[iMaterial]);
 		}
 	}
 
-	SAFE_DELETE_ARRAY(pMeshContainer->ppTextures);
-	SAFE_DELETE_ARRAY(pMeshContainer->ppBoneMatrixPtrs);
-	SAFE_RELEASE(pMeshContainer->pBoneCombinationBuf);
-	SAFE_RELEASE(pMeshContainer->MeshData.pMesh);
-	SAFE_RELEASE(pMeshContainer->pSkinInfo);
-	SAFE_RELEASE(pMeshContainer->pOrigMesh);
-	SAFE_DELETE(pMeshContainer);
+	SafeDeleteArray(pMeshContainer->ppTextures);
+	SafeDeleteArray(pMeshContainer->ppBoneMatrixPtrs);
+	SafeDelete(pMeshContainer->pBoneCombinationBuf);
+	SafeDelete(pMeshContainer->MeshData.pMesh);
+	SafeDelete(pMeshContainer->pSkinInfo);
+	SafeDelete(pMeshContainer->pOrigMesh);
+	SafeDelete(pMeshContainer);
 	return S_OK;
 }
 
@@ -1561,8 +1554,8 @@ HRESULT GenerateSkinnedMesh(D3DXMESHCONTAINER_DERIVED* pMeshContainer, METHOD Sk
 
 	*bUseSoftwareVP = false;
 
-	SAFE_RELEASE(pMeshContainer->MeshData.pMesh);
-	SAFE_RELEASE(pMeshContainer->pBoneCombinationBuf);
+	SafeDelete(pMeshContainer->MeshData.pMesh);
+	SafeDelete(pMeshContainer->pBoneCombinationBuf);
 
 	// if non-indexed skinning mode selected, use ConvertToBlendedMesh to generate drawable mesh
 	if (SkinningMethod == D3DNONINDEXED)
@@ -1705,7 +1698,7 @@ HRESULT GenerateSkinnedMesh(D3DXMESHCONTAINER_DERIVED* pMeshContainer, METHOD Sk
 			Flags |= D3DXMESH_SYSTEMMEM;
 		}
 
-		SAFE_RELEASE(pMeshContainer->MeshData.pMesh);
+		SafeDelete(pMeshContainer->MeshData.pMesh);
 
 		hr = pMeshContainer->pSkinInfo->ConvertToIndexedBlendedMesh
 		(

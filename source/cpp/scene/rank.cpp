@@ -2,7 +2,6 @@
 * @file rank.cpp
 * @brief NiceShot(3D)戦車ゲーム
 * @author キムラジュン
-* @date 2020/01/15
 */
 #include "../../h/main.h"
 #include "../../h/scene/rank.h"
@@ -55,10 +54,10 @@ RANK::RANK(void)
 		this->vtx.UV2D(CntRank);
 
 		//カラー設定
-		this->vtx.Color2D(CntRank, D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.0f));
+		this->vtx.Color2D(CntRank, D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
 
 		//使用設定
-		this->iUseType[CntRank].ChangeUse(NoUse);
+		this->iUseType[CntRank].Use(NoUse);
 	}
 
 	//カウントループ
@@ -95,7 +94,16 @@ void RANK::Init(void)
 	{
 		this->iUseType[CntRank].Use(NoUse);
 		this->RankParaOne.NetUse = false;
+		this->RankParaAll[CntRank].RankNum = RANK_COUNTDOWN_NUM;
 	}
+}
+
+//=============================================================================
+// 更新処理
+//=============================================================================
+void RANK::Update(void)
+{
+
 }
 
 //=============================================================================
@@ -110,8 +118,7 @@ void RANK::Draw(bool Netflag)
 	{
 		for (int CntRank = 0; CntRank < OBJECT_RANK_MAX; CntRank++)
 		{
-			bool use = this->iUseType[CntRank].Use();
-			if (use == true)
+			if (this->iUseType[CntRank].Use() == YesUseType1)
 			{
 				// 頂点バッファをデバイスのデータストリームにバインド
 				pDevice->SetStreamSource(0, this->vtx.VtxBuff(), 0, sizeof(VERTEX_2D));
@@ -153,15 +160,14 @@ void RANK::Draw(bool Netflag)
 //=============================================================================
 void RANK::SetRank(int PlayerNum)
 {
+	//使用可能にする
+	this->iUseType[PlayerNum].Use(YesUseType1);
 	for (int CntRank = 0; CntRank < OBJECT_RANK_MAX; CntRank++)
 	{
-		bool use = this->iUseType[CntRank].Use();
-		if (use != true)
+		if (this->iUseType[CntRank].Use() == NoUse)
 		{
-			//自分の順位を記録して順位を使用する
-			this->RankParaAll[CntRank].RankNum = PlayerNum;
-			this->iUseType[CntRank].Use(YesUse);
-			break;
+			//4スタートで一人死ぬたびにカウントダウンする　死んだ人はカウントダウンされずに順位が確定になる
+			this->RankParaAll[CntRank].RankNum--;
 		}
 	}
 }
@@ -173,8 +179,7 @@ void RANK::SetRankNet(int PlayerNum, int NetMyNumber)
 {
 	for (int CntRank = 0; CntRank < OBJECT_RANK_MAX; CntRank++)
 	{
-		bool use = this->iUseType[CntRank].Use();
-		if (use != true)
+		if (this->iUseType[CntRank].Use() == NoUse)
 		{
 			//ネット対戦用に描画位置を調整
 			D3DXVECTOR3 vtx[POLYGON_2D_VERTEX] =
@@ -188,7 +193,7 @@ void RANK::SetRankNet(int PlayerNum, int NetMyNumber)
 
 			//自分の順位を記録して順位を使用する
 			this->RankParaAll[CntRank].RankNum = PlayerNum;
-			this->iUseType[CntRank].Use(YesUse);
+			this->iUseType[CntRank].Use(YesUseType1);
 
 			//プレイヤーナンバーとネット固有マイナンバーが同じならネット用フラグオン
 			//ここをオンにしないとネット対戦時に順位が表示されない

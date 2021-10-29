@@ -2,7 +2,6 @@
 * @file title.cpp
 * @brief NiceShot(3D)戦車ゲーム
 * @author キムラジュン
-* @date 2020/01/15
 */
 #include "../../h/main.h"
 #include "../../h/other/input.h"
@@ -78,28 +77,6 @@ TITLE::TITLE(void)
 		//UV設定
 		this->vtx.UV2D(CntTitle);
 
-		//カラー設定と使用設定
-		{
-			D3DXCOLOR col;
-			switch (CntTitle)
-			{
-				//背景とロゴとPRESS画像だけ初期状態から使用
-			case NAME_BG:
-			case NAME_LOGO:
-			case NAME_PRESS:
-				col = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
-				this->iUseType[CntTitle].ChangeUse(YesUse);
-				break;
-
-				//それ以外不使用
-			default:
-				col = D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.0f);
-				this->iUseType[CntTitle].ChangeUse(NoUse);
-				break;
-			}
-			this->vtx.Color2D(CntTitle, col);
-		}
-
 		// テクスチャ読み込み
 		this->tex[CntTitle].LoadTexture(this->c_FileNameTex[CntTitle]);
 
@@ -141,13 +118,13 @@ void TITLE::Init(void)
 			case NAME_LOGO:
 			case NAME_PRESS:
 				col = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
-				this->iUseType[CntTitle].ChangeUse(YesUseType1);
+				this->iUseType[CntTitle].Use(YesUseType1);
 				break;
 
 				//それ以外不使用
 			default:
 				col = D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.0f);
-				this->iUseType[CntTitle].ChangeUse(NoUse);
+				this->iUseType[CntTitle].Use(NoUse);
 				break;
 			}
 			this->vtx.Color2D(CntTitle, col);
@@ -278,10 +255,10 @@ void TITLE::ChangeHierarchy(int NextHierarchyType)
 		this->vtx.Color2D(NAME_NET, col);
 		this->vtx.Color2D(NAME_QUIT, col);
 		//使用変更
-		this->iUseType[NAME_TUTO].ChangeUse(NoUse);
-		this->iUseType[NAME_LOCAL].ChangeUse(NoUse);
-		this->iUseType[NAME_NET].ChangeUse(NoUse);
-		this->iUseType[NAME_QUIT].ChangeUse(NoUse);
+		this->iUseType[NAME_TUTO].Use(NoUse);
+		this->iUseType[NAME_LOCAL].Use(NoUse);
+		this->iUseType[NAME_NET].Use(NoUse);
+		this->iUseType[NAME_QUIT].Use(NoUse);
 		break;
 		//シーン選択に変更
 	case TITLE_HIERARCHY_NUM_SELECT:
@@ -289,15 +266,22 @@ void TITLE::ChangeHierarchy(int NextHierarchyType)
 		PlaySound(SOUND_LABEL_SE_enter01);
 		//ヒエラルキー変更
 		this->TitlePara.HierarchyNum = TITLE_HIERARCHY_NUM_SELECT;
+		//選択シーンリセット
+		this->TitlePara.SceneNumX = this->TitlePara.SceneNumY = 0;
 		//α値変更
+		this->vtx.Color2D(NAME_TUTO, col);
+		col = D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.4f);
+		this->vtx.Color2D(NAME_LOCAL, col);
+		this->vtx.Color2D(NAME_NET, col);
+		this->vtx.Color2D(NAME_QUIT, col);
 		col = D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.0f);
 		this->vtx.Color2D(NAME_LOGO, col);
 		this->vtx.Color2D(NAME_PRESS, col);
 		//使用変更
-		this->iUseType[NAME_TUTO].ChangeUse(YesUse);
-		this->iUseType[NAME_LOCAL].ChangeUse(YesUse);
-		this->iUseType[NAME_NET].ChangeUse(YesUse);
-		this->iUseType[NAME_QUIT].ChangeUse(YesUse);
+		this->iUseType[NAME_TUTO].Use(YesUseType1);
+		this->iUseType[NAME_LOCAL].Use(YesUseType1);
+		this->iUseType[NAME_NET].Use(YesUseType1);
+		this->iUseType[NAME_QUIT].Use(YesUseType1);
 		break;
 	default:
 		break;
@@ -313,7 +297,7 @@ void TITLE::CheckScene(FADE *fade)
 	if (this->TitlePara.SceneNumX == 0 && this->TitlePara.SceneNumY == 0)
 	{
 		//カーソルが移動したらα値設定
-		if (this->TitlePara.OldSceneNumX != this->TitlePara.SceneNumX)
+		if (this->TitlePara.OldSceneNumX != this->TitlePara.SceneNumX || this->TitlePara.OldSceneNumY != this->TitlePara.SceneNumY)
 		{
 			//α値変更
 			D3DXCOLOR col = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
@@ -335,7 +319,7 @@ void TITLE::CheckScene(FADE *fade)
 	else if (this->TitlePara.SceneNumX == 1 && this->TitlePara.SceneNumY == 0)
 	{
 		//カーソルが移動したらα値設定
-		if (this->TitlePara.OldSceneNumX != this->TitlePara.SceneNumX)
+		if (this->TitlePara.OldSceneNumX != this->TitlePara.SceneNumX || this->TitlePara.OldSceneNumY != this->TitlePara.SceneNumY)
 		{
 			//α値変更
 			D3DXCOLOR col = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
@@ -351,13 +335,14 @@ void TITLE::CheckScene(FADE *fade)
 			//選択音再生
 			PlaySound(SOUND_LABEL_SE_enter01);
 			fade->SetFade(FADE_OUT, SCENE_GAMECOUNTDOWN, SOUND_LABEL_BGM_normal01);
+			SourceVolumeChange(0,SOUND_LABEL_BGM_normal01);
 		}
 	}
 	//ネット対戦
 	else if (this->TitlePara.SceneNumX == 0 && this->TitlePara.SceneNumY == 1)
 	{
 		//カーソルが移動したらα値設定
-		if (this->TitlePara.OldSceneNumX != this->TitlePara.SceneNumX)
+		if (this->TitlePara.OldSceneNumX != this->TitlePara.SceneNumX || this->TitlePara.OldSceneNumY != this->TitlePara.SceneNumY)
 		{
 			//α値変更
 			D3DXCOLOR col = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
@@ -372,6 +357,7 @@ void TITLE::CheckScene(FADE *fade)
 		{
 			//選択音再生
 			PlaySound(SOUND_LABEL_SE_enter01);
+			this->InitNet();
 			fade->SetFade(FADE_OUT, SCENE_NETMATCH, SOUND_LABEL_BGM_select01);
 		}
 	}
@@ -379,7 +365,7 @@ void TITLE::CheckScene(FADE *fade)
 	else if (this->TitlePara.SceneNumX == 1 && this->TitlePara.SceneNumY == 1)
 	{
 		//カーソルが移動したらα値設定
-		if (this->TitlePara.OldSceneNumX != this->TitlePara.SceneNumX)
+		if (this->TitlePara.OldSceneNumX != this->TitlePara.SceneNumX || this->TitlePara.OldSceneNumY != this->TitlePara.SceneNumY)
 		{
 			//α値変更
 			D3DXCOLOR col = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
@@ -389,7 +375,7 @@ void TITLE::CheckScene(FADE *fade)
 			this->vtx.Color2D(NAME_NET, col);
 			this->vtx.Color2D(NAME_TUTO, col);
 		}
-		//シーンをゲームへ
+		//アプリ終了
 		if (GetKeyboardTrigger(DIK_RETURN) || IsButtonTriggered(0, BUTTON_A))
 		{
 			//選択音再生

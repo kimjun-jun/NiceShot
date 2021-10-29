@@ -2,7 +2,6 @@
 * @file bulletprediction.cpp
 * @brief NiceShot(3D)戦車ゲーム
 * @author キムラジュン
-* @date 2020/01/15
 */
 #include "../../../h/main.h"
 #include "../../../h/other/input.h"
@@ -48,10 +47,10 @@ BULLETPREDICTION::BULLETPREDICTION(void)
 			// 頂点座標の設定
 			D3DXVECTOR3 vtx[POLYGON_2D_VERTEX] =
 			{
-			D3DXVECTOR3(-BULLETPREDICTION_SIZE_X / 2, -BULLETPREDICTION_SIZE_Y / 2, 0.0f),
-			D3DXVECTOR3(BULLETPREDICTION_SIZE_X / 2, -BULLETPREDICTION_SIZE_Y / 2, 0.0f),
 			D3DXVECTOR3(-BULLETPREDICTION_SIZE_X / 2, BULLETPREDICTION_SIZE_Y / 2, 0.0f),
 			D3DXVECTOR3(BULLETPREDICTION_SIZE_X / 2, BULLETPREDICTION_SIZE_Y / 2, 0.0f),
+			D3DXVECTOR3(-BULLETPREDICTION_SIZE_X / 2, -BULLETPREDICTION_SIZE_Y / 2, 0.0f),
+			D3DXVECTOR3(BULLETPREDICTION_SIZE_X / 2, -BULLETPREDICTION_SIZE_Y / 2, 0.0f),
 			};
 			this->vtx[CntPlayer].Vertex3D(CntBulletprediction, vtx);
 
@@ -114,11 +113,11 @@ void BULLETPREDICTION::Update(PLAYER *player)
 	for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
 	{
 		//---------------------------------オブジェクト値読み込み
-		D3DXVECTOR3	BulletPredictionPos = player->modelDraw[PLAYER_PARTS_TYPE_HOUDAI].Transform[CntPlayer].Pos();
+		D3DXVECTOR3	BulletPredictionPos = player->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos();
 		BulletPredictionPos.y += 20.0f;
-		D3DXVECTOR3 HoudaiRot = player->modelDraw[PLAYER_PARTS_TYPE_HOUDAI].Transform[CntPlayer].Rot();
-		D3DXVECTOR3 HoutouRot = player->modelDraw[PLAYER_PARTS_TYPE_HOUTOU].Transform[CntPlayer].Rot();
-		D3DXVECTOR3 HousinRot = player->modelDraw[PLAYER_PARTS_TYPE_HOUSIN].Transform[CntPlayer].Rot();
+		D3DXVECTOR3 HoudaiRot = player->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Rot();
+		D3DXVECTOR3 HoutouRot = player->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUTOU].Rot();
+		D3DXVECTOR3 HousinRot = player->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUSIN].Rot();
 
 		//発射角度、発射座用計算
 		D3DXVECTOR3 BmoveRot;
@@ -149,7 +148,7 @@ void BULLETPREDICTION::Update(PLAYER *player)
 			if (Gravity > VALUE_GRAVITYMAX_BULLET) Gravity = VALUE_GRAVITYMAX_BULLET;
 			//徐々にアルファ値を強くして遠距離地点を見やすくする
 			col.a += 0.01f;
-			this->UpdateInstance(BulletPredictionPos, CntPlayer, col, BULLETPREDICTION_SIZE_X, BULLETPREDICTION_SIZE_Y, CntBulletprediction - (CntPlayer * BULLETPREDICTION_MAX));
+			this->UpdateInstance(BulletPredictionPos, CntPlayer, col, BULLETPREDICTION_SIZE_X, BULLETPREDICTION_SIZE_Y, CntBulletprediction);
 
 
 		}
@@ -228,7 +227,7 @@ void BULLETPREDICTION::Draw(PLAYER *player, int CntPlayer)
 }
 
 //=============================================================================
-// エフェクトの設定
+// インスタンスの設定
 //=============================================================================
 void BULLETPREDICTION::UpdateInstance(D3DXVECTOR3 pos, int PlayerType, D3DXCOLOR col, float fSizeX, float fSizeY,int CntBulletPrediction)
 {

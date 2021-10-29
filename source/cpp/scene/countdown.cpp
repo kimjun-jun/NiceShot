@@ -2,7 +2,6 @@
 * @file countdown.cpp
 * @brief NiceShot(3D)戦車ゲーム
 * @author キムラジュン
-* @date 2020/01/15
 */
 #include "../../h/main.h"
 #include "../../h/other/fade.h"
@@ -69,8 +68,8 @@ COUNTDOWN::COUNTDOWN(void)
 	}
 
 	//使用設定
-	this->iUseType[COUNTDOWN_TEX_NUMBER].ChangeUse(YesUse);
-	this->iUseType[COUNTDOWN_TEX_LOGO].ChangeUse(NoUse);
+	this->iUseType[COUNTDOWN_TEX_NUMBER].Use(YesUseType1);
+	this->iUseType[COUNTDOWN_TEX_LOGO].Use(NoUse);
 
 	// テクスチャの読み込み
 	this->tex[COUNTDOWN_TEX_NUMBER].LoadTexture(COUNTDOWN_TEXTURE_NUMBER);
@@ -99,8 +98,8 @@ COUNTDOWN::~COUNTDOWN(void)
 void COUNTDOWN::Init(void)
 {
 	//初期設定　全て規定値
-	this->iUseType[COUNTDOWN_TEX_NUMBER].ChangeUse(YesUse);
-	this->iUseType[COUNTDOWN_TEX_LOGO].ChangeUse(NoUse);
+	this->iUseType[COUNTDOWN_TEX_NUMBER].Use(YesUseType1);
+	this->iUseType[COUNTDOWN_TEX_LOGO].Use(NoUse);
 	this->CountdownPara.color = 1.0f;
 	this->CountdownPara.time_maneger = COUNTDOWN_FPS_TIME;
 	this->CountdownPara.fps_maneger = COUNTDOWN_FPS_TIME_START;
@@ -127,12 +126,14 @@ void COUNTDOWN::Update(GAME_OBJECT*obj, bool Netflag)
 		{
 			obj->SetScene(SCENE_GAME);
 			PlaySound(SOUND_LABEL_BGM_normal01);
+			SourceVolumeChange(0.5f, SOUND_LABEL_BGM_normal01);
 		}
 		//ネットゲーム開始
 		else
 		{
 			obj->SetScene(SCENE_NETGAME);
 			PlaySound(SOUND_LABEL_BGM_boss01);
+			SourceVolumeChange(0.8f, SOUND_LABEL_BGM_boss01);
 		}
 	}
 }
@@ -177,7 +178,7 @@ void COUNTDOWN::NumberCountUpdate(void)
 	if (val <= 0)
 	{
 		this->iUseType[COUNTDOWN_TEX_NUMBER].Use(NoUse);
-		this->iUseType[COUNTDOWN_TEX_LOGO].Use(YesUse);
+		this->iUseType[COUNTDOWN_TEX_LOGO].Use(YesUseType1);
 	}
 	//else this->iUseType[COUNTDOWN_TEX_LOGO].Use(NoUse);
 

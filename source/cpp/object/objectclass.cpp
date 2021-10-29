@@ -2,7 +2,6 @@
 * @file objectclass.cpp
 * @brief NiceShot(3D)戦車ゲーム
 * @author キムラジュン
-* @date 2020/01/15
 */
 using namespace std;
 
@@ -36,6 +35,8 @@ using namespace std;
 #include "../../h/net/netmatch.h"
 #include "../../h/net/sock.h"
 
+int GAME_OBJECT::AllOBJCnt = 0;
+
 void SetOjama(int type, int UsePlayer, PLAYER *p);
 
 //マッチフラグ
@@ -64,20 +65,10 @@ void SetNetShareDateFlag(bool flag) { NetShareDateFlag = flag; }
 bool GetNetShareDateFlag(void) { return NetShareDateFlag; }
 
 //使用するタイプを変更する
-void iUseCheak::ChangeUse(int NowUseType)
-{
-	switch (NowUseType)
-	{
-		//使用していなかったら使用状態に変更
-	case NoUse:
-		this->Use(YesUseType1);
-		break;
-		//使用していたら未使用状態に変更
-	case YesUseType1:
-		this->Use(NoUse);
-		break;
-	}
-}
+//void iUseCheak::ChangeUse(eUse_Type UseType)
+//{
+//	this->Use(UseType);
+//}
 
 //テクスチャ読み込み処理
 void TEXTURE::LoadTexture(const char *FileName)
@@ -622,11 +613,12 @@ void VTXBuffer::Vertex2D(const int Indx, const float HalfSizeX, const float Half
 		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
 		this->pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
 		pVtx += (Indx * 4);
+		//pVtx += 4;
 		// 頂点座標の設定
-		pVtx[0].vtx = D3DXVECTOR3(Pos.x - HalfSizeX, Pos.y - HalfSizeX, 0.0f);
-		pVtx[1].vtx = D3DXVECTOR3(Pos.x + HalfSizeX, Pos.y - HalfSizeX, 0.0f);
-		pVtx[2].vtx = D3DXVECTOR3(Pos.x - HalfSizeX, Pos.y + HalfSizeX, 0.0f);
-		pVtx[3].vtx = D3DXVECTOR3(Pos.x + HalfSizeX, Pos.y + HalfSizeX, 0.0f);
+		pVtx[0].vtx = D3DXVECTOR3(Pos.x - HalfSizeX, Pos.y - HalfSizeY, 0.0f);
+		pVtx[1].vtx = D3DXVECTOR3(Pos.x + HalfSizeX, Pos.y - HalfSizeY, 0.0f);
+		pVtx[2].vtx = D3DXVECTOR3(Pos.x - HalfSizeX, Pos.y + HalfSizeY, 0.0f);
+		pVtx[3].vtx = D3DXVECTOR3(Pos.x + HalfSizeX, Pos.y + HalfSizeY, 0.0f);
 		// 頂点データをアンロックする
 		this->pD3DVtxBuff->Unlock();
 	}
@@ -691,7 +683,10 @@ void VTXBuffer::Color3D(const int Indx)
 		this->pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
 		pVtx += (Indx * 4);
 		// 反射光の設定
-		pVtx[0].diffuse = pVtx[1].diffuse = pVtx[2].diffuse = pVtx[3].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+		pVtx[0].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+		pVtx[1].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+		pVtx[2].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+		pVtx[3].diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
 		// 頂点データをアンロックする
 		this->pD3DVtxBuff->Unlock();
 	}
@@ -762,24 +757,6 @@ void VTXBuffer::UV3D(const int Indx)
 		pVtx[1].tex = D3DXVECTOR2(1.0f, 0.0f);
 		pVtx[2].tex = D3DXVECTOR2(0.0f, 1.0f);
 		pVtx[3].tex = D3DXVECTOR2(1.0f, 1.0f);
-		// 頂点データをアンロックする
-		this->pD3DVtxBuff->Unlock();
-	}
-}
-
-//UV入力　スプライトテクスチャ用 (3D)
-void VTXBuffer::UV3D(const int Indx, const float PatternU, const float PatternV)
-{
-	{//頂点バッファの中身を埋める
-		VERTEX_3D *pVtx;
-		// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
-		this->pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
-		pVtx += (Indx * 4);
-		// 頂点座標の設定　+1は次のスプライトでの調整用
-		pVtx[0].tex = D3DXVECTOR2(PatternU, PatternV);
-		pVtx[1].tex = D3DXVECTOR2((PatternU + 1), PatternV);
-		pVtx[2].tex = D3DXVECTOR2(PatternU, (PatternV + 1));
-		pVtx[3].tex = D3DXVECTOR2((PatternU + 1), (PatternV + 1));
 		// 頂点データをアンロックする
 		this->pD3DVtxBuff->Unlock();
 	}
@@ -940,46 +917,43 @@ static D3DXCOLOR PLAYER_COLOR[] = {
 
 void GAME_OBJECT::Generate()
 {
-	player = new PLAYER;
-	effect = new EFFECT;
-	bullet = new BULLET;
-	shadow = new SHADOW;
-	countdown = new COUNTDOWN;
-	tuto = new TUTO;
-	netmatch = new NETMATCH;
-	status = new STATUS;
-	bulletprediction = new BULLETPREDICTION;
-	vitalgauge = new VITALGAUGE;
-	bulletgauge = new BULLETGAUGE;
-	damege = new DAMEGE;
-	explosion = new EXPLOSION;
-	item = new ITEM;
-	rank = new RANK;
-	result = new RESULT;
-	title = new TITLE;
-	field = new FIELD;
-	sky = new SKY;
-	wall = new WALL;
-	fade = new FADE;
+	player = new PLAYER;								//ok 
+	effect = new EFFECT;								//ok
+	bullet = new BULLET;								//ok
+	shadow = new SHADOW;								//ok
+	countdown = new COUNTDOWN;							//ok
+	tuto = new TUTO;									//ok
+	netmatch = new NETMATCH;							//ok 改良中
+	status = new STATUS;								//ok
+	bulletprediction = new BULLETPREDICTION;			//ok
+	vitalgauge = new VITALGAUGE;						//ok
+	bulletgauge = new BULLETGAUGE;						//ok
+	damege = new DAMEGE;								//ok
+	explosion = new EXPLOSION;							//ok
+	item = new ITEM;									//ok 影がほしい
+	rank = new RANK;									//ok
+	result = new RESULT;								//ok
+	title = new TITLE;									//ok
+	field = new FIELD;									//ok
+	sky = new SKY;										//ok
+	wall = new WALL;									//ok
+	fade = new FADE;									//ok
 
+	mysocket = new MySOCKET;
+	this->GameSceneFlagFunc(true);
+	this->MultThreadFlagFunc(false);
 }
 
 void GAME_OBJECT::Init()
 {
 	//ネット対戦用
-	//NetClientSocketCreate();
-	//NetMatchFlag = false;
-	//NetMyNumberFlag = false;
-	//NetMyNumber = -1;
-	//NetItemFlag = false;
-	//NetGameStartFlag = false;
-	//NetShareDateFlag = false;
+	NetMatchFlag = false;
+	NetMyNumberFlag = false;
+	NetMyNumber = -1;
+	NetItemFlag = false;
+	NetGameStartFlag = false;
+	NetShareDateFlag = false;
 
-	//スクリーンのUIを再設定してるだけ　修正必要
-	//status->ReinitNet(NetMyNumber);
-	//vitalgauge->ReinitNet(NetMyNumber);
-	//bulletgauge->ReinitNet(NetMyNumber);
-	//damege->ReinitNet();
 
 	//こっちの書き方のほうが短くなる　引数が必要な場合は例外処理をするか　引数を必要としない構造にする
 	//for (int CntOBJ = 0; CntOBJ < AllOBJCnt; CntOBJ++) { this[CntOBJ].Init(); }
@@ -1003,32 +977,43 @@ void GAME_OBJECT::Init()
 	title->Init();
 	sky->Init();
 	wall->Init();
-	fade->Init();
+
+	this->MultThreadFlagFunc(false);
+
+}
+
+void GAME_OBJECT::InitNet()
+{
+	//スクリーンのUIを再設定してるだけ　修正必要
+	status->InitNet(NetMyNumber);
+	vitalgauge->InitNet(NetMyNumber);
+	bulletgauge->InitNet(NetMyNumber);
+	damege->InitNet(NetMyNumber);
 }
 
 void GAME_OBJECT::Delete()
 {
-	delete player;
-	delete effect;
-	delete bullet;
-	delete shadow;
-	delete countdown;
-	delete tuto;
-	delete netmatch;
-	delete status;
-	delete bulletprediction;
-	delete vitalgauge;
-	delete bulletgauge;
-	delete damege;
-	delete explosion;
-	delete item;
-	delete rank;
-	delete result;
-	delete title;
-	delete field;
-	delete sky;
-	delete wall;
-	delete fade;
+	//player->~PLAYER();
+	//effect->~EFFECT();
+	//delete bullet;
+	//delete shadow;
+	//delete countdown;
+	//tuto->~TUTO();
+	//delete netmatch;
+	//status->~STATUS();
+	//delete bulletprediction;
+	//vitalgauge->~VITALGAUGE();
+	//bulletgauge->~BULLETGAUGE();
+	//delete damege;
+	//delete explosion;
+	//delete item;
+	//delete rank;
+	//delete result;
+	//title->~TITLE();
+	//field->~FIELD();
+	//sky->~SKY();
+	//wall->~WALL();
+	//delete fade;
 }
 
 void GAME_OBJECT::Update()
@@ -1042,13 +1027,13 @@ void GAME_OBJECT::Update()
 #ifdef _DEBUG
 
 	//一時停止処理
-	//if (GetKeyboardTrigger(DIK_F12) || IsButtonTriggered(0, BUTTON_SELECT)) stop++;
-	//if (GetKeyboardTrigger(DIK_F11) || IsButtonTriggered(0, BUTTON_L3))
-	//{
-	//	MasterVolumeChange(1);
-	//	Reinit();
-	//	fade->SetFade(FADE_OUT, SCENE_RESULT, SOUND_LABEL_BGM_title01);
-	//}
+	if (GetKeyboardTrigger(DIK_F12) || IsButtonTriggered(0, BUTTON_SELECT)) stop++;
+	if (GetKeyboardTrigger(DIK_F11) || IsButtonTriggered(0, BUTTON_L3))
+	{
+		MasterVolumeChange(1);
+		this->Init();
+		fade->SetFade(FADE_OUT, SCENE_RESULT, SOUND_LABEL_BGM_title01);
+	}
 #endif
 
 	if (stop == false)
@@ -1056,7 +1041,7 @@ void GAME_OBJECT::Update()
 		// カメラの更新処理
 		UpdateCamera();
 
-		switch (nScene)
+		switch (this->nScene)
 		{
 		case SCENE_TITLE:
 			//タイトル更新
@@ -1077,9 +1062,9 @@ void GAME_OBJECT::Update()
 			explosion->Update();
 			item->Update(&player[0], NetGameStartFlag);
 			shadow->Update();
-
+			//
 			CheakHit(0);
-
+			//
 			//2D空間
 			bulletgauge->Update(&player[0]);
 			damege->Update();
@@ -1121,28 +1106,29 @@ void GAME_OBJECT::Update()
 			//マッチング中
 			if (NetMatchFlag == false)
 			{
-				NetMatch();
+				this->mysocket->NetMatch();
 			}
 			//マイナンバー取得中
 			if (NetMyNumberFlag == false)
 			{
-				if (NetMyNumber >= -1 && NetMyNumber <= 3) NetMyNumberGet();
+				if (NetMyNumber >= -1 && NetMyNumber <= 3) this->mysocket->NetMyNumberGet();
 			}
 			//アイテム情報取得中
 			else if (NetItemFlag==false)
 			{
-				NetItemGet();
+				this->mysocket->NetItemGet(item);
 			}
 			//カウントダウン信号待ち中
-			else
+			if(NetMatchFlag == true && NetMyNumberFlag == true && NetItemFlag == true&& NetGameStartFlag == false)
 			{
-				this[0].ReinitNet();
-				NetCountdown();
+				this->InitNet();
+				this->mysocket->NetCountdown();
 			}
 			//スタートフラグが送られてきて信号がONになったらカウントダウン開始
 			if (NetGameStartFlag == true)
 			{
 				fade->SetFade(FADE_OUT, SCENE_NETGAMECOUNTDOWN, SOUND_LABEL_BGM_boss01);
+				SourceVolumeChange(0, SOUND_LABEL_BGM_boss01);
 			}
 			break;
 		case SCENE_NETGAMECOUNTDOWN:
@@ -1200,13 +1186,13 @@ void GAME_OBJECT::Draw()
 	LPDIRECT3DDEVICE9 pD3DDevice = GetDevice();
 
 	// バックバッファ＆Ｚバッファのクリア
-	pD3DDevice->Clear(0, NULL, (D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER), D3DCOLOR_RGBA(200, 100, 100, 150), 1.0f, 0);
+	pD3DDevice->Clear(0, NULL, (D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER), D3DCOLOR_RGBA(1, 1, 1, 1), 1.0f, 0);
 
 	// Direct3Dによる描画の開始
 	if (SUCCEEDED(pD3DDevice->BeginScene()))
 	{
 		// 画面遷移
-		switch (nScene)
+		switch (this->nScene)
 		{
 		case SCENE_TITLE:
 			//タイトル描画
@@ -1216,7 +1202,7 @@ void GAME_OBJECT::Draw()
 			for (int CntPlayer = 0, vpCnt = sizeof(vp) / sizeof(vp[0]); CntPlayer < vpCnt; CntPlayer++)
 			{
 				pD3DDevice->SetViewport(&vp[CntPlayer]);
-				pD3DDevice->Clear(0, NULL, (D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER), D3DCOLOR_RGBA(200, 100, 100, 150), 1.0f, 0);
+				pD3DDevice->Clear(0, NULL, (D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER), D3DCOLOR_RGBA(1, 1, 1, 1), 1.0f, 0);
 
 				if (player->PlayerPara[CntPlayer].ItemPara.KiriSignal == true) pD3DDevice->SetRenderState(D3DRS_FOGENABLE, TRUE); //フォグ：ON
 				else pD3DDevice->SetRenderState(D3DRS_FOGENABLE, FALSE); //フォグ：OFF
@@ -1250,7 +1236,7 @@ void GAME_OBJECT::Draw()
 			for (int CntPlayer = 0, vpCnt = sizeof(vp) / sizeof(vp[0]); CntPlayer < vpCnt; CntPlayer++)
 			{
 				pD3DDevice->SetViewport(&vp[CntPlayer]);
-				pD3DDevice->Clear(0, NULL, (D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER), D3DCOLOR_RGBA(200, 100, 100, 150), 1.0f, 0);
+				pD3DDevice->Clear(0, NULL, (D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER), D3DCOLOR_RGBA(1, 1, 1, 1), 1.0f, 0);
 				// カメラの設定
 				SetCamera(CntPlayer);
 
@@ -1280,7 +1266,7 @@ void GAME_OBJECT::Draw()
 			for (int CntPlayer = 0, vpCnt = sizeof(vp) / sizeof(vp[0]); CntPlayer < vpCnt; CntPlayer++)
 			{
 				pD3DDevice->SetViewport(&vp[CntPlayer]);
-				pD3DDevice->Clear(0, NULL, (D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER), D3DCOLOR_RGBA(200, 100, 100, 150), 1.0f, 0);
+				pD3DDevice->Clear(0, NULL, (D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER), D3DCOLOR_RGBA(1, 1, 1, 1), 1.0f, 0);
 
 				bool puse = player->iUseType[CntPlayer].Use();
 				if (puse == true)
@@ -1469,8 +1455,8 @@ void GAME_OBJECT::CheakHit(int scene)
 		if (puse == true)
 		{
 			//オブジェクト値読み込み
-			D3DXVECTOR3 ppos = player->modelDraw[PLAYER_PARTS_TYPE_HOUDAI].Transform[CntPlayer].Pos();
-			D3DXVECTOR3 poldpos = player->modelDraw[PLAYER_PARTS_TYPE_HOUDAI].Transform[CntPlayer].OldPos();
+			D3DXVECTOR3 ppos = player->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos();
+			D3DXVECTOR3 poldpos = player->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].OldPos();
 
 			//保存
 			player->PlayerPara[CntPlayer].StandardPara.OldVital = player->PlayerPara[CntPlayer].StandardPara.Vital;
@@ -1498,7 +1484,7 @@ void GAME_OBJECT::CheakHit(int scene)
 					break;
 				}
 				//オブジェクト値書き込み
-				player->modelDraw[PLAYER_PARTS_TYPE_HOUDAI].Transform[CntPlayer].Pos(ppos);
+				player->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos(ppos);
 			}
 
 			//プレイヤーバレット対プレイヤー、壁、床
@@ -1506,9 +1492,9 @@ void GAME_OBJECT::CheakHit(int scene)
 			{
 				//オブジェクト値読み込み
 				D3DXVECTOR3 bpos = bullet->Transform[CntPlayerBullet].Pos();
-				bool buse = bullet->iUseType[CntPlayerBullet].Use();
+				eUse_Type buse = bullet->iUseType[CntPlayerBullet].Use();
 
-				if (buse == true)
+				if (buse == YesUseType1)
 				{
 					//対プレイヤー
 					if (bullet->BulletPara[CntPlayerBullet].UsePlayerType != CntPlayer)
@@ -1523,7 +1509,7 @@ void GAME_OBJECT::CheakHit(int scene)
 								player->PlayerPara[CntPlayer].StandardPara.Vital -= PLAYER_ATTACK_NORMAL;
 							}
 							//画面ダメージエフェクト
-							damege->iUseType[CntPlayer].Use(true);
+							damege->iUseType[CntPlayer].Use(YesUseType1);
 							damege->DamegePara[CntPlayer].time = 0;
 							damege->DamegePara[CntPlayer].alpha = 0;
 
@@ -1593,7 +1579,7 @@ void GAME_OBJECT::CheakHit(int scene)
 						default:
 							break;
 						}
-						if (buse == false) break;
+						if (buse == NoUse) break;
 					}
 				}
 			}
@@ -1646,7 +1632,7 @@ void GAME_OBJECT::CheakHit(int scene)
 							player->PlayerPara[CntPlayer].MorphingPara.MorphingTime = MORPHING_TIME;
 						}
 						//モーフィング終了変化中にアイテムを拾った時はもう一度モーフィングさせる
-						else if (player->PlayerPara[CntPlayer].MorphingPara.MorphingStart && player->PlayerPara[CntPlayer].MorphingPara.MorphingTime <= 0.0f)
+						else if (player->PlayerPara[CntPlayer].MorphingPara.MorphingStart == false && player->PlayerPara[CntPlayer].MorphingPara.MorphingTime <= 0.0f)
 						{
 							player->PlayerPara[CntPlayer].MorphingPara.MorphingStart = true;
 							player->PlayerPara[CntPlayer].StandardPara.eModelType = PLAYER_MODEL_TYPE_ATTACK;
@@ -1694,6 +1680,14 @@ void GAME_OBJECT::CheakHit(int scene)
 	}
 }
 
+void GAME_OBJECT::PackectAll(void)
+{
+	while (GetEndGame() == false)
+	{
+		mysocket->Packet(player, item, field, bullet,shadow);
+	}
+}
+
 void SetOjama(int type, int UsePlayer, PLAYER *p)
 {
 	//カメラ反転
@@ -1703,8 +1697,8 @@ void SetOjama(int type, int UsePlayer, PLAYER *p)
 		for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
 		{
 			if (UsePlayer == CntPlayer) continue;
-			p[CntPlayer].PlayerPara->ItemPara.BackCameraItemSignal = true;
-			p[CntPlayer].PlayerPara->ItemPara.BackCameraTime = 0.0f;
+			p->PlayerPara[CntPlayer].ItemPara.BackCameraItemSignal = true;
+			p->PlayerPara[CntPlayer].ItemPara.BackCameraTime = 0.0f;
 		}
 	}
 	//フォグ
@@ -1714,12 +1708,11 @@ void SetOjama(int type, int UsePlayer, PLAYER *p)
 		for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
 		{
 			if (UsePlayer == CntPlayer) continue;
-			p[CntPlayer].PlayerPara->ItemPara.KiriSignal = true;
-			p[CntPlayer].PlayerPara->ItemPara.KiriTime = 0.0f;
+			p->PlayerPara[CntPlayer].ItemPara.KiriSignal = true;
+			p->PlayerPara[CntPlayer].ItemPara.KiriTime = 0.0f;
 		}
 	}
 }
-
 
 
 

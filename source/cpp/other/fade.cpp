@@ -2,7 +2,6 @@
 * @file fade.cpp
 * @brief NiceShot(3D)íŽÔƒQ[ƒ€
 * @author ƒLƒ€ƒ‰ƒWƒ…ƒ“
-* @date 2020/01/15
 */
 #include "../../h/main.h"
 #include "../../h/other/sound.h"
@@ -32,6 +31,13 @@ FADE::FADE(void)
 	D3DXVECTOR3(SCREEN_W, SCREEN_H, 0.0f),
 	};
 	this->vtx.Vertex2D(0, VTX);
+
+	//RHWÝ’è
+	this->vtx.RHW2D(0);
+
+	//UVÝ’è
+	this->vtx.UV2D(0);
+
 }
 
 
