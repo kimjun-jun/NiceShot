@@ -15,16 +15,9 @@
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define	EFFECT_BULLET_SIZE_X				(16.0f)			//!< エフェクトバレットの幅
-#define	EFFECT_BULLET_SIZE_Y				(16.0f)			//!< エフェクトバレットの高さ
-#define	EFFECT_BULLET_TIME					(12)			//!< エフェクトバレットの生存時間
-
-static D3DXCOLOR PLAYER_COLOR[] = {
-	D3DXCOLOR(1.0f, 1.0f, 0.1f, 1.0f),//p1カラー
-	D3DXCOLOR(0.2f, 0.2f, 1.0f, 1.0f),//p2カラー
-	D3DXCOLOR(1.0f, 0.2f, 0.2f, 1.0f),//p3カラー
-	D3DXCOLOR(0.2f, 1.0f, 1.0f, 1.0f),//p4カラー
-};
+constexpr float	EFFECT_BULLET_SIZE_X{ 16.0f };		//!< エフェクトバレットの幅
+constexpr float	EFFECT_BULLET_SIZE_Y{ 16.0f };		//!< エフェクトバレットの高さ
+constexpr int	EFFECT_BULLET_TIME{ 12 };			//!< エフェクトバレットの生存時間
 
 //=============================================================================
 // コンストラクタ　「読み込み」「初期化」
@@ -62,8 +55,8 @@ void BULLET::Init(void)
 	{
 		//使用設定
 		this->iUseType[CntBullet].Use(NoUse);
-		this->Transform[CntBullet].Pos(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
-		this->move[CntBullet].Move(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+		this->Transform[CntBullet].Pos(VEC3_ALL0);
+		this->move[CntBullet].Move(VEC3_ALL0);
 		this->BulletPara[CntBullet].Gravity = 0.0f;
 		this->BulletPara[CntBullet].Timer = 0;
 		this->BulletPara[CntBullet].UsePlayerType = PLAYER_NONE;
@@ -145,7 +138,7 @@ void BULLET::Update(SHADOW *shadow, EFFECT *effect)
 					rot,scl);
 
 				// エフェクトの設定
-				effect->SetInstance(pos, D3DXVECTOR3(0.0f, 0.0f, 0.0f),
+				effect->SetInstance(pos, VEC3_ALL0,
 					PLAYER_COLOR[this->BulletPara[CntBullet].UsePlayerType], 
 					EFFECT_BULLET_SIZE_X, EFFECT_BULLET_SIZE_Y, EFFECT_BULLET_TIME);
 			}
@@ -176,8 +169,8 @@ int BULLET::SetInstance(D3DXVECTOR3 pos, D3DXVECTOR3 move, float fSizeX, float f
 		{
 			//引数で初期値を設定 rotやsclは使用しない
    			this->Transform[CntBullet].Pos(pos);
-			this->Transform[CntBullet].Rot(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
-			this->Transform[CntBullet].Scl(D3DXVECTOR3(1.0f, 1.0f, 1.0f));
+			this->Transform[CntBullet].Rot(VEC3_ALL0);
+			this->Transform[CntBullet].Scl(VEC3_ALL1);
 			this->move[CntBullet].Move(move);
 			this->iUseType[CntBullet].Use(YesUseType1);
 			this->BulletPara[CntBullet].Timer = nTimer;
@@ -185,7 +178,7 @@ int BULLET::SetInstance(D3DXVECTOR3 pos, D3DXVECTOR3 move, float fSizeX, float f
 			this->BulletPara[CntBullet].Gravity = 0.0f;
 
 			// 影の設定
-			this->BulletPara[CntBullet].IdxShadow = s->SetInstance(pos, D3DXVECTOR3(1.0f, 1.0f, 1.0f));
+			this->BulletPara[CntBullet].IdxShadow = s->SetInstance(pos, VEC3_ALL1);
 
 			//リターンするインデックスを更新
 			nIdxBullet = CntBullet;

@@ -11,14 +11,15 @@
 //*****************************************************************************
 // マクロ定義 nPatternX
 //*****************************************************************************
-#define	TEXTURE_EXPLOSION	"../data/TEXTURE/effect/bomb.png"		//!< 読み込むテクスチャファイル名
-#define	TEXTURE_PATTERN_X_UV_EXPLOSION		0.25f					//!< テクスチャスプライトX
-#define	TEXTURE_PATTERN_Y_UV_EXPLOSION		0.25f					//!< テクスチャスプライトY
-#define	TEXTURE_PATTERN_X_COUNT_EXPLOSION	4						//!< テクスチャスプライトX
-#define	TEXTURE_PATTERN_Y_COUNT_EXPLOSION	4						//!< テクスチャスプライトY
-#define	TEXTURE_PATTERN_COUNTER_EXPLOSION	4						//!< テクスチャスプライトのカウントタイマー
-#define	EXPLOSION_VERTEX_SIZE				(5.0f)					//!< EXPLOSION頂点サイズ
-#define	EXPLOSION_VERTEX_ADD_SIZE			(0.5f)					//!< EXPLOSION頂点サイズ
+#define	TEXTURE_EXPLOSION	"../data/TEXTURE/effect/bomb.png"	//!< 読み込むテクスチャファイル名
+
+constexpr int	TEXTURE_PATTERN_X_COUNT_EXPLOSION{ 4 };			//!< テクスチャスプライトX
+constexpr int	TEXTURE_PATTERN_Y_COUNT_EXPLOSION{ 4 };			//!< テクスチャスプライトY
+constexpr int	TEXTURE_PATTERN_COUNTER_EXPLOSION{ 4 };			//!< テクスチャスプライトのカウントタイマー
+constexpr float	TEXTURE_PATTERN_X_UV_EXPLOSION{ 0.25f };		//!< テクスチャスプライトX
+constexpr float	TEXTURE_PATTERN_Y_UV_EXPLOSION{ 0.25f };		//!< テクスチャスプライトY
+constexpr float	EXPLOSION_VERTEX_SIZE{ 5.0f };					//!< EXPLOSION頂点サイズ
+constexpr float	EXPLOSION_VERTEX_ADD_SIZE{ 0.5f };				//!< EXPLOSION頂点サイズ
 
 
 //=============================================================================
@@ -87,9 +88,9 @@ void EXPLOSION::Init(void)
 	for (int CntExplosion = 0; CntExplosion < OBJECT_EXPLOSION_MAX; CntExplosion++)
 	{
 		//初期化設定
-		this->Transform[CntExplosion].Pos(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
-		this->Transform[CntExplosion].Rot(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
-		this->Transform[CntExplosion].Scl(D3DXVECTOR3(1.0f, 1.0f, 1.0f));
+		this->Transform[CntExplosion].Pos(VEC3_ALL0);
+		this->Transform[CntExplosion].Rot(VEC3_ALL0);
+		this->Transform[CntExplosion].Scl(VEC3_ALL1);
 		this->vtx.Color3D(CntExplosion);
 		this->vtx.UV3D(CntExplosion, 0, 0, 0, 0);
 		this->ExploPara[CntExplosion].nPatternX = 0;
@@ -238,7 +239,7 @@ int EXPLOSION::SetInstance(D3DXVECTOR3 pos, float fSizeX, float fSizeY, eEXPLOSI
 		if (this->iUseType[CntExplosion].Use() ==NoUse)
 		{
 			this->Transform[CntExplosion].Pos(pos);
-			this->Transform[CntExplosion].Rot(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+			this->Transform[CntExplosion].Rot(VEC3_ALL0);
 			this->Transform[CntExplosion].Scl(D3DXVECTOR3(2.0f, 2.0f, 2.0f));
 			this->vtx.Color3D(CntExplosion,col);
 			this->iUseType[CntExplosion].Use(YesUseType1);

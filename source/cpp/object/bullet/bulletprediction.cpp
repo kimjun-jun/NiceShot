@@ -14,15 +14,9 @@
 // マクロ定義
 //*****************************************************************************
 #define	TEXTURE_BULLETPREDICTION		"../data/TEXTURE/effect/effect000.jpg"	// 読み込むテクスチャファイル名
-#define	BULLETPREDICTION_SIZE_X			(5.0f)							// ビルボードの幅
-#define	BULLETPREDICTION_SIZE_Y			(5.0f)							// ビルボードの高さ
 
-static D3DXCOLOR PLAYER_COLOR[] = {
-	D3DXCOLOR(1.0f, 1.0f, 0.1f, 0.1f),//p1カラー
-	D3DXCOLOR(0.2f, 0.2f, 1.0f, 0.1f),//p2カラー
-	D3DXCOLOR(1.0f, 0.2f, 0.2f, 0.1f),//p3カラー
-	D3DXCOLOR(0.2f, 1.0f, 1.0f, 0.1f),//p4カラー
-};
+constexpr float	BULLETPREDICTION_SIZE_X{ 5.0f };							// ビルボードの幅
+constexpr float	BULLETPREDICTION_SIZE_Y{ 5.0f };							// ビルボードの高さ
 
 //=============================================================================
 // コンストラクタ　「読み込み」「初期化」
@@ -97,8 +91,8 @@ void BULLETPREDICTION::Init(void)
 		//カウントループ　弾道予測エフェクト
 		for (int CntBulletprediction = 0; CntBulletprediction < BULLETPREDICTION_MAX; CntBulletprediction++)
 		{
-			this->Transform[CntPlayer][CntBulletprediction].Pos(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
-			this->Transform[CntPlayer][CntBulletprediction].Scl(D3DXVECTOR3(1.0f, 1.0f, 1.0f));
+			this->Transform[CntPlayer][CntBulletprediction].Pos(VEC3_ALL0);
+			this->Transform[CntPlayer][CntBulletprediction].Scl(VEC3_ALL1);
 			this->vtx[CntPlayer].Color3D(CntBulletprediction, D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
 		}
 	}
@@ -160,8 +154,7 @@ void BULLETPREDICTION::Update(PLAYER *player)
 //=============================================================================
 void BULLETPREDICTION::Draw(PLAYER *player, int CntPlayer)
 {
-	bool puse = player->iUseType[CntPlayer].Use();
-	if (puse)
+	if (player->iUseType[CntPlayer].Use()==YesUseType1)
 	{
 		LPDIRECT3DDEVICE9 pDevice = GetDevice();
 
@@ -232,6 +225,6 @@ void BULLETPREDICTION::Draw(PLAYER *player, int CntPlayer)
 void BULLETPREDICTION::UpdateInstance(D3DXVECTOR3 pos, int PlayerType, D3DXCOLOR col, float fSizeX, float fSizeY,int CntBulletPrediction)
 {
 	this->Transform[PlayerType][CntBulletPrediction].Pos(pos);
-	this->Transform[PlayerType][CntBulletPrediction].Scl(D3DXVECTOR3(1.0f, 1.0f, 1.0f));
+	this->Transform[PlayerType][CntBulletPrediction].Scl(VEC3_ALL1);
 	this->vtx[PlayerType].Color3D(CntBulletPrediction,col);
 }

@@ -13,10 +13,10 @@
 // マクロ定義
 //*****************************************************************************
 #define	TEXTURE_NETMATCHRIAL		("../data/TEXTURE/old/MatchLogo.png")						//!< 読み込むテクスチャファイル名
-#define	NETMATCHRIAL_SIZE_X			(SCREEN_W/4-50)										//!< チュートリアルの幅
-#define	NETMATCHRIAL_SIZE_Y			(SCREEN_H/4-50)										//!< チュートリアルの高さ
-#define	NETMATCHRIAL_POS_X			(SCREEN_CENTER_X)									//!< チュートリアルの表示位置
-#define	NETMATCHRIAL_POS_Y			(SCREEN_CENTER_Y)									//!< チュートリアルの表示位置
+constexpr int	NETMATCHRIAL_SIZE_X			{ SCREEN_W/4-50 };										//!< チュートリアルの幅
+constexpr int	NETMATCHRIAL_SIZE_Y			{ SCREEN_H/4-50 };										//!< チュートリアルの高さ
+constexpr int	NETMATCHRIAL_POS_X			{ SCREEN_CENTER_X };									//!< チュートリアルの表示位置
+constexpr int	NETMATCHRIAL_POS_Y			{ SCREEN_CENTER_Y };									//!< チュートリアルの表示位置
 
 //=============================================================================
 // コンストラクタ　「読み込み」「初期化」

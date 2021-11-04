@@ -13,31 +13,27 @@
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define	TITLE_BG_POS_X						(SCREEN_CENTER_X)			// タイトルBGの位置(X座標)
-#define	TITLE_BG_POS_Y						(SCREEN_CENTER_Y)			// タイトルBGの位置(Y座標)
-#define	TITLE_BG_WIDTH						(SCREEN_W)					// タイトルBGの幅
-#define	TITLE_BG_HEIGHT						(SCREEN_H)					// タイトルBGの高さ
-
-#define	TITLE_LOGO_POS_X					(SCREEN_CENTER_X)			// タイトルロゴの位置(X座標)
-#define	TITLE_LOGO_POS_Y					(SCREEN_CENTER_Y-200.0f)	// タイトルロゴの位置(Y座標)
-#define	TITLE_LOGO_WIDTH					(800.0f)					// タイトルロゴの幅
-#define	TITLE_LOGO_HEIGHT					(500.0f)					// タイトルロゴの高さ
-
-#define	TITLE_PRESS_LOGO_POS_X				(SCREEN_CENTER_X)			// PRESSロゴの位置(X座標)
-#define	TITLE_PRESS_LOGO_POS_Y				(SCREEN_CENTER_Y+200.0f)	// PRESSロゴの位置(Y座標)
-#define	TITLE_PRESS_LOGO_WIDTH				(400.0f)					// PRESSロゴの幅
-#define	TITLE_PRESS_LOGO_HEIGHT				(100.0f)					// PRESSロゴの高さ
-
-#define	TITLE_SELECT_POS_X					(SCREEN_CENTER_X)			// セレクトテクスチャの位置(X座標)
-#define	TITLE_SELECT_POS_Y					(SCREEN_CENTER_Y)			// セレクトテクスチャの位置(Y座標)
-#define	TITLE_SELECT_WIDTH					(300.0f)					// セレクトテクスチャの幅
-#define	TITLE_SELECT_HEIGHT					(200.0f)					// セレクトテクスチャの高さ
-#define	TITLE_SELECT_OFFSET_X				(200.0f)					// オフセット値
-#define	TITLE_SELECT_OFFSET_Y				(200.0f)					// オフセット値
-
-#define	COUNT_APPERA_START					(10)						// スタートボタン出現までの時間
-#define	INTERVAL_DISP_START					(30)						// スタートボタン点滅の時間
-#define	COUNT_WAIT_DEMO						(60 * 5)					// デモまでの待ち時間
+constexpr int	TITLE_BG_POS_X{ SCREEN_CENTER_X };				// タイトルBGの位置(X座標)
+constexpr int	TITLE_BG_POS_Y{ SCREEN_CENTER_Y };				// タイトルBGの位置(Y座標)
+constexpr int	TITLE_BG_WIDTH{ SCREEN_W };						// タイトルBGの幅
+constexpr int	TITLE_BG_HEIGHT{ SCREEN_H };					// タイトルBGの高さ
+constexpr int	TITLE_LOGO_POS_X{ SCREEN_CENTER_X };			// タイトルロゴの位置(X座標)
+constexpr int	TITLE_LOGO_POS_Y{ SCREEN_CENTER_Y - 200 };		// タイトルロゴの位置(Y座標)
+constexpr int	TITLE_LOGO_HEIGHT{ 500 };						// タイトルロゴの高さ
+constexpr int	TITLE_LOGO_WIDTH{ 800 };						// タイトルロゴの幅
+constexpr int	TITLE_PRESS_LOGO_POS_X{ SCREEN_CENTER_X };		// PRESSロゴの位置(X座標)
+constexpr int	TITLE_PRESS_LOGO_POS_Y{ SCREEN_CENTER_Y + 200 };// PRESSロゴの位置(Y座標)
+constexpr int	TITLE_PRESS_LOGO_WIDTH{ 400 };					// PRESSロゴの幅
+constexpr int	TITLE_PRESS_LOGO_HEIGHT{ 100 };					// PRESSロゴの高さ
+constexpr int	TITLE_SELECT_POS_X{ SCREEN_CENTER_X };			// セレクトテクスチャの位置(X座標)
+constexpr int	TITLE_SELECT_POS_Y{ SCREEN_CENTER_Y };			// セレクトテクスチャの位置(Y座標)
+constexpr int	TITLE_SELECT_WIDTH{ 300 };						// セレクトテクスチャの幅
+constexpr int	TITLE_SELECT_HEIGHT{ 200 };						// セレクトテクスチャの高さ
+constexpr int	TITLE_SELECT_OFFSET_X{ 200 };					// オフセット値
+constexpr int	TITLE_SELECT_OFFSET_Y{ 200 };					// オフセット値
+constexpr int	COUNT_APPERA_START{ 10 };						// スタートボタン出現までの時間
+constexpr int	INTERVAL_DISP_START{ 30 };						// スタートボタン点滅の時間
+constexpr int	COUNT_WAIT_DEMO{ 60 * 5 };						// デモまでの待ち時間
 
 //=============================================================================
 // コンストラクタ　「読み込み」「初期化」
@@ -357,7 +353,6 @@ void TITLE::CheckScene(FADE *fade)
 		{
 			//選択音再生
 			PlaySound(SOUND_LABEL_SE_enter01);
-			this->InitNet();
 			fade->SetFade(FADE_OUT, SCENE_NETMATCH, SOUND_LABEL_BGM_select01);
 		}
 	}

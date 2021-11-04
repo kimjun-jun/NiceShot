@@ -38,7 +38,7 @@ WALL::WALL(void)
 	this->Transform[WALL_TYPE_BACK].Pos(D3DXVECTOR3(0.0f, 0.0f, -WALL_INIT_POSZ));
 
 	//ƒ|ƒŠƒSƒ“‚Ì‰ñ“]ŠpŠp“x‚ðÝ’è
-	this->Transform[WALL_TYPE_FRONT].Rot(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+	this->Transform[WALL_TYPE_FRONT].Rot(VEC3_ALL0);
 	this->Transform[WALL_TYPE_LEFT].Rot(D3DXVECTOR3(0.0f, -D3DX_PI * 0.50f, 0.0f));
 	this->Transform[WALL_TYPE_RIGHT].Rot(D3DXVECTOR3(0.0f, D3DX_PI * 0.50f, 0.0f));
 	this->Transform[WALL_TYPE_BACK].Rot(D3DXVECTOR3(0.0f, D3DX_PI, 0.0f));

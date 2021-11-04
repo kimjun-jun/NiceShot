@@ -14,26 +14,26 @@
 //*****************************************************************************
 #define	TEXTURE_BULLETGAUGE			"../data/TEXTURE/UI/UI_Shell.png"			// 読み込むテクスチャファイル名
 #define	TEXTURE_BULLETGAUGE_EMPTY	"../data/TEXTURE/UI/UI_Shell_Empty.png"		// 読み込むテクスチャファイル名
-#define	BULLETGAUGE_SIZE_X			(15.0f)						// 数字の幅
-#define	BULLETGAUGE_SIZE_Y			(20.0f)						// 数字の高さ
-#define	BULLETGAUGE_SIZE_X_OFFSET	(0.8f)						// アタックゲージの数字の幅
-#define	BULLETGAUGE_SIZE_Y_OFFSET	(0.8f)						// アタックゲージの数字の高さ
-#define	BULLETGAUGE_POS_X			(570.0f)					// 表示基準位置Ｘ座標
-#define	BULLETGAUGE_POS_Y			(SCREEN_CENTER_Y/5)			// 表示基準位置Ｙ座標
-#define	BULLETGAUGE_POS_X_OFFSET	(20.0f)						// 表示基準位置Ｘ座標
 
-#define BULLETGAUGE_P1_POS_X		SCREEN_CENTER_X - SCREEN_SEPARATE_BUFF - BULLETGAUGE_POS_X
-#define BULLETGAUGE_P1_POS_Y		SCREEN_CENTER_Y - SCREEN_SEPARATE_BUFF - BULLETGAUGE_POS_Y
-#define BULLETGAUGE_P2_POS_X		SCREEN_W - SCREEN_SEPARATE_BUFF - BULLETGAUGE_POS_X
-#define BULLETGAUGE_P2_POS_Y		SCREEN_CENTER_Y - SCREEN_SEPARATE_BUFF - BULLETGAUGE_POS_Y
-#define BULLETGAUGE_P3_POS_X		SCREEN_CENTER_X - SCREEN_SEPARATE_BUFF - BULLETGAUGE_POS_X
-#define BULLETGAUGE_P3_POS_Y		SCREEN_H - SCREEN_SEPARATE_BUFF - BULLETGAUGE_POS_Y
-#define BULLETGAUGE_P4_POS_X		SCREEN_W - SCREEN_SEPARATE_BUFF - BULLETGAUGE_POS_X
-#define BULLETGAUGE_P4_POS_Y		SCREEN_H - SCREEN_SEPARATE_BUFF - BULLETGAUGE_POS_Y
-#define BULLETGAUGE_NET_POS_X		SCREEN_CENTER_X - SCREEN_SEPARATE_BUFF - BULLETGAUGE_POS_X+55.0f
-#define BULLETGAUGE_NET_POS_Y		SCREEN_H - SCREEN_SEPARATE_BUFF - BULLETGAUGE_POS_Y
+constexpr float	BULLETGAUGE_SIZE_X{ 15.0f };					// 数字の幅
+constexpr float	BULLETGAUGE_SIZE_Y{ 20.0f };					// 数字の高さ
+constexpr float	BULLETGAUGE_SIZE_X_OFFSET{ 0.8f };				// アタックゲージの数字の幅
+constexpr float	BULLETGAUGE_SIZE_Y_OFFSET{ 0.8f };				// アタックゲージの数字の高さ
+constexpr float	BULLETGAUGE_POS_X{ 570.0f };					// 表示基準位置Ｘ座標
+constexpr float	BULLETGAUGE_POS_Y{ SCREEN_CENTER_Y / 5.0f };	// 表示基準位置Ｙ座標
+constexpr float	BULLETGAUGE_POS_X_OFFSET{ 20.0f };				// 表示基準位置Ｘ座標
+constexpr float BULLETGAUGE_P1_POS_X{ SCREEN_CENTER_X - SCREEN_SEPARATE_BUFF - BULLETGAUGE_POS_X };
+constexpr float BULLETGAUGE_P1_POS_Y{ SCREEN_CENTER_Y - SCREEN_SEPARATE_BUFF - BULLETGAUGE_POS_Y };
+constexpr float BULLETGAUGE_P2_POS_X{ SCREEN_W - SCREEN_SEPARATE_BUFF - BULLETGAUGE_POS_X };
+constexpr float BULLETGAUGE_P2_POS_Y{ SCREEN_CENTER_Y - SCREEN_SEPARATE_BUFF - BULLETGAUGE_POS_Y };
+constexpr float BULLETGAUGE_P3_POS_X{ SCREEN_CENTER_X - SCREEN_SEPARATE_BUFF - BULLETGAUGE_POS_X };
+constexpr float BULLETGAUGE_P3_POS_Y{ SCREEN_H - SCREEN_SEPARATE_BUFF - BULLETGAUGE_POS_Y };
+constexpr float BULLETGAUGE_P4_POS_X{ SCREEN_W - SCREEN_SEPARATE_BUFF - BULLETGAUGE_POS_X };
+constexpr float BULLETGAUGE_P4_POS_Y{ SCREEN_H - SCREEN_SEPARATE_BUFF - BULLETGAUGE_POS_Y };
+constexpr float BULLETGAUGE_NET_POS_X{ SCREEN_CENTER_X - SCREEN_SEPARATE_BUFF - BULLETGAUGE_POS_X + 55.0f };
+constexpr float BULLETGAUGE_NET_POS_Y{ SCREEN_H - SCREEN_SEPARATE_BUFF - BULLETGAUGE_POS_Y };
 
-#define PLAYER_AMMOSTOCK		(10)	//!< 弾のストック　
+constexpr int PLAYER_AMMOSTOCK{ 10 };	//!< 弾のストック　
 
 //=============================================================================
 // コンストラクタ　「読み込み」「初期化」
@@ -132,6 +132,54 @@ void BULLETGAUGE::Init(void)
 		//初期設定は弾薬満タンからスタート
 		this->BulletGaugePara[CntBulletGauge].AmmoStock = PLAYER_AMMOSTOCK;
 	}
+
+	//描画位置設定
+	this->Transform[PLAYER01].Pos(D3DXVECTOR3(BULLETGAUGE_P1_POS_X, BULLETGAUGE_P1_POS_Y, 0.0f));
+	this->Transform[PLAYER02].Pos(D3DXVECTOR3(BULLETGAUGE_P2_POS_X, BULLETGAUGE_P2_POS_Y, 0.0f));
+	this->Transform[PLAYER03].Pos(D3DXVECTOR3(BULLETGAUGE_P3_POS_X, BULLETGAUGE_P3_POS_Y, 0.0f));
+	this->Transform[PLAYER04].Pos(D3DXVECTOR3(BULLETGAUGE_P4_POS_X, BULLETGAUGE_P4_POS_Y, 0.0f));
+
+	//カウントループ プレイヤー数(ゲージ数)
+	for (int CntBulletGauge = 0; CntBulletGauge < OBJECT_BULLETGAUGE_MAX; CntBulletGauge++)
+	{
+		//ベース座標取得
+		D3DXVECTOR3 pos = this->Transform[CntBulletGauge].Pos();
+		//カウントループ 弾数
+		for (int CntAmmoStock = 0; CntAmmoStock < PLAYER_AMMOSTOCK * 2; CntAmmoStock++)
+		{
+			//「枠」頂点と「中身」頂点で別の処理をする
+			D3DXVECTOR3 vtx[POLYGON_2D_VERTEX];
+			//枠
+			if (CntAmmoStock < PLAYER_AMMOSTOCK)//0-9の範囲
+			{
+				vtx[0] = D3DXVECTOR3(pos.x + BULLETGAUGE_SIZE_X_OFFSET + (CntAmmoStock*BULLETGAUGE_POS_X_OFFSET), pos.y + BULLETGAUGE_SIZE_Y_OFFSET, 0.0f);
+				vtx[1] = D3DXVECTOR3(pos.x - BULLETGAUGE_SIZE_X_OFFSET + (CntAmmoStock*BULLETGAUGE_POS_X_OFFSET) + BULLETGAUGE_SIZE_X, pos.y + BULLETGAUGE_SIZE_Y_OFFSET, 0.0f);
+				vtx[2] = D3DXVECTOR3(pos.x + BULLETGAUGE_SIZE_X_OFFSET + (CntAmmoStock*BULLETGAUGE_POS_X_OFFSET), pos.y + BULLETGAUGE_SIZE_Y - BULLETGAUGE_SIZE_Y_OFFSET + BULLETGAUGE_SIZE_Y, 0.0f);
+				vtx[3] = D3DXVECTOR3(pos.x - BULLETGAUGE_SIZE_X_OFFSET + (CntAmmoStock*BULLETGAUGE_POS_X_OFFSET) + BULLETGAUGE_SIZE_X, pos.y + BULLETGAUGE_SIZE_Y - BULLETGAUGE_SIZE_Y_OFFSET + BULLETGAUGE_SIZE_Y, 0.0f);
+			}
+			//中身
+			else
+			{
+				//オフセット用ループカウント
+				int cnt = CntAmmoStock - PLAYER_AMMOSTOCK;
+				vtx[0] = D3DXVECTOR3(pos.x + (cnt*BULLETGAUGE_POS_X_OFFSET), pos.y, 0.0f);
+				vtx[1] = D3DXVECTOR3(pos.x + (cnt*BULLETGAUGE_POS_X_OFFSET) + BULLETGAUGE_SIZE_X, pos.y, 0.0f);
+				vtx[2] = D3DXVECTOR3(pos.x + (cnt*BULLETGAUGE_POS_X_OFFSET), pos.y + BULLETGAUGE_SIZE_Y + BULLETGAUGE_SIZE_Y, 0.0f);
+				vtx[3] = D3DXVECTOR3(pos.x + (cnt*BULLETGAUGE_POS_X_OFFSET) + BULLETGAUGE_SIZE_X, pos.y + BULLETGAUGE_SIZE_Y + BULLETGAUGE_SIZE_Y, 0.0f);
+			}
+			//描画位置反映
+			this->vtx[CntBulletGauge].Vertex2D(CntAmmoStock, vtx);
+
+			//RHW設定
+			this->vtx[CntBulletGauge].RHW2D(CntAmmoStock);
+
+			//UVの設定
+			this->vtx[CntBulletGauge].UV2D(CntAmmoStock);
+
+			//カラー設定
+			this->vtx[CntBulletGauge].Color2D(CntAmmoStock, D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
+		}
+	}
 }
 
 //=============================================================================
@@ -139,29 +187,36 @@ void BULLETGAUGE::Init(void)
 //=============================================================================
 void BULLETGAUGE::InitNet(int MyNumber)
 {
-	/*
-	this[MyNumber].Pos(D3DXVECTOR3(BULLETGAUGE_NET_POS_X, BULLETGAUGE_NET_POS_Y, 0.0f));
-
-	//座標取得
-	D3DXVECTOR3 pos = this[MyNumber].Pos();
-
-	for (int CntAmmo = 0; CntAmmo < PLAYER_AMMOPOWER_NORMAL; CntAmmo++)
+	//描画位置設定
+	this->Transform[MyNumber].Pos(D3DXVECTOR3(BULLETGAUGE_NET_POS_X, BULLETGAUGE_NET_POS_Y, 0.0f));
+	//ベース座標取得
+	D3DXVECTOR3 pos = this->Transform[MyNumber].Pos();
+	//カウントループ 弾数
+	for (int CntAmmoStock = 0; CntAmmoStock < PLAYER_AMMOSTOCK * 2; CntAmmoStock++)
 	{
-		//BASE設定
-		// 頂点座標の設定
-		this[MyNumber].TexEmpty[CntAmmo].textureVTX[0].vtx = D3DXVECTOR3(pos.x + (CntAmmo*BULLETGAUGE_POS_X_OFFSET * 2), pos.y - BULLETGAUGE_SIZE_Y, 0.0f);
-		this[MyNumber].TexEmpty[CntAmmo].textureVTX[1].vtx = D3DXVECTOR3(pos.x + (CntAmmo*BULLETGAUGE_POS_X_OFFSET * 2) + BULLETGAUGE_SIZE_X*2, pos.y - BULLETGAUGE_SIZE_Y, 0.0f);
-		this[MyNumber].TexEmpty[CntAmmo].textureVTX[2].vtx = D3DXVECTOR3(pos.x + (CntAmmo*BULLETGAUGE_POS_X_OFFSET * 2), pos.y + BULLETGAUGE_SIZE_Y + BULLETGAUGE_SIZE_Y, 0.0f);
-		this[MyNumber].TexEmpty[CntAmmo].textureVTX[3].vtx = D3DXVECTOR3(pos.x + (CntAmmo*BULLETGAUGE_POS_X_OFFSET * 2) + BULLETGAUGE_SIZE_X * 2, pos.y + BULLETGAUGE_SIZE_Y + BULLETGAUGE_SIZE_Y, 0.0f);
-
-		//中身設定
-		// 頂点座標の設定
-		this[MyNumber].Tex[CntAmmo].textureVTX[0].vtx = D3DXVECTOR3(pos.x + BULLETGAUGE_SIZE_X_OFFSET + (CntAmmo*BULLETGAUGE_POS_X_OFFSET * 2), pos.y + BULLETGAUGE_SIZE_Y_OFFSET - BULLETGAUGE_SIZE_Y, 0.0f);
-		this[MyNumber].Tex[CntAmmo].textureVTX[1].vtx = D3DXVECTOR3(pos.x - BULLETGAUGE_SIZE_X_OFFSET + (CntAmmo*BULLETGAUGE_POS_X_OFFSET * 2) + BULLETGAUGE_SIZE_X * 2, pos.y + BULLETGAUGE_SIZE_Y_OFFSET - BULLETGAUGE_SIZE_Y, 0.0f);
-		this[MyNumber].Tex[CntAmmo].textureVTX[2].vtx = D3DXVECTOR3(pos.x + BULLETGAUGE_SIZE_X_OFFSET + (CntAmmo*BULLETGAUGE_POS_X_OFFSET * 2), pos.y + BULLETGAUGE_SIZE_Y - BULLETGAUGE_SIZE_Y_OFFSET + BULLETGAUGE_SIZE_Y, 0.0f);
-		this[MyNumber].Tex[CntAmmo].textureVTX[3].vtx = D3DXVECTOR3(pos.x - BULLETGAUGE_SIZE_X_OFFSET + (CntAmmo*BULLETGAUGE_POS_X_OFFSET * 2) + BULLETGAUGE_SIZE_X * 2, pos.y + BULLETGAUGE_SIZE_Y - BULLETGAUGE_SIZE_Y_OFFSET + BULLETGAUGE_SIZE_Y, 0.0f);
+		//「枠」頂点と「中身」頂点で別の処理をする
+		D3DXVECTOR3 vtx[POLYGON_2D_VERTEX];
+		//枠
+		if (CntAmmoStock < PLAYER_AMMOSTOCK)//0-9の範囲
+		{
+			vtx[0] = D3DXVECTOR3(pos.x + (CntAmmoStock*BULLETGAUGE_POS_X_OFFSET * 2), pos.y - BULLETGAUGE_SIZE_Y, 0.0f);
+			vtx[1] = D3DXVECTOR3(pos.x + (CntAmmoStock*BULLETGAUGE_POS_X_OFFSET * 2) + BULLETGAUGE_SIZE_X * 2, pos.y - BULLETGAUGE_SIZE_Y, 0.0f);
+			vtx[2] = D3DXVECTOR3(pos.x + (CntAmmoStock*BULLETGAUGE_POS_X_OFFSET * 2), pos.y + BULLETGAUGE_SIZE_Y + BULLETGAUGE_SIZE_Y, 0.0f);
+			vtx[3] = D3DXVECTOR3(pos.x + (CntAmmoStock*BULLETGAUGE_POS_X_OFFSET * 2) + BULLETGAUGE_SIZE_X * 2, pos.y + BULLETGAUGE_SIZE_Y + BULLETGAUGE_SIZE_Y, 0.0f);
+		}
+		//中身
+		else
+		{
+			//オフセット用ループカウント
+			int cnt = CntAmmoStock - PLAYER_AMMOSTOCK;
+			vtx[0] = D3DXVECTOR3(pos.x + BULLETGAUGE_SIZE_X_OFFSET + (cnt*BULLETGAUGE_POS_X_OFFSET * 2), pos.y + BULLETGAUGE_SIZE_Y_OFFSET - BULLETGAUGE_SIZE_Y, 0.0f);
+			vtx[1] = D3DXVECTOR3(pos.x - BULLETGAUGE_SIZE_X_OFFSET + (cnt*BULLETGAUGE_POS_X_OFFSET * 2) + BULLETGAUGE_SIZE_X * 2, pos.y + BULLETGAUGE_SIZE_Y_OFFSET - BULLETGAUGE_SIZE_Y, 0.0f);
+			vtx[2] = D3DXVECTOR3(pos.x + BULLETGAUGE_SIZE_X_OFFSET + (cnt*BULLETGAUGE_POS_X_OFFSET * 2), pos.y + BULLETGAUGE_SIZE_Y - BULLETGAUGE_SIZE_Y_OFFSET + BULLETGAUGE_SIZE_Y, 0.0f);
+			vtx[3] = D3DXVECTOR3(pos.x - BULLETGAUGE_SIZE_X_OFFSET + (cnt*BULLETGAUGE_POS_X_OFFSET * 2) + BULLETGAUGE_SIZE_X * 2, pos.y + BULLETGAUGE_SIZE_Y - BULLETGAUGE_SIZE_Y_OFFSET + BULLETGAUGE_SIZE_Y, 0.0f);
+		}
+		//描画位置反映
+		this->vtx[MyNumber].Vertex2D(CntAmmoStock, vtx);
 	}
-	*/
 }
 
 //=============================================================================
@@ -229,7 +284,7 @@ void BULLETGAUGE::Draw(bool Netflag, int NetMyNumber, int CntPlayer)
 			// テクスチャの設定　テクスチャが複数ならtexを配列化して選択させるように
 			pDevice->SetTexture(0, this->tex[BULLETGAUGE_TEX_SHELL].Texture());		//枠なので[1]
 			// 中身を描画　引数二個目の描画開始頂点を設定することが大事
-			pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, (CntAmmo * 4) + PLAYER_AMMOSTOCK, POLYGON_2D_NUM);
+			pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, (CntAmmo * 4) + (PLAYER_AMMOSTOCK * 4), POLYGON_2D_NUM);
 		}
 	}
 }

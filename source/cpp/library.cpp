@@ -9,9 +9,9 @@
 
 //---------------------------------------------------------------------------------ìñÇΩÇËîªíËçÇë¨âªóp
 //
-#define FIELD_PARTITION_FIRST_NUM		(4)
-#define FIELD_PARTITION_SECOND_NUM		(16)
-#define FIELD_PARTITION_THIRD_NUM		(64)
+constexpr int FIELD_PARTITION_FIRST_NUM{ 4 };
+constexpr int FIELD_PARTITION_SECOND_NUM{ 16 };
+constexpr int FIELD_PARTITION_THIRD_NUM{ 64 };
 FIELD_COLLISION g_Field_Collision[FIELD_PARTITION_THIRD_NUM];
 
 //=============================================================================

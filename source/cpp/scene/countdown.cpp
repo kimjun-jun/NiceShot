@@ -13,20 +13,21 @@
 //*****************************************************************************
 #define COUNTDOWN_TEXTURE_NUMBER			_T("../data/TEXTURE/BG/0-9.png")	//!< 読み込むテクスチャファイル名
 #define COUNTDOWN_TEXTURE_LOGO				_T("../data/TEXTURE/sozai/go.png")	//!< 読み込むテクスチャファイル名
-#define COUNTDOWN_TEXTURE_NUMBER_SIZE_X		(50)								//!< テクスチャサイズ 
-#define COUNTDOWN_TEXTURE_NUMBER_SIZE_Y		(50)								//!< 同上  
-#define COUNTDOWN_TEXTURE_LOGO_SIZE_X		(200)								//!< テクスチャロゴサイズ 
-#define COUNTDOWN_TEXTURE_LOGO_SIZE_Y		(200)								//!< 同上  
-#define COUNTDOWN_TEXTURE_PATTERN_X			(10)								//!< アニメパターンのテクスチャ内分割数（X)  
-#define COUNTDOWN_TEXTURE_PATTERN_Y			(1)									//!< アニメパターンのテクスチャ内分割数（Y)  
-#define COUNTDOWN_ANIM_PATTERN_NUM			(COUNTDOWN_TEXTURE_PATTERN_X*COUNTDOWN_TEXTURE_PATTERN_Y)	//!< アニメーションパターン数  
-#define COUNTDOWN_TIME_ANIMATION			(4)									//!< アニメーションの切り替わるカウント  
-#define COUNTDOWN_TEXTURE_POS_X				(SCREEN_CENTER_X)					//!< テクスチャ座標
-#define COUNTDOWN_TEXTURE_POS_Y				(SCREEN_CENTER_Y)					//!< 同上  
-#define COUNTDOWN_FPS_TIME					(240)								//!< 毎フレームカウントしてタイム計測
-#define COUNTDOWN_FPS_TIME_START			(4)									//!< カウントダウンスタート時点のタイム
-#define COUNTDOWN_ALPHA						(0.05f)								//!< カウントダウンが0の時GOを描画してGOが薄くなるスピード
-#define COUNTDOWN_CHANGESIZE				(5)									//!< カウントダウン数字のサイズが拡大していく値
+
+constexpr int COUNTDOWN_TEXTURE_NUMBER_SIZE_X{ 50 };			//!< テクスチャサイズ 
+constexpr int COUNTDOWN_TEXTURE_NUMBER_SIZE_Y{ 50 };			//!< 同上  
+constexpr int COUNTDOWN_TEXTURE_LOGO_SIZE_X{ 200 };				//!< テクスチャロゴサイズ 
+constexpr int COUNTDOWN_TEXTURE_LOGO_SIZE_Y{ 200 };				//!< 同上  
+constexpr int COUNTDOWN_TEXTURE_PATTERN_X{ 10 };				//!< アニメパターンのテクスチャ内分割数（X)  
+constexpr int COUNTDOWN_TEXTURE_PATTERN_Y{ 1 };					//!< アニメパターンのテクスチャ内分割数（Y)  
+constexpr int COUNTDOWN_ANIM_PATTERN_NUM{ COUNTDOWN_TEXTURE_PATTERN_X*COUNTDOWN_TEXTURE_PATTERN_Y };	//!< アニメーションパターン数  
+constexpr int COUNTDOWN_TIME_ANIMATION{ 4 };					//!< アニメーションの切り替わるカウント  
+constexpr int COUNTDOWN_TEXTURE_POS_X{ SCREEN_CENTER_X };		//!< テクスチャ座標
+constexpr int COUNTDOWN_TEXTURE_POS_Y{ SCREEN_CENTER_Y };		//!< 同上  
+constexpr int COUNTDOWN_FPS_TIME{ 240 };						//!< 毎フレームカウントしてタイム計測
+constexpr int COUNTDOWN_FPS_TIME_START{ 4 };					//!< カウントダウンスタート時点のタイム
+constexpr int COUNTDOWN_CHANGESIZE{ 5 };						//!< カウントダウン数字のサイズが拡大していく値
+constexpr float COUNTDOWN_ALPHA{ 0.05f };						//!< カウントダウンが0の時GOを描画してGOが薄くなるスピード
 
 //=============================================================================
 // コンストラクタ　「読み込み」「初期化」

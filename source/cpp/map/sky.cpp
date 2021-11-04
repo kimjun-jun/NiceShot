@@ -12,14 +12,14 @@
 //*****************************************************************************
 #define	SKY_TEXTURE_FILENAME	"../data/TEXTURE/map/sky001.jpg"		// 読み込むテクスチャファイル名
 
-constexpr float	VALUE_MOVE_SKY		{ 5.0f };				// 移動速度
-constexpr int	SKY_BLOCK_H			{ 16 };					// 水平のポリゴン数
-constexpr int	SKY_BLOCK_V			{ 8 };					// 垂直のポリゴン数
-constexpr float	SKY_RADIUS			{ 4000.0f };			// SKY半径
-constexpr float	VALUE_ROTATE_SKY	{ D3DX_PI * 0.0001f };	// 回転速度
-constexpr float	VALUE_TIME_SKY		{ 0.01f };				// 移動速度
-constexpr float	SKY_HEIGHT_RATE		{ 2.0f };				// 空ドームの高さ係数
-constexpr int	TEX_COUNT_LOOP		{ 1 };					// テクスチャの繰り返し回数
+constexpr float	VALUE_MOVE_SKY{ 5.0f };				// 移動速度
+constexpr float	SKY_RADIUS{ 4000.0f };			// SKY半径
+constexpr float	VALUE_ROTATE_SKY{ D3DX_PI * 0.0001f };	// 回転速度
+constexpr float	VALUE_TIME_SKY{ 0.01f };				// 移動速度
+constexpr float	SKY_HEIGHT_RATE{ 2.0f };				// 空ドームの高さ係数
+constexpr int	SKY_BLOCK_H{ 16 };					// 水平のポリゴン数
+constexpr int	SKY_BLOCK_V{ 8 };					// 垂直のポリゴン数
+constexpr int	TEX_COUNT_LOOP{ 1 };					// テクスチャの繰り返し回数
 
 //=============================================================================
 // コンストラクタ　「読み込み」「初期化」
@@ -38,9 +38,9 @@ SKY::SKY(void)
 
 	// ポリゴン表示位置の中心座標を設定
 	this->Transform[SKY_MODEL_TYPE_SPHERE].Pos(D3DXVECTOR3(0.0f, -100.0f, 0.0f));
-	this->Transform[SKY_MODEL_TYPE_SPHERE].Rot(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+	this->Transform[SKY_MODEL_TYPE_SPHERE].Rot(VEC3_ALL0);
 	this->Transform[SKY_MODEL_TYPE_TOP].Pos(D3DXVECTOR3(0.0f, -100.0f, 0.0f));
-	this->Transform[SKY_MODEL_TYPE_TOP].Rot(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+	this->Transform[SKY_MODEL_TYPE_TOP].Rot(VEC3_ALL0);
 
 	// ブロック数の設定
 	this->SkyPara[SKY_MODEL_TYPE_SPHERE].nNumBlockH = SKY_BLOCK_H;

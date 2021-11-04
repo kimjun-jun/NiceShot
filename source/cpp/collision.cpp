@@ -19,14 +19,6 @@
 #include "../h/object/status.h"
 #include "../h/collision.h"
 
-
-static D3DXCOLOR PLAYER_COLOR[] = {
-	D3DXCOLOR(1.0f, 1.0f, 0.1f, 1.0f),//p1カラー
-	D3DXCOLOR(0.2f, 0.2f, 1.0f, 1.0f),//p2カラー
-	D3DXCOLOR(1.0f, 0.2f, 0.2f, 1.0f),//p3カラー
-	D3DXCOLOR(0.2f, 1.0f, 0.2f, 1.0f),//p4カラー
-};
-
 //void SetOjama(int type, int UsePlayer, PLAYER_HONTAI *p);
 
 //=============================================================================

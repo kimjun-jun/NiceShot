@@ -18,17 +18,10 @@
 //*****************************************************************************
 #define	TEXTURE_FILENAME				"../data/TEXTURE/map/white.png"		// 読み込むテクスチャファイル名
 //#define	TEXTURE_NOISE					"../data/TEXTURE/noise.bmp"		// 読み込むテクスチャファイル名
-#define SPHERELINEAR_LEN				(10.0f)							//!< 球面線形補間で使う、プレイヤーの座標と3角ポリゴン辺までの距離(プレイヤーの座標がこの値より辺に近ければ球面線形補間開始する)
+constexpr float SPHERELINEAR_LEN{ 10.0f };			//!< 球面線形補間で使う、プレイヤーの座標と3角ポリゴン辺までの距離(プレイヤーの座標がこの値より辺に近ければ球面線形補間開始する)
+constexpr float FIELD_Y_HIGH{ 120.0f };				//!< フィールドの高さで色を変える。高い
+constexpr float FIELD_Y_LOW{ 20.0f };				//!< フィールドの高さで色を変える。低い
 
-#define FIELD_Y_HIGH					(120.0f)						//!< フィールドの高さで色を変える。高い
-#define FIELD_Y_LOW						(20.0f)							//!< フィールドの高さで色を変える。低い
-
-static D3DXCOLOR PLAYER_COLOR[] = {
-	D3DXCOLOR(1.0f, 1.0f, 0.1f, 1.0f),//p1カラー
-	D3DXCOLOR(0.2f, 0.2f, 1.0f, 1.0f),//p2カラー
-	D3DXCOLOR(1.0f, 0.2f, 0.2f, 1.0f),//p3カラー
-	D3DXCOLOR(0.2f, 1.0f, 1.0f, 1.0f),//p4カラー
-};
 
 //=============================================================================
 // コンストラクタ　「読み込み」「初期化」
@@ -425,6 +418,20 @@ void FIELD::FieldHitCheck(PLAYER *player, ITEM *item, BULLET *bullet, EXPLOSION 
 			D3DXVECTOR3 rayG = rayS;
 			D3DXVECTOR3 ReturnPos = rayS;
 			D3DXVECTOR3 FieldNor = item->PostureVec[CntItem].FNVecFunc();
+			if (item->ItemParaAll[CntItem].ShadowPosSignal==false)
+			{
+				D3DXVECTOR3 ShadowPos = rayS;
+				//レイ調整
+				rayS.y += 1000.0f;
+				rayG.y -= 1000.0f;
+
+				//判定
+				this->FieldHit(rayS, rayG, &FieldNor, &ShadowPos.y);
+
+				//結果反映してフラグ変更
+				item->ItemParaAll[CntItem].LinkShadowPos = ShadowPos;
+				item->ItemParaAll[CntItem].ShadowPosSignal = true;
+			}
 			if (item->ItemParaAll[CntItem].CollisionFieldEnd != true || this->FieldPara.InterPolationFieldSignal == false)
 			{
 				//レイ調整
@@ -454,7 +461,7 @@ void FIELD::FieldHitCheck(PLAYER *player, ITEM *item, BULLET *bullet, EXPLOSION 
 	{
 		if (bullet->iUseType[Cntbullet].Use() == YesUseType1)
 		{
-			D3DXVECTOR3 kari = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+			D3DXVECTOR3 kari = VEC3_ALL0;
 			//-------------------オブジェクト値読み込み
 			D3DXVECTOR3 rayS = bullet->Transform[Cntbullet].Pos();
 			D3DXVECTOR3 rayG = rayS;
@@ -1038,7 +1045,7 @@ void FIELD::FieldHitGetSphereVec(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVEC
 								D3DXVec3Normalize(&NextPolyNorVec, &NextPolyNorVec);
 								D3DXVECTOR3 NowPolyNorVec;
 								D3DXVec3Normalize(&NowPolyNorVec, &vtxHOUSEN);
-								D3DXVECTOR3 NewPolyNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+								D3DXVECTOR3 NewPolyNorVec = VEC3_ALL0;
 								//SPHERELINEAR_LEN(5)-MinDistance(0～5)*10 = 補間倍率(0～0.5の範囲)
 								SphereLinear(&NewPolyNorVec, &NowPolyNorVec, &NextPolyNorVec, (SPHERELINEAR_LEN - MinDistance) / 10);
 								*vtxNor = NewPolyNorVec;
@@ -1099,7 +1106,7 @@ void FIELD::FieldHitGetSphereVec(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVEC
 
 								D3DXVECTOR3 NowPolyNorVec;
 								D3DXVec3Normalize(&NowPolyNorVec, &vtxHOUSEN);
-								D3DXVECTOR3 NewPolyNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+								D3DXVECTOR3 NewPolyNorVec = VEC3_ALL0;
 								//SPHERELINEAR_LEN(5)-MinDistance(0～5)*10 = 補間倍率(0～0.5の範囲)
 								SphereLinear(&NewPolyNorVec, &NowPolyNorVec, &AveNextPolyNorVec, (SPHERELINEAR_LEN - MinRtionDistance) / 10);
 								*vtxNor = NewPolyNorVec;
@@ -1126,7 +1133,7 @@ void FIELD::FieldHitGetSphereVec(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVEC
 
 								D3DXVECTOR3 NowPolyNorVec;
 								D3DXVec3Normalize(&NowPolyNorVec, &vtxHOUSEN);
-								D3DXVECTOR3 NewPolyNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+								D3DXVECTOR3 NewPolyNorVec = VEC3_ALL0;
 								//SPHERELINEAR_LEN(5)-MinDistance(0～5)*10 = 補間倍率(0～0.5の範囲)
 								SphereLinear(&NewPolyNorVec, &NowPolyNorVec, &AveNextPolyNorVec, (SPHERELINEAR_LEN - MinRtionDistance) / 10);
 								*vtxNor = NewPolyNorVec;
@@ -1154,7 +1161,7 @@ void FIELD::FieldHitGetSphereVec(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVEC
 
 								D3DXVECTOR3 NowPolyNorVec;
 								D3DXVec3Normalize(&NowPolyNorVec, &vtxHOUSEN);
-								D3DXVECTOR3 NewPolyNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+								D3DXVECTOR3 NewPolyNorVec = VEC3_ALL0;
 								//SPHERELINEAR_LEN(5)-MinDistance(0～5)*10 = 補間倍率(0～0.5の範囲)
 								SphereLinear(&NewPolyNorVec, &NowPolyNorVec, &AveNextPolyNorVec, (SPHERELINEAR_LEN - MinRtionDistance) / 10);
 								*vtxNor = NewPolyNorVec;
@@ -1171,7 +1178,7 @@ void FIELD::FieldHitGetSphereVec(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVEC
 								D3DXVec3Normalize(&NextPolyNorVec, &NextPolyNorVec);
 								D3DXVECTOR3 NowPolyNorVec;
 								D3DXVec3Normalize(&NowPolyNorVec, &vtxHOUSEN);
-								D3DXVECTOR3 NewPolyNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+								D3DXVECTOR3 NewPolyNorVec = VEC3_ALL0;
 								//SPHERELINEAR_LEN(5)-MinDistance(0～5)*10 = 補間倍率(0～0.5の範囲)
 								SphereLinear(&NewPolyNorVec, &NowPolyNorVec, &NextPolyNorVec, (SPHERELINEAR_LEN - MinDistanceRightUp) / 10);
 								*vtxNor = NewPolyNorVec;
@@ -1186,7 +1193,7 @@ void FIELD::FieldHitGetSphereVec(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVEC
 								D3DXVec3Normalize(&NextPolyNorVec, &NextPolyNorVec);
 								D3DXVECTOR3 NowPolyNorVec;
 								D3DXVec3Normalize(&NowPolyNorVec, &vtxHOUSEN);
-								D3DXVECTOR3 NewPolyNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+								D3DXVECTOR3 NewPolyNorVec = VEC3_ALL0;
 								//SPHERELINEAR_LEN(5)-MinDistance(0～5)*10 = 補間倍率(0～0.5の範囲)
 								SphereLinear(&NewPolyNorVec, &NowPolyNorVec, &NextPolyNorVec, (SPHERELINEAR_LEN - MinDistanceDown) / 10);
 								*vtxNor = NewPolyNorVec;
@@ -1201,7 +1208,7 @@ void FIELD::FieldHitGetSphereVec(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVEC
 								D3DXVec3Normalize(&NextPolyNorVec, &NextPolyNorVec);
 								D3DXVECTOR3 NowPolyNorVec;
 								D3DXVec3Normalize(&NowPolyNorVec, &vtxHOUSEN);
-								D3DXVECTOR3 NewPolyNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+								D3DXVECTOR3 NewPolyNorVec = VEC3_ALL0;
 								//SPHERELINEAR_LEN(5)-MinDistance(0～5)*10 = 補間倍率(0～0.5の範囲)
 								SphereLinear(&NewPolyNorVec, &NowPolyNorVec, &NextPolyNorVec, (SPHERELINEAR_LEN - MinDistanceLeft) / 10);
 								*vtxNor = NewPolyNorVec;
@@ -1226,7 +1233,7 @@ void FIELD::FieldHitGetSphereVec(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVEC
 								D3DXVec3Normalize(&NextPolyNorVec, &NextPolyNorVec);
 								D3DXVECTOR3 NowPolyNorVec;
 								D3DXVec3Normalize(&NowPolyNorVec, &vtxHOUSEN);
-								D3DXVECTOR3 NewPolyNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+								D3DXVECTOR3 NewPolyNorVec = VEC3_ALL0;
 								//SPHERELINEAR_LEN(5)-MinDistance(0～5)*10 = 補間倍率(0～0.5の範囲)
 								SphereLinear(&NewPolyNorVec, &NowPolyNorVec, &NextPolyNorVec, (SPHERELINEAR_LEN - MinDistance) / 10);
 								*vtxNor = NewPolyNorVec;
@@ -1281,7 +1288,7 @@ void FIELD::FieldHitGetSphereVec(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVEC
 
 								D3DXVECTOR3 NowPolyNorVec;
 								D3DXVec3Normalize(&NowPolyNorVec, &vtxHOUSEN);
-								D3DXVECTOR3 NewPolyNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+								D3DXVECTOR3 NewPolyNorVec = VEC3_ALL0;
 								//SPHERELINEAR_LEN(5)-MinDistance(0～5)*10 = 補間倍率(0～0.5の範囲)
 								SphereLinear(&NewPolyNorVec, &NowPolyNorVec, &AveNextPolyNorVec, (SPHERELINEAR_LEN - MinRtionDistance) / 10);
 								*vtxNor = NewPolyNorVec;
@@ -1308,7 +1315,7 @@ void FIELD::FieldHitGetSphereVec(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVEC
 
 								D3DXVECTOR3 NowPolyNorVec;
 								D3DXVec3Normalize(&NowPolyNorVec, &vtxHOUSEN);
-								D3DXVECTOR3 NewPolyNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+								D3DXVECTOR3 NewPolyNorVec = VEC3_ALL0;
 								//SPHERELINEAR_LEN(5)-MinDistance(0～5)*10 = 補間倍率(0～0.5の範囲)
 								SphereLinear(&NewPolyNorVec, &NowPolyNorVec, &AveNextPolyNorVec, (SPHERELINEAR_LEN - MinRtionDistance) / 10);
 								*vtxNor = NewPolyNorVec;
@@ -1336,7 +1343,7 @@ void FIELD::FieldHitGetSphereVec(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVEC
 
 								D3DXVECTOR3 NowPolyNorVec;
 								D3DXVec3Normalize(&NowPolyNorVec, &vtxHOUSEN);
-								D3DXVECTOR3 NewPolyNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+								D3DXVECTOR3 NewPolyNorVec = VEC3_ALL0;
 								//SPHERELINEAR_LEN(5)-MinDistance(0～5)*10 = 補間倍率(0～0.5の範囲)
 								SphereLinear(&NewPolyNorVec, &NowPolyNorVec, &AveNextPolyNorVec, (SPHERELINEAR_LEN - MinRtionDistance) / 10);
 								*vtxNor = NewPolyNorVec;
@@ -1354,7 +1361,7 @@ void FIELD::FieldHitGetSphereVec(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVEC
 								D3DXVec3Normalize(&NextPolyNorVec, &NextPolyNorVec);
 								D3DXVECTOR3 NowPolyNorVec;
 								D3DXVec3Normalize(&NowPolyNorVec, &vtxHOUSEN);
-								D3DXVECTOR3 NewPolyNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+								D3DXVECTOR3 NewPolyNorVec = VEC3_ALL0;
 								//SPHERELINEAR_LEN(5)-MinDistance(0～5)*10 = 補間倍率(0～0.5の範囲)
 								SphereLinear(&NewPolyNorVec, &NowPolyNorVec, &NextPolyNorVec, (SPHERELINEAR_LEN - MinDistanceRight) / 10);
 								*vtxNor = NewPolyNorVec;
@@ -1369,7 +1376,7 @@ void FIELD::FieldHitGetSphereVec(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVEC
 								D3DXVec3Normalize(&NextPolyNorVec, &NextPolyNorVec);
 								D3DXVECTOR3 NowPolyNorVec;
 								D3DXVec3Normalize(&NowPolyNorVec, &vtxHOUSEN);
-								D3DXVECTOR3 NewPolyNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+								D3DXVECTOR3 NewPolyNorVec = VEC3_ALL0;
 								//SPHERELINEAR_LEN(5)-MinDistance(0～5)*10 = 補間倍率(0～0.5の範囲)
 								SphereLinear(&NewPolyNorVec, &NowPolyNorVec, &NextPolyNorVec, (SPHERELINEAR_LEN - MinDistanceUp) / 10);
 								*vtxNor = NewPolyNorVec;
@@ -1384,7 +1391,7 @@ void FIELD::FieldHitGetSphereVec(D3DXVECTOR3 InrayS, D3DXVECTOR3 InrayG, D3DXVEC
 								D3DXVec3Normalize(&NextPolyNorVec, &NextPolyNorVec);
 								D3DXVECTOR3 NowPolyNorVec;
 								D3DXVec3Normalize(&NowPolyNorVec, &vtxHOUSEN);
-								D3DXVECTOR3 NewPolyNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+								D3DXVECTOR3 NewPolyNorVec = VEC3_ALL0;
 								//SPHERELINEAR_LEN(5)-MinDistance(0～5)*10 = 補間倍率(0～0.5の範囲)
 								SphereLinear(&NewPolyNorVec, &NowPolyNorVec, &NextPolyNorVec, (SPHERELINEAR_LEN - MinDistanceLeftDown) / 10);
 								*vtxNor = NewPolyNorVec;

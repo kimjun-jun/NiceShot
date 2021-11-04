@@ -13,29 +13,29 @@
 // マクロ定義
 //*****************************************************************************
 
-#define	VITALGAUGE_SIZE_X			(500.0f)						//!< アタックゲージの数字の幅
-#define	VITALGAUGE_SIZE_Y			(20.0f)							//!< アタックゲージの数字の高さ
-#define	VITALGAUGE_SIZE_X_OFFSET	(0.8f)							//!< アタックゲージの数字の幅
-#define	VITALGAUGE_SIZE_Y_OFFSET	(0.8f)							//!< アタックゲージの数字の高さ
-#define	VITALGAUGE_BASE_POS_X		(570.0f)						//!< アタックゲージの表示基準位置Ｘ座標
-#define	VITALGAUGE_BASE_POS_Y		(SCREEN_CENTER_Y/10)			//!< アタックゲージの表示基準位置Ｙ座標
+constexpr float	VITALGAUGE_SIZE_X{ 500.0f };						//!< アタックゲージの数字の幅
+constexpr float	VITALGAUGE_SIZE_Y{ 20.0f };							//!< アタックゲージの数字の高さ
+constexpr float	VITALGAUGE_SIZE_X_NET{ VITALGAUGE_SIZE_X * 2 };		//!< アタックゲージの数字の幅
+constexpr float	VITALGAUGE_SIZE_Y_NET{ VITALGAUGE_SIZE_Y * 2 };		//!< アタックゲージの数字の高さ
+constexpr float	VITALGAUGE_SIZE_X_OFFSET{ 0.8f };					//!< アタックゲージの数字の幅
+constexpr float	VITALGAUGE_SIZE_Y_OFFSET{ 0.8f };					//!< アタックゲージの数字の高さ
+constexpr float	VITALGAUGE_BASE_POS_X{ 570.0f };					//!< アタックゲージの表示基準位置Ｘ座標
+constexpr float	VITALGAUGE_BASE_POS_Y{ SCREEN_CENTER_Y / 10 };		//!< アタックゲージの表示基準位置Ｙ座標
+constexpr float VITALGAUGE_P1_POS_X{ SCREEN_CENTER_X - SCREEN_SEPARATE_BUFF - VITALGAUGE_BASE_POS_X };
+constexpr float VITALGAUGE_P1_POS_Y{ SCREEN_CENTER_Y - SCREEN_SEPARATE_BUFF - VITALGAUGE_BASE_POS_Y };
+constexpr float VITALGAUGE_P2_POS_X{ SCREEN_W - SCREEN_SEPARATE_BUFF - VITALGAUGE_BASE_POS_X };
+constexpr float VITALGAUGE_P2_POS_Y{ SCREEN_CENTER_Y - SCREEN_SEPARATE_BUFF - VITALGAUGE_BASE_POS_Y };
+constexpr float VITALGAUGE_P3_POS_X{ SCREEN_CENTER_X - SCREEN_SEPARATE_BUFF - VITALGAUGE_BASE_POS_X };
+constexpr float VITALGAUGE_P3_POS_Y{ SCREEN_H - SCREEN_SEPARATE_BUFF - VITALGAUGE_BASE_POS_Y };
+constexpr float VITALGAUGE_P4_POS_X{ SCREEN_W - SCREEN_SEPARATE_BUFF - VITALGAUGE_BASE_POS_X };
+constexpr float VITALGAUGE_P4_POS_Y{ SCREEN_H - SCREEN_SEPARATE_BUFF - VITALGAUGE_BASE_POS_Y };
+constexpr float VITALGAUGE_NET_POS_X{ SCREEN_CENTER_X - SCREEN_SEPARATE_BUFF - VITALGAUGE_BASE_POS_X + 55.0f };
+constexpr float VITALGAUGE_NET_POS_Y{ SCREEN_H - SCREEN_SEPARATE_BUFF - VITALGAUGE_BASE_POS_Y };
+constexpr float	VITAL_GREEN_DIAMETER{ 0.5f };						//!< 
+constexpr float	VITAL_ORANGE_DIAMETER{ 0.2f };						//!< 
+constexpr float	VITAL_RED_DIAMETER{ 0.1f };							//!< 
 
-#define VITALGAUGE_P1_POS_X			SCREEN_CENTER_X - SCREEN_SEPARATE_BUFF - VITALGAUGE_BASE_POS_X
-#define VITALGAUGE_P1_POS_Y			SCREEN_CENTER_Y - SCREEN_SEPARATE_BUFF - VITALGAUGE_BASE_POS_Y
-#define VITALGAUGE_P2_POS_X			SCREEN_W - SCREEN_SEPARATE_BUFF - VITALGAUGE_BASE_POS_X
-#define VITALGAUGE_P2_POS_Y			SCREEN_CENTER_Y - SCREEN_SEPARATE_BUFF - VITALGAUGE_BASE_POS_Y
-#define VITALGAUGE_P3_POS_X			SCREEN_CENTER_X - SCREEN_SEPARATE_BUFF - VITALGAUGE_BASE_POS_X
-#define VITALGAUGE_P3_POS_Y			SCREEN_H - SCREEN_SEPARATE_BUFF - VITALGAUGE_BASE_POS_Y
-#define VITALGAUGE_P4_POS_X			SCREEN_W - SCREEN_SEPARATE_BUFF - VITALGAUGE_BASE_POS_X
-#define VITALGAUGE_P4_POS_Y			SCREEN_H - SCREEN_SEPARATE_BUFF - VITALGAUGE_BASE_POS_Y
-#define VITALGAUGE_NET_POS_X		SCREEN_CENTER_X - SCREEN_SEPARATE_BUFF - VITALGAUGE_BASE_POS_X+55.0f
-#define VITALGAUGE_NET_POS_Y		SCREEN_H - SCREEN_SEPARATE_BUFF - VITALGAUGE_BASE_POS_Y
-
-#define	VITAL_GREEN_DIAMETER		(0.5f)	//!< 
-#define	VITAL_ORANGE_DIAMETER		(0.2f)	//!< 
-#define	VITAL_RED_DIAMETER			(0.1f)	//!< 
-
-#define	VITAL_DRAW_TEX_NUM			(2)		//!< 各プレイヤーが描画するテクスチャの数(枠、本体)
+constexpr int	VITAL_DRAW_TEX_NUM{ 2 };		//!< 各プレイヤーが描画するテクスチャの数(枠、本体)
 
 //=============================================================================
 // コンストラクタ　「読み込み」「初期化」
@@ -175,28 +175,38 @@ void VITALGAUGE::Init(void)
 //=============================================================================
 void VITALGAUGE::InitNet(int MyNumber)
 {
-	/*
-	this[MyNumber].Pos(D3DXVECTOR3(VITALGAUGE_NET_POS_X, VITALGAUGE_NET_POS_Y, 0.0f));
-	//座標取得
-	D3DXVECTOR3 pos = this[MyNumber].Pos();
+	//描画位置設定
+	this->Transform[MyNumber].Pos(D3DXVECTOR3(VITALGAUGE_NET_POS_X, VITALGAUGE_NET_POS_Y, 0.0f));
 
-	//頂点座標の設定
-	//BASE
-	this[MyNumber].tex2D.textureVTX[0].vtx = D3DXVECTOR3(pos.x, pos.y, 0.0f);
-	this[MyNumber].tex2D.textureVTX[1].vtx = D3DXVECTOR3(pos.x + VITALGAUGE_SIZE_X*2, pos.y, 0.0f);
-	this[MyNumber].tex2D.textureVTX[2].vtx = D3DXVECTOR3(pos.x, pos.y + VITALGAUGE_SIZE_Y*2, 0.0f);
-	this[MyNumber].tex2D.textureVTX[3].vtx = D3DXVECTOR3(pos.x + VITALGAUGE_SIZE_X*2, pos.y + VITALGAUGE_SIZE_Y*2, 0.0f);
+	//体力満タン
+	this->VitalGaugePara[MyNumber].VitalPower = PLAYER_VITAL_MAX;
 
-
-	//中身
-	//バイタルの長さ
-	float vitallen = float(VITALGAUGE_SIZE_X*2 * (this[MyNumber].VitalPower / PLAYER_VITAL_MAX));
-	// 頂点座標の設定
-	this[MyNumber].Tex[0].textureVTX[0].vtx = D3DXVECTOR3(pos.x + VITALGAUGE_SIZE_X_OFFSET, pos.y + VITALGAUGE_SIZE_Y_OFFSET, 0.0f);
-	this[MyNumber].Tex[0].textureVTX[1].vtx = D3DXVECTOR3(pos.x - VITALGAUGE_SIZE_X_OFFSET + vitallen, pos.y + VITALGAUGE_SIZE_Y_OFFSET, 0.0f);
-	this[MyNumber].Tex[0].textureVTX[2].vtx = D3DXVECTOR3(pos.x + VITALGAUGE_SIZE_X_OFFSET, pos.y + VITALGAUGE_SIZE_Y*2 - VITALGAUGE_SIZE_Y_OFFSET, 0.0f);
-	this[MyNumber].Tex[0].textureVTX[3].vtx = D3DXVECTOR3(pos.x - VITALGAUGE_SIZE_X_OFFSET + vitallen, pos.y + VITALGAUGE_SIZE_Y*2 - VITALGAUGE_SIZE_Y_OFFSET, 0.0f);
-	*/
+	//ベース座標取得
+	D3DXVECTOR3 pos = this->Transform[MyNumber].Pos();
+	//カウントループ 体力テクスチャ数
+	for (int CntVitalTex = 0; CntVitalTex < VITAL_DRAW_TEX_NUM; CntVitalTex++)
+	{
+		//「枠」頂点と「中身」頂点で別の処理をする
+		D3DXVECTOR3 vtx[POLYGON_2D_VERTEX];
+		if (CntVitalTex == 0)//枠
+		{
+			vtx[0] = D3DXVECTOR3(pos.x, pos.y, 0.0f);
+			vtx[1] = D3DXVECTOR3(pos.x + VITALGAUGE_SIZE_X_NET, pos.y, 0.0f);
+			vtx[2] = D3DXVECTOR3(pos.x, pos.y + VITALGAUGE_SIZE_Y_NET, 0.0f);
+			vtx[3] = D3DXVECTOR3(pos.x + VITALGAUGE_SIZE_X_NET, pos.y + VITALGAUGE_SIZE_Y_NET, 0.0f);
+		}
+		else//中身		
+		{
+			// 頂点座標の設定
+			float vitallen = float(VITALGAUGE_SIZE_X_NET * (this->VitalGaugePara[MyNumber].VitalPower / PLAYER_VITAL_MAX));//バイタルの長さ
+			vtx[0] = D3DXVECTOR3(pos.x + VITALGAUGE_SIZE_X_OFFSET, pos.y + VITALGAUGE_SIZE_Y_OFFSET, 0.0f);
+			vtx[1] = D3DXVECTOR3(pos.x - VITALGAUGE_SIZE_X_OFFSET + vitallen, pos.y + VITALGAUGE_SIZE_Y_OFFSET, 0.0f);
+			vtx[2] = D3DXVECTOR3(pos.x + VITALGAUGE_SIZE_X_OFFSET, pos.y + VITALGAUGE_SIZE_Y_NET - VITALGAUGE_SIZE_Y_OFFSET, 0.0f);
+			vtx[3] = D3DXVECTOR3(pos.x - VITALGAUGE_SIZE_X_OFFSET + vitallen, pos.y + VITALGAUGE_SIZE_Y_NET - VITALGAUGE_SIZE_Y_OFFSET, 0.0f);
+		}
+		//描画位置反映
+		this->vtx[MyNumber].Vertex2D(CntVitalTex, vtx);
+	}
 }
 
 //=============================================================================
@@ -262,14 +272,14 @@ void VITALGAUGE::Update(PLAYER *p, RANK *rank, bool Netflag, int NetMyNumber)
 		D3DXVECTOR3 pos = this->Transform[NetMyNumber].Pos();
 
 		//バイタルの長さ
-		float vitallen = float(VITALGAUGE_SIZE_X) * 2 * float(this->VitalGaugePara[NetMyNumber].VitalPower) / float(PLAYER_VITAL_MAX);
+		float vitallen = float(VITALGAUGE_SIZE_X_NET) * float(this->VitalGaugePara[NetMyNumber].VitalPower) / float(PLAYER_VITAL_MAX);
 
 		// 頂点座標の設定
 		D3DXVECTOR3 vtx[POLYGON_2D_VERTEX];
 		vtx[0] = D3DXVECTOR3(pos.x + VITALGAUGE_SIZE_X_OFFSET, pos.y + VITALGAUGE_SIZE_Y_OFFSET, 0.0f);
 		vtx[1] = D3DXVECTOR3(pos.x - VITALGAUGE_SIZE_X_OFFSET + vitallen, pos.y + VITALGAUGE_SIZE_Y_OFFSET, 0.0f);
-		vtx[2] = D3DXVECTOR3(pos.x + VITALGAUGE_SIZE_X_OFFSET, pos.y + VITALGAUGE_SIZE_Y - VITALGAUGE_SIZE_Y_OFFSET, 0.0f);
-		vtx[3] = D3DXVECTOR3(pos.x - VITALGAUGE_SIZE_X_OFFSET + vitallen, pos.y + VITALGAUGE_SIZE_Y - VITALGAUGE_SIZE_Y_OFFSET, 0.0f);
+		vtx[2] = D3DXVECTOR3(pos.x + VITALGAUGE_SIZE_X_OFFSET, pos.y + VITALGAUGE_SIZE_Y_NET - VITALGAUGE_SIZE_Y_OFFSET, 0.0f);
+		vtx[3] = D3DXVECTOR3(pos.x - VITALGAUGE_SIZE_X_OFFSET + vitallen, pos.y + VITALGAUGE_SIZE_Y_NET - VITALGAUGE_SIZE_Y_OFFSET, 0.0f);
 		this->vtx[NetMyNumber].Vertex2D(1, vtx);//中身は1
 	}
 }

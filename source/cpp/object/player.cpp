@@ -18,19 +18,31 @@
 //画像の参照名																											
 #define	TEXTURE_MEISAI				"../data/MODEL/28513607_p4_master1200.jpg"		//!< 読み込むテクスチャファイル名
 
-#define BULLET_BORN_TIME_ADD		(1.0f)				//!< 弾薬復活させるための加算タイム
-#define BULLET_BORN_TIME_MAX		(120.0f)			//!< 1弾薬復活するのに必要なタイム
-
-#define	EFFECT_SPEEDUP_SIZE_X		(25.0f)			//!< エフェクトスピードアップの幅
-#define	EFFECT_SPEEDUP_SIZE_Y		(10.0f)			//!< エフェクトスピードアップの高さ
-#define	EFFECT_SPEEDUP_TIME			(10)			//!< エフェクトスピードアップの生存時間
-
-static D3DXCOLOR PLAYER_COLOR[] = {
-	D3DXCOLOR(1.0f, 1.0f, 0.1f, 1.0f),//p1カラー
-	D3DXCOLOR(0.2f, 0.2f, 1.0f, 1.0f),//p2カラー
-	D3DXCOLOR(1.0f, 0.2f, 0.2f, 1.0f),//p3カラー
-	D3DXCOLOR(0.2f, 1.0f, 1.0f, 1.0f),//p4カラー
-};
+constexpr float	PLAYER_INIT_POSX{ 700.0f };				//!< 初期座標プレイヤー
+constexpr float	PLAYER_INIT_POSY{ 300.0f };				//!< 初期座標プレイヤー
+constexpr float	PLAYER_INIT_POSZ{ 700.0f };				//!< 初期座標プレイヤー
+constexpr float BULLET_BORN_TIME_ADD{ 1.0f };			//!< 弾薬復活させるための加算タイム
+constexpr float BULLET_BORN_TIME_MAX{ 120.0f };			//!< 1弾薬復活するのに必要なタイム
+constexpr float	EFFECT_SPEEDUP_SIZE_X{ 25.0f };			//!< エフェクトスピードアップの幅
+constexpr float	EFFECT_SPEEDUP_SIZE_Y{ 10.0f };			//!< エフェクトスピードアップの高さ
+constexpr int	EFFECT_SPEEDUP_TIME{ 10 };				//!< エフェクトスピードアップの生存時間
+constexpr float	PLAYER_VALUE_DASHRATE{ 2.0f };			//!< 歩きに比べてのダッシュの速度倍率
+constexpr float	PLAYER_MOVE_RATE_X{ 1.0f / 40000.0f };	//!< 左右歩きの移動量倍率(-1000～1000が入力範囲なのでそれに乗算する)
+constexpr float	PLAYER_MOVE_RATE_Y{ 1.0f / 200.0f };	//!< 前後歩きの移動量倍率(-1000～1000が入力範囲なのでそれに乗算する)
+constexpr float	PLAYER_MOVE_RATE_LR2{ 1.0f / 20000.0f };//!< キャタピラの移動量倍率(0～65000が入力範囲なのでそれに乗算する)
+constexpr float VALUE_LEN_BULLET{ 10.0f };				//!< プレイヤー中心としたバレットの発射位置までの距離
+constexpr float	VALUE_ROTATE_PLAYER_HOUTOU{ 0.03f };	//!< プレイヤー砲塔回転量
+constexpr float	VALUE_ROTATE_PLAYER_HOUTOU_MAX{ 1.57f };//!< プレイヤー砲塔回転量最大値
+constexpr float	VALUE_ROTATE_PLAYER_HOUSIN{ 0.01f };	//!< プレイヤー砲身回転量
+constexpr float	VALUE_ROTATE_PLAYER_HOUSIN_MAX{ 0.2f };	//!< プレイヤー砲塔回転量最大値
+constexpr int	FRONT_VEC{ 1 };							//!< 前ベクトル
+constexpr int	BACK_VEC{ -1 };							//!< 後ろベクトル
+constexpr float	MOVE_INERTIA_MOMENT{ 0.8f };			//!< 移動量の慣性モーメント、減速係数として使用
+constexpr float	VALUE_SPEEDBUFF_SUB{ 1.0f };			//!< スピートアップ時間のデクリメントする値
+constexpr float BACKCAMERA_TIME{ 150.0f };				//!< バックカメラアイテム有効時間
+constexpr float KIRI_TIME{ 150.0f };					//!< フォグ霧アイテムの有効時間
+constexpr float	PLAYER_VALUE_MOVE{ 0.1f };				//!< 移動加速度
+constexpr float	PLAYER_VALUE_MOVE_MAX{ 4.0f };			//!< 移動加速度の最大値
 
 //=============================================================================
 // コンストラクタ　「読み込み」「初期化」
@@ -172,17 +184,17 @@ void PLAYER::Init(FIELD *field)
 		this->PlayerPara[CntPlayer].StandardPara.Vital = this->PlayerPara[CntPlayer].StandardPara.OldVital = PLAYER_VITAL_MAX;
 		this->PlayerPara[CntPlayer].StandardPara.Speed = 0.0f;
 		this->PlayerPara[CntPlayer].StandardPara.eModelType = this->PlayerPara[CntPlayer].StandardPara.eOldModelType= PLAYER_MODEL_TYPE_NORMAL;
-		this->PlayerPara[CntPlayer].StandardPara.FUPFCross = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		this->PlayerPara[CntPlayer].StandardPara.FUPFCross = VEC3_ALL0;
 
 		//バレットパラメータ
 		this->PlayerPara[CntPlayer].BulletPara.BulletBornTime = 0.0f;
-		this->PlayerPara[CntPlayer].BulletPara.BulletMove[1] = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-		this->PlayerPara[CntPlayer].BulletPara.BulletMove[2] = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		this->PlayerPara[CntPlayer].BulletPara.BulletMove[1] = VEC3_ALL0;
+		this->PlayerPara[CntPlayer].BulletPara.BulletMove[2] = VEC3_ALL0;
 		this->PlayerPara[CntPlayer].BulletPara.BulletRotY = 0.0f;
-		this->PlayerPara[CntPlayer].BulletPara.BulletStartPos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		this->PlayerPara[CntPlayer].BulletPara.BulletStartPos = VEC3_ALL0;
 		this->PlayerPara[CntPlayer].BulletPara.BulletStock = BULLET_MAX_STOCK;
 		this->PlayerPara[CntPlayer].BulletPara.NetBulletShotFlagOneFrame = 0;
-		for (int i = 0; i < 3; i++) this->PlayerPara[CntPlayer].BulletPara.BulletMove[i] = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		for (int i = 0; i < 3; i++) this->PlayerPara[CntPlayer].BulletPara.BulletMove[i] = VEC3_ALL0;
 
 		//アイテムパラメータ
 		this->PlayerPara[CntPlayer].ItemPara.BackCameraItemSignal = false;
@@ -203,16 +215,16 @@ void PLAYER::Init(FIELD *field)
 		this->PlayerPara[CntPlayer].MorphingPara.NetGetMorphingOneFrame = false;
 
 		//その他パラメータ
-		this->PostureVec[CntPlayer].FNVecFunc(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
-		this->PostureVec[CntPlayer].FNUNCrossFunc(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+		this->PostureVec[CntPlayer].FNVecFunc(VEC3_ALL0);
+		this->PostureVec[CntPlayer].FNUNCrossFunc(VEC3_ALL0);
 		this->PostureVec[CntPlayer].QrotFunc(0.0f);
-		this->Move[CntPlayer].Move(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+		this->Move[CntPlayer].Move(VEC3_ALL0);
 
 		//砲塔
-		this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUTOU].Rot(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+		this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUTOU].Rot(VEC3_ALL0);
 
 		//砲身								 
-		this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUSIN].Rot(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+		this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUSIN].Rot(VEC3_ALL0);
 
 		//モデルのリセット
 		ResetModel(
@@ -243,7 +255,7 @@ void PLAYER::Init(FIELD *field)
 		RayEnd.y -= 1000.0f;
 
 		float ReturnPosY = 0.0f;
-		D3DXVECTOR3 FieldNorVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		D3DXVECTOR3 FieldNorVec = VEC3_ALL0;
 
 		//レイキャスト関数
 		field->FieldHitGetSphereVec(RayStart, RayEnd, &FieldNorVec, &ReturnPosY);
@@ -296,7 +308,7 @@ void PLAYER::Update(EFFECT*effect, BULLET*bullet, SHADOW*shadow, FADE *fade, boo
 	//プレイヤー人数分ループ ローカル対戦
 	if (Netflag == false)
 	{
-		this->MoveKeybord(0, &effect[0], Netflag);
+		this->MoveKeybord(0, &effect[0]);//デバッグ用
 		for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
 		{
 			bool use = this->iUseType[CntPlayer].Use();
@@ -337,7 +349,6 @@ void PLAYER::Update(EFFECT*effect, BULLET*bullet, SHADOW*shadow, FADE *fade, boo
 	//ネット対戦
 	else
 	{
-		this->MoveKeybord(0, &effect[0], Netflag);
 		bool use = this->iUseType[MyNumber].Use();
 
 		//生きていれば操作可能
@@ -345,14 +356,15 @@ void PLAYER::Update(EFFECT*effect, BULLET*bullet, SHADOW*shadow, FADE *fade, boo
 		{
 			//ネット用フラグ初期化　1フレーム中の変更を保存して変更があればサーバーにデータを送る
 			this->PlayerPara[MyNumber].MorphingPara.NetGetMorphingOneFrame = false;
-			this->PlayerPara[MyNumber].BulletPara.BulletStartPos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-			for (int i = 0; i < 3; i++) this->PlayerPara[MyNumber].BulletPara.BulletMove[i] = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+			this->PlayerPara[MyNumber].BulletPara.BulletStartPos = VEC3_ALL0;
+			for (int i = 0; i < 3; i++) this->PlayerPara[MyNumber].BulletPara.BulletMove[i] = VEC3_ALL0;
 			for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
 			{
 				this->PlayerPara[CntPlayer].BulletPara.NetBulletShotFlagOneFrame = 0;
 				this->PlayerPara[CntPlayer].StandardPara.OldVital = this->PlayerPara[CntPlayer].StandardPara.Vital;
 			}
-			this->MoveLtype0(MyNumber, &effect[0], Netflag);
+			this->MoveKeybord(MyNumber, &effect[0]);
+			//this->MoveLtype0(MyNumber, &effect[0], Netflag);
 			for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
 			{
 				this->Quaternion(CntPlayer);
@@ -447,8 +459,7 @@ void PLAYER::Draw(void)
 
 	for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
 	{
-		bool use = this->iUseType[CntPlayer].Use();
-		if (use == true)
+		if (this->iUseType[CntPlayer].Use() == YesUseType1)
 		{
 			D3DXMATRIX mtxWorldHoudai;
 			D3DXMATRIX mtxWorldHoutou;
@@ -719,12 +730,12 @@ void PLAYER::MoveABL(int CntPlayer, EFFECT *effect, bool Netflag)
 	if (IsButtonPressed(CntPlayer, BUTTON_A))
 	{
 		dir = FRONT_VEC;
-		this->PlayerPara[CntPlayer].StandardPara.Speed += VALUE_MOVE;
+		this->PlayerPara[CntPlayer].StandardPara.Speed += PLAYER_VALUE_MOVE;
 	}
 	else if (IsButtonPressed(CntPlayer, BUTTON_B))
 	{
 		dir = BACK_VEC;
-		this->PlayerPara[CntPlayer].StandardPara.Speed -= VALUE_MOVE;
+		this->PlayerPara[CntPlayer].StandardPara.Speed -= PLAYER_VALUE_MOVE;
 	}
 
 	// 無移動時は移動量に慣性をかける
@@ -756,8 +767,8 @@ void PLAYER::MoveABL(int CntPlayer, EFFECT *effect, bool Netflag)
 	else if (HoudaiRot.y <= -D3DX_PI * 2) HoudaiRot.y = 0.0f;
 
 	// 移動速度の制限
-	if (this->PlayerPara[CntPlayer].StandardPara.Speed >= VALUE_MOVE_MAX) this->PlayerPara[CntPlayer].StandardPara.Speed = VALUE_MOVE_MAX;
-	else if (this->PlayerPara[CntPlayer].StandardPara.Speed <= -VALUE_MOVE_MAX) this->PlayerPara[CntPlayer].StandardPara.Speed = -VALUE_MOVE_MAX;
+	if (this->PlayerPara[CntPlayer].StandardPara.Speed >= PLAYER_VALUE_MOVE_MAX) this->PlayerPara[CntPlayer].StandardPara.Speed = PLAYER_VALUE_MOVE_MAX;
+	else if (this->PlayerPara[CntPlayer].StandardPara.Speed <= -PLAYER_VALUE_MOVE_MAX) this->PlayerPara[CntPlayer].StandardPara.Speed = -PLAYER_VALUE_MOVE_MAX;
 
 	// プレイヤーの座標を更新
 	pos.x -= sinf(HoudaiRot.y) * (this->PlayerPara[CntPlayer].StandardPara.Speed * this->PlayerPara[CntPlayer].ItemPara.SpeedBuff);
@@ -770,7 +781,7 @@ void PLAYER::MoveABL(int CntPlayer, EFFECT *effect, bool Netflag)
 
 		// エフェクトスピードアップの生成
 		D3DXVECTOR3 EffctSpeedupPos = D3DXVECTOR3(pos.x, pos.y, pos.z);
-		effect->SetInstance(EffctSpeedupPos, D3DXVECTOR3(0.0f, 0.0f, 0.0f), PLAYER_COLOR[CntPlayer], EFFECT_SPEEDUP_SIZE_X, EFFECT_SPEEDUP_SIZE_Y, EFFECT_SPEEDUP_TIME);
+		effect->SetInstance(EffctSpeedupPos, VEC3_ALL0, PLAYER_COLOR[CntPlayer], EFFECT_SPEEDUP_SIZE_X, EFFECT_SPEEDUP_SIZE_Y, EFFECT_SPEEDUP_TIME);
 
 		if (this->PlayerPara[CntPlayer].ItemPara.SpeedBuffTime <= 0.0f)
 		{
@@ -814,7 +825,7 @@ void PLAYER::MoveABL(int CntPlayer, EFFECT *effect, bool Netflag)
 //=============================================================================
 // 移動制御(ki-bo-doで移動制御)
 //=============================================================================
-void PLAYER::MoveKeybord(int CntPlayer, EFFECT *effect, bool Netflag)
+void PLAYER::MoveKeybord(int CntPlayer, EFFECT *effect)
 {
 	//---------------------------------------------------------オブジェクト値呼び出し
 	D3DXVECTOR3 pos = this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos();
@@ -830,12 +841,12 @@ void PLAYER::MoveKeybord(int CntPlayer, EFFECT *effect, bool Netflag)
 	if (GetKeyboardPress(DIK_W))
 	{
 		dir = FRONT_VEC;
-		this->PlayerPara[CntPlayer].StandardPara.Speed += VALUE_MOVE * 10*4;
+		this->PlayerPara[CntPlayer].StandardPara.Speed += PLAYER_VALUE_MOVE * 10*4;
 	}
 	else if (GetKeyboardPress(DIK_S))
 	{
 		dir = BACK_VEC;
-		this->PlayerPara[CntPlayer].StandardPara.Speed -= VALUE_MOVE * 10*4;
+		this->PlayerPara[CntPlayer].StandardPara.Speed -= PLAYER_VALUE_MOVE * 10*4;
 	}
 
 	// 無移動時は移動量に慣性をかける
@@ -860,8 +871,8 @@ void PLAYER::MoveKeybord(int CntPlayer, EFFECT *effect, bool Netflag)
 	else if (HoudaiRot.y <= -D3DX_PI * 2) HoudaiRot.y = 0.0f;
 
 	// 移動速度の制限
-	if (this->PlayerPara[CntPlayer].StandardPara.Speed >= VALUE_MOVE_MAX) this->PlayerPara[CntPlayer].StandardPara.Speed = VALUE_MOVE_MAX;
-	else if (this->PlayerPara[CntPlayer].StandardPara.Speed <= -VALUE_MOVE_MAX) this->PlayerPara[CntPlayer].StandardPara.Speed = -VALUE_MOVE_MAX;
+	if (this->PlayerPara[CntPlayer].StandardPara.Speed >= PLAYER_VALUE_MOVE_MAX) this->PlayerPara[CntPlayer].StandardPara.Speed = PLAYER_VALUE_MOVE_MAX;
+	else if (this->PlayerPara[CntPlayer].StandardPara.Speed <= -PLAYER_VALUE_MOVE_MAX) this->PlayerPara[CntPlayer].StandardPara.Speed = -PLAYER_VALUE_MOVE_MAX;
 
 	// プレイヤーの座標を更新
 	pos.x -= sinf(HoudaiRot.y) * (this->PlayerPara[CntPlayer].StandardPara.Speed * this->PlayerPara[CntPlayer].ItemPara.SpeedBuff);
@@ -874,7 +885,7 @@ void PLAYER::MoveKeybord(int CntPlayer, EFFECT *effect, bool Netflag)
 
 		// エフェクトスピードアップの生成
 		D3DXVECTOR3 EffctSpeedupPos = D3DXVECTOR3(pos.x, pos.y, pos.z);
-		effect->SetInstance(EffctSpeedupPos, D3DXVECTOR3(0.0f, 0.0f, 0.0f), PLAYER_COLOR[CntPlayer], EFFECT_SPEEDUP_SIZE_X, EFFECT_SPEEDUP_SIZE_Y, EFFECT_SPEEDUP_TIME);
+		effect->SetInstance(EffctSpeedupPos, VEC3_ALL0, PLAYER_COLOR[CntPlayer], EFFECT_SPEEDUP_SIZE_X, EFFECT_SPEEDUP_SIZE_Y, EFFECT_SPEEDUP_TIME);
 
 		if (this->PlayerPara[CntPlayer].ItemPara.SpeedBuffTime <= 0.0f)
 		{
@@ -945,7 +956,7 @@ void PLAYER::MoveL(int CntPlayer, EFFECT *effect, bool Netflag)
 
 		// エフェクトスピードアップの生成
 		D3DXVECTOR3 EffctSpeedupPos = pos;
-		effect->SetInstance(EffctSpeedupPos, D3DXVECTOR3(0.0f, 0.0f, 0.0f), PLAYER_COLOR[CntPlayer], EFFECT_SPEEDUP_SIZE_X, EFFECT_SPEEDUP_SIZE_Y, EFFECT_SPEEDUP_TIME);
+		effect->SetInstance(EffctSpeedupPos, VEC3_ALL0, PLAYER_COLOR[CntPlayer], EFFECT_SPEEDUP_SIZE_X, EFFECT_SPEEDUP_SIZE_Y, EFFECT_SPEEDUP_TIME);
 
 		if (this->PlayerPara[CntPlayer].ItemPara.SpeedBuffTime <= 0.0f)
 		{
@@ -1033,7 +1044,7 @@ void PLAYER::MoveLtype0(int CntPlayer, EFFECT *effect, bool Netflag)
 
 		// エフェクトスピードアップの生成
 		D3DXVECTOR3 EffctSpeedupPos = pos;
-		effect->SetInstance(EffctSpeedupPos, D3DXVECTOR3(0.0f, 0.0f, 0.0f), PLAYER_COLOR[CntPlayer], EFFECT_SPEEDUP_SIZE_X, EFFECT_SPEEDUP_SIZE_Y, EFFECT_SPEEDUP_TIME);
+		effect->SetInstance(EffctSpeedupPos, VEC3_ALL0, PLAYER_COLOR[CntPlayer], EFFECT_SPEEDUP_SIZE_X, EFFECT_SPEEDUP_SIZE_Y, EFFECT_SPEEDUP_TIME);
 
 		if (this->PlayerPara[CntPlayer].ItemPara.SpeedBuffTime <= 0.0f)
 		{
@@ -1119,7 +1130,7 @@ void PLAYER::MoveL2R2(int CntPlayer, EFFECT *effect, bool Netflag)
 
 		// エフェクトスピードアップの生成
 		D3DXVECTOR3 EffctSpeedupPos = pos;
-		effect->SetInstance(EffctSpeedupPos, D3DXVECTOR3(0.0f, 0.0f, 0.0f), PLAYER_COLOR[CntPlayer], EFFECT_SPEEDUP_SIZE_X, EFFECT_SPEEDUP_SIZE_Y, EFFECT_SPEEDUP_TIME);
+		effect->SetInstance(EffctSpeedupPos, VEC3_ALL0, PLAYER_COLOR[CntPlayer], EFFECT_SPEEDUP_SIZE_X, EFFECT_SPEEDUP_SIZE_Y, EFFECT_SPEEDUP_TIME);
 
 		if (this->PlayerPara[CntPlayer].ItemPara.SpeedBuffTime <= 0.0f)
 		{
@@ -1314,7 +1325,7 @@ void PLAYER::CameraRotControl(int CntPlayer, bool Netflag)
 	}
 
 	//回転量を反映
-	D3DXVECTOR3 moverot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	D3DXVECTOR3 moverot = VEC3_ALL0;
 	moverot.y = RAnalogX;
 	moverot.x = -RAnalogY;
 
@@ -1456,10 +1467,12 @@ void PLAYER::BulletALL(int CntPlayer, BULLET *bullet, SHADOW *shadow, bool Netfl
 		//{
 		if (IsButtonTriggered(PadNum, BUTTON_R1) || GetKeyboardTrigger(DIK_SPACE))
 		{
+			this->PlayerPara[CntPlayer].BulletPara.NetBulletShotFlagOneFrame = 1;
 			bullet->SetInstance(BposStart, bulletmove, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, ePLAYER_TYPE(CntPlayer), shadow);
 			//拡散弾処理
 			if (this->PlayerPara[CntPlayer].StandardPara.eModelType == PLAYER_MODEL_TYPE_ATTACK)
 			{
+				this->PlayerPara[CntPlayer].BulletPara.NetBulletShotFlagOneFrame = 3;
 				D3DXVECTOR3 leftB, rightB;
 				leftB = D3DXVECTOR3(-sinf(HoutouRot.y + HoudaiRot.y + 0.3f)*VALUE_MOVE_BULLET,
 					bulletmove.y,
@@ -1610,6 +1623,7 @@ void PLAYER::ItemTimeMorphing(int CntPlayer)
 	// モーフィングtrue
 	if (this->PlayerPara[CntPlayer].MorphingPara.MorphingStart == true)
 	{
+		this->PlayerPara[CntPlayer].MorphingPara.NetGetMorphingOneFrame = true;
 		///////////////////////////////////////////////////////////////////////バレット3つ時間開始
 		// モーフィング時間減算開始
 		this->PlayerPara[CntPlayer].MorphingPara.MorphingTime -= 1.0f;

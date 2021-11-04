@@ -37,6 +37,15 @@ using namespace std;
 
 int GAME_OBJECT::AllOBJCnt = 0;
 
+
+#define MAX_SPEEDBUFF						(1.5f)																		//!< スピードバフ移動量最大値(積)
+#define MAX_SPEEDBUFFTIME					(120.0f*3)																	//!< スピードバフ有効時間
+#define	EXPLOSION_COLLISIONPOS_BUFFSIZE		(5.0f)																		//!< 2D爆破を壁に当たった時の描画する座標を調整
+#define PLAYER_MODEL_SIZE					(15.0f)																		//!< モデルサイズ
+#define ITEM_MODEL_SIZE						(15.0f)																		//!< モデルサイズ
+
+
+
 void SetOjama(int type, int UsePlayer, PLAYER *p);
 
 //マッチフラグ
@@ -908,13 +917,6 @@ D3DXCOLOR VTXBuffer::GetColor2D(const int Indx)
 	return col;
 }
 
-static D3DXCOLOR PLAYER_COLOR[] = {
-	D3DXCOLOR(1.0f, 1.0f, 0.1f, 1.0f),//p1カラー
-	D3DXCOLOR(0.2f, 0.2f, 1.0f, 1.0f),//p2カラー
-	D3DXCOLOR(1.0f, 0.2f, 0.2f, 1.0f),//p3カラー
-	D3DXCOLOR(0.2f, 1.0f, 1.0f, 1.0f),//p4カラー
-};
-
 void GAME_OBJECT::Generate()
 {
 	player = new PLAYER;								//ok 
@@ -930,7 +932,7 @@ void GAME_OBJECT::Generate()
 	bulletgauge = new BULLETGAUGE;						//ok
 	damege = new DAMEGE;								//ok
 	explosion = new EXPLOSION;							//ok
-	item = new ITEM;									//ok 影がほしい
+	item = new ITEM;									//ok
 	rank = new RANK;									//ok
 	result = new RESULT;								//ok
 	title = new TITLE;									//ok
@@ -993,27 +995,28 @@ void GAME_OBJECT::InitNet()
 
 void GAME_OBJECT::Delete()
 {
-	//player->~PLAYER();
-	//effect->~EFFECT();
-	//delete bullet;
-	//delete shadow;
-	//delete countdown;
-	//tuto->~TUTO();
-	//delete netmatch;
-	//status->~STATUS();
-	//delete bulletprediction;
-	//vitalgauge->~VITALGAUGE();
-	//bulletgauge->~BULLETGAUGE();
-	//delete damege;
-	//delete explosion;
-	//delete item;
-	//delete rank;
-	//delete result;
-	//title->~TITLE();
-	//field->~FIELD();
-	//sky->~SKY();
-	//wall->~WALL();
-	//delete fade;
+	delete player;
+	delete effect;
+	delete bullet;
+	delete shadow;
+	delete countdown;
+	delete tuto;
+	delete netmatch;
+	delete status;
+	delete bulletprediction;
+	delete vitalgauge;
+	delete bulletgauge;
+	delete damege;
+	delete explosion;
+	delete item;
+	delete rank;
+	delete result;
+	delete title;
+	delete field;
+	delete sky;
+	delete wall;
+	delete fade;
+	delete mysocket;
 }
 
 void GAME_OBJECT::Update()
@@ -1060,7 +1063,7 @@ void GAME_OBJECT::Update()
 			bulletprediction->Update(&player[0]);
 			effect->Update();
 			explosion->Update();
-			item->Update(&player[0], NetGameStartFlag);
+			item->Update(&player[0], &shadow[0], NetGameStartFlag);
 			shadow->Update();
 			//
 			CheakHit(0);
@@ -1088,7 +1091,7 @@ void GAME_OBJECT::Update()
 			bulletprediction->Update(&player[0]);
 			effect->Update();
 			explosion->Update();
-			item->Update(&player[0], NetGameStartFlag);
+			item->Update(&player[0], &shadow[0], NetGameStartFlag);
 			shadow->Update();
 
 			//当たり判定
@@ -1149,7 +1152,7 @@ void GAME_OBJECT::Update()
 			bulletprediction->Update(&player[0]);
 			effect->Update();//パケット有り
 			explosion->Update();//パケット有り
-			item->Update(&player[0], NetGameStartFlag);//パケット有り
+			item->Update(&player[0], &shadow[0], NetGameStartFlag);//パケット有り
 			shadow->Update();//パケット有り
 
 			//当たり判定
@@ -1502,7 +1505,7 @@ void GAME_OBJECT::CheakHit(int scene)
 						if (CollisionBC(ppos, PLAYER_MODEL_SIZE, bpos, BULLET_MODEL_SIZE))
 						{
 							// エフェクト爆発の生成
-							effect->SetInstance(bpos, D3DXVECTOR3(0.0f, 0.0f, 0.0f),
+							effect->SetInstance(bpos, VEC3_ALL0,
 								PLAYER_COLOR[bullet->BulletPara[CntPlayerBullet].UsePlayerType], 150.0f, 150.0f, 40);
 							if (scene == 1)
 							{

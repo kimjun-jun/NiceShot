@@ -17,9 +17,9 @@ public:
 	NETMATCH();		//!< データ読み込み　初期化
 	~NETMATCH();	//!< 削除
 
-	void	Init(void);								//!< 初期化
-	void	Update(GAME_OBJECT* obj, FADE *fade);	//!< 更新
-	void	Draw(void);								//!< 描画
+	void	Init(void)override;								//!< 初期化
+	void	Update(GAME_OBJECT* obj, FADE *fade);			//!< 更新
+	void	Draw(void)override;								//!< 描画
 
 private:
 

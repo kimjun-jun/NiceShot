@@ -9,12 +9,13 @@
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define	RANK_SIZE_X				(SCREEN_W/4)				//!< やられた順位テクスチャの幅
-#define	RANK_SIZE_Y				(SCREEN_H/4)				//!< やられた順位テクスチャの高さ
-#define	RANK_POS_X				(SCREEN_W)					//!< やられた順位テクスチャの表示位置
-#define	RANK_POS_Y				(SCREEN_H)					//!< やられた順位テクスチャの表示位置
-#define	RANK_POS_OFFSET_LOW		(1.0f/4.0f)					//!< スクリーン分割数
-#define	RANK_POS_OFFSET_HI		(3.0f/4.0f)					//!< スクリーン分割数
+constexpr int	RANK_COUNTDOWN_NUM{ 2 };					//!< 順位の数　4人なので2,1,0,を使う
+constexpr int	RANK_SIZE_X{ SCREEN_W / 4 };				//!< やられた順位テクスチャの幅
+constexpr int	RANK_SIZE_Y{ SCREEN_H / 4 };				//!< やられた順位テクスチャの高さ
+constexpr int	RANK_POS_X{ SCREEN_W };						//!< やられた順位テクスチャの表示位置
+constexpr int	RANK_POS_Y{ SCREEN_H };						//!< やられた順位テクスチャの表示位置
+constexpr float	RANK_POS_OFFSET_LOW{ 1.0f / 4.0f };			//!< スクリーン分割数
+constexpr float	RANK_POS_OFFSET_HI{ 3.0f / 4.0f };			//!< スクリーン分割数
 
 //=============================================================================
 // コンストラクタ　「読み込み」「初期化」
@@ -184,7 +185,7 @@ void RANK::SetRankNet(int PlayerNum, int NetMyNumber)
 			//ネット対戦用に描画位置を調整
 			D3DXVECTOR3 vtx[POLYGON_2D_VERTEX] =
 			{
-			D3DXVECTOR3(0.0f, 0.0f, 0.0f),
+			VEC3_ALL0,
 			D3DXVECTOR3(SCREEN_W, 0.0f, 0.0f),
 			D3DXVECTOR3(0.0f, SCREEN_H, 0.0f),
 			D3DXVECTOR3(SCREEN_W, SCREEN_H, 0.0f),

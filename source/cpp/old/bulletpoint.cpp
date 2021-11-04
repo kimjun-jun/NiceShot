@@ -55,8 +55,8 @@
 //
 //	for (int nCntBulletPoint = 0; nCntBulletPoint < BULLETPOINT_MAX; nCntBulletPoint++)
 //	{
-//		g_aBulletPoint[nCntBulletPoint].pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-//		g_aBulletPoint[nCntBulletPoint].scl = D3DXVECTOR3(1.0f, 1.0f, 1.0f);
+//		g_aBulletPoint[nCntBulletPoint].pos = VEC3_ALL0;
+//		g_aBulletPoint[nCntBulletPoint].scl = VEC3_ALL1.0f, 1.0f, 1.0f);
 //		g_aBulletPoint[nCntBulletPoint].fWidth = BULLETPOINT_WIDTH;
 //		g_aBulletPoint[nCntBulletPoint].fHeight = BULLETPOINT_HEIGHT;
 //		g_aBulletPoint[nCntBulletPoint].bUse = false;
@@ -66,7 +66,7 @@
 //	for (int Cnt = 0; Cnt < BULLETPOINT_MAX; Cnt++)
 //	{
 //		// ’¸“_î•ñ‚Ìì¬
-//		SetBulletPoint(D3DXVECTOR3(0.0f, 0.0f, 0.0f), 60.0f, 90.0f, Cnt);
+//		SetBulletPoint(VEC3_ALL0, 60.0f, 90.0f, Cnt);
 //	}
 //
 //	return S_OK;
@@ -280,7 +280,7 @@
 //	if (!g_aBulletPoint[type].bUse)
 //	{
 //		g_aBulletPoint[type].pos = pos;
-//		g_aBulletPoint[type].scl = D3DXVECTOR3(1.0f, 1.0f, 1.0f);
+//		g_aBulletPoint[type].scl = VEC3_ALL1.0f, 1.0f, 1.0f);
 //		g_aBulletPoint[type].fWidth = fWidth;
 //		g_aBulletPoint[type].fHeight = fHeight;
 //		g_aBulletPoint[type].bUse = true;

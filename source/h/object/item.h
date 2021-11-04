@@ -11,9 +11,9 @@ class PLAYER_HONTAI;
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define ITEM_BIG_SCL				2.0f			//アイテムサイズ初期値
-#define ITEM_SMALL_SCL				0.03f			//アイテム取得後がアイテムがだんだん小さくなる値
-#define ITEM_DELETE_SCL				0.5f			//アイテムが消える値
+constexpr float ITEM_BIG_SCL{ 2.0f };			//アイテムサイズ初期値
+constexpr float ITEM_SMALL_SCL{ 0.03f };			//アイテム取得後がアイテムがだんだん小さくなる値
+constexpr float ITEM_DELETE_SCL{ 0.5f };			//アイテムが消える値
 
 //*****************************************************************************
 // クラス定義
@@ -26,8 +26,8 @@ class ITEM_PARAMETER_ALL
 {
 public:
 	ITEM_PARAMETER_ALL() {
-		nIdxShadow = -1; GetPlayerType = 0; GettingSignal = false; GettingSignalEnd = false;
-		CollisionFieldEnd = false; NetUse = false; NetGetItemFlag = false; NetGetItemFlagOld = false;
+		nIdxShadow = -1; GetPlayerType = 0; LinkShadowPos = VEC3_ALL0; GettingSignal = false; GettingSignalEnd = false;
+		CollisionFieldEnd = false; NetUse = false; NetGetItemFlag = false; NetGetItemFlagOld = false; ShadowPosSignal = false;
 		eType = ITEM_TYPE_NONE;
 	}
 	~ITEM_PARAMETER_ALL() {}
@@ -37,11 +37,13 @@ public:
 	bool	GettingSignal;			//!< プレイヤーがアイテムを取得したかどうか　真:取得中　偽:取得していない
 	bool	GettingSignalEnd;		//!< プレイヤーがアイテムを取得終了したかどうか　真:終了　偽:終了していない、もしくは取得していない
 	bool	CollisionFieldEnd;		//!< 地形との当たり判定が終わったかどうか
+	bool	ShadowPosSignal;		//!< 影の高さ計算フラグ
 
 	bool	NetUse;
 	bool	NetGetItemFlag;			//!< アイテムを取得した1フレーム分だけtrueにする
 	bool	NetGetItemFlagOld;		//!< アイテムを取得した1フレーム分だけtrueにする 比較値
 
+	D3DXVECTOR3		LinkShadowPos;	//!< 影の座標
 	eITEM_TYPE		eType;			//!< 種類
 
 };
@@ -74,22 +76,22 @@ public:
 	~ITEM();	//!< 削除
 
 	void	Init(void);										//!< 初期化
-	void	Update(PLAYER *Player, bool NetGameStartFlag);		//!< 更新
+	void	Update(PLAYER *Player, SHADOW *Shadow, bool NetGameStartFlag);		//!< 更新
 	void	Draw(void);										//!< 描画
 
 	ITEM_PARAMETER_ALL		ItemParaAll[OBJECT_ITEM_MAX];	//!< 各インスタンスに必要なデータ群
 	iUseCheak				iUseType[OBJECT_ITEM_MAX];		//!< 使用情報
 	TransForm				Transform[OBJECT_ITEM_MAX];		//!< トランスフォーム情報
 	FieldNor				PostureVec[OBJECT_ITEM_MAX];	//!< 姿勢ベクトル
-	void					SetInstance(D3DXVECTOR3 pos, D3DXVECTOR3 scl, D3DXVECTOR3 rot, eITEM_TYPE eType);
+	void					SetInstance(D3DXVECTOR3 pos, D3DXVECTOR3 scl, D3DXVECTOR3 rot, eITEM_TYPE eType, SHADOW *s);
 	void					SetInstance(int Index, D3DXVECTOR3 pos, D3DXVECTOR3 scl, D3DXVECTOR3 rot, eITEM_TYPE eType);
-	void					ReleaseInstance(int nIdxItem);
+	void					ReleaseInstance(int nIdxItem, SHADOW *s);
 
 private:
 
 	//void	ReinitNet(void);								//!< 初期化　同期
 
-	void	GettingItem(int nIdxItem, PLAYER *p);
+	void	GettingItem(int nIdxItem, PLAYER *p, SHADOW *s);
 
 	ModelAttribute			model;								//!< モデル情報　マテリアルや頂点数など　複数使用するならここを配列化
 	TEXTURE					tex[ITEM_TYPE_MAX];					//!< テクスチャ情報　複数使用するならここを配列化　ITEMTYPE_MAX

@@ -14,12 +14,13 @@
 // マクロ定義
 //*****************************************************************************
 #define	TEXTURE_TUTORIAL		("../data/TEXTURE/other/tutorialbg.png")			//!< 読み込むテクスチャファイル名
-#define	TUTORIAL_SIZE_X			(300)										//!< チュートリアルの幅
-#define	TUTORIAL_SIZE_Y			(200)										//!< チュートリアルの高さ
-#define	TUTORIAL_POS_X			(SCREEN_CENTER_X)									//!< チュートリアルの表示位置
-#define	TUTORIAL_POS_Y			(SCREEN_CENTER_Y)									//!< チュートリアルの表示位置
-#define	TUTORIAL_POS_X_OFFSET	(170)									//!< チュートリアルの表示位置
-#define	TUTORIAL_POS_Y_OFFSET	(200)									//!< チュートリアルの表示位置
+
+constexpr int	TUTORIAL_SIZE_X{ 300 };					//!< チュートリアルの幅
+constexpr int	TUTORIAL_SIZE_Y{ 200 };					//!< チュートリアルの高さ
+constexpr int	TUTORIAL_POS_X{ SCREEN_CENTER_X };		//!< チュートリアルの表示位置
+constexpr int	TUTORIAL_POS_Y{ SCREEN_CENTER_Y };		//!< チュートリアルの表示位置
+constexpr int	TUTORIAL_POS_X_OFFSET{ 170 };			//!< チュートリアルの表示位置
+constexpr int	TUTORIAL_POS_Y_OFFSET{ 200 };			//!< チュートリアルの表示位置
 
 //=============================================================================
 // コンストラクタ　「読み込み」「初期化」

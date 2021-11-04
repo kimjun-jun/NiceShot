@@ -64,6 +64,11 @@ public:
 		rank = NULL;
 		result = NULL;
 		title = NULL;
+		field = NULL;
+		sky = NULL;
+		wall = NULL;
+		fade = NULL;
+		mysocket = NULL;
 		nScene = SCENE_TITLE;
 		stop = 0;
 	}
@@ -141,7 +146,7 @@ private:
  */
 struct VERTEX_2D
 {
-	VERTEX_2D() { vtx = D3DXVECTOR3(0.0f, 0.0f, 0.0f); rhw = 0.0f; diffuse = D3DCOLOR(0); tex = D3DXVECTOR2(0.0f, 0.0f); }
+	VERTEX_2D() { vtx = VEC3_ALL0; rhw = 0.0f; diffuse = D3DCOLOR(0); tex = D3DXVECTOR2(0.0f, 0.0f); }
 	~VERTEX_2D() {}
 	D3DXVECTOR3 vtx;		//!< 頂点座標
 	float		rhw;		//!< テクスチャのパースペクティブコレクト用
@@ -155,7 +160,7 @@ struct VERTEX_2D
  */
 struct VERTEX_3D
 {
-	VERTEX_3D() { vtx = D3DXVECTOR3(0.0f, 0.0f, 0.0f); nor = D3DXVECTOR3(0.0f, 0.0f, 0.0f); diffuse = D3DCOLOR(0); tex = D3DXVECTOR2(0.0f, 0.0f); }
+	VERTEX_3D() { vtx = VEC3_ALL0; nor = VEC3_ALL0; diffuse = D3DCOLOR(0); tex = D3DXVECTOR2(0.0f, 0.0f); }
 	~VERTEX_3D() {}
 	D3DXVECTOR3 vtx;		//!< 頂点座標
 	D3DXVECTOR3 nor;		//!< 法線ベクトル
@@ -190,7 +195,7 @@ private:
 class Movement
 {
 public:
-	Movement() { move = D3DXVECTOR3(0.0f, 0.0f, 0.0f); }
+	Movement() { move = VEC3_ALL0; }
 	~Movement() {}
 	//------------------------get関数
 	inline D3DXVECTOR3 Move() const { return this->move; };
@@ -277,7 +282,7 @@ private:
 	float						Qrot;				//!< Upベクトルから地形法線への角度
 
 public:
-	FieldNor() { FNVec = D3DXVECTOR3(0.0f, 0.0f, 0.0f); FNUNCross = D3DXVECTOR3(0.0f, 0.0f, 0.0f); Qrot = 0.0f; }
+	FieldNor() { FNVec = VEC3_ALL0; FNUNCross = VEC3_ALL0; Qrot = 0.0f; }
 	~FieldNor() {}
 	//------------------------get関数
 	inline D3DXVECTOR3 FNVecFunc() const { return this->FNVec; };				//!< クォータニオンで使う地形の法線ベクトル
@@ -298,9 +303,9 @@ class TransForm
 {
 public:
 	TransForm() {	
-		pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f); oldpos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-		rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f); oldrot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-		scl = D3DXVECTOR3(1.0f, 1.0f, 1.0f); 
+		pos = VEC3_ALL0; oldpos = VEC3_ALL0;
+		rot = VEC3_ALL0; oldrot = VEC3_ALL0;
+		scl = VEC3_ALL1; 
 	}
 	~TransForm() {}
 

@@ -13,6 +13,10 @@
 //// マクロ定義
 ////*****************************************************************************
 //#define	TEXTURE_LIFETEX		"../data/TEXTURE/life000.png"		// 読み込むテクスチャファイル名
+//#define	LIFETEX_SIZE_X						(30.0f)																		//!< ライフの数字の幅
+//#define	LIFETEX_SIZE_Y						(40.0f)																		//!< ライフの数字の高さ
+//#define	LIFETEX_POS_X						(SCREEN_CENTER_X-200.0f)													//!< ライフの表示基準位置Ｘ座標
+//#define	LIFETEX_POS_Y						(SCREEN_CENTER_Y-100.0f)													//!< ライフの表示基準位置Ｙ座標
 //
 ////*****************************************************************************
 //// プロトタイプ宣言
@@ -53,8 +57,8 @@
 //	g_nNumVertexLifeTex = (POLYGON_2D_VERTEX * MAX_LIFE) - 2;
 //	g_nNumPolygonLifeTex = MAX_LIFE * 2;
 //	g_nNumIndexLifeTex = g_nNumPolygonLifeTex;
-//	g_posLifeTex = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-//	g_rotLifeTex = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+//	g_posLifeTex = VEC3_ALL0;
+//	g_rotLifeTex = VEC3_ALL0;
 //
 //	for (int CntPlayer = 0; CntPlayer < PLAYER_MAX; CntPlayer++)
 //	{

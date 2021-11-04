@@ -11,8 +11,9 @@
 // マクロ定義
 //*****************************************************************************
 #define	TEXTURE_SHADOW		"../data/TEXTURE/other/shadow000.jpg"	// 読み込むテクスチャファイル名
-#define	SHADOW_SIZE_X		(25.0f)							// 影の幅
-#define	SHADOW_SIZE_Z		(25.0f)							// 影の高さ
+
+constexpr float	SHADOW_SIZE_X{ 25.0f };							// 影の幅
+constexpr float	SHADOW_SIZE_Z{ 25.0f };							// 影の高さ
 
 //=============================================================================
 // コンストラクタ　「読み込み」「初期化」
@@ -76,9 +77,9 @@ void SHADOW::Init(void)
 {
 	for (int CntShadow = 0; CntShadow < OBJECT_SHADOW_MAX; CntShadow++)
 	{
-		this->Transform[CntShadow].Pos(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
-		this->Transform[CntShadow].Rot(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
-		this->Transform[CntShadow].Scl(D3DXVECTOR3(1.0f, 1.0f, 1.0f));
+		this->Transform[CntShadow].Pos(VEC3_ALL0);
+		this->Transform[CntShadow].Rot(VEC3_ALL0);
+		this->Transform[CntShadow].Scl(VEC3_ALL1);
 		this->iUseType[CntShadow].Use(NoUse);
 	}
 }
@@ -166,7 +167,7 @@ int SHADOW::SetInstance(D3DXVECTOR3 pos, D3DXVECTOR3 scl)
 		if(this->iUseType[CntShadow].Use() == NoUse)
 		{
 			this->Transform[CntShadow].Pos(pos);
-			this->Transform[CntShadow].Rot(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+			this->Transform[CntShadow].Rot(VEC3_ALL0);
 			this->Transform[CntShadow].Scl(scl);
 			this->iUseType[CntShadow].Use(YesUseType1);
 

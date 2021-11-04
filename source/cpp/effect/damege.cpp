@@ -9,13 +9,13 @@
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define	TEXTURE_DAMEGE			("../data/TEXTURE/effect/screendamage.png")			
-#define	DAMEGE_SIZE_X			(SCREEN_W/4)										// チュートリアルの幅
-#define	DAMEGE_SIZE_Y			(SCREEN_H/4)										// チュートリアルの高さ
-#define	DAMEGE_POS_X			(SCREEN_CENTER_X)									// チュートリアルの表示位置
-#define	DAMEGE_POS_Y			(SCREEN_CENTER_Y)									// チュートリアルの表示位置
+#define	TEXTURE_DAMEGE			("../data/TEXTURE/effect/screendamage.png")	
 
-#define SCREENDAMEGE_TIME		(20.0f)									//!< 被ダメージ時の画面フェード時間
+constexpr int	DAMEGE_SIZE_X{ SCREEN_W / 4 };		//!< チュートリアルの幅
+constexpr int	DAMEGE_SIZE_Y{ SCREEN_H / 4 };		//!< チュートリアルの高さ
+constexpr int	DAMEGE_POS_X{ SCREEN_CENTER_X };	//!< チュートリアルの表示位置
+constexpr int	DAMEGE_POS_Y{ SCREEN_CENTER_Y };	//!< チュートリアルの表示位置
+constexpr float SCREENDAMEGE_TIME{ 20.0f };			//!< 被ダメージ時の画面フェード時間
 
 //=============================================================================
 // コンストラクタ　「読み込み」「初期化」
@@ -77,9 +77,25 @@ DAMEGE::~DAMEGE(void)
 //=============================================================================
 void DAMEGE::Init(void)
 {
+	//描画位置設定
+	this->Transform[PLAYER01].Pos(D3DXVECTOR3(DAMEGE_POS_X - DAMEGE_SIZE_X, DAMEGE_POS_Y - DAMEGE_SIZE_Y, 0.0f));
+	this->Transform[PLAYER02].Pos(D3DXVECTOR3(DAMEGE_POS_X + DAMEGE_SIZE_X, DAMEGE_POS_Y - DAMEGE_SIZE_Y, 0.0f));
+	this->Transform[PLAYER03].Pos(D3DXVECTOR3(DAMEGE_POS_X - DAMEGE_SIZE_X, DAMEGE_POS_Y + DAMEGE_SIZE_Y, 0.0f));
+	this->Transform[PLAYER04].Pos(D3DXVECTOR3(DAMEGE_POS_X + DAMEGE_SIZE_X, DAMEGE_POS_Y + DAMEGE_SIZE_Y, 0.0f));
+
 	//カウントループ
 	for (int CntDamege = 0; CntDamege < OBJECT_DAMEGE_MAX; CntDamege++)
 	{
+		//描画位置反映
+		D3DXVECTOR3 pos = this->Transform[CntDamege].Pos();
+		this->vtx.Vertex2D(CntDamege, DAMEGE_SIZE_X, DAMEGE_SIZE_Y, pos);
+
+		//RHW設定
+		this->vtx.RHW2D(CntDamege);
+
+		//UVの設定
+		this->vtx.UV2D(CntDamege);
+
 		//カラー設定
 		this->vtx.Color2D(CntDamege, D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
 
@@ -98,23 +114,19 @@ void DAMEGE::Init(void)
 //=============================================================================
 void DAMEGE::InitNet(int MyNumber)
 {
-	/*
-	D3DXVECTOR3 pos;
-	pos = D3DXVECTOR3(DAMEGE_POS_X, DAMEGE_POS_Y, 0.0f);
-	this[0].Pos(pos);
-	D3DXVECTOR3 Getpos = this[0].Pos();
-	// 頂点座標の設定
-	this[0].tex2D.textureVTX[0].vtx = D3DXVECTOR3(Getpos.x - DAMEGE_POS_X, Getpos.y - DAMEGE_POS_Y, 0.0f);
-	this[0].tex2D.textureVTX[1].vtx = D3DXVECTOR3(Getpos.x + DAMEGE_POS_X, Getpos.y - DAMEGE_POS_Y, 0.0f);
-	this[0].tex2D.textureVTX[2].vtx = D3DXVECTOR3(Getpos.x - DAMEGE_POS_X, Getpos.y + DAMEGE_POS_Y, 0.0f);
-	this[0].tex2D.textureVTX[3].vtx = D3DXVECTOR3(Getpos.x + DAMEGE_POS_X, Getpos.y + DAMEGE_POS_Y, 0.0f);
-	for (int CntDamege = 0; CntDamege < OBJECT_DAMEGE_MAX; CntDamege++)
-	{
-		this[CntDamege].alpha = 0;
-		this[CntDamege].time = 0.0f;
-		this[CntDamege].Use(false);
-	}
-	*/
+	//描画位置設定
+	this->Transform[MyNumber].Pos(D3DXVECTOR3(DAMEGE_POS_X, DAMEGE_POS_Y, 0.0f));
+
+	//描画位置反映
+	D3DXVECTOR3 pos = this->Transform[MyNumber].Pos();
+
+	D3DXVECTOR3 vtx[POLYGON_2D_VERTEX];
+	vtx[0] = D3DXVECTOR3(pos.x - DAMEGE_POS_X, pos.y - DAMEGE_POS_Y, 0.0f);
+	vtx[1] = D3DXVECTOR3(pos.x + DAMEGE_POS_X, pos.y - DAMEGE_POS_Y, 0.0f);
+	vtx[2] = D3DXVECTOR3(pos.x - DAMEGE_POS_X, pos.y + DAMEGE_POS_Y, 0.0f);
+	vtx[3] = D3DXVECTOR3(pos.x + DAMEGE_POS_X, pos.y + DAMEGE_POS_Y, 0.0f);
+
+	this->vtx.Vertex2D(MyNumber, DAMEGE_SIZE_X, DAMEGE_SIZE_Y, pos);
 }
 
 //=============================================================================

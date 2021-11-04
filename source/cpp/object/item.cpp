@@ -7,20 +7,21 @@
 #include "../../h/map/field.h"
 #include "../../h/other/sound.h"
 #include "../../h/object/player.h"
+#include "../../../h/object/shadow.h"
 #include "../../h/library.h"
 #include "../../h/object/item.h"
 
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define	VALUE_ROTATE_ITEM_LO	(D3DX_PI * 0.01f)			// 回転速度　低速
-#define	VALUE_ROTATE_ITEM_HI	(D3DX_PI * 0.1f)			// 回転速度　高速
-#define	APPROADHING_RATE		(0.25f)						// プレイヤーに近づいていく割合 (距離 * APPROADHING_RATE)
-#define	VALUE_FALLSPEED_ITEM	(2.0f)						// 落下速度
-#define	ITEM_RADIUS				(20.0f)						// 半径
-#define DROP_ITEM_MAX						(20)			//!< フィールドに落ちてるアイテムの数
-#define DROP_ITEM_CHARGE_ADDTIME			(1)				//!< アイテムをリスポーンさせる時の加算タイム
-#define DROP_ITEM_CHARGE_CNT				(60.0f)			//!< アイテムをリスポーンさせる時の所要タイム
+constexpr float	VALUE_ROTATE_ITEM_LO{ D3DX_PI * 0.01f };	//!< 回転速度　低速
+constexpr float	VALUE_ROTATE_ITEM_HI{ D3DX_PI * 0.1f };		//!< 回転速度　高速
+constexpr float	APPROADHING_RATE{ 0.25f };					//!< プレイヤーに近づいていく割合 (距離 * APPROADHING_RATE)
+constexpr float	VALUE_FALLSPEED_ITEM{ 2.0f };				//!< 落下速度
+constexpr float	ITEM_RADIUS{ 20.0f };						//!< 半径
+constexpr float DROP_ITEM_CHARGE_CNT{ 60.0f };				//!< アイテムをリスポーンさせる時の所要タイム
+constexpr int DROP_ITEM_MAX{ 20 };							//!< フィールドに落ちてるアイテムの数
+constexpr int DROP_ITEM_CHARGE_ADDTIME{ 1 };				//!< アイテムをリスポーンさせる時の加算タイム
 
 //=============================================================================
 // コンストラクタ　「読み込み」「初期化」
@@ -113,6 +114,8 @@ void ITEM::Init(void)
 		this->Transform[nCntItem].Scl(this->ItemParaOne.MaxSize);
 		this->ItemParaAll[nCntItem].nIdxShadow = -1;
 		this->ItemParaAll[nCntItem].eType = ITEM_TYPE_NONE;
+		this->ItemParaAll[nCntItem].LinkShadowPos = VEC3_ALL0;
+		this->ItemParaAll[nCntItem].ShadowPosSignal = false;
 		this->ItemParaAll[nCntItem].NetUse = false;
 		this->ItemParaAll[nCntItem].NetGetItemFlag = false;
 		this->ItemParaAll[nCntItem].NetGetItemFlagOld = false;
@@ -133,11 +136,11 @@ void ITEM::Init(void)
 //	//初期化 全てセットしない
 //	for (int nCntItem = 0; nCntItem < OBJECT_ITEM_MAX; nCntItem++)
 //	{
-//		this[nCntItem].Pos(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+//		this[nCntItem].Pos(VEC3_ALL0);
 //		this[nCntItem].SetScl(D3DXVECTOR3(2.0f, 2.0f, 2.0f));
-//		this[nCntItem].SetRot(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
-//		this[nCntItem].SetFieldNorVec(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
-//		this[nCntItem].SetFieldNorUpNorCross(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+//		this[nCntItem].SetRot(VEC3_ALL0);
+//		this[nCntItem].SetFieldNorVec(VEC3_ALL0);
+//		this[nCntItem].SetFieldNorUpNorCross(VEC3_ALL0);
 //		this[nCntItem].SetQrot(0.0f);
 //		this[nCntItem].NetUse = false;
 //		this[nCntItem].Use(false);
@@ -163,8 +166,8 @@ void ITEM::Init(void)
 //		int ItemTypeNum = rand() % ITEMTYPE_MAX;
 //		//ライフ、カメラ、霧アイテムの時はもう一度抽選
 //		if (ItemTypeNum == ITEMTYPE_LIFE && ItemTypeNum == ITEMTYPE_CAMERA && ItemTypeNum == ITEMTYPE_KIRI) ItemTypeNum = rand() % ITEMTYPE_MAX;
-//		this[0].SetItem(pos, D3DXVECTOR3(2.0f, 2.0f, 2.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ItemTypeNum);
-//		//this[0].SetItem(pos, D3DXVECTOR3(1.0f, 1.0f, 1.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ITEMTYPE_TIKEI);
+//		this[0].SetItem(pos, D3DXVECTOR3(2.0f, 2.0f, 2.0f), VEC3_ALL0, ItemTypeNum);
+//		//this[0].SetItem(pos, VEC3_ALL1, VEC3_ALL0, ITEMTYPE_TIKEI);
 //		this[nCntItem].Use(true);
 //	}
 //	*/
@@ -182,11 +185,11 @@ void ITEM::Init(void)
 //{
 //	for (int nCntItem = 0; nCntItem < OBJECT_ITEM_MAX; nCntItem++)
 //	{
-//		this[nCntItem].Pos(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+//		this[nCntItem].Pos(VEC3_ALL0);
 //		this[nCntItem].SetScl(D3DXVECTOR3(2.0f, 2.0f, 2.0f));
-//		this[nCntItem].SetRot(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
-//		this[nCntItem].SetFieldNorVec(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
-//		this[nCntItem].SetFieldNorUpNorCross(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+//		this[nCntItem].SetRot(VEC3_ALL0);
+//		this[nCntItem].SetFieldNorVec(VEC3_ALL0);
+//		this[nCntItem].SetFieldNorUpNorCross(VEC3_ALL0);
 //		this[nCntItem].SetQrot(0.0f);
 //		this[nCntItem].Use(false);
 //		this[nCntItem].Droptime = 0.0f;
@@ -205,7 +208,7 @@ void ITEM::Init(void)
 //=============================================================================
 // 更新処理
 //=============================================================================
-void ITEM::Update(PLAYER *Player, bool NetGameStartFlag)
+void ITEM::Update(PLAYER *Player, SHADOW *Shadow, bool NetGameStartFlag)
 {
 	//カウントループ(アイテムのインスタンス数)
 	for (int nCntItem = 0; nCntItem < OBJECT_ITEM_MAX; nCntItem++)
@@ -218,6 +221,7 @@ void ITEM::Update(PLAYER *Player, bool NetGameStartFlag)
 			//-------------------------------------------オブジェクトの値読み込み
 			D3DXVECTOR3 pos = this->Transform[nCntItem].Pos();
 			D3DXVECTOR3 rot = this->Transform[nCntItem].Rot();
+			D3DXVECTOR3 scl = this->Transform[nCntItem].Scl();
 			D3DXVECTOR3 FieldNorVec = this->PostureVec[nCntItem].FNVecFunc();
 			D3DXVECTOR3 FieldNorUpNorCross = this->PostureVec[nCntItem].FNUNCrossFunc();
 			float Qrot = this->PostureVec[nCntItem].QrotFunc();
@@ -245,6 +249,10 @@ void ITEM::Update(PLAYER *Player, bool NetGameStartFlag)
 			}
 			else Qrot = 0.0f;
 
+			// 影の位置設定
+			Shadow->UpdateInstance(this->ItemParaAll[nCntItem].nIdxShadow,
+				this->ItemParaAll[nCntItem].LinkShadowPos,rot, scl);
+
 			//-------------------------------------------オブジェクトの値書き込み
 			this->Transform[nCntItem].Pos(pos);
 			this->Transform[nCntItem].Rot(rot);
@@ -255,7 +263,7 @@ void ITEM::Update(PLAYER *Player, bool NetGameStartFlag)
 		//だれかがアイテムを取得したらそのプレイヤーに近づく処理
 		if (this->ItemParaAll[nCntItem].GettingSignal == true)
 		{
-			GettingItem(nCntItem, Player);
+			GettingItem(nCntItem, Player, Shadow);
 		}
 	}
 
@@ -289,9 +297,9 @@ void ITEM::Update(PLAYER *Player, bool NetGameStartFlag)
 					if (ItemNum == ITEM_TYPE_LIFE && ItemNum == ITEM_TYPE_CAMERA && ItemNum == ITEM_TYPE_KIRI) ItemNum = rand() % ITEM_TYPE_MAX;
 					this->ItemParaAll[nCntItem].eType = eITEM_TYPE(ItemNum);
 					//インスタンスセット　使用する
-					this->SetInstance(pos, D3DXVECTOR3(ITEM_BIG_SCL, ITEM_BIG_SCL, ITEM_BIG_SCL), D3DXVECTOR3(0.0f, 0.0f, 0.0f), this->ItemParaAll[nCntItem].eType);
-					//this->SetInstance(pos, D3DXVECTOR3(ITEM_BIG_SCL, ITEM_BIG_SCL, ITEM_BIG_SCL), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ITEM_TYPE_TIKEI);
-					//this->SetInstance(pos, D3DXVECTOR3(ITEM_BIG_SCL, ITEM_BIG_SCL, ITEM_BIG_SCL), D3DXVECTOR3(0.0f, 0.0f, 0.0f), ITEM_TYPE_SENSYA);
+					this->SetInstance(pos, D3DXVECTOR3(ITEM_BIG_SCL, ITEM_BIG_SCL, ITEM_BIG_SCL), VEC3_ALL0, this->ItemParaAll[nCntItem].eType, Shadow);
+					//this->SetInstance(pos, D3DXVECTOR3(ITEM_BIG_SCL, ITEM_BIG_SCL, ITEM_BIG_SCL), VEC3_ALL0, ITEM_TYPE_TIKEI);
+					//this->SetInstance(pos, D3DXVECTOR3(ITEM_BIG_SCL, ITEM_BIG_SCL, ITEM_BIG_SCL), VEC3_ALL0, ITEM_TYPE_SENSYA);
 					this->ItemParaAll[nCntItem].CollisionFieldEnd = false;
 					this->ItemParaOne.Droptime = 0;
 					this->ItemParaOne.GoukeiDrop++;
@@ -393,7 +401,7 @@ void ITEM::Draw(void)
 //=============================================================================
 // アイテムの設定
 //=============================================================================
-void ITEM::SetInstance(D3DXVECTOR3 pos, D3DXVECTOR3 scl, D3DXVECTOR3 rot, eITEM_TYPE eType)
+void ITEM::SetInstance(D3DXVECTOR3 pos, D3DXVECTOR3 scl, D3DXVECTOR3 rot, eITEM_TYPE eType, SHADOW *s)
 {
 	//カウントループ(アイテムのインスタンス数)
 	for(int nCntItem = 0; nCntItem < OBJECT_ITEM_MAX; nCntItem++)
@@ -408,6 +416,12 @@ void ITEM::SetInstance(D3DXVECTOR3 pos, D3DXVECTOR3 scl, D3DXVECTOR3 rot, eITEM_
 			this->Transform[nCntItem].Rot(rot);
 			this->iUseType[nCntItem].Use(YesUseType1);
 			this->ItemParaAll[nCntItem].eType = eType;
+
+			// 影の設定
+			this->ItemParaAll[nCntItem].LinkShadowPos = VEC3_ALL0;
+			this->ItemParaAll[nCntItem].ShadowPosSignal = false;
+			this->ItemParaAll[nCntItem].nIdxShadow = s->SetInstance(pos, VEC3_ALL1);
+
 			break;
 		}
 	}
@@ -431,7 +445,7 @@ void ITEM::SetInstance(int Index, D3DXVECTOR3 pos, D3DXVECTOR3 scl, D3DXVECTOR3 
 //=============================================================================
 // アイテムの削除
 //=============================================================================
-void ITEM::ReleaseInstance(int nIdxItem)
+void ITEM::ReleaseInstance(int nIdxItem, SHADOW *s)
 {
 	//指定範囲外の数値ならスルー　存在する数値なら使用(描画)しない
 	if(nIdxItem >= 0 && nIdxItem < OBJECT_ITEM_MAX)
@@ -439,13 +453,14 @@ void ITEM::ReleaseInstance(int nIdxItem)
 		//基本パラメータの設定
 		this->iUseType[nIdxItem].Use(NoUse);
 		this->ItemParaAll[nIdxItem].CollisionFieldEnd = false;
+		s->ReleaseInstance(this->ItemParaAll[nIdxItem].nIdxShadow);
 	}
 }
 
 //=============================================================================
 // アイテムを取得したプレイヤーへ近づける関数
 //=============================================================================
-void ITEM::GettingItem(int nIdxItem, PLAYER *Player)
+void ITEM::GettingItem(int nIdxItem, PLAYER *Player, SHADOW *s)
 {
 	//プレイヤーへ近づける処理
 	if (this->ItemParaAll[nIdxItem].GettingSignalEnd == false)
@@ -482,7 +497,7 @@ void ITEM::GettingItem(int nIdxItem, PLAYER *Player)
 	else if(this->ItemParaAll[nIdxItem].GettingSignalEnd == true)
 	{
 		//フラグを終了させ使用インスタンス数を減らす
-		this->ReleaseInstance(nIdxItem);
+		this->ReleaseInstance(nIdxItem,s);
 		this->ItemParaAll[nIdxItem].GettingSignal = false;
 		this->ItemParaAll[nIdxItem].GettingSignalEnd = false;
 		this->ItemParaOne.GoukeiDrop--;

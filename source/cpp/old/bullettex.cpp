@@ -11,7 +11,11 @@
 //// マクロ定義
 ////*****************************************************************************
 //#define	TEXTURE_BULLETTEX		"../data/TEXTURE/bullettex.png"		// 読み込むテクスチャファイル名
-//
+//#define	BULLETTEX_SIZE_X					(30.0f)																				//!< ライフの数字の幅
+//#define	BULLETTEX_SIZE_Y					(40.0f)																				//!< ライフの数字の高さ
+//#define	BULLETTEX_POS_X						(SCREEN_CENTER_X-200.0f)															//!< ライフの表示基準位置Ｘ座標
+//#define	BULLETTEX_POS_Y						(BULLETTEX_POS_Y+BULLETTEX_SIZE_Y)												//!< ライフの表示基準位置Ｙ座標
+
 ////*****************************************************************************
 //// プロトタイプ宣言
 ////*****************************************************************************
@@ -51,8 +55,8 @@
 //	g_nNumVertexBulletTex = (POLYGON_2D_VERTEX * MAX_AMMO) - 2;//4*2-2=6頂点
 //	g_nNumPolygonBulletTex = MAX_AMMO * 2;//2*2=4ポリゴンの数
 //	g_nNumIndexBulletTex = g_nNumPolygonBulletTex;//今回は頂点の数と同値
-//	g_posBulletTex = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-//	g_rotBulletTex = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+//	g_posBulletTex = VEC3_ALL0;
+//	g_rotBulletTex = VEC3_ALL0;
 //
 //	for (int CntPlayer = 0; CntPlayer < PLAYER_MAX; CntPlayer++)
 //	{

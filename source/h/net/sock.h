@@ -6,7 +6,7 @@
 #pragma once
 
 #define BUFFER_SIZE 500
-#define BUFFER_SIZE_STRING 501					//!< 送信データバッファサイズ
+#define BUFFER_SIZE_STRING 500					//!< 送信データバッファサイズ 送信受信共にサイズを合わせないと、メモリ読み取りエラーになる　メモリストリームで徐々にずれていく
 
 enum
 {

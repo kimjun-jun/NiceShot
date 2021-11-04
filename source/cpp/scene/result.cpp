@@ -14,12 +14,12 @@
 //*****************************************************************************
 // É}ÉNÉçíËã`
 //*****************************************************************************
-#define	RESULT_LOGO_POS_X		(SCREEN_CENTER_X)				//!< ÉçÉSÇÃç¿ïW
-#define	RESULT_LOGO_POS_Y		(SCREEN_CENTER_Y-200.0f)		//!< ÉçÉSÇÃç¿ïW
-#define	RESULT_LOGO_SIZE_X		(300.0f)						//!< ÉçÉSÇÃïù
-#define	RESULT_LOGO_SIZE_Y		(200.0f)						//!< ÉçÉSÇÃçÇÇ≥
-#define	RESULT_BG_SIZE_X		(SCREEN_W)						//!< îwåiÇÃïù
-#define	RESULT_BG_SIZE_Y		(SCREEN_H)						//!< îwåiÇÃçÇÇ≥
+constexpr int	RESULT_LOGO_POS_X{ SCREEN_CENTER_X };			//!< ÉçÉSÇÃç¿ïW
+constexpr int	RESULT_LOGO_POS_Y{ SCREEN_CENTER_Y - 200 };		//!< ÉçÉSÇÃç¿ïW
+constexpr int	RESULT_BG_SIZE_X{ SCREEN_W };					//!< îwåiÇÃïù
+constexpr int	RESULT_BG_SIZE_Y{ SCREEN_H };					//!< îwåiÇÃçÇÇ≥
+constexpr float	RESULT_LOGO_SIZE_X{ 300.0f };					//!< ÉçÉSÇÃïù
+constexpr float	RESULT_LOGO_SIZE_Y{200.0f};						//!< ÉçÉSÇÃçÇÇ≥
 
 //=============================================================================
 // ÉRÉìÉXÉgÉâÉNÉ^Å@Åuì«Ç›çûÇ›ÅvÅuèâä˙âªÅv
@@ -34,7 +34,7 @@ RESULT::RESULT(void)
 
 	//ï`âÊà íuîΩâfÅ@ÉXÉNÉäÅ[ÉìÉTÉCÉYÇ≈çÏê¨ BGÇ∆LOGO
 	D3DXVECTOR3 vtxBG[POLYGON_2D_VERTEX] = {
-	D3DXVECTOR3(0.0f, 0.0f, 0.0f),
+	VEC3_ALL0,
 	D3DXVECTOR3(RESULT_BG_SIZE_X, 0.0f, 0.0f),
 	D3DXVECTOR3(0.0f, RESULT_BG_SIZE_Y, 0.0f),
 	D3DXVECTOR3(RESULT_BG_SIZE_X, RESULT_BG_SIZE_Y, 0.0f),

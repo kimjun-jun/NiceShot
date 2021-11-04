@@ -40,11 +40,11 @@ using namespace std;
 //*****************************************************************************
 #define	FVF_VERTEX_2D				(D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1)										//!< ２Ｄポリゴン頂点フォーマット( 頂点座標[2D] / 反射光 / テクスチャ座標 )
 #define	FVF_VERTEX_3D				(D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_DIFFUSE | D3DFVF_TEX1)							//!< ３Ｄポリゴン頂点フォーマット( 頂点座標[3D] / 法線 / 反射光 / テクスチャ座標 )
-#define SCREEN_W					(1280)																				//!< ウインドウの幅
-#define SCREEN_H					(960)																				//!< ウインドウの高さ
-#define SCREEN_CENTER_X				(SCREEN_W / 2)																		//!< ウインドウの中心Ｘ座標
-#define SCREEN_CENTER_Y				(SCREEN_H / 2)																		//!< ウインドウの中心Ｙ座標
-#define SCREEN_SEPARATE_BUFF		(2.5f)																				//!< 画面分割時の描画範囲と描画範囲の隙間
+constexpr int SCREEN_W{ 1280 };																				//!< ウインドウの幅
+constexpr int SCREEN_H{ 960 };																				//!< ウインドウの高さ
+constexpr int SCREEN_CENTER_X{ SCREEN_W / 2 };																		//!< ウインドウの中心Ｘ座標
+constexpr int SCREEN_CENTER_Y{ SCREEN_H / 2 };																		//!< ウインドウの中心Ｙ座標
+constexpr float SCREEN_SEPARATE_BUFF{ 2.5f };																				//!< 画面分割時の描画範囲と描画範囲の隙間
 
 //開放マクロ
 template <typename T>
@@ -71,25 +71,52 @@ inline void SafeRelease(T*& p) {
 	}
 }
 
+#define VEC3_ALL0	D3DXVECTOR3(0.0f,0.0f,0.0f)		//!< 頻出文字列を短く　座標初期化など
+#define VEC3_ALL1	D3DXVECTOR3(1.0f,1.0f,1.0f)		//!< 頻出文字列を短く　スケール初期化など
+
 //2Dポリゴンに関するパラメータ																							
-#define	POLYGON_2D_VERTEX			(4)																					//!< 頂点数
-#define	POLYGON_2D_NUM				(2)																					//!< ポリゴン数
-																														
-																													
+constexpr int	POLYGON_2D_VERTEX{ 4 };												//!< 頂点数
+constexpr int	POLYGON_2D_NUM{ 2 };												//!< ポリゴン数
+																					
+//キャラクターなどのパラメータ 複数ファイルで使用するもの
+constexpr int PLAYER_VITAL_MAX{ 200 };												//!< プレイヤー体力
+constexpr int PLAYER_ATTACK_NORMAL{ 20 };											//!< プレイヤー攻撃力中
+constexpr int BULLETPREDICTION_MAX{ 100 };											//!< 弾道予想エフェクト　100 * 4
+constexpr int BULLET_MAX_STOCK{ 10 };												//!< 1弾薬復活するのに必要なタイム
+constexpr float MORPHING_TIME{ 300.0f };											//!< モーフィングアイテム有効時間
 
-//キャラクターなどのパラメータ
-#define PLAYER_VITAL_MAX					(200)																		//!< プレイヤー体力
-#define PLAYER_DEFENCE_STRONG				(15)																		//!< プレイヤー防御力強
-#define PLAYER_DEFENCE_NORMAL				(10)																		//!< プレイヤー防御力中
-#define PLAYER_DEFENCE_WEAK					(5)																			//!< プレイヤー防御力弱
-#define PLAYER_ATTACK_STRONG				(30)																		//!< プレイヤー攻撃力強
-#define PLAYER_ATTACK_NORMAL				(20)																		//!< プレイヤー攻撃力中
-#define PLAYER_ATTACK_WEAK					(10)																		//!< プレイヤー攻撃力弱
-#define PLAYER_SPEED_STRONG					(1.5f)																		//!< プレイヤースピード強
-#define PLAYER_SPEED_NORMAL					(1.0f)																		//!< プレイヤースピード中
-#define PLAYER_SPEED_WEAK					(0.7f)																		//!< プレイヤースピード弱
+//座標やサイズ 複数ファイルで使用するもの
+constexpr float	ITEM_INIT_POSY{ 500.0f };											//!< 初期座標アイテム
+constexpr float	WALL_INIT_POSX{ 2600.0f };											//!< 初期座標壁
+constexpr float	WALL_INIT_POSZ{ 2600.0f };											//!< 初期座標壁
+constexpr float	BULLET_EFFECT_SIZE{ 4.0f };											//!< プレイヤーで使用
+constexpr int	BULLET_EFFECT_TIME{ 240 };											//!< プレイヤーで使用
+constexpr float	WALL_SIZE_X{ WALL_INIT_POSX * 2 };									//!< 壁のサイズX
+constexpr float	WALL_SIZE_Y{ 800.0f };												//!< 壁のサイズY
 
-#define	BULLETPREDICTION_MAX			(100)		// 弾道予想エフェクト　100 * 4
+//移動量  複数ファイルで使用するもの
+constexpr float VALUE_MOVE_BULLET{ 15.0f };											//!< バレットの速度
+constexpr float VALUE_LENTIMES_BULLET{ 2.5f };										//!< プレイヤー中心としたバレットの発射位置にたいする倍率
+constexpr float VALUE_GRAVITYMAX_BULLET{ 10.0f };									//!< バレットの重力最大値
+constexpr float VALUE_GRAVITYADD_BULLET{ 0.05f };									//!< バレットの重力加速度
+constexpr float BULLET_MODEL_SIZE{ 15.0f };											//!< モデルサイズ
+
+//キャラクターなどのパラメータ 今後使う可能性があるもの
+constexpr int PLAYER_DEFENCE_STRONG{ 15 };											//!< プレイヤー防御力強
+constexpr int PLAYER_DEFENCE_NORMAL{ 10 };											//!< プレイヤー防御力中
+constexpr int PLAYER_DEFENCE_WEAK{ 5 };												//!< プレイヤー防御力弱
+constexpr int PLAYER_ATTACK_STRONG{ 30 };											//!< プレイヤー攻撃力強
+constexpr int PLAYER_ATTACK_WEAK{ 10 };												//!< プレイヤー攻撃力弱
+constexpr float PLAYER_SPEED_STRONG{ 1.5f };										//!< プレイヤースピード強
+constexpr float PLAYER_SPEED_NORMAL{ 1.0f };										//!< プレイヤースピード中
+constexpr float PLAYER_SPEED_WEAK{ 0.7f };											//!< プレイヤースピード弱
+
+const static D3DXCOLOR PLAYER_COLOR[] = {
+	D3DXCOLOR(1.0f, 1.0f, 0.1f, 1.0f),//p1カラー
+	D3DXCOLOR(0.2f, 0.2f, 1.0f, 1.0f),//p2カラー
+	D3DXCOLOR(1.0f, 0.2f, 0.2f, 1.0f),//p3カラー
+	D3DXCOLOR(0.2f, 1.0f, 1.0f, 1.0f),//p4カラー
+};
 
 //オブジェクトの合計(インスタンス総数)
 enum eOBJECT_COUNT
@@ -118,74 +145,6 @@ enum eOBJECT_COUNT
 	OBJECT_WALL_MAX = 4,
 	OBJECT_FADE_MAX = 1,
 };
-
-
-//モデル等の初期座標
-#define	PLAYER_INIT_POSX					(700.0f)																	//!< 初期座標プレイヤー
-#define	PLAYER_INIT_POSY					(300.0f)																	//!< 初期座標プレイヤー
-#define	PLAYER_INIT_POSZ					(700.0f)																	//!< 初期座標プレイヤー
-#define	ITEM_INIT_POSX						(700.0f)																	//!< 初期座標アイテム
-#define	ITEM_INIT_POSY						(500.0f)																	//!< 初期座標アイテム
-#define	ITEM_INIT_POSZ						(700.0f)																	//!< 初期座標アイテム
-#define	WALL_INIT_POSX						(2600.0f)																	//!< 初期座標壁
-#define	WALL_INIT_POSY						(0.0f)																		//!< 初期座標壁
-#define	WALL_INIT_POSZ						(2600.0f)																	//!< 初期座標壁
-
-//モデル等のサイズ
-#define	BULLET_EFFECT_SIZE					(4.0f)		//!< プレイヤーで使用
-#define	BULLET_EFFECT_TIME					(240)		//!< プレイヤーで使用
-#define	WALL_SIZE_X							(WALL_INIT_POSX*2)															//!< 壁のサイズX
-#define	WALL_SIZE_Y							(800.0f)																	//!< 壁のサイズY
-
-
-//移動量マクロ
-#define	PLAYER_VALUE_DASHRATE				(2.0f)																		//!< 歩きに比べてのダッシュの速度倍率
-#define	PLAYER_MOVE_RATE_X					(1.0f/40000.0f)																//!< 左右歩きの移動量倍率(-1000～1000が入力範囲なのでそれに乗算する)
-#define	PLAYER_MOVE_RATE_Y					(1.0f/200.0f)																//!< 前後歩きの移動量倍率(-1000～1000が入力範囲なのでそれに乗算する)
-#define	PLAYER_MOVE_RATE_LR2				(1.0f/20000.0f)																//!< キャタピラの移動量倍率(0～65000が入力範囲なのでそれに乗算する)
-#define VALUE_MOVE_BULLET					(15.0f)																		//!< バレットの速度
-#define VALUE_LEN_BULLET					(10.0f)																		//!< プレイヤー中心としたバレットの発射位置までの距離
-#define VALUE_LENTIMES_BULLET				(2.5f)																		//!< プレイヤー中心としたバレットの発射位置にたいする倍率
-#define VALUE_GRAVITYMAX_BULLET				(10.0f)																		//!< バレットの重力最大値
-#define VALUE_GRAVITYADD_BULLET				(0.05f)																		//!< バレットの重力加速度
-#define	VALUE_MOVE							(0.1f)																		//!< 移動加速度
-#define	VALUE_MOVE_MAX						(4.0f)																		//!< 移動加速度の最大値
-#define	VALUE_ROTATE_PLAYER_HOUTOU			(0.03f)																		//!< プレイヤー砲塔回転量
-#define	VALUE_ROTATE_PLAYER_HOUTOU_MAX		(1.57f)																		//!< プレイヤー砲塔回転量最大値
-#define	VALUE_ROTATE_PLAYER_HOUSIN			(0.01f)																		//!< プレイヤー砲身回転量
-#define	VALUE_ROTATE_PLAYER_HOUSIN_MAX		(0.2f)																		//!< プレイヤー砲塔回転量最大値
-#define MAX_SPEEDBUFF						(1.5f)																		//!< スピードバフ移動量最大値(積)
-#define MAX_SPEEDBUFFTIME					(120.0f*3)																	//!< スピードバフ有効時間
-#define	FRONT_VEC							(1)																			//!< 前ベクトル
-#define	BACK_VEC							(-1)																		//!< 後ろベクトル
-#define	MOVE_INERTIA_MOMENT					(0.8f)																		//!< 移動量の慣性モーメント、減速係数として使用
-#define	VALUE_SPEEDBUFF_SUB					(1.0f)																		//!< スピートアップ時間のデクリメントする値
-
-//2Dテクスチャのサイズポジションなど																			
-#define	LIFETEX_SIZE_X						(30.0f)																		//!< ライフの数字の幅
-#define	LIFETEX_SIZE_Y						(40.0f)																		//!< ライフの数字の高さ
-#define	LIFETEX_POS_X						(SCREEN_CENTER_X-200.0f)													//!< ライフの表示基準位置Ｘ座標
-#define	LIFETEX_POS_Y						(SCREEN_CENTER_Y-100.0f)													//!< ライフの表示基準位置Ｙ座標
-#define	BULLETTEX_SIZE_X					(LIFETEX_SIZE_X)															//!< ライフの数字の幅
-#define	BULLETTEX_SIZE_Y					(LIFETEX_SIZE_Y)															//!< ライフの数字の高さ
-#define	BULLETTEX_POS_X						(LIFETEX_POS_X)																//!< ライフの表示基準位置Ｘ座標
-#define	BULLETTEX_POS_Y						(LIFETEX_POS_Y+LIFETEX_SIZE_Y)												//!< ライフの表示基準位置Ｙ座標
-#define	EXPLOSION_COLLISIONPOS_BUFFSIZE		(5.0f)																		//!< 2D爆破を壁に当たった時の描画する座標を調整
-
-#define MORPHING_TIME						(300.0f)																	//!< モーフィングアイテム有効時間
-#define BACKCAMERA_TIME						(150.0f)																	//!< バックカメラアイテム有効時間
-#define KIRI_TIME							(150.0f)																	//!< フォグ霧アイテムの有効時間
-#define PLAYER_MODEL_SIZE					(15.0f)																		//!< モデルサイズ
-#define BULLET_MODEL_SIZE					(15.0f)																		//!< モデルサイズ
-#define ITEM_MODEL_SIZE						(15.0f)																		//!< モデルサイズ
-
-
-#define VEC3_ALL0						D3DXVECTOR3(0.0f,0.0f,0.0f)		//!< 頻出文字列を短く
-#define VEC3_ALL1						D3DXVECTOR3(1.0f,1.0f,1.0f)		//!< 頻出文字列を短く
-
-
-#define BULLET_MAX_STOCK			(10)				//!< 1弾薬復活するのに必要なタイム
-
 
 /**
  * @enum E_STAGE
@@ -349,12 +308,7 @@ LRESULT CALLBACK IDD_DIALOG(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 BOOL CALLBACK IP_DIALOG(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-
 bool GetEndGame(void);
-
-class GAME_OBJECT;
-GAME_OBJECT *GetSendObjectP(void);
-
 
 //線形合同法関数
 int MyRandFunc(int *X, int M);

@@ -7,11 +7,6 @@
 
 #include "../../h/object/objectclass.h"
 
-
-
-
-//class PLAYER_HONTAI;
-
 /**
  * @enum ePLAYER_PARTS_TYPE
  * @brief 
@@ -49,17 +44,6 @@ enum ePLAYER_MODEL_ALL_TYPE
 };
 
 /**
-*　@class PLAYER_PRATS
-*　@brief 
-*/
-class PLAYER_PRATS
-{
-public:
-	//PLAYER_HONTAI		*ParentHontai;		//!< 親判定　親階層のアドレス
-	//PLAYER_PRATS		*ParentParts;		//!< 子判定　子階層のアドレス
-};
-
-/**
 *　@class PLAYER_PARAMETER_BULLET
 *　@brief プレイヤーバレット用パラメータ
 */
@@ -67,7 +51,7 @@ class PLAYER_PARAMETER_BULLET
 {
 public:
 	PLAYER_PARAMETER_BULLET() {
-		BulletStartPos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);	for (int i = 0; i < 3; i++) BulletMove[i] = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		BulletStartPos = VEC3_ALL0;	for (int i = 0; i < 3; i++) BulletMove[i] = VEC3_ALL0;
 		BulletRotY = 0.0f; BulletBornTime = 0.0f; BulletStock = 0; NetBulletShotFlagOneFrame = 0;
 	};
 	~PLAYER_PARAMETER_BULLET() {}
@@ -88,7 +72,7 @@ class PLAYER_PARAMETER_STANDARD
 {
 public:
 	PLAYER_PARAMETER_STANDARD() {
-		FUPFCross = D3DXVECTOR3(0.0f, 0.0f, 0.0f); Speed = 0.0f; Vital = PLAYER_VITAL_MAX; OldVital = PLAYER_VITAL_MAX; ShadowIdx = -1;
+		FUPFCross = VEC3_ALL0; Speed = 0.0f; Vital = PLAYER_VITAL_MAX; OldVital = PLAYER_VITAL_MAX; ShadowIdx = -1;
 		eModelType = PLAYER_MODEL_TYPE_NORMAL; eOldModelType = PLAYER_MODEL_TYPE_NORMAL;
 	}
 	~PLAYER_PARAMETER_STANDARD() {}
@@ -205,21 +189,18 @@ public:
 
 	void				Init(FIELD *field);			//!< 初期化
 	void				Update(EFFECT*effect, BULLET*bullet, SHADOW*shadow, FADE *fade, bool Netflag, int MyNumber); //!< 更新
-	void				Draw(void);						//!< 描画
-
-	//PLAYER_PRATS				parts[OBJECT_PLAYER_MAX];			//!< モデルのパーツ階層　親本体(砲台)、子パーツ[0](砲塔)、孫パーツ[1](砲身)
-	//PLAYER_HONTAI				*Parent[OBJECT_PLAYER_MAX];			//!< 親子判定 ワールドマトリクスで親→子→孫のように使う
+	void				Draw(void)override;						//!< 描画
 
 	PLAYER_PARAMETER_SUMMARY	PlayerPara[OBJECT_PLAYER_MAX];		//!< インスタンスに必要なデータ群	数が多いので複数包含している							
-
-	TEXTURE						tex;								//!< テクスチャ情報　複数使用するならここを配列化　ITEMTYPE_MAX
 	PLAYER_MODEL_DRAW			modelDraw[OBJECT_PLAYER_MAX];		//!< 描画用モデルデータ
-	PLAYER_MODEL_ORIGINAL		modelOri;							//!< オリジナルモデルデータ　モーフィング時の基準用
-
 	iUseCheak					iUseType[OBJECT_PLAYER_MAX];		//!< 使用情報
 	FieldNor					PostureVec[OBJECT_PLAYER_MAX];		//!< 姿勢ベクトル
-	Movement					Move[OBJECT_PLAYER_MAX];			//!< 移動量
+
 private:
+
+	TEXTURE						tex;								//!< テクスチャ情報　複数使用するならここを配列化　ITEMTYPE_MAX
+	PLAYER_MODEL_ORIGINAL		modelOri;							//!< オリジナルモデルデータ　モーフィング時の基準用
+	Movement					Move[OBJECT_PLAYER_MAX];			//!< 移動量
 
 	//------カラー
 	void	PlayerMeshColor(LPDIRECT3DVERTEXBUFFER9 *pD3DVtxBuff, LPDIRECT3DINDEXBUFFER9 *pD3DIdxBuff, DWORD nNumPolygon, int CntPlayer);
@@ -229,7 +210,7 @@ private:
 	void	MoveL(int CntPlayer, EFFECT *effect, bool Netflag);			//!< 移動制御(LRスティックで移動制御)
 	void	MoveLtype0(int CntPlayer, EFFECT *effect, bool Netflag);	//!< 移動制御(LRスティックで移動制御)
 	void	MoveL2R2(int CntPlayer, EFFECT *effect, bool Netflag);		//!< 移動制御(L2R2で移動制御)
-	void	MoveKeybord(int CntPlayer, EFFECT *effect, bool Netflag);	//!< 移動制御(ki-bo-doで移動制御)
+	void	MoveKeybord(int CntPlayer, EFFECT *effect);	//!< 移動制御(ki-bo-doで移動制御)
 
 	//------カメラ制御
 	void	CameraRevers(int CntPlayer, bool Netflag);		//!< カメラ制御

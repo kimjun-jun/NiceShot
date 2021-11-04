@@ -34,7 +34,6 @@
 #include "../h/net/sock.h"
 #include "../project/resource.h"
 
-
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
@@ -256,9 +255,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		}
 	}
 
-	//-----------------------------------------------------オブジェクト終了 koko
-	ObjectAll.Delete();
-
+	//-----------------------------------------------------オブジェクト終了
 	//シーケンス終了フラグ
 	EndGame = true;
 	ObjectAll.MultThreadFlagFunc(false);
@@ -266,6 +263,9 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 	//スレッド破棄
 	SubThread.join();
+
+	//delete
+	ObjectAll.Delete();
 
 	// ウィンドウクラスの登録を解除
 	UnregisterClass(CLASS_NAME, wcex.hInstance);

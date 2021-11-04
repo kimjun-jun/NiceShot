@@ -37,11 +37,11 @@
 struct SENDMSG_BUFF
 {
 	SENDMSG_BUFF() {
-		PlayerPos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-		HoudaiRot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-		HoutouRot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-		HousinRot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-		BPos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		PlayerPos = VEC3_ALL0;
+		HoudaiRot = VEC3_ALL0;
+		HoutouRot = VEC3_ALL0;
+		HousinRot = VEC3_ALL0;
+		BPos = VEC3_ALL0;
 		ItemSyncUse = false;
 	}
 
@@ -133,9 +133,12 @@ MainMsgData g_MainMsgData;
 
 MySOCKET::MySOCKET(void)
 {
+	//オブジェクトカウントアップ
+	this->CreateInstanceOBJ();
+
 	//syokika ro-karu 
 	char l_Destination[80] = { NULL };
-	unsigned short l_Port = 27015;
+	unsigned short l_Port = 27015;//WANの人はプロトコルのポート　LANや同端末は同じ端末のポート
 	sockaddr_in l_DstAddr;
 
 	sprintf_s(l_Destination, "192.168.11.4"); //ro-karu
@@ -189,7 +192,7 @@ void MySOCKET::NetMatch(void)
 		ConnectRMsg[0] = NULL;
 		char toSendText[500] = { NULL };
 		sprintf_s(toSendText, "Entry");
-		if (ChkSend == false)
+		if (ChkSend == false)//WAN環境で要求回数が変わる
 		{
 			send(this->DstSocketFunc(), toSendText, BUFFER_SIZE_STRING, 0);
 			ChkSend = true;
@@ -271,7 +274,7 @@ void MySOCKET::NetMyNumberGet(void)
 			SetNetMyNumberFlagFlag(true);
 		}
 	}
-	Sleep(100);
+	Sleep(10);
 	//}
 }
 
@@ -446,7 +449,7 @@ void MySOCKET::SendPacket(PLAYER *Player, ITEM *Item, FIELD *Field, BULLET *Bull
 	//座標
 	D3DXVECTOR3 Pos = Player->modelDraw[MyNum].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos();
 	D3DXVECTOR3 OldPos = Player->modelDraw[MyNum].Transform[PLAYER_PARTS_TYPE_HOUDAI].OldPos();
-	if (Pos != OldPos)
+	//if (Pos != OldPos)
 	{
 		//g_SendMsgBuff.PlayerPos = Pos;
 		//Player[MyNum].NetChkPos = true;
@@ -504,40 +507,40 @@ void MySOCKET::SendPacket(PLAYER *Player, ITEM *Item, FIELD *Field, BULLET *Bull
 		sprintf_s(SMsg, "%s%s", SMsg, NewSMsg);
 	}
 
-		//---------------------------バレット
-		//バレットを発射していなと0,通常モデルの発射1,アタックモデルの発射3
-		switch (Player->PlayerPara[MyNum].BulletPara.NetBulletShotFlagOneFrame)
-		{
-		case 0:
-			break;
-		case 1:
-		{
-			D3DXVECTOR3 BPos = Player->PlayerPara[MyNum].BulletPara.BulletStartPos;
-			D3DXVECTOR3 BMove = Player->PlayerPara[MyNum].BulletPara.BulletMove[0];
-			//変更があるので送信用メッセージに書き込む
-			char NewSMsg[BUFFER_SIZE] = { NULL }; //送るデータ内容
-			sprintf_s(NewSMsg, "@P%d,BulletA,PX%4.3f,PY%4.3f,PZ%4.3f,MX%4.3f,MY%4.3f,MZ%4.3f&"
-				, MyNum, BPos.x, BPos.y, BPos.z, BMove.x, BMove.y, BMove.z);
-			sprintf_s(SMsg, "%s%s", SMsg, NewSMsg);
-			break;
-		}
-		case 3:
-		{
-			D3DXVECTOR3 BPos = Player->PlayerPara[MyNum].BulletPara.BulletStartPos;
-			D3DXVECTOR3 BMove[3];
-			BMove[0] = Player->PlayerPara[MyNum].BulletPara.BulletMove[0];
-			BMove[1] = Player->PlayerPara[MyNum].BulletPara.BulletMove[1];
-			BMove[2] = Player->PlayerPara[MyNum].BulletPara.BulletMove[2];
-			//変更があるので送信用メッセージに書き込む
-			char NewSMsg[BUFFER_SIZE] = { NULL }; //送るデータ内容
-			sprintf_s(NewSMsg,
-				"@P%d,BulletB,PX%4.3f,PY%4.3f,PZ%4.3f,MX%4.3f,MY%4.3f,MZ%4.3f,MX%4.3f,MY%4.3f,MZ%4.3f,MX%4.3f,MY%4.3f,MZ%4.3f&"
-				, MyNum, BPos.x, BPos.y, BPos.z, BMove[0].x, BMove[0].y, BMove[0].z
-				, BMove[1].x, BMove[1].y, BMove[1].z, BMove[2].x, BMove[2].y, BMove[2].z);
-			sprintf_s(SMsg, "%s%s", SMsg, NewSMsg);
-			break;
-		}
-		}
+	//---------------------------バレット
+	//バレットを発射していなと0,通常モデルの発射1,アタックモデルの発射3
+	switch (Player->PlayerPara[MyNum].BulletPara.NetBulletShotFlagOneFrame)
+	{
+	case 0:
+		break;
+	case 1:
+	{
+		D3DXVECTOR3 BPos = Player->PlayerPara[MyNum].BulletPara.BulletStartPos;
+		D3DXVECTOR3 BMove = Player->PlayerPara[MyNum].BulletPara.BulletMove[0];
+		//変更があるので送信用メッセージに書き込む
+		char NewSMsg[BUFFER_SIZE] = { NULL }; //送るデータ内容
+		sprintf_s(NewSMsg, "@P%d,BulletA,PX%4.3f,PY%4.3f,PZ%4.3f,MX%4.3f,MY%4.3f,MZ%4.3f&"
+			, MyNum, BPos.x, BPos.y, BPos.z, BMove.x, BMove.y, BMove.z);
+		sprintf_s(SMsg, "%s%s", SMsg, NewSMsg);
+		break;
+	}
+	case 3:
+	{
+		D3DXVECTOR3 BPos = Player->PlayerPara[MyNum].BulletPara.BulletStartPos;
+		D3DXVECTOR3 BMove[3];
+		BMove[0] = Player->PlayerPara[MyNum].BulletPara.BulletMove[0];
+		BMove[1] = Player->PlayerPara[MyNum].BulletPara.BulletMove[1];
+		BMove[2] = Player->PlayerPara[MyNum].BulletPara.BulletMove[2];
+		//変更があるので送信用メッセージに書き込む
+		char NewSMsg[BUFFER_SIZE] = { NULL }; //送るデータ内容
+		sprintf_s(NewSMsg,
+			"@P%d,BulletB,PX%4.3f,PY%4.3f,PZ%4.3f,MX%4.3f,MY%4.3f,MZ%4.3f,MX%4.3f,MY%4.3f,MZ%4.3f,MX%4.3f,MY%4.3f,MZ%4.3f&"
+			, MyNum, BPos.x, BPos.y, BPos.z, BMove[0].x, BMove[0].y, BMove[0].z
+			, BMove[1].x, BMove[1].y, BMove[1].z, BMove[2].x, BMove[2].y, BMove[2].z);
+		sprintf_s(SMsg, "%s%s", SMsg, NewSMsg);
+		break;
+	}
+	}
 
 	//---------------------------アイテム取得信号
 	for (int CntItem = 0; CntItem < OBJECT_ITEM_MAX; CntItem++)
@@ -2046,7 +2049,7 @@ void MySOCKET::NetSetItem(ITEM *Item, D3DXVECTOR3 buff, int index, int type)
 {
 	if (Item->iUseType[index].Use() == false)
 	{
-		Item->SetInstance(index, buff, D3DXVECTOR3(2.0f, 2.0f, 2.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), static_cast<eITEM_TYPE>(type));
+		Item->SetInstance(index, buff, D3DXVECTOR3(2.0f, 2.0f, 2.0f), VEC3_ALL0, static_cast<eITEM_TYPE>(type));
 		Item->ItemParaAll[index].NetUse = true;
 	}
 }
@@ -2070,7 +2073,7 @@ void MySOCKET::NetSetPos(PLAYER *Player, D3DXVECTOR3 buff, int PlayerNum)
 	//ロックされてなければ分析して書き込み
 	if (GetNetShareDateFlag() == false)
 	{
-		Player->modelDraw[PlayerNum].Transform[PLAYER_PARTS_TYPE_HOUTOU].Pos(buff);
+		Player->modelDraw[PlayerNum].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos(buff);
 	}
 }
 

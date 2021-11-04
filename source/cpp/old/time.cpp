@@ -51,7 +51,7 @@
 //	{
 //		TIME *time = &g_time[i];
 //		time->pos = D3DXVECTOR3(TEXTURE_TIME_POS_X - (NUM_INTERVAL_X*i), TEXTURE_TIME_POS_Y, 0.0f);
-//		time->rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+//		time->rot = VEC3_ALL0;
 //		time->nCountAnim = 0;
 //		time->nPatternAnim = 0;
 //		time->use = true;

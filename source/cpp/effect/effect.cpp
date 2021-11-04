@@ -14,8 +14,8 @@
 #define	TEXTURE_EFFECT			"../data/TEXTURE/effect/effect000.jpg"	// 読み込むテクスチャファイル名
 
 //エフェクト関連定数
-#define	EFFECT_NORMALSET_SIZE_X				(16.0f)			//!< エフェクト標準の幅
-#define	EFFECT_NORMALSET_SIZE_Y				(16.0f)			//!< エフェクト標準の高さ
+constexpr float	EFFECT_NORMALSET_SIZE_X{ 16.0f };			//!< エフェクト標準の幅
+constexpr float	EFFECT_NORMALSET_SIZE_Y{ 16.0f };			//!< エフェクト標準の高さ
 
 
 //=============================================================================
@@ -57,7 +57,7 @@ EFFECT::EFFECT(void)
 		this->iUseType[CntEffect].Use(NoUse);
 
 		//移動量設定
-		this->move[CntEffect].Move(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+		this->move[CntEffect].Move(VEC3_ALL0);
 	}
 
 	// テクスチャの読み込み
@@ -93,11 +93,11 @@ void EFFECT::Init(void)
 		this->iUseType[CntEffect].Use(NoUse);
 
 		//移動量設定
-		this->move[CntEffect].Move(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+		this->move[CntEffect].Move(VEC3_ALL0);
 
 		//トランスフォーム設定
-		this->Transform[CntEffect].Pos(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
-		this->Transform[CntEffect].Scl(D3DXVECTOR3(1.0f, 1.0f, 1.0f));
+		this->Transform[CntEffect].Pos(VEC3_ALL0);
+		this->Transform[CntEffect].Scl(VEC3_ALL1);
 
 		//パラメータ設定
 		this->EffectPara[CntEffect].nTimer = 0;
@@ -226,8 +226,8 @@ int EFFECT::SetInstance(D3DXVECTOR3 pos, D3DXVECTOR3 move, D3DXCOLOR col, float 
 		if (this->iUseType[nCntEffect].Use() == NoUse)
 		{
 			this->Transform[nCntEffect].Pos(pos);
-			this->Transform[nCntEffect].Rot(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
-			this->Transform[nCntEffect].Scl(D3DXVECTOR3(1.0f, 1.0f, 1.0f));
+			this->Transform[nCntEffect].Rot(VEC3_ALL0);
+			this->Transform[nCntEffect].Scl(VEC3_ALL1);
 			this->move[nCntEffect].Move(move);
 			this->EffectPara[nCntEffect].nTimer = nTimer;
 			this->EffectPara[nCntEffect].nDecAlpha = float(col.a / nTimer);

@@ -12,13 +12,12 @@
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define	VIEW_ANGLE		(D3DXToRadian(45.0f))							// ビュー平面の視野角
-#define	VIEW_ASPECT		((float)SCREEN_W / (float)SCREEN_H)				// ビュー平面のアスペクト比	
-#define	VIEW_NEAR_Z		(10.0f)											// ビュー平面のNearZ値
-#define	VIEW_FAR_Z		(10000.0f)										// ビュー平面のFarZ値
-
-#define	VALUE_MOVE_CAMERA	(2.0f)										// カメラの移動量
-#define	VALUE_ROTATE_CAMERA	(D3DX_PI * 0.005f)							// カメラの回転量
+constexpr float	VIEW_ANGLE{ D3DXToRadian(45.0f) };							// ビュー平面の視野角
+constexpr float	VIEW_NEAR_Z{ 10.0f };										// ビュー平面のNearZ値
+constexpr float	VIEW_FAR_Z{ 10000.0f };										// ビュー平面のFarZ値
+constexpr float	VALUE_MOVE_CAMERA{ 2.0f };									// カメラの移動量
+constexpr float	VALUE_ROTATE_CAMERA{ D3DX_PI * 0.005f };					// カメラの回転量
+constexpr float	VIEW_ASPECT{ (float)SCREEN_W / (float)SCREEN_H };			// ビュー平面のアスペクト比	
 
 //*****************************************************************************
 // グローバル変数
@@ -33,9 +32,9 @@ void InitCamera(void)
 	for (int CntCam = 0; CntCam < OBJECT_CAMERA_MAX; CntCam++)
 	{
 		g_Camera[CntCam].pos = D3DXVECTOR3(0.0f, POS_H_CAM, -POS_W_CAM);
-		g_Camera[CntCam].at = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		g_Camera[CntCam].at = VEC3_ALL0;
 		g_Camera[CntCam].up = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
-		g_Camera[CntCam].rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		g_Camera[CntCam].rot = VEC3_ALL0;
 		// 視点と注視点の距離を計算
 		float vx, vz;
 		vx = g_Camera[CntCam].pos.x - g_Camera[CntCam].at.x;
