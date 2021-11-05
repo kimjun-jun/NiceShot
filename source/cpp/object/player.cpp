@@ -295,12 +295,22 @@ void PLAYER::Update(EFFECT*effect, BULLET*bullet, SHADOW*shadow, FADE *fade, boo
 	//プレイヤー人数分ループ
 	for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
 	{
-		bool use = this->iUseType[CntPlayer].Use();
-		if (use == false) deadcnt++;
+		if (this->iUseType[CntPlayer].Use() == NoUse) deadcnt++;
 		if (deadcnt >= 3)
 		{
-			fade->SetFade(FADE_OUT, SCENE_RESULT, SOUND_LABEL_BGM_gameclear01);
-			//this->GameSceneFlagFuncSetGameSceneFlag(false);
+			//ローカル対戦時は3人死ぬとすぐシーン遷移
+			if (Netflag==false)
+			{
+				fade->SetFade(FADE_OUT, SCENE_RESULT, SOUND_LABEL_BGM_gameclear01);
+			}
+			//ネット対戦時は3人死んでから他のプレイヤーと同期した後にシーン遷移
+			else
+			{
+				if (this->MultThreadFlagFunc() == false)
+				{
+					fade->SetFade(FADE_OUT, SCENE_RESULT, SOUND_LABEL_BGM_gameclear01);
+				}
+			}
 		}
 	}
 
@@ -1438,20 +1448,18 @@ void PLAYER::BulletALL(int CntPlayer, BULLET *bullet, SHADOW *shadow, bool Netfl
 
 	//プレイヤーposから発射方向に少しずらした値
 	//地面の傾きに沿って発射するときは問題ない。その傾きから左右に回転してる時だけposがおかしい
-	D3DXVECTOR3 BposStart;
-	BposStart.x = pos.x - (sinf(HoutouRot.y + HoudaiRot.y) * VALUE_LEN_BULLET);
-	BposStart.y = pos.y + (sinf(this->PlayerPara[CntPlayer].BulletPara.BulletRotY - HousinRot.x) * VALUE_LEN_BULLET) + 20.0f;
-	BposStart.z = pos.z - (cosf(HoutouRot.y + HoudaiRot.y) * VALUE_LEN_BULLET);
+	this->PlayerPara[CntPlayer].BulletPara.BulletStartPos.x = pos.x - (sinf(HoutouRot.y + HoudaiRot.y) * VALUE_LEN_BULLET);
+	this->PlayerPara[CntPlayer].BulletPara.BulletStartPos.y = pos.y + (sinf(this->PlayerPara[CntPlayer].BulletPara.BulletRotY - HousinRot.x) * VALUE_LEN_BULLET) + 20.0f;
+	this->PlayerPara[CntPlayer].BulletPara.BulletStartPos.z = pos.z - (cosf(HoutouRot.y + HoudaiRot.y) * VALUE_LEN_BULLET);
 
 	D3DXVECTOR3 BmoveRot;
 	BmoveRot.x = -sinf(HoutouRot.y + HoudaiRot.y);
 	BmoveRot.y = sinf(this->PlayerPara[CntPlayer].BulletPara.BulletRotY - HousinRot.x);
 	BmoveRot.z = -cosf(HoutouRot.y + HoudaiRot.y);
 
-	D3DXVECTOR3 bulletmove;
-	bulletmove.x = (BmoveRot.x) *VALUE_MOVE_BULLET;
-	bulletmove.y = (BmoveRot.y) *VALUE_MOVE_BULLET;
-	bulletmove.z = (BmoveRot.z) *VALUE_MOVE_BULLET;
+	this->PlayerPara[CntPlayer].BulletPara.BulletMove[0].x = (BmoveRot.x) *VALUE_MOVE_BULLET;
+	this->PlayerPara[CntPlayer].BulletPara.BulletMove[0].y = (BmoveRot.y) *VALUE_MOVE_BULLET;
+	this->PlayerPara[CntPlayer].BulletPara.BulletMove[0].z = (BmoveRot.z) *VALUE_MOVE_BULLET;
 
 	//ネット対戦時はゲームパッドナンバーは0　それ以外はプレイヤー番号で対応させる
 	int PadNum = CntPlayer;
@@ -1468,20 +1476,20 @@ void PLAYER::BulletALL(int CntPlayer, BULLET *bullet, SHADOW *shadow, bool Netfl
 		if (IsButtonTriggered(PadNum, BUTTON_R1) || GetKeyboardTrigger(DIK_SPACE))
 		{
 			this->PlayerPara[CntPlayer].BulletPara.NetBulletShotFlagOneFrame = 1;
-			bullet->SetInstance(BposStart, bulletmove, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, ePLAYER_TYPE(CntPlayer), shadow);
+			bullet->SetInstance(this->PlayerPara[CntPlayer].BulletPara.BulletStartPos, this->PlayerPara[CntPlayer].BulletPara.BulletMove[0], BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, ePLAYER_TYPE(CntPlayer), shadow);
 			//拡散弾処理
 			if (this->PlayerPara[CntPlayer].StandardPara.eModelType == PLAYER_MODEL_TYPE_ATTACK)
 			{
 				this->PlayerPara[CntPlayer].BulletPara.NetBulletShotFlagOneFrame = 3;
 				D3DXVECTOR3 leftB, rightB;
 				leftB = D3DXVECTOR3(-sinf(HoutouRot.y + HoudaiRot.y + 0.3f)*VALUE_MOVE_BULLET,
-					bulletmove.y,
+					this->PlayerPara[CntPlayer].BulletPara.BulletMove[0].y,
 					-cosf(HoutouRot.y + HoudaiRot.y + 0.3f) *VALUE_MOVE_BULLET);
 				rightB = D3DXVECTOR3(-sinf(HoutouRot.y + HoudaiRot.y - 0.3f)*VALUE_MOVE_BULLET,
-					bulletmove.y,
+					this->PlayerPara[CntPlayer].BulletPara.BulletMove[0].y,
 					-cosf(HoutouRot.y + HoudaiRot.y - 0.3f) *VALUE_MOVE_BULLET);
-				bullet->SetInstance(BposStart, leftB, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, ePLAYER_TYPE(CntPlayer), shadow);
-				bullet->SetInstance(BposStart, rightB, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, ePLAYER_TYPE(CntPlayer), shadow);
+				bullet->SetInstance(this->PlayerPara[CntPlayer].BulletPara.BulletStartPos, leftB, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, ePLAYER_TYPE(CntPlayer), shadow);
+				bullet->SetInstance(this->PlayerPara[CntPlayer].BulletPara.BulletStartPos, rightB, BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME, ePLAYER_TYPE(CntPlayer), shadow);
 
 			}
 			//残弾を減らす

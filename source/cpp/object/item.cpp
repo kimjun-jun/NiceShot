@@ -215,8 +215,7 @@ void ITEM::Update(PLAYER *Player, SHADOW *Shadow, bool NetGameStartFlag)
 	{
 		this->ItemParaAll[nCntItem].NetGetItemFlagOld = this->ItemParaAll[nCntItem].NetGetItemFlag;
 		this->ItemParaAll[nCntItem].NetGetItemFlag = false;
-		bool use = this->iUseType[nCntItem].Use();
-		if (use == true)
+		if (this->iUseType[nCntItem].Use() == YesUseType1)
 		{
 			//-------------------------------------------オブジェクトの値読み込み
 			D3DXVECTOR3 pos = this->Transform[nCntItem].Pos();
@@ -474,7 +473,7 @@ void ITEM::GettingItem(int nIdxItem, PLAYER *Player, SHADOW *s)
 		irot.y += VALUE_ROTATE_ITEM_HI;
 		
 		//プレイヤーとアイテムの距離を計算し近づける
-		D3DXVECTOR3 ppos = Player->modelDraw[PLAYER_PARTS_TYPE_HOUDAI].Transform[this->ItemParaAll[nIdxItem].GetPlayerType].Pos();
+		D3DXVECTOR3 ppos = Player->modelDraw[this->ItemParaAll[nIdxItem].GetPlayerType].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos();
 
 		D3DXVECTOR3 distance = ppos - ipos;
 		distance *= APPROADHING_RATE;

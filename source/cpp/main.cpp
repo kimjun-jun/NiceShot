@@ -85,9 +85,26 @@ HWND edit;
 MSG msg;
 
 bool EndGame = false;
-bool GetEndGame(void) 
+void SetEndGame(bool flag)
+{
+	EndGame = flag;
+}
+bool GetEndGame(void)
 {
 	return EndGame;
+}
+
+//ゲーム終了処理
+bool GetGameLoop(void)
+{
+	if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+	{
+		if (msg.message == WM_QUIT)
+		{// PostQuitMessage()が呼ばれたらループ終了
+			return true;
+		}
+	}
+	return false;
 }
 
 //=============================================================================
@@ -212,6 +229,10 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		}
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
+			if (EndGame == true)
+			{
+				break;
+			}
 			if (msg.message == WM_QUIT)
 			{// PostQuitMessage()が呼ばれたらループ終了
 				break;
@@ -618,4 +639,10 @@ int MyRandFunc(int *X, int Max)
 void SetMsg(UINT Setmsg)
 {
 	msg.message = Setmsg;
+}
+
+//ピークメッセージのセット 終了するときにQuitを代入する
+MSG GetMsg(void)
+{
+	return msg;
 }

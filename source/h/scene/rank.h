@@ -8,6 +8,8 @@
 
 #include "../../h/object/objectclass.h"
 
+constexpr int	RANK_COUNTDOWN_NUM{ 2 };					//!< 順位の数　4人なので2,1,0,を使う テクスチャ配列が0-2なので最大値が2
+
 //*****************************************************************************
 // クラス定義
 //*****************************************************************************
@@ -18,9 +20,9 @@
 class RANK_PARAMETER_ALL
 {
 public:
-	RANK_PARAMETER_ALL() { RankNum = 2; }
+	RANK_PARAMETER_ALL() { RankNum = RANK_COUNTDOWN_NUM; }
 	~RANK_PARAMETER_ALL() {}
-	int			RankNum;			//!< 自分の順位	
+	int			RankNum;			//!< 自分の順位	4人だから　2,1,0とカウントダウンさせていく
 };
 
 /**
@@ -45,9 +47,10 @@ public:
 	RANK();		//!< データ読み込み　初期化
 	~RANK();	//!< 削除
 
-	void		Init(void);				//!< 初期化
-	void		Update(void);			//!< 更新
-	void		Draw(bool Netflag);		//!< 描画
+	void		Init(void);								//!< 初期化
+	void		InitNet(int NetMyNumber);				//!< 初期化
+	void		Update(void);							//!< 更新
+	void		Draw(bool Netflag, int NetMyNumber);	//!< 描画
 
 	void		SetRank(int PlayerNum);
 	void		SetRankNet(int PlayerNum, int NetMyNumber);

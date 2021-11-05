@@ -11,10 +11,12 @@
 //*****************************************************************************
 #define	TEXTURE_DAMEGE			("../data/TEXTURE/effect/screendamage.png")	
 
-constexpr int	DAMEGE_SIZE_X{ SCREEN_W / 4 };		//!< チュートリアルの幅
-constexpr int	DAMEGE_SIZE_Y{ SCREEN_H / 4 };		//!< チュートリアルの高さ
-constexpr int	DAMEGE_POS_X{ SCREEN_CENTER_X };	//!< チュートリアルの表示位置
-constexpr int	DAMEGE_POS_Y{ SCREEN_CENTER_Y };	//!< チュートリアルの表示位置
+constexpr int	DAMEGE_SIZE_X{ SCREEN_W / 4 };		//!< ダメージテクスチャの幅
+constexpr int	DAMEGE_SIZE_Y{ SCREEN_H / 4 };		//!< ダメージテクスチャの高さネット用
+constexpr int	DAMEGE_SIZE_X_NET{ SCREEN_W / 2 };		//!< ダメージテクスチャの幅ネット用
+constexpr int	DAMEGE_SIZE_Y_NET{ SCREEN_H / 2 };		//!< ダメージテクスチャの高さ
+constexpr int	DAMEGE_POS_X{ SCREEN_CENTER_X };	//!< ダメージテクスチャの表示位置
+constexpr int	DAMEGE_POS_Y{ SCREEN_CENTER_Y };	//!< ダメージテクスチャの表示位置
 constexpr float SCREENDAMEGE_TIME{ 20.0f };			//!< 被ダメージ時の画面フェード時間
 
 //=============================================================================
@@ -126,7 +128,7 @@ void DAMEGE::InitNet(int MyNumber)
 	vtx[2] = D3DXVECTOR3(pos.x - DAMEGE_POS_X, pos.y + DAMEGE_POS_Y, 0.0f);
 	vtx[3] = D3DXVECTOR3(pos.x + DAMEGE_POS_X, pos.y + DAMEGE_POS_Y, 0.0f);
 
-	this->vtx.Vertex2D(MyNumber, DAMEGE_SIZE_X, DAMEGE_SIZE_Y, pos);
+	this->vtx.Vertex2D(MyNumber, DAMEGE_SIZE_X_NET, DAMEGE_SIZE_Y_NET, pos);
 }
 
 //=============================================================================

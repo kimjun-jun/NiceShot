@@ -252,15 +252,16 @@ void VITALGAUGE::Update(PLAYER *p, RANK *rank, bool Netflag, int NetMyNumber)
 	//ネット対戦時
 	else
 	{
-		//バイタル記録
-		this->VitalGaugePara[NetMyNumber].VitalPower = p->PlayerPara[NetMyNumber].StandardPara.Vital;
-
 		//プレイヤーが生きているときにバイタルが0以下で未使用にする（死亡フラグ）　負けた時点での順位もセットする
 		for (int CntPlayer = 0; CntPlayer < OBJECT_VITAL_MAX; CntPlayer++)
 		{
-			bool puse = p->iUseType[CntPlayer].Use();
-			if (puse == true)
+			//バイタル記録
+			this->VitalGaugePara[CntPlayer].VitalPower = p->PlayerPara[CntPlayer].StandardPara.Vital;
+
+			//使用中判定
+			if (p->iUseType[CntPlayer].Use() == YesUseType1)
 			{
+				//死んでいたら不使用にしてランクをセットする
 				if (this->VitalGaugePara[CntPlayer].VitalPower <= 0)
 				{
 					p->iUseType[CntPlayer].Use(NoUse);

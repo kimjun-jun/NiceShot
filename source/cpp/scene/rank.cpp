@@ -9,7 +9,6 @@
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-constexpr int	RANK_COUNTDOWN_NUM{ 2 };					//!< 順位の数　4人なので2,1,0,を使う
 constexpr int	RANK_SIZE_X{ SCREEN_W / 4 };				//!< やられた順位テクスチャの幅
 constexpr int	RANK_SIZE_Y{ SCREEN_H / 4 };				//!< やられた順位テクスチャの高さ
 constexpr int	RANK_POS_X{ SCREEN_W };						//!< やられた順位テクスチャの表示位置
@@ -100,6 +99,22 @@ void RANK::Init(void)
 }
 
 //=============================================================================
+// 初期化処理
+//=============================================================================
+void RANK::InitNet(int NetMyNumber)
+{
+	//ネット対戦用に描画位置を調整
+	D3DXVECTOR3 vtx[POLYGON_2D_VERTEX] =
+	{
+	VEC3_ALL0,
+	D3DXVECTOR3(SCREEN_W, 0.0f, 0.0f),
+	D3DXVECTOR3(0.0f, SCREEN_H, 0.0f),
+	D3DXVECTOR3(SCREEN_W, SCREEN_H, 0.0f),
+	};
+	this->vtx.Vertex2D(NetMyNumber, vtx);
+}
+
+//=============================================================================
 // 更新処理
 //=============================================================================
 void RANK::Update(void)
@@ -110,7 +125,7 @@ void RANK::Update(void)
 //=============================================================================
 // 描画処理
 //=============================================================================
-void RANK::Draw(bool Netflag)
+void RANK::Draw(bool Netflag, int NetMyNumber)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 
@@ -136,38 +151,37 @@ void RANK::Draw(bool Netflag)
 	//ネット対戦時
 	else
 	{
-		for (int CntRank = 0; CntRank < OBJECT_RANK_MAX; CntRank++)
+		if (this->iUseType[NetMyNumber].Use() == YesUseType1)
 		{
-			bool use = this->iUseType[CntRank].Use();
-			if (use == true)
+			if (this->RankParaOne.NetUse == true)
 			{
-				if (this->RankParaOne.NetUse == true)
-				{
-					// 頂点バッファをデバイスのデータストリームにバインド
-					pDevice->SetStreamSource(0, this->vtx.VtxBuff(), 0, sizeof(VERTEX_2D));
-					// 頂点フォーマットの設定
-					pDevice->SetFVF(FVF_VERTEX_2D);
-					// テクスチャの設定　テクスチャが複数ならtexを配列化して選択させるように
-					pDevice->SetTexture(0, this->tex[this->RankParaAll[CntRank].RankNum].Texture());
-					// ポリゴンの描画　引数二個目の描画開始頂点を設定することが大事
-					pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, (CntRank * 4), POLYGON_2D_NUM);
-				}
+				// 頂点バッファをデバイスのデータストリームにバインド
+				pDevice->SetStreamSource(0, this->vtx.VtxBuff(), 0, sizeof(VERTEX_2D));
+				// 頂点フォーマットの設定
+				pDevice->SetFVF(FVF_VERTEX_2D);
+				// テクスチャの設定　テクスチャが複数ならtexを配列化して選択させるように
+				pDevice->SetTexture(0, this->tex[this->RankParaAll[NetMyNumber].RankNum].Texture());
+				// ポリゴンの描画　引数二個目の描画開始頂点を設定することが大事
+				pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, (NetMyNumber * 4), POLYGON_2D_NUM);
 			}
 		}
 	}
 }
+
 //=============================================================================
 // ランクをセット
 //=============================================================================
 void RANK::SetRank(int PlayerNum)
 {
-	//使用可能にする
+	//先に使用可能にする
 	this->iUseType[PlayerNum].Use(YesUseType1);
+
 	for (int CntRank = 0; CntRank < OBJECT_RANK_MAX; CntRank++)
 	{
+		//使用していないものをカウントダウンさせる
 		if (this->iUseType[CntRank].Use() == NoUse)
 		{
-			//4スタートで一人死ぬたびにカウントダウンする　死んだ人はカウントダウンされずに順位が確定になる
+			//2スタートで一人死ぬたびにカウントダウンする　死んだ人はカウントダウンされずに順位が確定になる
 			this->RankParaAll[CntRank].RankNum--;
 		}
 	}
@@ -178,23 +192,16 @@ void RANK::SetRank(int PlayerNum)
 //=============================================================================
 void RANK::SetRankNet(int PlayerNum, int NetMyNumber)
 {
+	//先に使用可能にする
+	this->iUseType[PlayerNum].Use(YesUseType1);
+
 	for (int CntRank = 0; CntRank < OBJECT_RANK_MAX; CntRank++)
 	{
 		if (this->iUseType[CntRank].Use() == NoUse)
 		{
-			//ネット対戦用に描画位置を調整
-			D3DXVECTOR3 vtx[POLYGON_2D_VERTEX] =
-			{
-			VEC3_ALL0,
-			D3DXVECTOR3(SCREEN_W, 0.0f, 0.0f),
-			D3DXVECTOR3(0.0f, SCREEN_H, 0.0f),
-			D3DXVECTOR3(SCREEN_W, SCREEN_H, 0.0f),
-			};
-			this->vtx.Vertex2D(CntRank, vtx);
-
 			//自分の順位を記録して順位を使用する
-			this->RankParaAll[CntRank].RankNum = PlayerNum;
-			this->iUseType[CntRank].Use(YesUseType1);
+			//2スタートで一人死ぬたびにカウントダウンする　死んだ人はカウントダウンされずに順位が確定になる
+			this->RankParaAll[CntRank].RankNum--;
 
 			//プレイヤーナンバーとネット固有マイナンバーが同じならネット用フラグオン
 			//ここをオンにしないとネット対戦時に順位が表示されない

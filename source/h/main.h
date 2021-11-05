@@ -308,10 +308,16 @@ LRESULT CALLBACK IDD_DIALOG(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 BOOL CALLBACK IP_DIALOG(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-bool GetEndGame(void);
 
 //線形合同法関数
 int MyRandFunc(int *X, int M);
 
 //ピークメッセージのセット
 void SetMsg(UINT msg);
+
+//アプリメッセージ関数群
+MSG GetMsg(void);
+void SetEndGame(bool flag);
+bool GetEndGame(void);
+bool GetGameLoop(void);
+

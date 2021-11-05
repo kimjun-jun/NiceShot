@@ -141,7 +141,7 @@ MySOCKET::MySOCKET(void)
 	unsigned short l_Port = 27015;//WANの人はプロトコルのポート　LANや同端末は同じ端末のポート
 	sockaddr_in l_DstAddr;
 
-	sprintf_s(l_Destination, "192.168.11.4"); //ro-karu
+	sprintf_s(l_Destination, "192.168.11.2"); //ro-karu
 	//sprintf_s(l_Destination, "10.192.121.192"); //guro-baru
 
 	/* Windows 独自の設定 */
@@ -177,55 +177,77 @@ MySOCKET::~MySOCKET(void)
 	WSACleanup();
 }
 
+void MySOCKET::Init(void)
+{
+	//フラグをオフにする
+	ConnectFlag = false;
+	CountDownFlag = false;
+}
+
 void MySOCKET::NetMatch(void)
 {
 	/* 接続 */
 	//printf("Trying to connect to %s: \n", destination);
-	connect(this->DstSocketFunc(), (struct sockaddr *) &this->DstAddrFunc(), sizeof(this->DstAddrFunc()));
 
+	//一度コネクトするとフラグを消す
+	if (ConnectFlag == false)
+	{
+		//接続要求
+		connect(this->DstSocketFunc(), (struct sockaddr *) &this->DstAddrFunc(), sizeof(this->DstAddrFunc()));
+		ConnectFlag = true;
+	}
 	//マッチング
 	bool ChkMatch = false;
 	bool ChkSend = false;//エントリーは一度しか送らない
-	while (ChkMatch != true)
+	//while (ChkMatch != true)
+	//{
+		//ゲーム終了処理
+		//if (GetGameLoop() == true)
+		//{
+		//	SetEndGame(true);
+		//	this->MultThreadFlagFunc(false);
+		//	this->GameSceneFlagFunc(false);
+		//	break;
+		//}
+
+	char ConnectRMsg[BUFFER_SIZE]; //送られてくるデータ内容
+	ConnectRMsg[0] = NULL;
+	char toSendText[500] = { NULL };
+	sprintf_s(toSendText, "Entry");
+	if (ChkSend == false)//WAN環境で要求回数が変わる
 	{
-		char ConnectRMsg[BUFFER_SIZE]; //送られてくるデータ内容
-		ConnectRMsg[0] = NULL;
-		char toSendText[500] = { NULL };
-		sprintf_s(toSendText, "Entry");
-		if (ChkSend == false)//WAN環境で要求回数が変わる
+		send(this->DstSocketFunc(), toSendText, BUFFER_SIZE_STRING, 0);
+		ChkSend = true;
+	}
+	printf("マッチング中\n");
+	int numrcv = recv(this->DstSocketFunc(), ConnectRMsg, BUFFER_SIZE_STRING, 0);
+	if (numrcv < 1)
+	{
+		if (WSAGetLastError() == WSAEWOULDBLOCK)
 		{
-			send(this->DstSocketFunc(), toSendText, BUFFER_SIZE_STRING, 0);
-			ChkSend = true;
-		}
-		printf("マッチング中\n");
-		int numrcv = recv(this->DstSocketFunc(), ConnectRMsg, BUFFER_SIZE_STRING, 0);
-		if (numrcv < 1)
-		{
-			if (WSAGetLastError() == WSAEWOULDBLOCK)
-			{
-				// まだ来ない。
-				//printf("ただ今の接続人数%s\n", buffer);
-			}
-			else
-			{
-				printf("error : 0x%x\n", WSAGetLastError());
-			}
+			// まだ来ない。
+			//printf("ただ今の接続人数%s\n", buffer);
 		}
 		else
 		{
-			printf("received: ただ今の接続人数%s\n", ConnectRMsg);
-			if (ConnectRMsg[0] == '5')
-			{
-				//受信完了メッセージ送信
-				//strcpy_s(toSendText, "OK");
-				//send(this->DstSocketFunc(), toSendText, BUFFER_SIZE_STRING, 0);
-				ChkMatch = true;
-				SetNetMatchFlag(true);
-
-			}
+			printf("error : 0x%x\n", WSAGetLastError());
 		}
-		Sleep(10);
 	}
+	else
+	{
+		printf("received: ただ今の接続人数%s\n", ConnectRMsg);
+		if (ConnectRMsg[0] == '5')
+		{
+			//受信完了メッセージ送信
+			//strcpy_s(toSendText, "OK");
+			//send(this->DstSocketFunc(), toSendText, BUFFER_SIZE_STRING, 0);
+			ChkMatch = true;
+			SetNetMatchFlag(true);
+
+		}
+	}
+	Sleep(10);
+	//}
 }
 
 void MySOCKET::NetMyNumberGet(void)
@@ -381,8 +403,7 @@ void MySOCKET::NetCountdown(void)
 	CountChkRMsg[0] = NULL;
 	//ゲームカウントダウン開始
 	//printf("ゲームカウントダウン開始\n");
-	bool ChkStart = false;
-	while (ChkStart != true)
+	if (CountDownFlag == false)
 	{
 		char toSendText[500] = { NULL };
 		int numrcv = recv(this->DstSocketFunc(), CountChkRMsg, BUFFER_SIZE_STRING, 0);
@@ -407,7 +428,7 @@ void MySOCKET::NetCountdown(void)
 				toSendText[0] = NULL;
 				sprintf_s(toSendText, "StartOK");
 				send(this->DstSocketFunc(), toSendText, BUFFER_SIZE_STRING, 0);
-				ChkStart = true;
+				CountDownFlag = true;
 				SetNetGameStartFlag(true);
 				//マルチスレッド開始信号ON
 				this->MultThreadFlagFunc(true);
@@ -432,6 +453,9 @@ void MySOCKET::Packet(PLAYER *Player, ITEM *Item, FIELD *Field, BULLET *Bullet, 
 			//調整用スリープ　これがないとランタイムエラーになる
 			//receiveとsendの回数に関係がありそう。すこし待ってからreceiveしないといけいない
 			Sleep(1);
+
+			//ゲーム終了判定　アプリ右上Xを押されたら終了する
+			if (GetEndGame() == true) break;
 		}
 	}
 }
@@ -548,7 +572,6 @@ void MySOCKET::SendPacket(PLAYER *Player, ITEM *Item, FIELD *Field, BULLET *Bull
 		if (Item->ItemParaAll[CntItem].NetGetItemFlag == true &&
 			Item->ItemParaAll[CntItem].GetPlayerType == MyNum)
 		{
-			bool use = Item->iUseType[CntItem].Use();
 			int ItemT = Item->ItemParaAll[CntItem].eType;
 			D3DXVECTOR3 ItemPos = Item->Transform[CntItem].Pos();
 			//変更があるので送信用メッセージに書き込む
@@ -579,13 +602,13 @@ void MySOCKET::SendPacket(PLAYER *Player, ITEM *Item, FIELD *Field, BULLET *Bull
 	int Puse = 0;
 	for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
 	{
-		if (Player->iUseType[CntPlayer].Use() == false) Puse++;
+		if (Player->iUseType[CntPlayer].Use() == NoUse) Puse++;
 	}
 	if (Puse >= 3)
 	{
 		//変更があるので送信用メッセージに書き込む
 		char NewSMsg[BUFFER_SIZE] = { NULL }; //送るデータ内容
-		sprintf_s(NewSMsg, "EndGame");
+		sprintf_s(NewSMsg, "@EndGame&");
 		sprintf_s(EndGameMsg, "%s%s", EndGameMsg, NewSMsg);
 	}
 
@@ -1988,7 +2011,7 @@ void MySOCKET::MsgAnalys(char* argRMsg, PLAYER *Player, ITEM *Item, FIELD *Field
 	{
 		char *next2 = NULL;
 		next2 = next;
-		//アイテムメッセージ解析 "@Item,%d,%d,X%d,Z%d&"
+		//地形アイテム時だけ追加のメッセージ
 		char *Seed;
 		Seed = strtok_s(next2, "S,", &next);
 		char *PlayerNum;
@@ -1997,6 +2020,18 @@ void MySOCKET::MsgAnalys(char* argRMsg, PLAYER *Player, ITEM *Item, FIELD *Field
 		int iPlayerNum = atoi(PlayerNum);
 
 		NetSetTikeiSeed(Field,Item,iSeed, iPlayerNum);
+	}
+
+	//ゲーム終了情報はここ
+	if (strcmp(RMsgBlock, "@EndGame") == 0)
+	{
+		//char *next2 = NULL;
+		//next2 = next;
+		////ゲーム終了信号　@EndGame
+		//char *EndMsg;
+		//EndMsg = strtok_s(next2, "&", &next);
+
+		NetSetGameEnd();
 	}
 }
 
@@ -2109,7 +2144,6 @@ void MySOCKET::NetSetVital(PLAYER *Player, int buff, int PlayerNum)
 	//ロックされてなければ分析して書き込み
 	if (GetNetShareDateFlag() == false)
 	{
-	
 		Player->PlayerPara[PlayerNum].StandardPara.Vital = buff;
 	}
 }
@@ -2180,6 +2214,15 @@ void MySOCKET::NetSetBulletType3(PLAYER *Player, BULLET *Bullet, SHADOW *Shadow,
 	}
 }
 
+void MySOCKET::NetSetGameEnd(void)
+{
+	//ロックされてなければ分析して書き込み
+	if (GetNetShareDateFlag() == false)
+	{
+		//対戦フラグを終了させる
+		this->MultThreadFlagFunc(false);
+	}
+}
 
 
 

@@ -28,6 +28,8 @@ public:
 	MySOCKET();	//!< ソケット設定
 	~MySOCKET();	//!< ソケット削除
 
+	void Init(void);	//!< 初期化
+
 	//ネット対戦開始処理
 	void NetMatch(void);
 	void NetMyNumberGet(void);
@@ -59,6 +61,8 @@ public:
 	void NetSetMorphing(PLAYER *Player, int PlayerNum);
 	void NetSetBulletType1(PLAYER *Player, BULLET *Bullet, SHADOW *Shadow, D3DXVECTOR3 buffpos, D3DXVECTOR3 buffmove, int PlayerNum);
 	void NetSetBulletType3(PLAYER *Player, BULLET *Bullet, SHADOW *Shadow, D3DXVECTOR3 buffpos, D3DXVECTOR3 *buffmove, int PlayerNum);
+
+	void NetSetGameEnd(void);
 	//---------マルチスレッド環境で実行　アプリ起動時にマルチスレッドで永久ループ
 
 
@@ -70,6 +74,12 @@ private:
 
 	/* sockaddr_in 構造体 */
 	sockaddr_in DstAddr;
+
+	//conect判定用
+	bool ConnectFlag = false;
+
+	//countdown判定用
+	bool CountDownFlag = false;
 
 	//メンバ関数　ゲッターセッター
 	void DestinationFunc(char* InIP) { Destination = InIP; }

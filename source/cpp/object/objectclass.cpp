@@ -979,18 +979,19 @@ void GAME_OBJECT::Init()
 	title->Init();
 	sky->Init();
 	wall->Init();
+	mysocket->Init();
 
 	this->MultThreadFlagFunc(false);
-
 }
 
 void GAME_OBJECT::InitNet()
 {
-	//スクリーンのUIを再設定してるだけ　修正必要
+	//スクリーンのUIを再設定してるだけ
 	status->InitNet(NetMyNumber);
 	vitalgauge->InitNet(NetMyNumber);
 	bulletgauge->InitNet(NetMyNumber);
 	damege->InitNet(NetMyNumber);
+	rank->InitNet(NetMyNumber);
 }
 
 void GAME_OBJECT::Delete()
@@ -1133,6 +1134,14 @@ void GAME_OBJECT::Update()
 				fade->SetFade(FADE_OUT, SCENE_NETGAMECOUNTDOWN, SOUND_LABEL_BGM_boss01);
 				SourceVolumeChange(0, SOUND_LABEL_BGM_boss01);
 			}
+
+			//ゲーム終了処理
+			//if (GetGameLoop() == true)
+			//{
+			//	SetEndGame(true);
+			//	this->MultThreadFlagFunc(false);
+			//	this->GameSceneFlagFunc(false);
+			//}
 			break;
 		case SCENE_NETGAMECOUNTDOWN:
 			//カウントダウンの更新
@@ -1140,7 +1149,7 @@ void GAME_OBJECT::Update()
 			countdown->AddCountdown(-1);
 			break;
 		case SCENE_NETGAME:
-			//パケットはマルチスレッドでロックされていないとき(Draw中はロックされている)に常に受け取る
+			//パケットはマルチスレッドでロックされていないとき(Draw中はロックされている)に常に反映させる
 
 			// map更新
 			field->Update(&player[0], &item[0], &bullet[0], &explosion[0], &shadow[0]);//パケット有り
@@ -1324,7 +1333,7 @@ void GAME_OBJECT::Draw()
 					status->Draw(NetGameStartFlag, NetMyNumber, CntPlayer);
 					vitalgauge->Draw(NetGameStartFlag, NetMyNumber, CntPlayer);
 					bulletgauge->Draw(NetGameStartFlag, NetMyNumber, CntPlayer);
-					rank->Draw(NetGameStartFlag);
+					rank->Draw(NetGameStartFlag, NetMyNumber);
 				}
 			}
 			pD3DDevice->SetViewport(&VpMaster);
@@ -1348,7 +1357,7 @@ void GAME_OBJECT::Draw()
 			//3D空間
 			player->Draw();
 			item->Draw();
-			bulletprediction->Draw(&player[NetMyNumber], 0);
+			bulletprediction->Draw(&player[0], NetMyNumber);
 			explosion->Draw(0);
 			effect->Draw(0);
 			shadow->Draw();
@@ -1406,7 +1415,7 @@ void GAME_OBJECT::Draw()
 				//3D空間
 				player->Draw();
 				item->Draw();
-				//bulletprediction->Draw(&player[NetMyNumber], 0);
+				bulletprediction->Draw(&player[0], NetMyNumber);
 				explosion->Draw(0);
 				effect->Draw(0);
 				shadow->Draw();
@@ -1416,7 +1425,7 @@ void GAME_OBJECT::Draw()
 				status->Draw(NetGameStartFlag, NetMyNumber, NetMyNumber);
 				vitalgauge->Draw(NetGameStartFlag, NetMyNumber, NetMyNumber);
 				bulletgauge->Draw(NetGameStartFlag, NetMyNumber, NetMyNumber);
-				rank->Draw(NetGameStartFlag);
+				rank->Draw(NetGameStartFlag, NetMyNumber);
 			}
 
 			break;
@@ -1454,8 +1463,7 @@ void GAME_OBJECT::CheakHit(int scene)
 	//プレイヤーに対する当たり判定
 	for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
 	{
-		bool puse = player->iUseType[CntPlayer].Use();
-		if (puse == true)
+		if (player->iUseType[CntPlayer].Use() == YesUseType1)
 		{
 			//オブジェクト値読み込み
 			D3DXVECTOR3 ppos = player->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos();
