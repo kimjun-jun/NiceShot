@@ -141,8 +141,8 @@ MySOCKET::MySOCKET(void)
 	unsigned short l_Port = 27015;//WANの人はプロトコルのポート　LANや同端末は同じ端末のポート
 	sockaddr_in l_DstAddr;
 
-	sprintf_s(l_Destination, "192.168.11.2"); //ro-karu
-	//sprintf_s(l_Destination, "10.192.121.192"); //guro-baru
+	//sprintf_s(l_Destination, "192.168.11.2"); //ro-karu
+	sprintf_s(l_Destination, "106.73.19.98"); //guro-baru
 
 	/* Windows 独自の設定 */
 	WSADATA data;
