@@ -12,7 +12,7 @@
 #include "../../h/object/bullet/bullet.h"
 #include "../../h/effect/effect.h"
 #include "../../h/other/fade.h"
-#include "../../h/net/sock.h"
+#include "../../h/net/sockTCP.h"
 #include "../../h/object/player.h"
 
 //‰æ‘œ‚ÌQÆ–¼																											

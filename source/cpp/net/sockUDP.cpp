@@ -1,5 +1,5 @@
 /**
-* @file sock.cpp
+* @file sockUDP.cpp
 * @brief NiceShot(3D)戦車ゲーム
 * @author キムラジュン
 */
@@ -16,7 +16,7 @@
 #include "../../h/object/item.h"
 #include "../../h/object/bullet/bullet.h"
 #include "../../h/map/field.h"
-#include "../../h/net/sock.h"
+#include "../../h/net/sockUDP.h"
 
 #pragma comment (lib, "Ws2_32.lib")
 
@@ -34,104 +34,7 @@
 //
 
 
-struct SENDMSG_BUFF
-{
-	SENDMSG_BUFF() {
-		PlayerPos = VEC3_ALL0;
-		HoudaiRot = VEC3_ALL0;
-		HoutouRot = VEC3_ALL0;
-		HousinRot = VEC3_ALL0;
-		BPos = VEC3_ALL0;
-		ItemSyncUse = false;
-	}
-
-	//プレイヤーデータ
-	D3DXVECTOR3 PlayerPos;
-	D3DXVECTOR3 HoudaiRot;
-	D3DXVECTOR3 HoutouRot;
-	D3DXVECTOR3 HousinRot;
-	int Vital;
-	bool Morphing;
-	D3DXVECTOR3 BPos;
-
-	//アイテムデータ
-	bool ItemSyncUse;
-
-};
-
-//SENDMSG_BUFF g_SendMsgBuff;
-
-//player1-4,item1-20
-class SubMsgName
-{
-public:
-	void Name(string InName) { TargetName = InName; }
-	string Name() { return TargetName; }
-
-private:
-	string TargetName;
-	string TargetNum;
-};
-
-class SubMsgObjectNum
-{
-public:
-	void ObjectNum(string InObjectNum) { TargetObjectNum = InObjectNum; }
-	string ObjectNum() { return TargetObjectNum; }
-
-private:
-	string TargetObjectNum;
-};
-
-class SubMsgParameter
-{
-public:
-	void Parameter(string InParameter) { TargetParameter = InParameter; }
-	string Parameter() { return TargetParameter; }
-
-private:
-	string TargetParameter;
-};
-
-class SubMsgValue
-{
-public:
-	void Value(string InValue) { TargetValue = InValue; }
-	string Value() { return TargetValue; }
-
-private:
-	string TargetValue;
-};
-
-class SubMsgPacketNum
-{
-public:
-	void PacketNum(string InPacketNum) { TargetPacketNum = InPacketNum; }
-	string PacketNum() { return TargetPacketNum; }
-
-private:
-	string TargetPacketNum;
-};
-
-class MainMsgData
-{
-public:
-	SubMsgName MsgName;
-	SubMsgObjectNum MsgObjectNum;
-	SubMsgParameter MsgParameter;
-	SubMsgValue MsgValue;
-	SubMsgPacketNum MsgPacketNum;
-private:
-
-};
-
-
-//*****************************************************************************
-// グローバル変数
-//*****************************************************************************
-MainMsgData g_MainMsgData;
-
-MySOCKET::MySOCKET(void)
+UDPSOCKET::UDPSOCKET(void)
 {
 	//オブジェクトカウントアップ
 	this->CreateInstanceOBJ();
@@ -162,7 +65,7 @@ MySOCKET::MySOCKET(void)
 	/* ソケット生成 */
 	//ストリームタイプー＞一つのでっかいバッファ。データの区切りをしっかり作る必要が出てくる　TCP　アクセプトなどの処理が必要
 	//データグラムタイプー＞データごとで区切られている。こまごまとしたデータを多数送って処理する。　UDP　アクセプトなどの処理が必要ない
-	this->DstSocketFunc(socket(AF_INET, SOCK_STREAM, 0));
+	this->DstSocketFunc(socket(AF_INET, SOCK_DGRAM, 0));
 
 	// ここで、ノンブロッキングに設定しています。
 	 // val = 0でブロッキングモードに設定できます。
@@ -171,24 +74,23 @@ MySOCKET::MySOCKET(void)
 	ioctlsocket(this->DstSocketFunc(), FIONBIO, &val);
 }
 
-MySOCKET::~MySOCKET(void)
+UDPSOCKET::~UDPSOCKET(void)
 {
 	/* Windows 独自の設定 */
 	closesocket(this->DstSocketFunc());
 	WSACleanup();
 }
 
-void MySOCKET::Init(void)
+void UDPSOCKET::Init(void)
 {
 	//フラグをオフにする
 	ConnectFlag = false;
 	CountDownFlag = false;
 }
 
-void MySOCKET::NetMatch(void)
+void UDPSOCKET::NetMatch(void)
 {
 	/* 接続 */
-	//printf("Trying to connect to %s: \n", destination);
 
 	//一度コネクトするとフラグを消す
 	if (ConnectFlag == false)
@@ -251,7 +153,7 @@ void MySOCKET::NetMatch(void)
 	//}
 }
 
-void MySOCKET::NetMyNumberGet(void)
+void UDPSOCKET::NetMyNumberGet(void)
 {
 	//個人番号取得
 	//bool ChkMyNumber = false;
@@ -301,7 +203,7 @@ void MySOCKET::NetMyNumberGet(void)
 	//}
 }
 
-void MySOCKET::NetItemGet(ITEM* item)
+void UDPSOCKET::NetItemGet(ITEM* item)
 {
 	//アイテム情報取得
 	int ItemChk = 0;
@@ -398,7 +300,7 @@ void MySOCKET::NetItemGet(ITEM* item)
 	}
 }
 
-void MySOCKET::NetCountdown(void)
+void UDPSOCKET::NetCountdown(void)
 {
 	char CountChkRMsg[BUFFER_SIZE]; //送られてくるデータ内容
 	CountChkRMsg[0] = NULL;
@@ -441,7 +343,7 @@ void MySOCKET::NetCountdown(void)
 }
 
 //以下マルチスレッド環境で実行
-void MySOCKET::Packet(PLAYER *Player, ITEM *Item, FIELD *Field, BULLET *Bullet, SHADOW *Shadow)
+void UDPSOCKET::Packet(PLAYER *Player, ITEM *Item, FIELD *Field, BULLET *Bullet, SHADOW *Shadow)
 {
 	while (this->GameSceneFlagFunc() == true)
 	{
@@ -461,7 +363,7 @@ void MySOCKET::Packet(PLAYER *Player, ITEM *Item, FIELD *Field, BULLET *Bullet, 
 	}
 }
 
-void MySOCKET::SendPacket(PLAYER *Player, ITEM *Item, FIELD *Field, BULLET *Bullet)
+void UDPSOCKET::SendPacket(PLAYER *Player, ITEM *Item, FIELD *Field, BULLET *Bullet)
 {
 	int MyNum = GetNetMyNumber();
 	char SMsg[BUFFER_SIZE] = { NULL }; //送るデータ内容
@@ -644,7 +546,7 @@ void MySOCKET::SendPacket(PLAYER *Player, ITEM *Item, FIELD *Field, BULLET *Bull
 
 }
 
-void MySOCKET::ReceivePacket(PLAYER *Player, ITEM *Item, FIELD *Field, BULLET *Bullet, SHADOW *Shadow)
+void UDPSOCKET::ReceivePacket(PLAYER *Player, ITEM *Item, FIELD *Field, BULLET *Bullet, SHADOW *Shadow)
 {
 	//実際のゲームで扱っているアドレスを取得
 
@@ -676,7 +578,7 @@ void MySOCKET::ReceivePacket(PLAYER *Player, ITEM *Item, FIELD *Field, BULLET *B
 	}
 }
 
-void MySOCKET::MsgAnalys(char* argRMsg, PLAYER *Player, ITEM *Item, FIELD *Field, BULLET *Bullet,SHADOW *Shadow)
+void UDPSOCKET::MsgAnalys(char* argRMsg, PLAYER *Player, ITEM *Item, FIELD *Field, BULLET *Bullet, SHADOW *Shadow)
 {
 	char *RMsgBlock;
 	char *next = NULL;
@@ -719,7 +621,7 @@ void MySOCKET::MsgAnalys(char* argRMsg, PLAYER *Player, ITEM *Item, FIELD *Field
 				case 2:
 					buff.z = strtof(SetVal, NULL);
 					//データを格納
-					NetSetPos(Player,buff, 0);
+					NetSetPos(Player, buff, 0);
 					if (next[0] != NULL) RMsgBlock = strtok_s(next, "@P0,", &next);
 					break;
 				}
@@ -757,7 +659,7 @@ void MySOCKET::MsgAnalys(char* argRMsg, PLAYER *Player, ITEM *Item, FIELD *Field
 				case 2:
 					buff.z = strtof(SetVal, NULL);
 					//データを格納
-					NetSetHoudaiRot(Player,buff, 0);
+					NetSetHoudaiRot(Player, buff, 0);
 					if (next[0] != NULL) RMsgBlock = strtok_s(next, "@P0,", &next);
 					break;
 				}
@@ -794,7 +696,7 @@ void MySOCKET::MsgAnalys(char* argRMsg, PLAYER *Player, ITEM *Item, FIELD *Field
 				case 2:
 					buff.z = strtof(SetVal, NULL);
 					//データを格納
-					NetSetHoutouRot(Player,buff, 0);
+					NetSetHoutouRot(Player, buff, 0);
 					if (next[0] != NULL) RMsgBlock = strtok_s(next, "@P0,", &next);
 					break;
 				}
@@ -831,7 +733,7 @@ void MySOCKET::MsgAnalys(char* argRMsg, PLAYER *Player, ITEM *Item, FIELD *Field
 				case 2:
 					buff.z = strtof(SetVal, NULL);
 					//データを格納
-					NetSetHousinRot(Player,buff, 0);
+					NetSetHousinRot(Player, buff, 0);
 					if (next[0] != NULL) RMsgBlock = strtok_s(next, "@P0,", &next);
 					break;
 				}
@@ -843,7 +745,7 @@ void MySOCKET::MsgAnalys(char* argRMsg, PLAYER *Player, ITEM *Item, FIELD *Field
 			int buff;
 			buff = atoi(RMsgBlock);
 			//データを格納
-			NetSetVital(Player,buff, 0);
+			NetSetVital(Player, buff, 0);
 			if (next[0] != NULL) RMsgBlock = strtok_s(next, "@P0,", &next);
 		}
 		if (strcmp(RMsgBlock, "Morphing") == 0)
@@ -852,7 +754,7 @@ void MySOCKET::MsgAnalys(char* argRMsg, PLAYER *Player, ITEM *Item, FIELD *Field
 			int buff;
 			buff = atoi(RMsgBlock);
 			//データを格納
-			NetSetMorphing(Player,0);
+			NetSetMorphing(Player, 0);
 			if (next[0] != NULL) RMsgBlock = strtok_s(next, "@P0,", &next);
 		}
 		if (strcmp(RMsgBlock, "BulletA") == 0)
@@ -918,7 +820,7 @@ void MySOCKET::MsgAnalys(char* argRMsg, PLAYER *Player, ITEM *Item, FIELD *Field
 						}
 
 						//データを格納
-						NetSetBulletType1(Player,Bullet,Shadow,buffpos, buffmove, 0);
+						NetSetBulletType1(Player, Bullet, Shadow, buffpos, buffmove, 0);
 						if (next[0] != NULL) RMsgBlock = strtok_s(next, "@P0,", &next);
 						break;
 					}
@@ -992,7 +894,7 @@ void MySOCKET::MsgAnalys(char* argRMsg, PLAYER *Player, ITEM *Item, FIELD *Field
 							//データを格納
 							if (MoveCnt == 2)
 							{
-								NetSetBulletType3(Player,Bullet,Shadow,buffpos, &buffmove[0], 0);
+								NetSetBulletType3(Player, Bullet, Shadow, buffpos, &buffmove[0], 0);
 								if (next[0] != NULL) RMsgBlock = strtok_s(next, "@P0,", &next);
 							}
 						}
@@ -1038,7 +940,7 @@ void MySOCKET::MsgAnalys(char* argRMsg, PLAYER *Player, ITEM *Item, FIELD *Field
 				case 2:
 					buff.z = strtof(SetVal, NULL);
 					//データを格納
-					NetSetPos(Player,buff, 1);
+					NetSetPos(Player, buff, 1);
 					if (next[0] != NULL) RMsgBlock = strtok_s(next, "@P1,", &next);
 					break;
 				}
@@ -1076,7 +978,7 @@ void MySOCKET::MsgAnalys(char* argRMsg, PLAYER *Player, ITEM *Item, FIELD *Field
 				case 2:
 					buff.z = strtof(SetVal, NULL);
 					//データを格納
-					NetSetHoudaiRot(Player,buff, 1);
+					NetSetHoudaiRot(Player, buff, 1);
 					if (next[0] != NULL) RMsgBlock = strtok_s(next, "@P1,", &next);
 					break;
 				}
@@ -1113,7 +1015,7 @@ void MySOCKET::MsgAnalys(char* argRMsg, PLAYER *Player, ITEM *Item, FIELD *Field
 				case 2:
 					buff.z = strtof(SetVal, NULL);
 					//データを格納
-					NetSetHoutouRot(Player,buff, 1);
+					NetSetHoutouRot(Player, buff, 1);
 					if (next[0] != NULL) RMsgBlock = strtok_s(next, "@P1,", &next);
 					break;
 				}
@@ -1150,7 +1052,7 @@ void MySOCKET::MsgAnalys(char* argRMsg, PLAYER *Player, ITEM *Item, FIELD *Field
 				case 2:
 					buff.z = strtof(SetVal, NULL);
 					//データを格納
-					NetSetHousinRot(Player,buff, 1);
+					NetSetHousinRot(Player, buff, 1);
 					if (next[0] != NULL) RMsgBlock = strtok_s(next, "@P1,", &next);
 					break;
 				}
@@ -1162,7 +1064,7 @@ void MySOCKET::MsgAnalys(char* argRMsg, PLAYER *Player, ITEM *Item, FIELD *Field
 			int buff;
 			buff = atoi(RMsgBlock);
 			//データを格納
-			NetSetVital(Player,buff, 1);
+			NetSetVital(Player, buff, 1);
 			if (next[0] != NULL) RMsgBlock = strtok_s(next, "@P1,", &next);
 		}
 		if (strcmp(RMsgBlock, "Morphing") == 0)
@@ -1171,78 +1073,78 @@ void MySOCKET::MsgAnalys(char* argRMsg, PLAYER *Player, ITEM *Item, FIELD *Field
 			int buff;
 			buff = atoi(RMsgBlock);
 			//データを格納
-			NetSetMorphing(Player,1);
+			NetSetMorphing(Player, 1);
 			if (next[0] != NULL) RMsgBlock = strtok_s(next, "@P1,", &next);
 		}
 		if (strcmp(RMsgBlock, "BulletA") == 0)
 		{
-		RMsgBlock = strtok_s(NULL, "&", &next);
-		//SetBuff(RMsgBlock, SetEnumPos, 0);
+			RMsgBlock = strtok_s(NULL, "&", &next);
+			//SetBuff(RMsgBlock, SetEnumPos, 0);
 
-		D3DXVECTOR3 buffpos;
-		char *XYZnext = RMsgBlock;
-		for (int CntXYZ = 0; CntXYZ < 3; CntXYZ++)
-		{
-			char *GetVal = NULL;
-			char *SetVal = NULL;
-			char *YZnext = NULL;
-			char *nullp = NULL;
-			//XYZの数値部分を取得する
-			GetVal = strtok_s(XYZnext, ",", &XYZnext);//GetVal=X000.000,Y000.000,Z000.000  next=次のRot
-			//GetVal = strtok_s(NULL, ",", &YZnext);//GetVal=X000.000 XYZnext=Y000.000,Z000.000
-			//XYZnext = YZnext;
-			if (CntXYZ == 0) SetVal = strtok_s(GetVal, "PX", &nullp);//SetVal=000.000 nullp=NULL
-			else if (CntXYZ == 1) SetVal = strtok_s(GetVal, "PY", &nullp);//SetVal=000.000 nullp=NULL
-			else if (CntXYZ == 2) SetVal = strtok_s(GetVal, "PZ", &nullp);//SetVal=000.000 nullp=NULL
-			switch (CntXYZ)
+			D3DXVECTOR3 buffpos;
+			char *XYZnext = RMsgBlock;
+			for (int CntXYZ = 0; CntXYZ < 3; CntXYZ++)
 			{
-			case 0:
-				buffpos.x = strtof(SetVal, NULL);
-				break;
-			case 1:
-				buffpos.y = strtof(SetVal, NULL);
-				break;
-			case 2:
-				buffpos.z = strtof(SetVal, NULL);
-
-				//Move取得
+				char *GetVal = NULL;
+				char *SetVal = NULL;
+				char *YZnext = NULL;
+				char *nullp = NULL;
+				//XYZの数値部分を取得する
+				GetVal = strtok_s(XYZnext, ",", &XYZnext);//GetVal=X000.000,Y000.000,Z000.000  next=次のRot
+				//GetVal = strtok_s(NULL, ",", &YZnext);//GetVal=X000.000 XYZnext=Y000.000,Z000.000
+				//XYZnext = YZnext;
+				if (CntXYZ == 0) SetVal = strtok_s(GetVal, "PX", &nullp);//SetVal=000.000 nullp=NULL
+				else if (CntXYZ == 1) SetVal = strtok_s(GetVal, "PY", &nullp);//SetVal=000.000 nullp=NULL
+				else if (CntXYZ == 2) SetVal = strtok_s(GetVal, "PZ", &nullp);//SetVal=000.000 nullp=NULL
+				switch (CntXYZ)
 				{
-					D3DXVECTOR3 buffmove;
-					char *XYZnextmove = XYZnext;
-					for (int CntXYZmove = 0; CntXYZmove < 3; CntXYZmove++)
-					{
-						char *GetValmove = NULL;
-						char *SetValmove = NULL;
-						char *YZnextmove = NULL;
-						char *nullpmove = NULL;
-						//XYZの数値部分を取得する
-						GetValmove = strtok_s(XYZnextmove, ",", &XYZnextmove);//GetVal=X000.000,Y000.000,Z000.000  next=次のRot
-						//GetVal = strtok_s(NULL, ",", &YZnext);//GetVal=X000.000 XYZnext=Y000.000,Z000.000
-						//XYZnext = YZnext;
-						if (CntXYZmove == 0) SetValmove = strtok_s(GetValmove, "MX", &nullpmove);//SetVal=000.000 nullp=NULL
-						else if (CntXYZmove == 1) SetValmove = strtok_s(GetValmove, "MY", &nullpmove);//SetVal=000.000 nullp=NULL
-						else if (CntXYZmove == 2) SetValmove = strtok_s(GetValmove, "MZ", &nullpmove);//SetVal=000.000 nullp=NULL
-						switch (CntXYZmove)
-						{
-						case 0:
-							buffmove.x = strtof(SetValmove, NULL);
-							break;
-						case 1:
-							buffmove.y = strtof(SetValmove, NULL);
-							break;
-						case 2:
-							buffmove.z = strtof(SetValmove, NULL);
-							break;
-						}
-					}
-
-					//データを格納
-					NetSetBulletType1(Player,Bullet,Shadow,buffpos, buffmove, 1);
-					if (next[0] != NULL) RMsgBlock = strtok_s(next, "@P1,", &next);
+				case 0:
+					buffpos.x = strtof(SetVal, NULL);
 					break;
+				case 1:
+					buffpos.y = strtof(SetVal, NULL);
+					break;
+				case 2:
+					buffpos.z = strtof(SetVal, NULL);
+
+					//Move取得
+					{
+						D3DXVECTOR3 buffmove;
+						char *XYZnextmove = XYZnext;
+						for (int CntXYZmove = 0; CntXYZmove < 3; CntXYZmove++)
+						{
+							char *GetValmove = NULL;
+							char *SetValmove = NULL;
+							char *YZnextmove = NULL;
+							char *nullpmove = NULL;
+							//XYZの数値部分を取得する
+							GetValmove = strtok_s(XYZnextmove, ",", &XYZnextmove);//GetVal=X000.000,Y000.000,Z000.000  next=次のRot
+							//GetVal = strtok_s(NULL, ",", &YZnext);//GetVal=X000.000 XYZnext=Y000.000,Z000.000
+							//XYZnext = YZnext;
+							if (CntXYZmove == 0) SetValmove = strtok_s(GetValmove, "MX", &nullpmove);//SetVal=000.000 nullp=NULL
+							else if (CntXYZmove == 1) SetValmove = strtok_s(GetValmove, "MY", &nullpmove);//SetVal=000.000 nullp=NULL
+							else if (CntXYZmove == 2) SetValmove = strtok_s(GetValmove, "MZ", &nullpmove);//SetVal=000.000 nullp=NULL
+							switch (CntXYZmove)
+							{
+							case 0:
+								buffmove.x = strtof(SetValmove, NULL);
+								break;
+							case 1:
+								buffmove.y = strtof(SetValmove, NULL);
+								break;
+							case 2:
+								buffmove.z = strtof(SetValmove, NULL);
+								break;
+							}
+						}
+
+						//データを格納
+						NetSetBulletType1(Player, Bullet, Shadow, buffpos, buffmove, 1);
+						if (next[0] != NULL) RMsgBlock = strtok_s(next, "@P1,", &next);
+						break;
+					}
 				}
 			}
-		}
 		}
 		if (strcmp(RMsgBlock, "BulletB") == 0)
 		{
@@ -1311,7 +1213,7 @@ void MySOCKET::MsgAnalys(char* argRMsg, PLAYER *Player, ITEM *Item, FIELD *Field
 							//データを格納
 							if (MoveCnt == 2)
 							{
-								NetSetBulletType3(Player,Bullet,Shadow,buffpos, &buffmove[0], 1);
+								NetSetBulletType3(Player, Bullet, Shadow, buffpos, &buffmove[0], 1);
 								if (next[0] != NULL) RMsgBlock = strtok_s(next, "@P1,", &next);
 							}
 						}
@@ -1357,7 +1259,7 @@ void MySOCKET::MsgAnalys(char* argRMsg, PLAYER *Player, ITEM *Item, FIELD *Field
 				case 2:
 					buff.z = strtof(SetVal, NULL);
 					//データを格納
-					NetSetPos(Player,buff, 2);
+					NetSetPos(Player, buff, 2);
 					if (next[0] != NULL) RMsgBlock = strtok_s(next, "@P2,", &next);
 					break;
 				}
@@ -1395,7 +1297,7 @@ void MySOCKET::MsgAnalys(char* argRMsg, PLAYER *Player, ITEM *Item, FIELD *Field
 				case 2:
 					buff.z = strtof(SetVal, NULL);
 					//データを格納
-					NetSetHoudaiRot(Player,buff, 2);
+					NetSetHoudaiRot(Player, buff, 2);
 					if (next[0] != NULL) RMsgBlock = strtok_s(next, "@P2,", &next);
 					break;
 				}
@@ -1432,7 +1334,7 @@ void MySOCKET::MsgAnalys(char* argRMsg, PLAYER *Player, ITEM *Item, FIELD *Field
 				case 2:
 					buff.z = strtof(SetVal, NULL);
 					//データを格納
-					NetSetHoutouRot(Player,buff, 2);
+					NetSetHoutouRot(Player, buff, 2);
 					break;
 					if (next[0] != NULL) RMsgBlock = strtok_s(next, "@P2,", &next);
 				}
@@ -1469,7 +1371,7 @@ void MySOCKET::MsgAnalys(char* argRMsg, PLAYER *Player, ITEM *Item, FIELD *Field
 				case 2:
 					buff.z = strtof(SetVal, NULL);
 					//データを格納
-					NetSetHousinRot(Player,buff, 2);
+					NetSetHousinRot(Player, buff, 2);
 					if (next[0] != NULL) RMsgBlock = strtok_s(next, "@P2,", &next);
 					break;
 				}
@@ -1481,7 +1383,7 @@ void MySOCKET::MsgAnalys(char* argRMsg, PLAYER *Player, ITEM *Item, FIELD *Field
 			int buff;
 			buff = atoi(RMsgBlock);
 			//データを格納
-			NetSetVital(Player,buff, 2);
+			NetSetVital(Player, buff, 2);
 			if (next[0] != NULL) RMsgBlock = strtok_s(next, "@P2,", &next);
 		}
 		if (strcmp(RMsgBlock, "Morphing") == 0)
@@ -1495,73 +1397,73 @@ void MySOCKET::MsgAnalys(char* argRMsg, PLAYER *Player, ITEM *Item, FIELD *Field
 		}
 		if (strcmp(RMsgBlock, "BulletA") == 0)
 		{
-		RMsgBlock = strtok_s(NULL, "&", &next);
-		//SetBuff(RMsgBlock, SetEnumPos, 0);
+			RMsgBlock = strtok_s(NULL, "&", &next);
+			//SetBuff(RMsgBlock, SetEnumPos, 0);
 
-		D3DXVECTOR3 buffpos;
-		char *XYZnext = RMsgBlock;
-		for (int CntXYZ = 0; CntXYZ < 3; CntXYZ++)
-		{
-			char *GetVal = NULL;
-			char *SetVal = NULL;
-			char *YZnext = NULL;
-			char *nullp = NULL;
-			//XYZの数値部分を取得する
-			GetVal = strtok_s(XYZnext, ",", &XYZnext);//GetVal=X000.000,Y000.000,Z000.000  next=次のRot
-			//GetVal = strtok_s(NULL, ",", &YZnext);//GetVal=X000.000 XYZnext=Y000.000,Z000.000
-			//XYZnext = YZnext;
-			if (CntXYZ == 0) SetVal = strtok_s(GetVal, "PX", &nullp);//SetVal=000.000 nullp=NULL
-			else if (CntXYZ == 1) SetVal = strtok_s(GetVal, "PY", &nullp);//SetVal=000.000 nullp=NULL
-			else if (CntXYZ == 2) SetVal = strtok_s(GetVal, "PZ", &nullp);//SetVal=000.000 nullp=NULL
-			switch (CntXYZ)
+			D3DXVECTOR3 buffpos;
+			char *XYZnext = RMsgBlock;
+			for (int CntXYZ = 0; CntXYZ < 3; CntXYZ++)
 			{
-			case 0:
-				buffpos.x = strtof(SetVal, NULL);
-				break;
-			case 1:
-				buffpos.y = strtof(SetVal, NULL);
-				break;
-			case 2:
-				buffpos.z = strtof(SetVal, NULL);
-
-				//Move取得
+				char *GetVal = NULL;
+				char *SetVal = NULL;
+				char *YZnext = NULL;
+				char *nullp = NULL;
+				//XYZの数値部分を取得する
+				GetVal = strtok_s(XYZnext, ",", &XYZnext);//GetVal=X000.000,Y000.000,Z000.000  next=次のRot
+				//GetVal = strtok_s(NULL, ",", &YZnext);//GetVal=X000.000 XYZnext=Y000.000,Z000.000
+				//XYZnext = YZnext;
+				if (CntXYZ == 0) SetVal = strtok_s(GetVal, "PX", &nullp);//SetVal=000.000 nullp=NULL
+				else if (CntXYZ == 1) SetVal = strtok_s(GetVal, "PY", &nullp);//SetVal=000.000 nullp=NULL
+				else if (CntXYZ == 2) SetVal = strtok_s(GetVal, "PZ", &nullp);//SetVal=000.000 nullp=NULL
+				switch (CntXYZ)
 				{
-					D3DXVECTOR3 buffmove;
-					char *XYZnextmove = XYZnext;
-					for (int CntXYZmove = 0; CntXYZmove < 3; CntXYZmove++)
-					{
-						char *GetValmove = NULL;
-						char *SetValmove = NULL;
-						char *YZnextmove = NULL;
-						char *nullpmove = NULL;
-						//XYZの数値部分を取得する
-						GetValmove = strtok_s(XYZnextmove, ",", &XYZnextmove);//GetVal=X000.000,Y000.000,Z000.000  next=次のRot
-						//GetVal = strtok_s(NULL, ",", &YZnext);//GetVal=X000.000 XYZnext=Y000.000,Z000.000
-						//XYZnext = YZnext;
-						if (CntXYZmove == 0) SetValmove = strtok_s(GetValmove, "MX", &nullpmove);//SetVal=000.000 nullp=NULL
-						else if (CntXYZmove == 1) SetValmove = strtok_s(GetValmove, "MY", &nullpmove);//SetVal=000.000 nullp=NULL
-						else if (CntXYZmove == 2) SetValmove = strtok_s(GetValmove, "MZ", &nullpmove);//SetVal=000.000 nullp=NULL
-						switch (CntXYZmove)
-						{
-						case 0:
-							buffmove.x = strtof(SetValmove, NULL);
-							break;
-						case 1:
-							buffmove.y = strtof(SetValmove, NULL);
-							break;
-						case 2:
-							buffmove.z = strtof(SetValmove, NULL);
-							break;
-						}
-					}
-
-					//データを格納
-					NetSetBulletType1(Player,Bullet,Shadow,buffpos, buffmove, 2);
-					if (next[0] != NULL) RMsgBlock = strtok_s(next, "@P2,", &next);
+				case 0:
+					buffpos.x = strtof(SetVal, NULL);
 					break;
+				case 1:
+					buffpos.y = strtof(SetVal, NULL);
+					break;
+				case 2:
+					buffpos.z = strtof(SetVal, NULL);
+
+					//Move取得
+					{
+						D3DXVECTOR3 buffmove;
+						char *XYZnextmove = XYZnext;
+						for (int CntXYZmove = 0; CntXYZmove < 3; CntXYZmove++)
+						{
+							char *GetValmove = NULL;
+							char *SetValmove = NULL;
+							char *YZnextmove = NULL;
+							char *nullpmove = NULL;
+							//XYZの数値部分を取得する
+							GetValmove = strtok_s(XYZnextmove, ",", &XYZnextmove);//GetVal=X000.000,Y000.000,Z000.000  next=次のRot
+							//GetVal = strtok_s(NULL, ",", &YZnext);//GetVal=X000.000 XYZnext=Y000.000,Z000.000
+							//XYZnext = YZnext;
+							if (CntXYZmove == 0) SetValmove = strtok_s(GetValmove, "MX", &nullpmove);//SetVal=000.000 nullp=NULL
+							else if (CntXYZmove == 1) SetValmove = strtok_s(GetValmove, "MY", &nullpmove);//SetVal=000.000 nullp=NULL
+							else if (CntXYZmove == 2) SetValmove = strtok_s(GetValmove, "MZ", &nullpmove);//SetVal=000.000 nullp=NULL
+							switch (CntXYZmove)
+							{
+							case 0:
+								buffmove.x = strtof(SetValmove, NULL);
+								break;
+							case 1:
+								buffmove.y = strtof(SetValmove, NULL);
+								break;
+							case 2:
+								buffmove.z = strtof(SetValmove, NULL);
+								break;
+							}
+						}
+
+						//データを格納
+						NetSetBulletType1(Player, Bullet, Shadow, buffpos, buffmove, 2);
+						if (next[0] != NULL) RMsgBlock = strtok_s(next, "@P2,", &next);
+						break;
+					}
 				}
 			}
-		}
 		}
 		if (strcmp(RMsgBlock, "BulletB") == 0)
 		{
@@ -1630,7 +1532,7 @@ void MySOCKET::MsgAnalys(char* argRMsg, PLAYER *Player, ITEM *Item, FIELD *Field
 							//データを格納
 							if (MoveCnt == 2)
 							{
-								NetSetBulletType3(Player,Bullet,Shadow,buffpos, &buffmove[0], 2);
+								NetSetBulletType3(Player, Bullet, Shadow, buffpos, &buffmove[0], 2);
 								if (next[0] != NULL) RMsgBlock = strtok_s(next, "@P2,", &next);
 							}
 						}
@@ -1676,7 +1578,7 @@ void MySOCKET::MsgAnalys(char* argRMsg, PLAYER *Player, ITEM *Item, FIELD *Field
 				case 2:
 					buff.z = strtof(SetVal, NULL);
 					//データを格納
-					NetSetPos(Player,buff, 3);
+					NetSetPos(Player, buff, 3);
 					if (next[0] != NULL) RMsgBlock = strtok_s(next, "@P3,", &next);
 					break;
 				}
@@ -1714,7 +1616,7 @@ void MySOCKET::MsgAnalys(char* argRMsg, PLAYER *Player, ITEM *Item, FIELD *Field
 				case 2:
 					buff.z = strtof(SetVal, NULL);
 					//データを格納
-					NetSetHoudaiRot(Player,buff, 3);
+					NetSetHoudaiRot(Player, buff, 3);
 					if (next[0] != NULL) RMsgBlock = strtok_s(next, "@P3,", &next);
 					break;
 				}
@@ -1751,7 +1653,7 @@ void MySOCKET::MsgAnalys(char* argRMsg, PLAYER *Player, ITEM *Item, FIELD *Field
 				case 2:
 					buff.z = strtof(SetVal, NULL);
 					//データを格納
-					NetSetHoutouRot(Player,buff, 3);
+					NetSetHoutouRot(Player, buff, 3);
 					if (next[0] != NULL) RMsgBlock = strtok_s(next, "@P3,", &next);
 					break;
 				}
@@ -1788,7 +1690,7 @@ void MySOCKET::MsgAnalys(char* argRMsg, PLAYER *Player, ITEM *Item, FIELD *Field
 				case 2:
 					buff.z = strtof(SetVal, NULL);
 					//データを格納
-					NetSetHousinRot(Player,buff, 3);
+					NetSetHousinRot(Player, buff, 3);
 					if (next[0] != NULL) RMsgBlock = strtok_s(next, "@P3,", &next);
 					break;
 				}
@@ -1800,7 +1702,7 @@ void MySOCKET::MsgAnalys(char* argRMsg, PLAYER *Player, ITEM *Item, FIELD *Field
 			int buff;
 			buff = atoi(RMsgBlock);
 			//データを格納
-			NetSetVital(Player,buff, 3);
+			NetSetVital(Player, buff, 3);
 			if (next[0] != NULL) RMsgBlock = strtok_s(next, "@P3,", &next);
 		}
 		if (strcmp(RMsgBlock, "Morphing") == 0)
@@ -1809,78 +1711,78 @@ void MySOCKET::MsgAnalys(char* argRMsg, PLAYER *Player, ITEM *Item, FIELD *Field
 			int buff;
 			buff = atoi(RMsgBlock);
 			//データを格納
-			NetSetMorphing(Player,3);
+			NetSetMorphing(Player, 3);
 			if (next[0] != NULL) RMsgBlock = strtok_s(next, "@P3,", &next);
 		}
 		if (strcmp(RMsgBlock, "BulletA") == 0)
 		{
-		RMsgBlock = strtok_s(NULL, "&", &next);
-		//SetBuff(RMsgBlock, SetEnumPos, 0);
+			RMsgBlock = strtok_s(NULL, "&", &next);
+			//SetBuff(RMsgBlock, SetEnumPos, 0);
 
-		D3DXVECTOR3 buffpos;
-		char *XYZnext = RMsgBlock;
-		for (int CntXYZ = 0; CntXYZ < 3; CntXYZ++)
-		{
-			char *GetVal = NULL;
-			char *SetVal = NULL;
-			char *YZnext = NULL;
-			char *nullp = NULL;
-			//XYZの数値部分を取得する
-			GetVal = strtok_s(XYZnext, ",", &XYZnext);//GetVal=X000.000,Y000.000,Z000.000  next=次のRot
-			//GetVal = strtok_s(NULL, ",", &YZnext);//GetVal=X000.000 XYZnext=Y000.000,Z000.000
-			//XYZnext = YZnext;
-			if (CntXYZ == 0) SetVal = strtok_s(GetVal, "PX", &nullp);//SetVal=000.000 nullp=NULL
-			else if (CntXYZ == 1) SetVal = strtok_s(GetVal, "PY", &nullp);//SetVal=000.000 nullp=NULL
-			else if (CntXYZ == 2) SetVal = strtok_s(GetVal, "PZ", &nullp);//SetVal=000.000 nullp=NULL
-			switch (CntXYZ)
+			D3DXVECTOR3 buffpos;
+			char *XYZnext = RMsgBlock;
+			for (int CntXYZ = 0; CntXYZ < 3; CntXYZ++)
 			{
-			case 0:
-				buffpos.x = strtof(SetVal, NULL);
-				break;
-			case 1:
-				buffpos.y = strtof(SetVal, NULL);
-				break;
-			case 2:
-				buffpos.z = strtof(SetVal, NULL);
-
-				//Move取得
+				char *GetVal = NULL;
+				char *SetVal = NULL;
+				char *YZnext = NULL;
+				char *nullp = NULL;
+				//XYZの数値部分を取得する
+				GetVal = strtok_s(XYZnext, ",", &XYZnext);//GetVal=X000.000,Y000.000,Z000.000  next=次のRot
+				//GetVal = strtok_s(NULL, ",", &YZnext);//GetVal=X000.000 XYZnext=Y000.000,Z000.000
+				//XYZnext = YZnext;
+				if (CntXYZ == 0) SetVal = strtok_s(GetVal, "PX", &nullp);//SetVal=000.000 nullp=NULL
+				else if (CntXYZ == 1) SetVal = strtok_s(GetVal, "PY", &nullp);//SetVal=000.000 nullp=NULL
+				else if (CntXYZ == 2) SetVal = strtok_s(GetVal, "PZ", &nullp);//SetVal=000.000 nullp=NULL
+				switch (CntXYZ)
 				{
-					D3DXVECTOR3 buffmove;
-					char *XYZnextmove = XYZnext;
-					for (int CntXYZmove = 0; CntXYZmove < 3; CntXYZmove++)
-					{
-						char *GetValmove = NULL;
-						char *SetValmove = NULL;
-						char *YZnextmove = NULL;
-						char *nullpmove = NULL;
-						//XYZの数値部分を取得する
-						GetValmove = strtok_s(XYZnextmove, ",", &XYZnextmove);//GetVal=X000.000,Y000.000,Z000.000  next=次のRot
-						//GetVal = strtok_s(NULL, ",", &YZnext);//GetVal=X000.000 XYZnext=Y000.000,Z000.000
-						//XYZnext = YZnext;
-						if (CntXYZmove == 0) SetValmove = strtok_s(GetValmove, "MX", &nullpmove);//SetVal=000.000 nullp=NULL
-						else if (CntXYZmove == 1) SetValmove = strtok_s(GetValmove, "MY", &nullpmove);//SetVal=000.000 nullp=NULL
-						else if (CntXYZmove == 2) SetValmove = strtok_s(GetValmove, "MZ", &nullpmove);//SetVal=000.000 nullp=NULL
-						switch (CntXYZmove)
-						{
-						case 0:
-							buffmove.x = strtof(SetValmove, NULL);
-							break;
-						case 1:
-							buffmove.y = strtof(SetValmove, NULL);
-							break;
-						case 2:
-							buffmove.z = strtof(SetValmove, NULL);
-							break;
-						}
-					}
-
-					//データを格納
-					NetSetBulletType1(Player,Bullet,Shadow,buffpos, buffmove, 3);
-					if (next[0] != NULL) RMsgBlock = strtok_s(next, "@P3,", &next);
+				case 0:
+					buffpos.x = strtof(SetVal, NULL);
 					break;
+				case 1:
+					buffpos.y = strtof(SetVal, NULL);
+					break;
+				case 2:
+					buffpos.z = strtof(SetVal, NULL);
+
+					//Move取得
+					{
+						D3DXVECTOR3 buffmove;
+						char *XYZnextmove = XYZnext;
+						for (int CntXYZmove = 0; CntXYZmove < 3; CntXYZmove++)
+						{
+							char *GetValmove = NULL;
+							char *SetValmove = NULL;
+							char *YZnextmove = NULL;
+							char *nullpmove = NULL;
+							//XYZの数値部分を取得する
+							GetValmove = strtok_s(XYZnextmove, ",", &XYZnextmove);//GetVal=X000.000,Y000.000,Z000.000  next=次のRot
+							//GetVal = strtok_s(NULL, ",", &YZnext);//GetVal=X000.000 XYZnext=Y000.000,Z000.000
+							//XYZnext = YZnext;
+							if (CntXYZmove == 0) SetValmove = strtok_s(GetValmove, "MX", &nullpmove);//SetVal=000.000 nullp=NULL
+							else if (CntXYZmove == 1) SetValmove = strtok_s(GetValmove, "MY", &nullpmove);//SetVal=000.000 nullp=NULL
+							else if (CntXYZmove == 2) SetValmove = strtok_s(GetValmove, "MZ", &nullpmove);//SetVal=000.000 nullp=NULL
+							switch (CntXYZmove)
+							{
+							case 0:
+								buffmove.x = strtof(SetValmove, NULL);
+								break;
+							case 1:
+								buffmove.y = strtof(SetValmove, NULL);
+								break;
+							case 2:
+								buffmove.z = strtof(SetValmove, NULL);
+								break;
+							}
+						}
+
+						//データを格納
+						NetSetBulletType1(Player, Bullet, Shadow, buffpos, buffmove, 3);
+						if (next[0] != NULL) RMsgBlock = strtok_s(next, "@P3,", &next);
+						break;
+					}
 				}
 			}
-		}
 		}
 		if (strcmp(RMsgBlock, "BulletB") == 0)
 		{
@@ -1949,7 +1851,7 @@ void MySOCKET::MsgAnalys(char* argRMsg, PLAYER *Player, ITEM *Item, FIELD *Field
 							//データを格納
 							if (MoveCnt == 2)
 							{
-								NetSetBulletType3(Player,Bullet,Shadow,buffpos, &buffmove[0], 3);
+								NetSetBulletType3(Player, Bullet, Shadow, buffpos, &buffmove[0], 3);
 								if (next[0] != NULL) RMsgBlock = strtok_s(next, "@P3,", &next);
 							}
 						}
@@ -1994,7 +1896,7 @@ void MySOCKET::MsgAnalys(char* argRMsg, PLAYER *Player, ITEM *Item, FIELD *Field
 				//データを格納
 				int iIndex = atoi(Index);
 				int iType = atoi(Type);
-				NetSetItem(Item,buff, iIndex, iType);
+				NetSetItem(Item, buff, iIndex, iType);
 				PlaySound(SOUND_LABEL_SE_nyu);
 				if (next[0] != NULL)
 				{
@@ -2020,7 +1922,7 @@ void MySOCKET::MsgAnalys(char* argRMsg, PLAYER *Player, ITEM *Item, FIELD *Field
 		int iSeed = atoi(Seed);
 		int iPlayerNum = atoi(PlayerNum);
 
-		NetSetTikeiSeed(Field,Item,iSeed, iPlayerNum);
+		NetSetTikeiSeed(Field, Item, iSeed, iPlayerNum);
 	}
 
 	//ゲーム終了情報はここ
@@ -2037,7 +1939,7 @@ void MySOCKET::MsgAnalys(char* argRMsg, PLAYER *Player, ITEM *Item, FIELD *Field
 }
 
 //反映処理一括関数　今後使用予定
-void MySOCKET::SetBuff(char* RMsgBlock, int SetEnumType,int PlayerNum)
+void UDPSOCKET::SetBuff(char* RMsgBlock, int SetEnumType, int PlayerNum)
 {
 	D3DXVECTOR3 buff;
 	char* RMsgBlockBuff = RMsgBlock;
@@ -2081,7 +1983,7 @@ void MySOCKET::SetBuff(char* RMsgBlock, int SetEnumType,int PlayerNum)
 	}
 }
 
-void MySOCKET::NetSetItem(ITEM *Item, D3DXVECTOR3 buff, int index, int type)
+void UDPSOCKET::NetSetItem(ITEM *Item, D3DXVECTOR3 buff, int index, int type)
 {
 	if (Item->iUseType[index].Use() == false)
 	{
@@ -2090,7 +1992,7 @@ void MySOCKET::NetSetItem(ITEM *Item, D3DXVECTOR3 buff, int index, int type)
 	}
 }
 
-void MySOCKET::NetSetTikeiSeed(FIELD *Field, ITEM *Item, int Seed, int PlayerNum)
+void UDPSOCKET::NetSetTikeiSeed(FIELD *Field, ITEM *Item, int Seed, int PlayerNum)
 {
 	if (Field->FieldPara.NetTikei == false)
 	{
@@ -2104,7 +2006,7 @@ void MySOCKET::NetSetTikeiSeed(FIELD *Field, ITEM *Item, int Seed, int PlayerNum
 	}
 }
 
-void MySOCKET::NetSetPos(PLAYER *Player, D3DXVECTOR3 buff, int PlayerNum)
+void UDPSOCKET::NetSetPos(PLAYER *Player, D3DXVECTOR3 buff, int PlayerNum)
 {
 	//ロックされてなければ分析して書き込み
 	if (GetNetShareDateFlag() == false)
@@ -2113,7 +2015,7 @@ void MySOCKET::NetSetPos(PLAYER *Player, D3DXVECTOR3 buff, int PlayerNum)
 	}
 }
 
-void MySOCKET::NetSetHoudaiRot(PLAYER *Player, D3DXVECTOR3 buff, int PlayerNum)
+void UDPSOCKET::NetSetHoudaiRot(PLAYER *Player, D3DXVECTOR3 buff, int PlayerNum)
 {
 	//ロックされてなければ分析して書き込み
 	if (GetNetShareDateFlag() == false)
@@ -2122,7 +2024,7 @@ void MySOCKET::NetSetHoudaiRot(PLAYER *Player, D3DXVECTOR3 buff, int PlayerNum)
 	}
 }
 
-void MySOCKET::NetSetHoutouRot(PLAYER *Player, D3DXVECTOR3 buff, int PlayerNum)
+void UDPSOCKET::NetSetHoutouRot(PLAYER *Player, D3DXVECTOR3 buff, int PlayerNum)
 {
 	//ロックされてなければ分析して書き込み
 	if (GetNetShareDateFlag() == false)
@@ -2131,16 +2033,16 @@ void MySOCKET::NetSetHoutouRot(PLAYER *Player, D3DXVECTOR3 buff, int PlayerNum)
 	}
 }
 
-void MySOCKET::NetSetHousinRot(PLAYER *Player, D3DXVECTOR3 buff, int PlayerNum)
+void UDPSOCKET::NetSetHousinRot(PLAYER *Player, D3DXVECTOR3 buff, int PlayerNum)
 {
 	//ロックされてなければ分析して書き込み
 	if (GetNetShareDateFlag() == false)
-	{	
+	{
 		Player->modelDraw[PlayerNum].Transform[PLAYER_PARTS_TYPE_HOUSIN].Rot(buff);
 	}
 }
 
-void MySOCKET::NetSetVital(PLAYER *Player, int buff, int PlayerNum)
+void UDPSOCKET::NetSetVital(PLAYER *Player, int buff, int PlayerNum)
 {
 	//ロックされてなければ分析して書き込み
 	if (GetNetShareDateFlag() == false)
@@ -2149,7 +2051,7 @@ void MySOCKET::NetSetVital(PLAYER *Player, int buff, int PlayerNum)
 	}
 }
 
-void MySOCKET::NetSetMorphing(PLAYER *Player, int PlayerNum)
+void UDPSOCKET::NetSetMorphing(PLAYER *Player, int PlayerNum)
 {
 	//ロックされてなければ分析して書き込み
 	if (GetNetShareDateFlag() == false)
@@ -2179,7 +2081,7 @@ void MySOCKET::NetSetMorphing(PLAYER *Player, int PlayerNum)
 	}
 }
 
-void MySOCKET::NetSetBulletType1(PLAYER *Player, BULLET *Bullet, SHADOW *Shadow, D3DXVECTOR3 buffpos, D3DXVECTOR3 buffmove, int PlayerNum)
+void UDPSOCKET::NetSetBulletType1(PLAYER *Player, BULLET *Bullet, SHADOW *Shadow, D3DXVECTOR3 buffpos, D3DXVECTOR3 buffmove, int PlayerNum)
 {
 	//ロックされてなければ分析して書き込み
 	if (GetNetShareDateFlag() == false)
@@ -2187,15 +2089,15 @@ void MySOCKET::NetSetBulletType1(PLAYER *Player, BULLET *Bullet, SHADOW *Shadow,
 		//フラグが0なら発射してあげる。1フレームで1回発射できる。ここでフラグを1にして更新処理で0にするしている
 		if (Player->PlayerPara[PlayerNum].BulletPara.NetBulletShotFlagOneFrame == 0)
 		{
-				Bullet->SetInstance(buffpos, buffmove,
-					BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME,
-					static_cast<ePLAYER_TYPE>(PlayerNum), Shadow);
-				Player->PlayerPara[PlayerNum].BulletPara.NetBulletShotFlagOneFrame = 1;
+			Bullet->SetInstance(buffpos, buffmove,
+				BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME,
+				static_cast<ePLAYER_TYPE>(PlayerNum), Shadow);
+			Player->PlayerPara[PlayerNum].BulletPara.NetBulletShotFlagOneFrame = 1;
 		}
 	}
 }
 
-void MySOCKET::NetSetBulletType3(PLAYER *Player, BULLET *Bullet, SHADOW *Shadow, D3DXVECTOR3 buffpos, D3DXVECTOR3 *buffmove, int PlayerNum)
+void UDPSOCKET::NetSetBulletType3(PLAYER *Player, BULLET *Bullet, SHADOW *Shadow, D3DXVECTOR3 buffpos, D3DXVECTOR3 *buffmove, int PlayerNum)
 {
 	//ロックされてなければ分析して書き込み
 	if (GetNetShareDateFlag() == false)
@@ -2203,7 +2105,7 @@ void MySOCKET::NetSetBulletType3(PLAYER *Player, BULLET *Bullet, SHADOW *Shadow,
 		//フラグが0なら発射してあげる。1フレームで1回発射できる。ここでフラグを1にして更新処理で0にするしている
 		if (Player->PlayerPara[PlayerNum].BulletPara.NetBulletShotFlagOneFrame == 0)
 		{
-		
+
 			for (int i = 0; i < 3; i++)
 			{
 				Bullet->SetInstance(buffpos, buffmove[i],
@@ -2215,7 +2117,7 @@ void MySOCKET::NetSetBulletType3(PLAYER *Player, BULLET *Bullet, SHADOW *Shadow,
 	}
 }
 
-void MySOCKET::NetSetGameEnd(void)
+void UDPSOCKET::NetSetGameEnd(void)
 {
 	//ロックされてなければ分析して書き込み
 	if (GetNetShareDateFlag() == false)

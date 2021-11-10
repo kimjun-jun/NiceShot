@@ -29,7 +29,8 @@
     <ClCompile Include="..\cpp\map\sky.cpp" />
     <ClCompile Include="..\cpp\map\wall.cpp" />
     <ClCompile Include="..\cpp\net\netmatch.cpp" />
-    <ClCompile Include="..\cpp\net\sock.cpp" />
+    <ClCompile Include="..\cpp\net\sockTCP.cpp" />
+    <ClCompile Include="..\cpp\net\sockUDP.cpp" />
     <ClCompile Include="..\cpp\object\bullet\bullet.cpp" />
     <ClCompile Include="..\cpp\object\bullet\bulletgauge.cpp" />
     <ClCompile Include="..\cpp\object\bullet\bulletprediction.cpp" />
@@ -66,7 +67,8 @@
     <ClInclude Include="..\h\map\sky.h" />
     <ClInclude Include="..\h\map\wall.h" />
     <ClInclude Include="..\h\net\netmatch.h" />
-    <ClInclude Include="..\h\net\sock.h" />
+    <ClInclude Include="..\h\net\sockTCP.h" />
+    <ClInclude Include="..\h\net\sockUDP.h" />
     <ClInclude Include="..\h\object\bullet\bullet.h" />
     <ClInclude Include="..\h\object\bullet\bulletgauge.h" />
     <ClInclude Include="..\h\object\bullet\bulletprediction.h" />

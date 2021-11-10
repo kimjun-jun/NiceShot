@@ -168,10 +168,13 @@
     <ClCompile Include="..\cpp\other\fade.cpp">
       <Filter>cpp\other</Filter>
     </ClCompile>
-    <ClCompile Include="..\cpp\net\sock.cpp">
+    <ClCompile Include="..\cpp\net\netmatch.cpp">
       <Filter>cpp\net</Filter>
     </ClCompile>
-    <ClCompile Include="..\cpp\net\netmatch.cpp">
+    <ClCompile Include="..\cpp\net\sockTCP.cpp">
+      <Filter>cpp\net</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\net\sockUDP.cpp">
       <Filter>cpp\net</Filter>
     </ClCompile>
   </ItemGroup>
@@ -275,13 +278,16 @@
     <ClInclude Include="..\h\other\fade.h">
       <Filter>h\other</Filter>
     </ClInclude>
-    <ClInclude Include="..\h\net\sock.h">
-      <Filter>h\net</Filter>
-    </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="..\h\net\netmatch.h">
+      <Filter>h\net</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\net\sockTCP.h">
+      <Filter>h\net</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\net\sockUDP.h">
       <Filter>h\net</Filter>
     </ClInclude>
   </ItemGroup>

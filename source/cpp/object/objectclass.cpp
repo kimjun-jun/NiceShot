@@ -33,7 +33,7 @@ using namespace std;
 #include "../../h/object/vitalgauge.h"
 #include "../../h/object/objectclass.h"
 #include "../../h/net/netmatch.h"
-#include "../../h/net/sock.h"
+#include "../../h/net/sockTCP.h"
 
 int GAME_OBJECT::AllOBJCnt = 0;
 

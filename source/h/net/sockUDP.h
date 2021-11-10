@@ -1,5 +1,5 @@
 /**
-* @file sock.h
+* @file sockUDP.h
 * @brief NiceShot(3D)戦車ゲーム
 * @author キムラジュン
 */
@@ -19,14 +19,14 @@ enum
 
 
 /**
-*　@class MySOCKET
+*　@class UDPSOCKET
 *　@brief GAMEOBJECT派生クラス
 */
-class MySOCKET : public GAME_OBJECT
+class UDPSOCKET : public GAME_OBJECT
 {
 public:
-	MySOCKET();	//!< ソケット設定
-	~MySOCKET();	//!< ソケット削除
+	UDPSOCKET();	//!< ソケット設定
+	~UDPSOCKET();	//!< ソケット削除
 
 	void Init(void);	//!< 初期化
 
@@ -37,7 +37,7 @@ public:
 	void NetCountdown(void);
 
 	//---------マルチスレッド環境で実行　アプリ起動時にマルチスレッドで永久ループ
-	void Packet(PLAYER *Player, ITEM *Item, FIELD *Field, BULLET *Bullet,SHADOW *Shadow);
+	void Packet(PLAYER *Player, ITEM *Item, FIELD *Field, BULLET *Bullet, SHADOW *Shadow);
 	//ネット対戦実行中処理
 	void SendPacket(PLAYER *Player, ITEM *Item, FIELD *Field, BULLET *Bullet);	//送信処理
 	void ReceivePacket(PLAYER *Player, ITEM *Item, FIELD *Field, BULLET *Bullet, SHADOW *Shadow);		//受信処理
@@ -51,7 +51,7 @@ public:
 
 	//地形反映
 	void NetSetTikeiSeed(FIELD *Field, ITEM *Item, int Seed, int PlayerNum);
-	
+
 	//プレイヤー反映群
 	void NetSetPos(PLAYER *Player, D3DXVECTOR3 buff, int PlayerNum);
 	void NetSetHoudaiRot(PLAYER *Player, D3DXVECTOR3 buff, int PlayerNum);

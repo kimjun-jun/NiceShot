@@ -31,7 +31,7 @@
 #include "../h/object/bullet/bulletgauge.h"
 #include "../h/object/vitalgauge.h"
 #include "../h/object/objectclass.h"
-#include "../h/net/sock.h"
+#include "../h/net/sockTCP.h"
 #include "../project/resource.h"
 
 //*****************************************************************************
