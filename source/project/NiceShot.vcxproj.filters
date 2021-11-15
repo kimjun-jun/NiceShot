@@ -100,9 +100,6 @@
     <Filter Include="h\Object">
       <UniqueIdentifier>{5355b4b6-760b-40d6-bfe0-840d10af5c09}</UniqueIdentifier>
     </Filter>
-    <Filter Include="h\Object\bullet">
-      <UniqueIdentifier>{f191a436-44ff-46e5-b3de-2c3f45334114}</UniqueIdentifier>
-    </Filter>
     <Filter Include="h\Other">
       <UniqueIdentifier>{1b8cd7ca-d130-4ee8-a3fd-17daefc43ff1}</UniqueIdentifier>
     </Filter>
@@ -178,46 +175,13 @@
     <Filter Include="cpp\Object\Result">
       <UniqueIdentifier>{be8216c2-9878-45cb-8c94-dcc521115588}</UniqueIdentifier>
     </Filter>
+    <Filter Include="h\Object\Bullet">
+      <UniqueIdentifier>{a40de41a-b3ea-4448-bb8f-7cb0e1bbda3b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\cpp\main.cpp">
       <Filter>cpp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\cpp\effect\damege.cpp">
-      <Filter>cpp\Effect</Filter>
-    </ClCompile>
-    <ClCompile Include="..\cpp\effect\effect.cpp">
-      <Filter>cpp\Effect</Filter>
-    </ClCompile>
-    <ClCompile Include="..\cpp\effect\explosion.cpp">
-      <Filter>cpp\Effect</Filter>
-    </ClCompile>
-    <ClCompile Include="..\cpp\map\field.cpp">
-      <Filter>cpp\Map</Filter>
-    </ClCompile>
-    <ClCompile Include="..\cpp\map\wall.cpp">
-      <Filter>cpp\Map</Filter>
-    </ClCompile>
-    <ClCompile Include="..\cpp\object\bullet\bullet.cpp">
-      <Filter>cpp\Object\Bullet</Filter>
-    </ClCompile>
-    <ClCompile Include="..\cpp\object\bullet\bulletgauge.cpp">
-      <Filter>cpp\Object\Bullet</Filter>
-    </ClCompile>
-    <ClCompile Include="..\cpp\object\bullet\bulletprediction.cpp">
-      <Filter>cpp\Object\Bullet</Filter>
-    </ClCompile>
-    <ClCompile Include="..\cpp\other\input.cpp">
-      <Filter>cpp\Other</Filter>
-    </ClCompile>
-    <ClCompile Include="..\cpp\other\sound.cpp">
-      <Filter>cpp\Other</Filter>
-    </ClCompile>
-    <ClCompile Include="..\cpp\map\sky.cpp">
-      <Filter>cpp\Map</Filter>
-    </ClCompile>
-    <ClCompile Include="..\cpp\net\netmatch.cpp">
-      <Filter>cpp\Net</Filter>
     </ClCompile>
     <ClCompile Include="..\cpp\Debug\debugproc.cpp">
       <Filter>cpp\Debug</Filter>
@@ -258,9 +222,6 @@
     <ClCompile Include="..\cpp\Object\Rank\rank.cpp">
       <Filter>cpp\Object\Rank</Filter>
     </ClCompile>
-    <ClCompile Include="..\cpp\net\sock.cpp">
-      <Filter>cpp\Net</Filter>
-    </ClCompile>
     <ClCompile Include="..\cpp\Object\ObjectClass\objectclass.cpp">
       <Filter>cpp\Object\ObjectClass</Filter>
     </ClCompile>
@@ -279,49 +240,52 @@
     <ClCompile Include="..\cpp\Scene\Scene.cpp">
       <Filter>cpp\Scene</Filter>
     </ClCompile>
+    <ClCompile Include="..\cpp\Effect\damege.cpp">
+      <Filter>cpp\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\Effect\effect.cpp">
+      <Filter>cpp\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\Effect\explosion.cpp">
+      <Filter>cpp\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\Map\field.cpp">
+      <Filter>cpp\Map</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\Map\sky.cpp">
+      <Filter>cpp\Map</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\Map\wall.cpp">
+      <Filter>cpp\Map</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\Net\netmatch.cpp">
+      <Filter>cpp\Net</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\Net\sock.cpp">
+      <Filter>cpp\Net</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\Object\Bullet\bullet.cpp">
+      <Filter>cpp\Object\Bullet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\Object\Bullet\bulletgauge.cpp">
+      <Filter>cpp\Object\Bullet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\Object\Bullet\bulletprediction.cpp">
+      <Filter>cpp\Object\Bullet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\Other\input.cpp">
+      <Filter>cpp\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\Other\sound.cpp">
+      <Filter>cpp\Other</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\h\main.h">
       <Filter>h</Filter>
     </ClInclude>
-    <ClInclude Include="..\h\effect\damege.h">
-      <Filter>h\Effect</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\effect\effect.h">
-      <Filter>h\Effect</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\effect\explosion.h">
-      <Filter>h\Effect</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\map\field.h">
-      <Filter>h\Map</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\map\wall.h">
-      <Filter>h\Map</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\object\bullet\bullet.h">
-      <Filter>h\Object\bullet</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\object\bullet\bulletgauge.h">
-      <Filter>h\Object\bullet</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\object\bullet\bulletprediction.h">
-      <Filter>h\Object\bullet</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\other\input.h">
-      <Filter>h\Other</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\other\sound.h">
-      <Filter>h\Other</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\map\sky.h">
-      <Filter>h\Map</Filter>
-    </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\net\netmatch.h">
-      <Filter>h\Net</Filter>
     </ClInclude>
     <ClInclude Include="..\h\Debug\debugproc.h">
       <Filter>h\Debug</Filter>
@@ -365,9 +329,6 @@
     <ClInclude Include="..\h\Object\Player\player.h">
       <Filter>h\Object\Player</Filter>
     </ClInclude>
-    <ClInclude Include="..\h\net\sock.h">
-      <Filter>h\Net</Filter>
-    </ClInclude>
     <ClInclude Include="..\h\Collision\collision.h">
       <Filter>h\Collision</Filter>
     </ClInclude>
@@ -379,6 +340,45 @@
     </ClInclude>
     <ClInclude Include="..\h\Scene\Scene.h">
       <Filter>h\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\Effect\damege.h">
+      <Filter>h\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\Effect\effect.h">
+      <Filter>h\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\Effect\explosion.h">
+      <Filter>h\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\Map\field.h">
+      <Filter>h\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\Map\sky.h">
+      <Filter>h\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\Map\wall.h">
+      <Filter>h\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\Net\netmatch.h">
+      <Filter>h\Net</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\Net\sock.h">
+      <Filter>h\Net</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\Object\Bullet\bullet.h">
+      <Filter>h\Object\Bullet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\Object\Bullet\bulletgauge.h">
+      <Filter>h\Object\Bullet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\Object\Bullet\bulletprediction.h">
+      <Filter>h\Object\Bullet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\Other\input.h">
+      <Filter>h\Other</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\Other\sound.h">
+      <Filter>h\Other</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
