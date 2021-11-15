@@ -4,8 +4,8 @@
 * @author キムラジュン
 */
 #include "../../h/main.h"
-#include "../../h/other/input.h"
-#include "../../h/map/sky.h"
+#include "../../h/Other/input.h"
+#include "../../h/Map/sky.h"
 
 //*****************************************************************************
 // マクロ定義

@@ -4,10 +4,10 @@
 * @author キムラジュン
 */
 #include "../../h/main.h"
-#include "../../h/other/input.h"
-#include "../../h/other/fade.h"
-#include "../../h/other/sound.h"
-#include "../../h/net/netmatch.h"
+#include "../../h/Other/input.h"
+#include "../../h/Object/Fade/fade.h"
+#include "../../h/Other/sound.h"
+#include "../../h/Net/netmatch.h"
 
 //*****************************************************************************
 // マクロ定義

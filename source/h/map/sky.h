@@ -5,7 +5,7 @@
 */
 #pragma once
 
-#include "../../h/object/objectclass.h"
+#include "../../h/Object/ObjectClass/objectclass.h"
 
 enum eSKY_MODEL_TYPE
 {

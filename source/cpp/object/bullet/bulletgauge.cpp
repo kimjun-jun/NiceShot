@@ -4,9 +4,9 @@
 * @author ƒLƒ€ƒ‰ƒWƒ…ƒ“
 */
 #include "../../../h/main.h"
-#include "../../../h/object/objectclass.h"
-#include "../../../h/object/player.h"
-#include "../../../h/object/bullet/bulletgauge.h"
+#include "../../../h/Object/ObjectClass/objectclass.h"
+#include "../../../h/Object/Player/player.h"
+#include "../../../h/Object/Bullet/bulletgauge.h"
 
 
 //*****************************************************************************

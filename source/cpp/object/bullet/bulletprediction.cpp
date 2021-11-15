@@ -4,11 +4,11 @@
 * @author キムラジュン
 */
 #include "../../../h/main.h"
-#include "../../../h/other/input.h"
-#include "../../../h/object/camera.h"
-#include "../../../h/object/player.h"
-#include "../../../h/object/objectclass.h"
-#include "../../../h/object/bullet/bulletprediction.h"
+#include "../../../h/Other/input.h"
+#include "../../../h/Object/Camera/camera.h"
+#include "../../../h/Object/Player/player.h"
+#include "../../../h/Object/ObjectClass/objectclass.h"
+#include "../../../h/Object/Bullet/bulletprediction.h"
 
 //*****************************************************************************
 // マクロ定義

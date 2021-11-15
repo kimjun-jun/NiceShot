@@ -70,8 +70,8 @@ UDPSOCKET::UDPSOCKET(void)
 	// ここで、ノンブロッキングに設定しています。
 	 // val = 0でブロッキングモードに設定できます。
 	 // ソケットの初期設定はブロッキングモードです。
-	u_long val = 1;
-	ioctlsocket(this->DstSocketFunc(), FIONBIO, &val);
+	//u_long val = 1;
+	//ioctlsocket(this->DstSocketFunc(), FIONBIO, &val);
 }
 
 UDPSOCKET::~UDPSOCKET(void)
@@ -96,7 +96,7 @@ void UDPSOCKET::NetMatch(void)
 	if (ConnectFlag == false)
 	{
 		//接続要求
-		connect(this->DstSocketFunc(), (struct sockaddr *) &this->DstAddrFunc(), sizeof(this->DstAddrFunc()));
+		//connect(this->DstSocketFunc(), (struct sockaddr *) &this->DstAddrFunc(), sizeof(this->DstAddrFunc()));
 		ConnectFlag = true;
 	}
 	//マッチング
@@ -196,7 +196,7 @@ void UDPSOCKET::NetMyNumberGet(void)
 			//ChkMyNumber = true;
 			int num = packet;
 			SetNetMyNumber(num);
-			SetNetMyNumberFlagFlag(true);
+			SetNetMyNumberFlag(true);
 		}
 	}
 	Sleep(10);

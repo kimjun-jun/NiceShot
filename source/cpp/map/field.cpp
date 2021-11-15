@@ -4,14 +4,14 @@
 * @author キムラジュン
 */
 #include "../../h/main.h"
-#include "../../h/other/input.h"
-#include "../../h/map/field.h"
-#include "../../h/object/item.h"
-#include "../../h/object/bullet/bullet.h"
-#include "../../h/other/sound.h"
-#include "../../h/effect/explosion.h"
-#include "../../h/object/player.h"
-#include "../../h/library.h"
+#include "../../h/Other/input.h"
+#include "../../h/Map/field.h"
+#include "../../h/Object/Item/item.h"
+#include "../../h/Object/Bullet/bullet.h"
+#include "../../h/Other/sound.h"
+#include "../../h/Effect/explosion.h"
+#include "../../h/Object/Player/player.h"
+#include "../../h/Library/library.h"
 
 //*****************************************************************************
 // マクロ定義

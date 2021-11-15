@@ -4,7 +4,7 @@
 * @author キムラジュン
 */
 #pragma once
-#include "../../h/object/objectclass.h"
+#include "../../../h/Object/ObjectClass/objectclass.h"
 
 //*****************************************************************************
 // クラス定義

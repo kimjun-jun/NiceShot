@@ -4,35 +4,32 @@
 * @author キムラジュン
 */
 #include "../h/main.h"
-#include "../h/other/debugproc.h"
-#include "../h/other/input.h"
-#include "../h/object/camera.h"
-#include "../h/other/light.h"
-#include "../h/object/player.h"
-#include "../h/map/field.h"
-#include "../h/map/wall.h"
-#include "../h/map/sky.h"
-#include "../h/object/shadow.h"
-#include "../h/collision.h"
-#include "../h/scene/title.h"
-#include "../h/scene/result.h"
-#include "../h/other/fade.h"
-#include "../h/scene/tutorial.h"
-#include "../h/effect/effect.h"
-#include "../h/object/bullet/bullet.h"
-#include "../h/effect/explosion.h"
-#include "../h/scene/rank.h"
-#include "../h/scene/countdown.h"
-#include "../h/object/item.h"
-#include "../h/effect/damege.h"
-#include "../h/object/status.h"
-#include "../h/other/sound.h"
-#include "../h/object/bullet/bulletprediction.h"
-#include "../h/object/bullet/bulletgauge.h"
-#include "../h/object/vitalgauge.h"
-#include "../h/object/objectclass.h"
-#include "../h/net/sockTCP.h"
-#include "../project/resource.h"
+#include "../h/Debug/debugproc.h"
+#include "../h/Other/input.h"
+#include "../h/Object/Camera/camera.h"
+#include "../h/Object/Player/player.h"
+#include "../h/Map/field.h"
+#include "../h/Map/wall.h"
+#include "../h/Map/sky.h"
+#include "../h/Object/Shadow/shadow.h"
+#include "../h/Object/Title/title.h"
+#include "../h/Object/Result/result.h"
+#include "../h/Object/Fade/fade.h"
+#include "../h/Object/Tutorial/tutorial.h"
+#include "../h/Effect/effect.h"
+#include "../h/Object/Bullet/bullet.h"
+#include "../h/Effect/explosion.h"
+#include "../h/Object/Rank/rank.h"
+#include "../h/Object/CountDown/countdown.h"
+#include "../h/Object/Item/item.h"
+#include "../h/Effect/damege.h"
+#include "../h/Object/Player/Status/status.h"
+#include "../h/Other/sound.h"
+#include "../h/Object/Bullet/bulletprediction.h"
+#include "../h/Object/Bullet/bulletgauge.h"
+#include "../h/Object/Player/VitalGauge/vitalgauge.h"
+#include "../h/Object/ObjectClass/objectclass.h"
+#include "../h/net/sock.h"
 
 //*****************************************************************************
 // マクロ定義
@@ -116,8 +113,8 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 	srand((unsigned)time(NULL));
 	
-	UNREFERENCED_PARAMETER(hPrevInstance);	// 無くても良いけど、警告が出る（未使用宣言）
-	UNREFERENCED_PARAMETER(lpCmdLine);		// 無くても良いけど、警告が出る（未使用宣言）
+	//UNREFERENCED_PARAMETER(hPrevInstance);	// 無くても良いけど、警告が出る（未使用宣言）
+	//UNREFERENCED_PARAMETER(lpCmdLine);		// 無くても良いけど、警告が出る（未使用宣言）
 
 	DWORD dwExecLastTime;
 	DWORD dwFPSLastTime;
@@ -315,7 +312,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		switch(wParam)
 		{
 		case VK_ESCAPE:
-			DestroyWindow(hWnd);
+			//DestroyWindow(hWnd);
 			break;
 		}
 		break;
@@ -511,7 +508,6 @@ HRESULT Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	InitSound(hWnd);
 	InitDebugProc();
 	InitCamera();
-	InitLight();
 
 	return S_OK;
 }

@@ -5,12 +5,12 @@
 */
 #include "../../../h/main.h"
 #include "../../../h/other/input.h"
-#include "../../../h/object/camera.h"
-#include "../../../h/collision.h"
-#include "../../../h/other/sound.h"
-#include "../../../h/object/shadow.h"
-#include "../../../h/effect/effect.h"
-#include "../../../h/object/bullet/bullet.h"
+#include "../../../h/Object/Camera/camera.h"
+//#include "../../../h/Collision/"
+#include "../../../h/Other/sound.h"
+#include "../../../h/Object/Shadow/shadow.h"
+#include "../../../h/Effect/effect.h"
+#include "../../../h/Object/Bullet/bullet.h"
 
 //*****************************************************************************
 // É}ÉNÉçíËã`

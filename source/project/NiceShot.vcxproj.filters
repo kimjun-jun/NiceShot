@@ -19,276 +19,348 @@
     <Filter Include="h">
       <UniqueIdentifier>{57ae052a-2949-4256-b852-77341a825699}</UniqueIdentifier>
     </Filter>
-    <Filter Include="cpp\effect">
-      <UniqueIdentifier>{9d370243-79fd-484d-b870-9aee64b92d23}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="cpp\map">
+    <Filter Include="cpp\Map">
       <UniqueIdentifier>{39de7acb-bb73-483c-a9b8-9ab40afb9558}</UniqueIdentifier>
     </Filter>
-    <Filter Include="cpp\object">
-      <UniqueIdentifier>{98a96e2d-dc47-47f3-8d8b-daa529a73ca2}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="cpp\other">
-      <UniqueIdentifier>{0343b9d1-da55-4dbb-a4dc-e06cedf668c0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="cpp\scene">
-      <UniqueIdentifier>{17a0f19d-5da0-4a38-9e55-28b002b7801a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="cpp\object\bullet">
-      <UniqueIdentifier>{5d532c76-1539-4750-a5ef-2c72661360ba}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="h\effect">
-      <UniqueIdentifier>{8d97ac0f-8e78-4f2f-9ac2-6d6cd33ff5bd}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="h\scene">
-      <UniqueIdentifier>{9b26a6b2-db78-4162-9f44-7b5492e5f5e8}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="h\other">
-      <UniqueIdentifier>{1b8cd7ca-d130-4ee8-a3fd-17daefc43ff1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="h\object">
-      <UniqueIdentifier>{5355b4b6-760b-40d6-bfe0-840d10af5c09}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="h\map">
-      <UniqueIdentifier>{87f939d6-98b4-45ea-a247-27fce4cc9dac}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="h\object\bullet">
-      <UniqueIdentifier>{f191a436-44ff-46e5-b3de-2c3f45334114}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="cpp\old">
-      <UniqueIdentifier>{1108c7fe-ea07-42e4-8b14-eee85ba27b6a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="h\old">
-      <UniqueIdentifier>{8e16f117-a184-4c38-b56f-a0393aa8f828}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="cpp\net">
+    <Filter Include="cpp\Net">
       <UniqueIdentifier>{f8d8f4b6-a232-4326-b612-8820280bbebd}</UniqueIdentifier>
     </Filter>
-    <Filter Include="h\net">
+    <Filter Include="cpp\Object">
+      <UniqueIdentifier>{98a96e2d-dc47-47f3-8d8b-daa529a73ca2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp\Other">
+      <UniqueIdentifier>{0343b9d1-da55-4dbb-a4dc-e06cedf668c0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp\Scene">
+      <UniqueIdentifier>{17a0f19d-5da0-4a38-9e55-28b002b7801a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp\Draw">
+      <UniqueIdentifier>{2cd506c2-a81e-4590-af37-834f1b307769}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp\Update">
+      <UniqueIdentifier>{b7a7cf17-5ada-41a8-876d-0f139cfdae83}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp\Collision">
+      <UniqueIdentifier>{31150ae0-d632-44ae-938a-78da51aab22c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp\Debug">
+      <UniqueIdentifier>{9e3b9cb5-b777-49ee-985e-3c6b27d5689b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp\Effect">
+      <UniqueIdentifier>{9d370243-79fd-484d-b870-9aee64b92d23}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp\Object\Bullet">
+      <UniqueIdentifier>{5d532c76-1539-4750-a5ef-2c72661360ba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp\Object\Player">
+      <UniqueIdentifier>{9a49139f-3e3b-4f31-8528-192fa034105e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp\Object\Item">
+      <UniqueIdentifier>{c7feeca4-7432-43ec-8060-8812b4676936}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp\Object\Shadow">
+      <UniqueIdentifier>{e5b3c163-8359-44aa-bb96-fe7095e5b3f4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp\Object\Camera">
+      <UniqueIdentifier>{81840e4b-264d-4198-98d8-6b90de66c2f0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp\Object\CountDown">
+      <UniqueIdentifier>{cd8e141b-12e9-493c-a80f-7d9b88d517af}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp\Object\Rank">
+      <UniqueIdentifier>{b234f084-dedb-4467-b2bc-7834a58113ba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp\Object\Fade">
+      <UniqueIdentifier>{b4bb9eaf-93f7-4321-b075-a64356a56c74}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp\Object\Title">
+      <UniqueIdentifier>{27d4e1a1-2447-47a2-81ed-125fce544e92}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp\Object\Tutorial">
+      <UniqueIdentifier>{2cc0cbc4-e3ca-454f-822f-fa79c93ac620}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp\Library">
+      <UniqueIdentifier>{7717ebc2-1d2c-46c0-bc79-8d896bc9b158}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp\Object\Player\Status">
+      <UniqueIdentifier>{983fe47a-7318-4670-a81e-1d426f9618e8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp\Object\Player\VitalGauge">
+      <UniqueIdentifier>{eaebb26a-4328-4091-8b6f-2d28742a275e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="h\Effect">
+      <UniqueIdentifier>{8d97ac0f-8e78-4f2f-9ac2-6d6cd33ff5bd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="h\Map">
+      <UniqueIdentifier>{87f939d6-98b4-45ea-a247-27fce4cc9dac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="h\Net">
       <UniqueIdentifier>{3801e6a8-e906-4500-9dfb-7e856e70d212}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="h\Object">
+      <UniqueIdentifier>{5355b4b6-760b-40d6-bfe0-840d10af5c09}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="h\Object\bullet">
+      <UniqueIdentifier>{f191a436-44ff-46e5-b3de-2c3f45334114}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="h\Other">
+      <UniqueIdentifier>{1b8cd7ca-d130-4ee8-a3fd-17daefc43ff1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="h\Scene">
+      <UniqueIdentifier>{9b26a6b2-db78-4162-9f44-7b5492e5f5e8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="h\Collision">
+      <UniqueIdentifier>{2788db82-f309-4d72-9319-dd19c7cf5441}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="h\Debug">
+      <UniqueIdentifier>{dfe4a528-d2d6-4b48-8f9b-e706d642c17e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="h\Draw">
+      <UniqueIdentifier>{16bdc054-1c6e-4d26-a7cb-8bde4c5b7772}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="h\Library">
+      <UniqueIdentifier>{5d67271b-9195-4532-9509-bb25add760fa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="h\Update">
+      <UniqueIdentifier>{22fa8dac-14c4-4158-9dd7-2a754436fc92}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="h\Object\Camera">
+      <UniqueIdentifier>{4cd5b28a-684e-4469-9d7b-57bba893479c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="h\Object\CountDown">
+      <UniqueIdentifier>{f628b8cc-44cb-45dc-ae6f-fd490db74e96}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="h\Object\Fade">
+      <UniqueIdentifier>{9dbc73c3-f5d7-45e4-a8e3-be8fd727834c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="h\Object\ObjectClass">
+      <UniqueIdentifier>{131372c9-e110-409e-930c-fdfb3f724df3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="h\Object\ObjectClass\Interface">
+      <UniqueIdentifier>{10b230c4-5ea5-4514-9b7b-ea23b2dc95e7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="h\Object\ObjectClass\Instance">
+      <UniqueIdentifier>{13ad8976-2d4a-4490-998a-4ff9cbd5f8ad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp\Object\ObjectClass">
+      <UniqueIdentifier>{d104e89c-8aeb-45d1-9523-39005fc34229}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp\Object\ObjectClass\Interface">
+      <UniqueIdentifier>{ce48d3ff-64b6-47b7-99b5-acaef85cddc9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp\Object\ObjectClass\Instance">
+      <UniqueIdentifier>{9356b28c-f7f2-4752-ac14-883a2cb04fa6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="h\Object\Player">
+      <UniqueIdentifier>{7413c587-d5b7-4bb0-b9cc-4e10116524c7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="h\Object\Rank">
+      <UniqueIdentifier>{21b54984-ea8d-4836-a163-6f4db2ce7681}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="h\Object\Result">
+      <UniqueIdentifier>{96c71789-7c6a-4a3a-8584-91d6ba851f96}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="h\Object\Shadow">
+      <UniqueIdentifier>{8f394fcb-3383-42ba-87b3-b9c98d6e9a54}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="h\Object\Title">
+      <UniqueIdentifier>{c47f2571-44f8-4eab-9019-2ad4f2847c45}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="h\Object\Tutorial">
+      <UniqueIdentifier>{afabab78-288d-4cbe-b789-fc69f0c363db}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="h\Object\Player\Status">
+      <UniqueIdentifier>{32022289-5564-49fb-8de3-24a1e1453fac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="h\Object\Player\VitalGauge">
+      <UniqueIdentifier>{7f6883f1-fe0c-47a7-801e-4f7d5aec30ff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp\Object\Result">
+      <UniqueIdentifier>{be8216c2-9878-45cb-8c94-dcc521115588}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\cpp\collision.cpp">
-      <Filter>cpp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\cpp\library.cpp">
-      <Filter>cpp</Filter>
-    </ClCompile>
     <ClCompile Include="..\cpp\main.cpp">
       <Filter>cpp</Filter>
     </ClCompile>
     <ClCompile Include="..\cpp\effect\damege.cpp">
-      <Filter>cpp\effect</Filter>
+      <Filter>cpp\Effect</Filter>
     </ClCompile>
     <ClCompile Include="..\cpp\effect\effect.cpp">
-      <Filter>cpp\effect</Filter>
+      <Filter>cpp\Effect</Filter>
     </ClCompile>
     <ClCompile Include="..\cpp\effect\explosion.cpp">
-      <Filter>cpp\effect</Filter>
+      <Filter>cpp\Effect</Filter>
     </ClCompile>
     <ClCompile Include="..\cpp\map\field.cpp">
-      <Filter>cpp\map</Filter>
+      <Filter>cpp\Map</Filter>
     </ClCompile>
     <ClCompile Include="..\cpp\map\wall.cpp">
-      <Filter>cpp\map</Filter>
-    </ClCompile>
-    <ClCompile Include="..\cpp\scene\countdown.cpp">
-      <Filter>cpp\scene</Filter>
-    </ClCompile>
-    <ClCompile Include="..\cpp\scene\rank.cpp">
-      <Filter>cpp\scene</Filter>
-    </ClCompile>
-    <ClCompile Include="..\cpp\scene\result.cpp">
-      <Filter>cpp\scene</Filter>
-    </ClCompile>
-    <ClCompile Include="..\cpp\scene\title.cpp">
-      <Filter>cpp\scene</Filter>
-    </ClCompile>
-    <ClCompile Include="..\cpp\scene\tutorial.cpp">
-      <Filter>cpp\scene</Filter>
-    </ClCompile>
-    <ClCompile Include="..\cpp\object\camera.cpp">
-      <Filter>cpp\object</Filter>
-    </ClCompile>
-    <ClCompile Include="..\cpp\object\item.cpp">
-      <Filter>cpp\object</Filter>
-    </ClCompile>
-    <ClCompile Include="..\cpp\object\player.cpp">
-      <Filter>cpp\object</Filter>
-    </ClCompile>
-    <ClCompile Include="..\cpp\object\status.cpp">
-      <Filter>cpp\object</Filter>
+      <Filter>cpp\Map</Filter>
     </ClCompile>
     <ClCompile Include="..\cpp\object\bullet\bullet.cpp">
-      <Filter>cpp\object\bullet</Filter>
+      <Filter>cpp\Object\Bullet</Filter>
     </ClCompile>
     <ClCompile Include="..\cpp\object\bullet\bulletgauge.cpp">
-      <Filter>cpp\object\bullet</Filter>
+      <Filter>cpp\Object\Bullet</Filter>
     </ClCompile>
     <ClCompile Include="..\cpp\object\bullet\bulletprediction.cpp">
-      <Filter>cpp\object\bullet</Filter>
-    </ClCompile>
-    <ClCompile Include="..\cpp\other\debugproc.cpp">
-      <Filter>cpp\other</Filter>
+      <Filter>cpp\Object\Bullet</Filter>
     </ClCompile>
     <ClCompile Include="..\cpp\other\input.cpp">
-      <Filter>cpp\other</Filter>
-    </ClCompile>
-    <ClCompile Include="..\cpp\other\light.cpp">
-      <Filter>cpp\other</Filter>
+      <Filter>cpp\Other</Filter>
     </ClCompile>
     <ClCompile Include="..\cpp\other\sound.cpp">
-      <Filter>cpp\other</Filter>
+      <Filter>cpp\Other</Filter>
     </ClCompile>
     <ClCompile Include="..\cpp\map\sky.cpp">
-      <Filter>cpp\map</Filter>
-    </ClCompile>
-    <ClCompile Include="..\cpp\object\vitalgauge.cpp">
-      <Filter>cpp\object</Filter>
-    </ClCompile>
-    <ClCompile Include="..\cpp\old\bullettex.cpp">
-      <Filter>cpp\old</Filter>
-    </ClCompile>
-    <ClCompile Include="..\cpp\old\life.cpp">
-      <Filter>cpp\old</Filter>
-    </ClCompile>
-    <ClCompile Include="..\cpp\old\time.cpp">
-      <Filter>cpp\old</Filter>
-    </ClCompile>
-    <ClCompile Include="..\cpp\old\bulletpoint.cpp">
-      <Filter>cpp\old</Filter>
-    </ClCompile>
-    <ClCompile Include="..\cpp\object\shadow.cpp">
-      <Filter>cpp\object</Filter>
-    </ClCompile>
-    <ClCompile Include="..\cpp\object\objectclass.cpp">
-      <Filter>cpp\object</Filter>
-    </ClCompile>
-    <ClCompile Include="..\cpp\other\fade.cpp">
-      <Filter>cpp\other</Filter>
+      <Filter>cpp\Map</Filter>
     </ClCompile>
     <ClCompile Include="..\cpp\net\netmatch.cpp">
-      <Filter>cpp\net</Filter>
+      <Filter>cpp\Net</Filter>
     </ClCompile>
-    <ClCompile Include="..\cpp\net\sockTCP.cpp">
-      <Filter>cpp\net</Filter>
+    <ClCompile Include="..\cpp\Debug\debugproc.cpp">
+      <Filter>cpp\Debug</Filter>
     </ClCompile>
-    <ClCompile Include="..\cpp\net\sockUDP.cpp">
-      <Filter>cpp\net</Filter>
+    <ClCompile Include="..\cpp\Library\library.cpp">
+      <Filter>cpp\Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\Object\Fade\fade.cpp">
+      <Filter>cpp\Object\Fade</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\Object\Tutorial\tutorial.cpp">
+      <Filter>cpp\Object\Tutorial</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\Object\Title\title.cpp">
+      <Filter>cpp\Object\Title</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\Object\Player\Status\status.cpp">
+      <Filter>cpp\Object\Player\Status</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\Object\Player\VitalGauge\vitalgauge.cpp">
+      <Filter>cpp\Object\Player\VitalGauge</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\Object\Player\player.cpp">
+      <Filter>cpp\Object\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\Object\Camera\camera.cpp">
+      <Filter>cpp\Object\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\Object\Item\item.cpp">
+      <Filter>cpp\Object\Item</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\Object\CountDown\countdown.cpp">
+      <Filter>cpp\Object\CountDown</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\Object\Shadow\shadow.cpp">
+      <Filter>cpp\Object\Shadow</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\Object\Rank\rank.cpp">
+      <Filter>cpp\Object\Rank</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\net\sock.cpp">
+      <Filter>cpp\Net</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\Object\ObjectClass\objectclass.cpp">
+      <Filter>cpp\Object\ObjectClass</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\Collision\collision.cpp">
+      <Filter>cpp\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\Object\Result\result.cpp">
+      <Filter>cpp\Object\Result</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\h\collision.h">
-      <Filter>h</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\library.h">
-      <Filter>h</Filter>
-    </ClInclude>
     <ClInclude Include="..\h\main.h">
       <Filter>h</Filter>
     </ClInclude>
     <ClInclude Include="..\h\effect\damege.h">
-      <Filter>h\effect</Filter>
+      <Filter>h\Effect</Filter>
     </ClInclude>
     <ClInclude Include="..\h\effect\effect.h">
-      <Filter>h\effect</Filter>
+      <Filter>h\Effect</Filter>
     </ClInclude>
     <ClInclude Include="..\h\effect\explosion.h">
-      <Filter>h\effect</Filter>
+      <Filter>h\Effect</Filter>
     </ClInclude>
     <ClInclude Include="..\h\map\field.h">
-      <Filter>h\map</Filter>
+      <Filter>h\Map</Filter>
     </ClInclude>
     <ClInclude Include="..\h\map\wall.h">
-      <Filter>h\map</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\object\camera.h">
-      <Filter>h\object</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\object\item.h">
-      <Filter>h\object</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\object\player.h">
-      <Filter>h\object</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\object\status.h">
-      <Filter>h\object</Filter>
+      <Filter>h\Map</Filter>
     </ClInclude>
     <ClInclude Include="..\h\object\bullet\bullet.h">
-      <Filter>h\object\bullet</Filter>
+      <Filter>h\Object\bullet</Filter>
     </ClInclude>
     <ClInclude Include="..\h\object\bullet\bulletgauge.h">
-      <Filter>h\object\bullet</Filter>
+      <Filter>h\Object\bullet</Filter>
     </ClInclude>
     <ClInclude Include="..\h\object\bullet\bulletprediction.h">
-      <Filter>h\object\bullet</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\other\debugproc.h">
-      <Filter>h\other</Filter>
+      <Filter>h\Object\bullet</Filter>
     </ClInclude>
     <ClInclude Include="..\h\other\input.h">
-      <Filter>h\other</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\other\light.h">
-      <Filter>h\other</Filter>
+      <Filter>h\Other</Filter>
     </ClInclude>
     <ClInclude Include="..\h\other\sound.h">
-      <Filter>h\other</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\scene\countdown.h">
-      <Filter>h\scene</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\scene\rank.h">
-      <Filter>h\scene</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\scene\result.h">
-      <Filter>h\scene</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\scene\title.h">
-      <Filter>h\scene</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\scene\tutorial.h">
-      <Filter>h\scene</Filter>
+      <Filter>h\Other</Filter>
     </ClInclude>
     <ClInclude Include="..\h\map\sky.h">
-      <Filter>h\map</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\object\vitalgauge.h">
-      <Filter>h\object</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\old\bulletpoint.h">
-      <Filter>h\old</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\old\bullettex.h">
-      <Filter>h\old</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\old\life.h">
-      <Filter>h\old</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\old\time.h">
-      <Filter>h\old</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\object\shadow.h">
-      <Filter>h\object</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\object\objectclass.h">
-      <Filter>h\object</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\other\fade.h">
-      <Filter>h\other</Filter>
+      <Filter>h\Map</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="..\h\net\netmatch.h">
-      <Filter>h\net</Filter>
+      <Filter>h\Net</Filter>
     </ClInclude>
-    <ClInclude Include="..\h\net\sockTCP.h">
-      <Filter>h\net</Filter>
+    <ClInclude Include="..\h\Debug\debugproc.h">
+      <Filter>h\Debug</Filter>
     </ClInclude>
-    <ClInclude Include="..\h\net\sockUDP.h">
-      <Filter>h\net</Filter>
+    <ClInclude Include="..\h\Library\library.h">
+      <Filter>h\Library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\Object\ObjectClass\objectclass.h">
+      <Filter>h\Object\ObjectClass</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\Object\Camera\camera.h">
+      <Filter>h\Object\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\Object\CountDown\countdown.h">
+      <Filter>h\Object\CountDown</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\Object\Fade\fade.h">
+      <Filter>h\Object\Fade</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\Object\Tutorial\tutorial.h">
+      <Filter>h\Object\Tutorial</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\Object\Title\title.h">
+      <Filter>h\Object\Title</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\Object\Shadow\shadow.h">
+      <Filter>h\Object\Shadow</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\Object\Result\result.h">
+      <Filter>h\Object\Result</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\Object\Rank\rank.h">
+      <Filter>h\Object\Rank</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\Object\Player\VitalGauge\vitalgauge.h">
+      <Filter>h\Object\Player\VitalGauge</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\Object\Player\Status\status.h">
+      <Filter>h\Object\Player\Status</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\Object\Player\player.h">
+      <Filter>h\Object\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\net\sock.h">
+      <Filter>h\Net</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\Collision\collision.h">
+      <Filter>h\Collision</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

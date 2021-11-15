@@ -4,7 +4,7 @@
 * @author ƒLƒ€ƒ‰ƒWƒ…ƒ“
 */
 #pragma once
-#include "../../../h/object/objectclass.h"
+#include "../../../h/Object/ObjectClass/objectclass.h"
 
 enum eBULLETGAUGE_TEX_TYPE
 {

@@ -4,9 +4,9 @@
 * @author キムラジュン
 */
 #include "../../h/main.h"
-#include "../../h/other/input.h"
-#include "../../h/object/camera.h"
-#include "../../h/effect/explosion.h"
+#include "../../h/Other/input.h"
+#include "../../h/Object/Camera/camera.h"
+#include "../../h/Effect/explosion.h"
 
 //*****************************************************************************
 // マクロ定義 nPatternX
