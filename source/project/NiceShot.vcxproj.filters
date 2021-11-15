@@ -270,6 +270,15 @@
     <ClCompile Include="..\cpp\Object\Result\result.cpp">
       <Filter>cpp\Object\Result</Filter>
     </ClCompile>
+    <ClCompile Include="..\cpp\Draw\Draw.cpp">
+      <Filter>cpp\Draw</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\Update\Update.cpp">
+      <Filter>cpp\Update</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\Scene\Scene.cpp">
+      <Filter>cpp\Scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\h\main.h">
@@ -361,6 +370,15 @@
     </ClInclude>
     <ClInclude Include="..\h\Collision\collision.h">
       <Filter>h\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\Draw\Draw.h">
+      <Filter>h\Draw</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\Update\Update.h">
+      <Filter>h\Update</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\Scene\Scene.h">
+      <Filter>h\Scene</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="..\cpp\Collision\collision.cpp" />
     <ClCompile Include="..\cpp\Debug\debugproc.cpp" />
+    <ClCompile Include="..\cpp\Draw\Draw.cpp" />
     <ClCompile Include="..\cpp\effect\damege.cpp" />
     <ClCompile Include="..\cpp\effect\effect.cpp" />
     <ClCompile Include="..\cpp\effect\explosion.cpp" />
@@ -49,10 +50,13 @@
     <ClCompile Include="..\cpp\Object\Tutorial\tutorial.cpp" />
     <ClCompile Include="..\cpp\other\input.cpp" />
     <ClCompile Include="..\cpp\other\sound.cpp" />
+    <ClCompile Include="..\cpp\Scene\Scene.cpp" />
+    <ClCompile Include="..\cpp\Update\Update.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\h\Collision\collision.h" />
     <ClInclude Include="..\h\Debug\debugproc.h" />
+    <ClInclude Include="..\h\Draw\Draw.h" />
     <ClInclude Include="..\h\effect\damege.h" />
     <ClInclude Include="..\h\effect\effect.h" />
     <ClInclude Include="..\h\effect\explosion.h" />
@@ -80,6 +84,8 @@
     <ClInclude Include="..\h\Object\Tutorial\tutorial.h" />
     <ClInclude Include="..\h\other\input.h" />
     <ClInclude Include="..\h\other\sound.h" />
+    <ClInclude Include="..\h\Scene\Scene.h" />
+    <ClInclude Include="..\h\Update\Update.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
