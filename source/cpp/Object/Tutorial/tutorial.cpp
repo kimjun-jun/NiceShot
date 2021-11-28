@@ -5,9 +5,8 @@
 */
 #include "../../../h/main.h"
 #include "../../../h/Other/input.h"
-#include "../../../h/Object/Fade/fade.h"
+#include "../../../h/Object/Scene/Scene.h"
 #include "../../../h/Other/sound.h"
-#include "../../../h/Object/ObjectClass/objectclass.h"
 #include "../../../h/Object/Tutorial/tutorial.h"
 
 //*****************************************************************************
@@ -27,9 +26,6 @@ constexpr int	TUTORIAL_POS_Y_OFFSET{ 200 };			//!< チュートリアルの表示位置
 //=============================================================================
 TUTO::TUTO(void)
 {
-	//オブジェクトカウントアップ
-	this->CreateInstanceOBJ();
-
 	//頂点の作成
 	this->vtx.MakeVertex2D(OBJECT_PLAYER_MAX*OBJECT_TUTORIAL_MAX, FVF_VERTEX_2D);
 
@@ -73,9 +69,16 @@ TUTO::~TUTO(void)
 	//テクスチャ解放
 	this->tex.~TEXTURE();
 	//頂点解放
-	this->vtx.~VTXBuffer();
-	//オブジェクトカウントダウン
-	this->DeleteInstanceOBJ();
+	this->vtx.~VTXBUFFER();
+}
+
+//=============================================================================
+// 他クラスのアドレス取得
+//=============================================================================
+void TUTO::Addressor(GAME_OBJECT_INSTANCE *obj)
+{
+	pscene = obj->GetScene();
+	pGameObjInstance = obj;
 }
 
 //=============================================================================
@@ -94,7 +97,7 @@ void TUTO::Init(void)
 //=============================================================================
 // 更新
 //=============================================================================
-void TUTO::Update(GAME_OBJECT* obj, FADE *fade)
+void TUTO::Update(void)
 {
 
 	//カウントループ
@@ -104,8 +107,8 @@ void TUTO::Update(GAME_OBJECT* obj, FADE *fade)
 		if (GetKeyboardTrigger(DIK_RETURN) || IsButtonTriggered(CntTuto, BUTTON_START))
 		{
 			PlaySound(SOUND_LABEL_SE_enter02);
-			fade->SetFade(FADE_OUT, SCENE_TITLE, SOUND_LABEL_BGM_title01);
-			obj->Init();
+			pGameObjInstance->Init();
+			pscene->NextScene(FADE_OUT, SCENE_TITLE, SOUND_LABEL_BGM_title01);
 		}
 
 		//操作方法画像　表示非表示切り替え

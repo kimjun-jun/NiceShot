@@ -4,15 +4,15 @@
 * @author ƒLƒ€ƒ‰ƒWƒ…ƒ“
 */
 #include "../../../h/main.h"
-#include "../../../../h/Object/ObjectClass/objectclass.h"
 #include "../../../../h/Object/Player/player.h"
 #include "../../../../h/Object/Rank/rank.h"
+#include "../../../../h/Net/sock.h"
+#include "../../../../h/Draw/Draw.h"
 #include "../../../../h/Object/Player/VitalGauge/vitalgauge.h"
 
 //*****************************************************************************
 // ƒ}ƒNƒ’è‹`
 //*****************************************************************************
-
 constexpr float	VITALGAUGE_SIZE_X{ 500.0f };						//!< ƒAƒ^ƒbƒNƒQ[ƒW‚Ì”š‚Ì•
 constexpr float	VITALGAUGE_SIZE_Y{ 20.0f };							//!< ƒAƒ^ƒbƒNƒQ[ƒW‚Ì”š‚Ì‚‚³
 constexpr float	VITALGAUGE_SIZE_X_NET{ VITALGAUGE_SIZE_X * 2 };		//!< ƒAƒ^ƒbƒNƒQ[ƒW‚Ì”š‚Ì•
@@ -42,9 +42,6 @@ constexpr int	VITAL_DRAW_TEX_NUM{ 2 };		//!< ŠeƒvƒŒƒCƒ„[‚ª•`‰æ‚·‚éƒeƒNƒXƒ`ƒƒ‚Ì
 //=============================================================================
 VITALGAUGE::VITALGAUGE(void)
 {
-	//ƒIƒuƒWƒFƒNƒgƒJƒEƒ“ƒgƒAƒbƒv
-	this->CreateInstanceOBJ();
-
 	//’¸“_‚Ìì¬
 	this->vtx[PLAYER01].MakeVertex2D(VITAL_DRAW_TEX_NUM, FVF_VERTEX_2D);
 	this->vtx[PLAYER02].MakeVertex2D(VITAL_DRAW_TEX_NUM, FVF_VERTEX_2D);
@@ -119,10 +116,19 @@ VITALGAUGE::~VITALGAUGE(void)
 	for (int CntVital = 0; CntVital < OBJECT_BULLETGAUGE_MAX; CntVital++)
 	{
 		//’¸“_‰ğ•ú
-		this->vtx[CntVital].~VTXBuffer();
+		this->vtx[CntVital].~VTXBUFFER();
 	}
-	//ƒIƒuƒWƒFƒNƒgƒJƒEƒ“ƒgƒ_ƒEƒ“
-	this->DeleteInstanceOBJ();
+}
+
+//=============================================================================
+// ‘¼ƒNƒ‰ƒX‚ÌƒAƒhƒŒƒXæ“¾
+//=============================================================================
+void VITALGAUGE::Addressor(GAME_OBJECT_INSTANCE *obj)
+{
+	pplayer = obj->GetPlayer();
+	pmysocket = obj->GetMySocket();
+	prank = obj->GetRank();
+	pDrawManager = obj->GetDrawManager();
 }
 
 //=============================================================================
@@ -173,16 +179,16 @@ void VITALGAUGE::Init(void)
 //=============================================================================
 // Ä‰Šú‰»ˆ—@ƒlƒbƒg‘Îí‘O
 //=============================================================================
-void VITALGAUGE::InitNet(int MyNumber)
+void VITALGAUGE::InitNet(void)
 {
 	//•`‰æˆÊ’uİ’è
-	this->Transform[MyNumber].Pos(D3DXVECTOR3(VITALGAUGE_NET_POS_X, VITALGAUGE_NET_POS_Y, 0.0f));
+	this->Transform[pmysocket->GetNetMyNumber()].Pos(D3DXVECTOR3(VITALGAUGE_NET_POS_X, VITALGAUGE_NET_POS_Y, 0.0f));
 
 	//‘Ì—Í–ƒ^ƒ“
-	this->VitalGaugePara[MyNumber].VitalPower = PLAYER_VITAL_MAX;
+	this->VitalGaugePara[pmysocket->GetNetMyNumber()].VitalPower = PLAYER_VITAL_MAX;
 
 	//ƒx[ƒXÀ•Wæ“¾
-	D3DXVECTOR3 pos = this->Transform[MyNumber].Pos();
+	D3DXVECTOR3 pos = this->Transform[pmysocket->GetNetMyNumber()].Pos();
 	//ƒJƒEƒ“ƒgƒ‹[ƒv ‘Ì—ÍƒeƒNƒXƒ`ƒƒ”
 	for (int CntVitalTex = 0; CntVitalTex < VITAL_DRAW_TEX_NUM; CntVitalTex++)
 	{
@@ -198,38 +204,38 @@ void VITALGAUGE::InitNet(int MyNumber)
 		else//’†g		
 		{
 			// ’¸“_À•W‚Ìİ’è
-			float vitallen = float(VITALGAUGE_SIZE_X_NET * (this->VitalGaugePara[MyNumber].VitalPower / PLAYER_VITAL_MAX));//ƒoƒCƒ^ƒ‹‚Ì’·‚³
+			float vitallen = float(VITALGAUGE_SIZE_X_NET * (this->VitalGaugePara[pmysocket->GetNetMyNumber()].VitalPower / PLAYER_VITAL_MAX));//ƒoƒCƒ^ƒ‹‚Ì’·‚³
 			vtx[0] = D3DXVECTOR3(pos.x + VITALGAUGE_SIZE_X_OFFSET, pos.y + VITALGAUGE_SIZE_Y_OFFSET, 0.0f);
 			vtx[1] = D3DXVECTOR3(pos.x - VITALGAUGE_SIZE_X_OFFSET + vitallen, pos.y + VITALGAUGE_SIZE_Y_OFFSET, 0.0f);
 			vtx[2] = D3DXVECTOR3(pos.x + VITALGAUGE_SIZE_X_OFFSET, pos.y + VITALGAUGE_SIZE_Y_NET - VITALGAUGE_SIZE_Y_OFFSET, 0.0f);
 			vtx[3] = D3DXVECTOR3(pos.x - VITALGAUGE_SIZE_X_OFFSET + vitallen, pos.y + VITALGAUGE_SIZE_Y_NET - VITALGAUGE_SIZE_Y_OFFSET, 0.0f);
 		}
 		//•`‰æˆÊ’u”½‰f
-		this->vtx[MyNumber].Vertex2D(CntVitalTex, vtx);
+		this->vtx[pmysocket->GetNetMyNumber()].Vertex2D(CntVitalTex, vtx);
 	}
 }
 
 //=============================================================================
 // XVˆ—
 //=============================================================================
-void VITALGAUGE::Update(PLAYER *p, RANK *rank, bool Netflag, int NetMyNumber)
+void VITALGAUGE::Update(void)
 {
 	//’†gXV
 	//ƒ[ƒJƒ‹‘Îí
-	if (Netflag == false)
+	if (pmysocket->GetNetGameStartFlag() == false)
 	{
 		for (int CntPlayer = 0; CntPlayer < OBJECT_VITAL_MAX; CntPlayer++)
 		{
 			//ƒoƒCƒ^ƒ‹‹L˜^
-			this->VitalGaugePara[CntPlayer].VitalPower = p->PlayerPara[CntPlayer].StandardPara.Vital;
+			this->VitalGaugePara[CntPlayer].VitalPower = pplayer->PlayerPara[CntPlayer].StandardPara.Vital;
 
 			//ƒvƒŒƒCƒ„[‚ª¶‚«‚Ä‚¢‚é‚Æ‚«‚ÉƒoƒCƒ^ƒ‹‚ª0ˆÈ‰º‚Å–¢g—p‚É‚·‚éi€–Sƒtƒ‰ƒOj@•‰‚¯‚½“_‚Å‚Ì‡ˆÊ‚àƒZƒbƒg‚·‚é
-			if (p->iUseType[CntPlayer].Use() == YesUseType1)
+			if (pplayer->iUseType[CntPlayer].Use() == YesUseType1)
 			{
 				if (this->VitalGaugePara[CntPlayer].VitalPower <= 0)
 				{
-					p->iUseType[CntPlayer].Use(NoUse);
-					rank->SetRank(CntPlayer);
+					pplayer->iUseType[CntPlayer].Use(NoUse);
+					prank->SetRank(CntPlayer);
 				}
 			}
 
@@ -256,24 +262,24 @@ void VITALGAUGE::Update(PLAYER *p, RANK *rank, bool Netflag, int NetMyNumber)
 		for (int CntPlayer = 0; CntPlayer < OBJECT_VITAL_MAX; CntPlayer++)
 		{
 			//ƒoƒCƒ^ƒ‹‹L˜^
-			this->VitalGaugePara[CntPlayer].VitalPower = p->PlayerPara[CntPlayer].StandardPara.Vital;
+			this->VitalGaugePara[CntPlayer].VitalPower = pplayer->PlayerPara[CntPlayer].StandardPara.Vital;
 
 			//g—p’†”»’è
-			if (p->iUseType[CntPlayer].Use() == YesUseType1)
+			if (pplayer->iUseType[CntPlayer].Use() == YesUseType1)
 			{
 				//€‚ñ‚Å‚¢‚½‚ç•sg—p‚É‚µ‚Äƒ‰ƒ“ƒN‚ğƒZƒbƒg‚·‚é
 				if (this->VitalGaugePara[CntPlayer].VitalPower <= 0)
 				{
-					p->iUseType[CntPlayer].Use(NoUse);
-					rank->SetRankNet(CntPlayer, NetMyNumber);
+					pplayer->iUseType[CntPlayer].Use(NoUse);
+					prank->SetRankNet(CntPlayer, pmysocket->GetNetMyNumber());
 				}
 			}
 		}
 		//À•Wæ“¾
-		D3DXVECTOR3 pos = this->Transform[NetMyNumber].Pos();
+		D3DXVECTOR3 pos = this->Transform[pmysocket->GetNetMyNumber()].Pos();
 
 		//ƒoƒCƒ^ƒ‹‚Ì’·‚³
-		float vitallen = float(VITALGAUGE_SIZE_X_NET) * float(this->VitalGaugePara[NetMyNumber].VitalPower) / float(PLAYER_VITAL_MAX);
+		float vitallen = float(VITALGAUGE_SIZE_X_NET) * float(this->VitalGaugePara[pmysocket->GetNetMyNumber()].VitalPower) / float(PLAYER_VITAL_MAX);
 
 		// ’¸“_À•W‚Ìİ’è
 		D3DXVECTOR3 vtx[POLYGON_2D_VERTEX];
@@ -281,22 +287,22 @@ void VITALGAUGE::Update(PLAYER *p, RANK *rank, bool Netflag, int NetMyNumber)
 		vtx[1] = D3DXVECTOR3(pos.x - VITALGAUGE_SIZE_X_OFFSET + vitallen, pos.y + VITALGAUGE_SIZE_Y_OFFSET, 0.0f);
 		vtx[2] = D3DXVECTOR3(pos.x + VITALGAUGE_SIZE_X_OFFSET, pos.y + VITALGAUGE_SIZE_Y_NET - VITALGAUGE_SIZE_Y_OFFSET, 0.0f);
 		vtx[3] = D3DXVECTOR3(pos.x - VITALGAUGE_SIZE_X_OFFSET + vitallen, pos.y + VITALGAUGE_SIZE_Y_NET - VITALGAUGE_SIZE_Y_OFFSET, 0.0f);
-		this->vtx[NetMyNumber].Vertex2D(1, vtx);//’†g‚Í1
+		this->vtx[pmysocket->GetNetMyNumber()].Vertex2D(1, vtx);//’†g‚Í1
 	}
 }
 
 //=============================================================================
 // •`‰æˆ—
 //=============================================================================
-void VITALGAUGE::Draw(bool Netflag, int NetMyNumber, int CntPlayer)
+void VITALGAUGE::Draw(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 	//ƒ[ƒJƒ‹‘Îí
-	if (Netflag == false)
+	if (pmysocket->GetNetGameStartFlag() == false)
 	{
 		//˜g•`‰æ[„’†g•`‰æ
 		// ’¸“_ƒoƒbƒtƒ@‚ğƒfƒoƒCƒX‚Ìƒf[ƒ^ƒXƒgƒŠ[ƒ€‚ÉƒoƒCƒ“ƒh
-		pDevice->SetStreamSource(0, this->vtx[CntPlayer].VtxBuff(), 0, sizeof(VERTEX_2D));
+		pDevice->SetStreamSource(0, this->vtx[pDrawManager->GetDrawManagerNum()].VtxBuff(), 0, sizeof(VERTEX_2D));
 		// ’¸“_ƒtƒH[ƒ}ƒbƒg‚Ìİ’è
 		pDevice->SetFVF(FVF_VERTEX_2D);
 		// ƒeƒNƒXƒ`ƒƒ‚Ìİ’è@ƒeƒNƒXƒ`ƒƒ‚ª•¡”‚È‚çtex‚ğ”z—ñ‰»‚µ‚Ä‘I‘ğ‚³‚¹‚é‚æ‚¤‚É
@@ -304,9 +310,9 @@ void VITALGAUGE::Draw(bool Netflag, int NetMyNumber, int CntPlayer)
 		//BASE‚ğ•`‰æ
 		pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, POLYGON_2D_NUM);
 		// ƒeƒNƒXƒ`ƒƒ‚Ìİ’è
-		if (this->VitalGaugePara[CntPlayer].VitalPower >= VITAL_GREEN_DIAMETER * PLAYER_VITAL_MAX)
+		if (this->VitalGaugePara[pDrawManager->GetDrawManagerNum()].VitalPower >= VITAL_GREEN_DIAMETER * PLAYER_VITAL_MAX)
 			pDevice->SetTexture(0, this->tex[VITAL_TEX_GREEN].Texture());
-		else if (this->VitalGaugePara[CntPlayer].VitalPower >= VITAL_ORANGE_DIAMETER * PLAYER_VITAL_MAX)
+		else if (this->VitalGaugePara[pDrawManager->GetDrawManagerNum()].VitalPower >= VITAL_ORANGE_DIAMETER * PLAYER_VITAL_MAX)
 			pDevice->SetTexture(0, this->tex[VITAL_TEX_ORANGE].Texture());
 		else pDevice->SetTexture(0, this->tex[VITAL_TEX_RED].Texture());
 		// ’†g‚ğ•`‰æ@ˆø”“ñŒÂ–Ú‚Ì•`‰æŠJn’¸“_‚ğİ’è‚·‚é‚±‚Æ‚ª‘å–
@@ -317,7 +323,7 @@ void VITALGAUGE::Draw(bool Netflag, int NetMyNumber, int CntPlayer)
 	{
 		//˜g•`‰æ[„’†g•`‰æ
 		// ’¸“_ƒoƒbƒtƒ@‚ğƒfƒoƒCƒX‚Ìƒf[ƒ^ƒXƒgƒŠ[ƒ€‚ÉƒoƒCƒ“ƒh
-		pDevice->SetStreamSource(0, this->vtx[NetMyNumber].VtxBuff(), 0, sizeof(VERTEX_2D));
+		pDevice->SetStreamSource(0, this->vtx[pmysocket->GetNetMyNumber()].VtxBuff(), 0, sizeof(VERTEX_2D));
 		// ’¸“_ƒtƒH[ƒ}ƒbƒg‚Ìİ’è
 		pDevice->SetFVF(FVF_VERTEX_2D);
 		// ƒeƒNƒXƒ`ƒƒ‚Ìİ’è@ƒeƒNƒXƒ`ƒƒ‚ª•¡”‚È‚çtex‚ğ”z—ñ‰»‚µ‚Ä‘I‘ğ‚³‚¹‚é‚æ‚¤‚É
@@ -325,9 +331,9 @@ void VITALGAUGE::Draw(bool Netflag, int NetMyNumber, int CntPlayer)
 		//BASE‚ğ•`‰æ
 		pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, POLYGON_2D_NUM);
 		// ƒeƒNƒXƒ`ƒƒ‚Ìİ’è
-		if (this->VitalGaugePara[NetMyNumber].VitalPower >= VITAL_GREEN_DIAMETER * PLAYER_VITAL_MAX)
+		if (this->VitalGaugePara[pmysocket->GetNetMyNumber()].VitalPower >= VITAL_GREEN_DIAMETER * PLAYER_VITAL_MAX)
 			pDevice->SetTexture(0, this->tex[VITAL_TEX_GREEN].Texture());
-		else if (this->VitalGaugePara[NetMyNumber].VitalPower >= VITAL_ORANGE_DIAMETER * PLAYER_VITAL_MAX)
+		else if (this->VitalGaugePara[pmysocket->GetNetMyNumber()].VitalPower >= VITAL_ORANGE_DIAMETER * PLAYER_VITAL_MAX)
 			pDevice->SetTexture(0, this->tex[VITAL_TEX_ORANGE].Texture());
 		else pDevice->SetTexture(0, this->tex[VITAL_TEX_RED].Texture());
 		// ’†g‚ğ•`‰æ@ˆø”“ñŒÂ–Ú‚Ì•`‰æŠJn’¸“_‚ğİ’è‚·‚é‚±‚Æ‚ª‘å–

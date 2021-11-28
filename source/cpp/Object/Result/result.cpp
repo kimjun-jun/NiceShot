@@ -5,7 +5,7 @@
 */
 #include "../../../h/main.h"
 #include "../../../h/Other/input.h"
-#include "../../../h/Object/Fade/fade.h"
+#include "../../../h/Object/Scene/Scene.h"
 #include "../../../h/Other/sound.h"
 #include "../../../h/net/sock.h"
 #include "../../../h/Object/Result/result.h"
@@ -26,9 +26,6 @@ constexpr float	RESULT_LOGO_SIZE_Y{200.0f};						//!< ロゴの高さ
 //=============================================================================
 RESULT::RESULT(void)
 {
-	//オブジェクトカウントアップ
-	this->CreateInstanceOBJ();
-
 	//頂点の作成
 	this->vtx.MakeVertex2D(OBJECT_RESULT_MAX, FVF_VERTEX_2D);
 
@@ -72,7 +69,16 @@ RESULT::~RESULT(void)
 		this->tex[CntResult].~TEXTURE();
 	}
 	//頂点解放
-	this->vtx.~VTXBuffer();
+	this->vtx.~VTXBUFFER();
+}
+
+//=============================================================================
+// 他クラスのアドレス取得
+//=============================================================================
+void RESULT::Addressor(GAME_OBJECT_INSTANCE *obj)
+{
+	pscene = obj->GetScene();
+	pGameObjInstance = obj;
 }
 
 //=============================================================================
@@ -86,13 +92,13 @@ void RESULT::Init(void)
 //=============================================================================
 // 更新処理
 //=============================================================================
-void RESULT::Update(GAME_OBJECT* obj, FADE *fade)
+void RESULT::Update(void)
 {
 	//リザルト画面中に入力があれば初期化してタイトルシーンに戻る
 	if (IsButtonTriggered(0, BUTTON_A)|| GetKeyboardTrigger(DIK_RETURN))
 	{
-		obj->Init();	// ゲームの初期化処理
-		fade->SetFade(FADE_OUT, SCENE_TITLE, SOUND_LABEL_BGM_title01);
+		pGameObjInstance->Init();
+		pscene->NextScene(FADE_OUT, SCENE_TITLE, SOUND_LABEL_BGM_title01);
 	}
 }
 

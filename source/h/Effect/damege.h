@@ -5,7 +5,13 @@
 */
 #pragma once
 
-#include "../../../h/Object/ObjectClass/objectclass.h"
+#include "../../h/Object/ObjectClass/Interface/interface.h"
+#include "../../h/Object/ObjectClass/StandardComponent/Model/Model.h"
+#include "../../h/Object/ObjectClass/StandardComponent/TRANSFORM/TransForm.h"
+#include "../../h/Object/ObjectClass/StandardComponent/UseCheck/UseCheck.h"
+
+//前置宣言
+class MySOCKET;
 
 /**
 *　@class DAMEGE_PARAMETER
@@ -25,25 +31,31 @@ public:
 *　@class DAMEGE
 *　@brief GAMEOBJECT派生クラス
 */
-class DAMEGE : public GAME_OBJECT
+class DAMEGE : private GAME_OBJECT_INTERFACE_SUMMRY
 {
 public:
 	DAMEGE();	//!< データ読み込み　初期化
 	~DAMEGE();	//!< 削除
 
-	void	Init(void);			//!< 初期化
-	void	InitNet(int MyNumber);	//!< 初期化
-	void	Update(void);		//!< 更新
-	void	Draw(bool Netflag, int NetMyNumber, int CntPlayer);			//!< 描画
-	iUseCheak	iUseType[OBJECT_DAMEGE_MAX];			//!< 使用情報
+	void Addressor(GAME_OBJECT_INSTANCE *obj) override;	//!< アドレッサー
+	void Init(void) override;			//!< 初期化
+	void InitNet(void)override;			//!< 初期化ネット対戦用に変更が必要なとこで使用
+	void Update(void)override;			//!< 更新
+	void Draw(void)override;			//!< 描画
+
+	iUseCheck	iUseType[OBJECT_DAMEGE_MAX];			//!< 使用情報
 	DAMEGE_PARAMETER	DamegePara[OBJECT_DAMEGE_MAX];	//!< インスタンスに必要なデータ群
 
 private:
-
-
 	TEXTURE		tex;	//!< テクスチャ情報　複数使用するならここを配列化
-	VTXBuffer	vtx;	//!< 頂点情報　複数使用するならここを配列化
-	TransForm	Transform[OBJECT_DAMEGE_MAX];			//!< トランスフォーム情報
+	VTXBUFFER	vtx;	//!< 頂点情報　複数使用するならここを配列化
+	TRANSFORM	Transform[OBJECT_DAMEGE_MAX];			//!< トランスフォーム情報
+
+	//------他クラスのアドレス
+	MySOCKET *pmysocket;
+
+	//------描画ループカウントのアドレス
+	DRAW_MANAGER *pDrawManager;
 
 };
 

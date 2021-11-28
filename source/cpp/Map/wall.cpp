@@ -25,9 +25,6 @@ enum eWALL_TYPE
 //=============================================================================
 WALL::WALL(void)
 {
-	//オブジェクトカウントアップ
-	this->CreateInstanceOBJ();
-
 	// テクスチャの読み込み
 	this->tex.LoadTexture(WALL_TEXTURE_FILENAME);
 
@@ -65,10 +62,8 @@ WALL::~WALL(void)
 	for (int nCntMeshField = 0; nCntMeshField < OBJECT_WALL_MAX; nCntMeshField++)
 	{
 		//頂点解放
-		this->vtx[nCntMeshField].~VTXBuffer();
+		this->vtx[nCntMeshField].~VTXBUFFER();
 	}
-	//オブジェクトカウントダウン
-	this->DeleteInstanceOBJ();
 }
 
 //=============================================================================
@@ -93,6 +88,11 @@ void WALL::Update(void)
 void WALL::Draw(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
+	DWORD dwSettingLighting, dwSettingCullmode;
+	pDevice->GetRenderState(D3DRS_LIGHTING, &dwSettingLighting);
+	pDevice->GetRenderState(D3DRS_CULLMODE, &dwSettingCullmode);
+	// ライティングを無効に
+	pDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
 	for(int nCntMeshField = 0; nCntMeshField < OBJECT_WALL_MAX; nCntMeshField++)
 	{
 		D3DXMATRIX mtxRot, mtxTranslate, mtxWorld;
@@ -125,6 +125,12 @@ void WALL::Draw(void)
 		// ポリゴンの描画
 		pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, POLYGON_2D_NUM);
 	}
+	pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);	// 裏面をカリング
+	pDevice->SetRenderState(D3DRS_CULLMODE, dwSettingCullmode);
+	// ライティングを有効に
+	pDevice->SetRenderState(D3DRS_LIGHTING, TRUE);
+	pDevice->SetRenderState(D3DRS_LIGHTING, dwSettingLighting);
+	pDevice->SetRenderState(D3DRS_CULLMODE, dwSettingCullmode);
 }
 
 //=============================================================================

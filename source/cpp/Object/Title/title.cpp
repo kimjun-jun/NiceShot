@@ -5,7 +5,7 @@
 */
 #include "../../../h/main.h"
 #include "../../../h/Other/input.h"
-#include "../../../h/Object/Fade/fade.h"
+#include "../../../h/Object/Scene/Scene.h"
 #include "../../../h/Other/sound.h"
 #include "../../../h/net/sock.h"
 #include "../../../h/Object/Title/title.h"
@@ -40,9 +40,6 @@ constexpr int	COUNT_WAIT_DEMO{ 60 * 5 };						// デモまでの待ち時間
 //=============================================================================
 TITLE::TITLE(void)
 {
-	//オブジェクトカウントアップ
-	this->CreateInstanceOBJ();
-
 	//頂点作成
 	this->vtx.MakeVertex2D(OBJECT_TITLE_MAX, FVF_VERTEX_2D);
 
@@ -91,9 +88,15 @@ TITLE::~TITLE(void)
 		this->tex[CntTitle].~TEXTURE();
 	}
 	//頂点解放
-	this->vtx.~VTXBuffer();
-	//オブジェクトカウントダウン
-	this->DeleteInstanceOBJ();
+	this->vtx.~VTXBUFFER();
+}
+
+//=============================================================================
+// 他クラスのアドレス取得
+//=============================================================================
+void TITLE::Addressor(GAME_OBJECT_INSTANCE *obj)
+{
+	pscene = obj->GetScene();
 }
 
 //=============================================================================
@@ -135,7 +138,7 @@ void TITLE::Init(void)
 //=============================================================================
 // 更新処理
 //=============================================================================
-void TITLE::Update(GAME_OBJECT* obj, FADE *fade)
+void TITLE::Update(void)
 {
 	//カーソルを保存
 	this->TitlePara.OldSceneNumX = this->TitlePara.SceneNumX;
@@ -195,7 +198,7 @@ void TITLE::Update(GAME_OBJECT* obj, FADE *fade)
 			if (this->TitlePara.SceneNumX <= -1)this->TitlePara.SceneNumX = 1;
 		}
 		//scene選択処理
-		this->CheckScene(fade);
+		this->CheckScene();
 		break;
 	default:
 		break;
@@ -287,7 +290,7 @@ void TITLE::ChangeHierarchy(int NextHierarchyType)
 //=============================================================================
 // シーン切り替え処理
 //=============================================================================
-void TITLE::CheckScene(FADE *fade)
+void TITLE::CheckScene(void)
 {
 	//チュートリアル
 	if (this->TitlePara.SceneNumX == 0 && this->TitlePara.SceneNumY == 0)
@@ -308,7 +311,7 @@ void TITLE::CheckScene(FADE *fade)
 		{
 			//選択音再生
 			PlaySound(SOUND_LABEL_SE_enter01);
-			fade->SetFade(FADE_OUT, SCENE_TUTORIAL, SOUND_LABEL_BGM_tutorial01);
+			pscene->NextScene(FADE_OUT, SCENE_TUTORIAL, SOUND_LABEL_BGM_tutorial01);
 		}
 	}
 	//ローカル対戦
@@ -330,7 +333,7 @@ void TITLE::CheckScene(FADE *fade)
 		{
 			//選択音再生
 			PlaySound(SOUND_LABEL_SE_enter01);
-			fade->SetFade(FADE_OUT, SCENE_GAMECOUNTDOWN, SOUND_LABEL_BGM_normal01);
+			pscene->NextScene(FADE_OUT, SCENE_GAMECOUNTDOWN, SOUND_LABEL_BGM_normal01);
 			SourceVolumeChange(0,SOUND_LABEL_BGM_normal01);
 		}
 	}
@@ -353,7 +356,7 @@ void TITLE::CheckScene(FADE *fade)
 		{
 			//選択音再生
 			PlaySound(SOUND_LABEL_SE_enter01);
-			fade->SetFade(FADE_OUT, SCENE_NETMATCH, SOUND_LABEL_BGM_select01);
+			pscene->NextScene(FADE_OUT, SCENE_NETMATCH, SOUND_LABEL_BGM_select01);
 		}
 	}
 	//アプリ終了へ

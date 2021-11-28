@@ -4,8 +4,9 @@
 * @author キムラジュン
 */
 #include "../../../h/main.h"
-#include "../../../h/Object/ObjectClass/objectclass.h"
 #include "../../../h/Object/Player/player.h"
+#include "../../../h/Net/sock.h"
+#include "../../../h/Draw/Draw.h"
 #include "../../../h/Object/Bullet/bulletgauge.h"
 
 
@@ -40,9 +41,6 @@ constexpr int PLAYER_AMMOSTOCK{ 10 };	//!< 弾のストック　
 //=============================================================================
 BULLETGAUGE::BULLETGAUGE(void)
 {
-	//オブジェクトカウントアップ
-	this->CreateInstanceOBJ();
-
 	//頂点の作成
 	this->vtx[PLAYER01].MakeVertex2D(PLAYER_AMMOSTOCK*2, FVF_VERTEX_2D);	//!< *2は枠テクスチャと本体テクスチャの2種類必要だから
 	this->vtx[PLAYER02].MakeVertex2D(PLAYER_AMMOSTOCK*2, FVF_VERTEX_2D);
@@ -115,10 +113,18 @@ BULLETGAUGE::~BULLETGAUGE(void)
 	for (int CntBulletGauge = 0; CntBulletGauge < OBJECT_BULLETGAUGE_MAX; CntBulletGauge++)
 	{
 		//頂点解放
-		this->vtx[CntBulletGauge].~VTXBuffer();
+		this->vtx[CntBulletGauge].~VTXBUFFER();
 	}
-	//オブジェクトカウントダウン
-	this->DeleteInstanceOBJ();
+}
+
+//=============================================================================
+// 他クラスのアドレス取得
+//=============================================================================
+void BULLETGAUGE::Addressor(GAME_OBJECT_INSTANCE *obj)
+{
+	pmysocket = obj->GetMySocket();
+	pplayer = obj->GetPlayer();
+	pDrawManager = obj->GetDrawManager();
 }
 
 //=============================================================================
@@ -185,12 +191,12 @@ void BULLETGAUGE::Init(void)
 //=============================================================================
 // 再初期化処理　ネット対戦前
 //=============================================================================
-void BULLETGAUGE::InitNet(int MyNumber)
+void BULLETGAUGE::InitNet(void)
 {
 	//描画位置設定
-	this->Transform[MyNumber].Pos(D3DXVECTOR3(BULLETGAUGE_NET_POS_X, BULLETGAUGE_NET_POS_Y, 0.0f));
+	this->Transform[pmysocket->GetNetMyNumber()].Pos(D3DXVECTOR3(BULLETGAUGE_NET_POS_X, BULLETGAUGE_NET_POS_Y, 0.0f));
 	//ベース座標取得
-	D3DXVECTOR3 pos = this->Transform[MyNumber].Pos();
+	D3DXVECTOR3 pos = this->Transform[pmysocket->GetNetMyNumber()].Pos();
 	//カウントループ 弾数
 	for (int CntAmmoStock = 0; CntAmmoStock < PLAYER_AMMOSTOCK * 2; CntAmmoStock++)
 	{
@@ -215,35 +221,35 @@ void BULLETGAUGE::InitNet(int MyNumber)
 			vtx[3] = D3DXVECTOR3(pos.x - BULLETGAUGE_SIZE_X_OFFSET + (cnt*BULLETGAUGE_POS_X_OFFSET * 2) + BULLETGAUGE_SIZE_X * 2, pos.y + BULLETGAUGE_SIZE_Y - BULLETGAUGE_SIZE_Y_OFFSET + BULLETGAUGE_SIZE_Y, 0.0f);
 		}
 		//描画位置反映
-		this->vtx[MyNumber].Vertex2D(CntAmmoStock, vtx);
+		this->vtx[pmysocket->GetNetMyNumber()].Vertex2D(CntAmmoStock, vtx);
 	}
 }
 
 //=============================================================================
 // 更新処理
 //=============================================================================
-void BULLETGAUGE::Update(PLAYER *player)
+void BULLETGAUGE::Update(void)
 {
 	//カウントループ プレイヤー数(バレットゲージ数)
 	for (int CntBulletGauge = 0; CntBulletGauge < OBJECT_BULLETGAUGE_MAX; CntBulletGauge++)
 	{
 		//プレイヤーの弾数を記録
-		this->BulletGaugePara[CntBulletGauge].AmmoStock = player->PlayerPara[CntBulletGauge].BulletPara.BulletStock;
+		this->BulletGaugePara[CntBulletGauge].AmmoStock = pplayer->PlayerPara[CntBulletGauge].BulletPara.BulletStock;
 	}
 }
 
 //=============================================================================
 // 描画処理
 //=============================================================================
-void BULLETGAUGE::Draw(bool Netflag, int NetMyNumber, int CntPlayer)
+void BULLETGAUGE::Draw(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 
 	//ローカル対戦時
-	if (Netflag == false)
+	if (pmysocket->GetNetGameStartFlag() == false)
 	{
 		// 頂点バッファをデバイスのデータストリームにバインド
-		pDevice->SetStreamSource(0, this->vtx[CntPlayer].VtxBuff(), 0, sizeof(VERTEX_2D));
+		pDevice->SetStreamSource(0, this->vtx[pDrawManager->GetDrawManagerNum()].VtxBuff(), 0, sizeof(VERTEX_2D));
 		// 頂点フォーマットの設定
 		pDevice->SetFVF(FVF_VERTEX_2D);
 		//カウントループ　枠の数
@@ -255,7 +261,7 @@ void BULLETGAUGE::Draw(bool Netflag, int NetMyNumber, int CntPlayer)
 			pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, (CntAmmo * 4), POLYGON_2D_NUM);
 		}
 		//カウントループ　中身の数
-		for (int CntAmmo = 0; CntAmmo < this->BulletGaugePara[CntPlayer].AmmoStock; CntAmmo++)
+		for (int CntAmmo = 0; CntAmmo < this->BulletGaugePara[pDrawManager->GetDrawManagerNum()].AmmoStock; CntAmmo++)
 		{
 			// テクスチャの設定　テクスチャが複数ならtexを配列化して選択させるように
 			pDevice->SetTexture(0, this->tex[BULLETGAUGE_TEX_SHELL].Texture());		//枠なので[1]
@@ -267,7 +273,7 @@ void BULLETGAUGE::Draw(bool Netflag, int NetMyNumber, int CntPlayer)
 	else
 	{
 		// 頂点バッファをデバイスのデータストリームにバインド
-		pDevice->SetStreamSource(0, this->vtx[NetMyNumber].VtxBuff(), 0, sizeof(VERTEX_2D));
+		pDevice->SetStreamSource(0, this->vtx[pmysocket->GetNetMyNumber()].VtxBuff(), 0, sizeof(VERTEX_2D));
 		// 頂点フォーマットの設定
 		pDevice->SetFVF(FVF_VERTEX_2D);
 		//カウントループ　枠の数
@@ -279,7 +285,7 @@ void BULLETGAUGE::Draw(bool Netflag, int NetMyNumber, int CntPlayer)
 			pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, (CntAmmo * 4), POLYGON_2D_NUM);
 		}
 		//カウントループ　中身の数
-		for (int CntAmmo = 0; CntAmmo < this->BulletGaugePara[NetMyNumber].AmmoStock; CntAmmo++)
+		for (int CntAmmo = 0; CntAmmo < this->BulletGaugePara[pmysocket->GetNetMyNumber()].AmmoStock; CntAmmo++)
 		{
 			// テクスチャの設定　テクスチャが複数ならtexを配列化して選択させるように
 			pDevice->SetTexture(0, this->tex[BULLETGAUGE_TEX_SHELL].Texture());		//枠なので[1]

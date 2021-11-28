@@ -4,6 +4,7 @@
 * @author キムラジュン
 */
 #include "../../../h/main.h"
+#include "../../../h/Net/sock.h"
 #include "../../../h/Object/Rank/rank.h"
 
 //*****************************************************************************
@@ -21,9 +22,6 @@ constexpr float	RANK_POS_OFFSET_HI{ 3.0f / 4.0f };			//!< スクリーン分割数
 //=============================================================================
 RANK::RANK(void)
 {
-	//オブジェクトカウントアップ
-	this->CreateInstanceOBJ();
-
 	//頂点の作成
 	this->vtx.MakeVertex2D(OBJECT_RANK_MAX, FVF_VERTEX_2D);
 
@@ -80,9 +78,15 @@ RANK::~RANK(void)
 		this->tex[CntRank].~TEXTURE();
 	}
 	//頂点解放
-	this->vtx.~VTXBuffer();
-	//オブジェクトカウントダウン
-	this->DeleteInstanceOBJ();
+	this->vtx.~VTXBUFFER();
+}
+
+//=============================================================================
+// 他クラスのアドレス取得
+//=============================================================================
+void RANK::Addressor(GAME_OBJECT_INSTANCE *obj)
+{
+	pmysocket = obj->GetMySocket();
 }
 
 //=============================================================================
@@ -101,7 +105,7 @@ void RANK::Init(void)
 //=============================================================================
 // 初期化処理
 //=============================================================================
-void RANK::InitNet(int NetMyNumber)
+void RANK::InitNet(void)
 {
 	//ネット対戦用に描画位置を調整
 	D3DXVECTOR3 vtx[POLYGON_2D_VERTEX] =
@@ -111,7 +115,7 @@ void RANK::InitNet(int NetMyNumber)
 	D3DXVECTOR3(0.0f, SCREEN_H, 0.0f),
 	D3DXVECTOR3(SCREEN_W, SCREEN_H, 0.0f),
 	};
-	this->vtx.Vertex2D(NetMyNumber, vtx);
+	this->vtx.Vertex2D(pmysocket->GetNetMyNumber(), vtx);
 }
 
 //=============================================================================
@@ -125,12 +129,12 @@ void RANK::Update(void)
 //=============================================================================
 // 描画処理
 //=============================================================================
-void RANK::Draw(bool Netflag, int NetMyNumber)
+void RANK::Draw(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 
 	//ローカル対戦時
-	if (Netflag == false)
+	if (pmysocket->GetNetGameStartFlag() == false)
 	{
 		for (int CntRank = 0; CntRank < OBJECT_RANK_MAX; CntRank++)
 		{
@@ -151,7 +155,7 @@ void RANK::Draw(bool Netflag, int NetMyNumber)
 	//ネット対戦時
 	else
 	{
-		if (this->iUseType[NetMyNumber].Use() == YesUseType1)
+		if (this->iUseType[pmysocket->GetNetMyNumber()].Use() == YesUseType1)
 		{
 			if (this->RankParaOne.NetUse == true)
 			{
@@ -160,9 +164,9 @@ void RANK::Draw(bool Netflag, int NetMyNumber)
 				// 頂点フォーマットの設定
 				pDevice->SetFVF(FVF_VERTEX_2D);
 				// テクスチャの設定　テクスチャが複数ならtexを配列化して選択させるように
-				pDevice->SetTexture(0, this->tex[this->RankParaAll[NetMyNumber].RankNum].Texture());
+				pDevice->SetTexture(0, this->tex[this->RankParaAll[pmysocket->GetNetMyNumber()].RankNum].Texture());
 				// ポリゴンの描画　引数二個目の描画開始頂点を設定することが大事
-				pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, (NetMyNumber * 4), POLYGON_2D_NUM);
+				pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, (pmysocket->GetNetMyNumber() * 4), POLYGON_2D_NUM);
 			}
 		}
 	}

@@ -24,9 +24,6 @@ constexpr int	EFFECT_BULLET_TIME{ 12 };			//!< エフェクトバレットの生存時間
 //=============================================================================
 BULLET::BULLET(void)
 {
-	//オブジェクトカウントアップ
-	this->CreateInstanceOBJ();
-
 	//カウントループ
 	for (int CntBullet = 0; CntBullet < OBJECT_BULLET_MAX; CntBullet++)
 	{
@@ -41,8 +38,15 @@ BULLET::BULLET(void)
 //=============================================================================
 BULLET::~BULLET(void)
 {
-	//オブジェクトカウントダウン
-	this->DeleteInstanceOBJ();
+}
+
+//=============================================================================
+// 他クラスのアドレス取得
+//=============================================================================
+void BULLET::Addressor(GAME_OBJECT_INSTANCE *obj)
+{
+	pshadow = obj->GetShadow();
+	peffect = obj->GetEffect();
 }
 
 //=============================================================================
@@ -66,7 +70,7 @@ void BULLET::Init(void)
 //=============================================================================
 // 更新処理
 //=============================================================================
-void BULLET::Update(SHADOW *shadow, EFFECT *effect)
+void BULLET::Update(void)
 {
 	for(int CntBullet = 0; CntBullet < OBJECT_BULLET_MAX; CntBullet++)
 	{
@@ -127,18 +131,18 @@ void BULLET::Update(SHADOW *shadow, EFFECT *effect)
 			//一定時間経過で未使用にする
 			if (this->BulletPara[CntBullet].Timer <= 0)
 			{
-				shadow->ReleaseInstance(this->BulletPara[CntBullet].IdxShadow);
-				this->ReleaseInstance(CntBullet, &shadow[0]);
+				pshadow->ReleaseInstance(this->BulletPara[CntBullet].IdxShadow);
+				this->ReleaseInstance(CntBullet);
 			}
 			else
 			{
 				// 影の位置設定
-				shadow->UpdateInstance(this->BulletPara[CntBullet].IdxShadow,
+				pshadow->UpdateInstance(this->BulletPara[CntBullet].IdxShadow,
 					D3DXVECTOR3(pos.x, this->BulletPara[CntBullet].FieldPosY, pos.z), 
 					rot,scl);
 
 				// エフェクトの設定
-				effect->SetInstance(pos, VEC3_ALL0,
+				peffect->SetInstance(pos, VEC3_ALL0,
 					PLAYER_COLOR[this->BulletPara[CntBullet].UsePlayerType], 
 					EFFECT_BULLET_SIZE_X, EFFECT_BULLET_SIZE_Y, EFFECT_BULLET_TIME);
 			}
@@ -158,7 +162,7 @@ void BULLET::Draw(void)
 //=============================================================================
 // 弾の設定
 //=============================================================================
-int BULLET::SetInstance(D3DXVECTOR3 pos, D3DXVECTOR3 move, float fSizeX, float fSizeY, int nTimer, ePLAYER_TYPE type,SHADOW *s)
+int BULLET::SetInstance(D3DXVECTOR3 pos, D3DXVECTOR3 move, float fSizeX, float fSizeY, int nTimer, ePLAYER_TYPE type)
 {
 	int nIdxBullet = -1;
 
@@ -178,7 +182,7 @@ int BULLET::SetInstance(D3DXVECTOR3 pos, D3DXVECTOR3 move, float fSizeX, float f
 			this->BulletPara[CntBullet].Gravity = 0.0f;
 
 			// 影の設定
-			this->BulletPara[CntBullet].IdxShadow = s->SetInstance(pos, VEC3_ALL1);
+			this->BulletPara[CntBullet].IdxShadow = pshadow->SetInstance(pos, VEC3_ALL1);
 
 			//リターンするインデックスを更新
 			nIdxBullet = CntBullet;
@@ -193,12 +197,12 @@ int BULLET::SetInstance(D3DXVECTOR3 pos, D3DXVECTOR3 move, float fSizeX, float f
 //=============================================================================
 // 弾の削除
 //=============================================================================
-void BULLET::ReleaseInstance(int nIdxBullet, SHADOW *s)
+void BULLET::ReleaseInstance(int nIdxBullet)
 {
 	//インデックスが正常なら対応するバレットを未使用にする
 	if(nIdxBullet >= 0 && nIdxBullet < OBJECT_BULLET_MAX)
 	{
-		s->ReleaseInstance(this->BulletPara[nIdxBullet].IdxShadow);
+		pshadow->ReleaseInstance(this->BulletPara[nIdxBullet].IdxShadow);
 		this->iUseType[nIdxBullet].Use(NoUse);
 	}
 }

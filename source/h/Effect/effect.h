@@ -4,7 +4,12 @@
 * @author キムラジュン
 */
 #pragma once
-#include "../../../h/Object/ObjectClass/objectclass.h"
+
+#include "../../h/Object/ObjectClass/Interface/interface.h"
+#include "../../h/Object/ObjectClass/Instance/instance.h"
+#include "../../h/Object/ObjectClass/StandardComponent/Model/Model.h"
+#include "../../h/Object/ObjectClass/StandardComponent/TRANSFORM/TransForm.h"
+#include "../../h/Object/ObjectClass/StandardComponent/UseCheck/UseCheck.h"
 
 //*****************************************************************************
 // クラス定義
@@ -26,30 +31,33 @@ public:
 *　@class EFFECT
 *　@brief GAMEOBJECT派生クラス
 */
-class EFFECT : public GAME_OBJECT
+class EFFECT : private GAME_OBJECT_INTERFACE_SUMMRY
 {
 public:
 	EFFECT();	//!< データ読み込み　初期化
 	~EFFECT();	//!< 削除
 
-	void		Init(void);					//!< 初期化
-	void		Update(void);				//!< 更新
-	void		Draw(int CntPlayer);		//!< 描画
+	void Addressor(GAME_OBJECT_INSTANCE *obj) override;	//!< アドレッサー
+	void Init(void) override;			//!< 初期化
+	void InitNet(void)override {};		//!< 初期化ネット対戦用に変更が必要なとこで使用
+	void Update(void)override;			//!< 更新
+	void Draw(void)override;			//!< 描画
 
 	//インスタンス作成と解放　＊解放に関してはタイマーで自動未使用になるので用意しない
 	int		SetInstance(D3DXVECTOR3 pos, D3DXVECTOR3 move, D3DXCOLOR col, float fSizeX, float fSizeY, int nTimer);	//!< インスタンスセット
 
 private:
-
-
 	TEXTURE		tex;				//!< テクスチャ情報　複数使用するならここを配列化
-	VTXBuffer	vtx;				//!< 頂点情報　複数使用するならここを配列化
+	VTXBUFFER	vtx;				//!< 頂点情報　複数使用するならここを配列化
 
-	TransForm	Transform[OBJECT_EFFECT_MAX];		//!< トランスフォーム情報
-	iUseCheak	iUseType[OBJECT_EFFECT_MAX];		//!< 使用情報
-	Movement	move[OBJECT_EFFECT_MAX];			//!< 移動量
+	TRANSFORM	Transform[OBJECT_EFFECT_MAX];		//!< トランスフォーム情報
+	iUseCheck	iUseType[OBJECT_EFFECT_MAX];		//!< 使用情報
+	MOVEMENT	move[OBJECT_EFFECT_MAX];			//!< 移動量
 
 	EFFECT_PARAMETER EffectPara[OBJECT_EFFECT_MAX];	//!< インスタンスに必要なデータ群
+
+	//------描画ループカウントのアドレス
+	DRAW_MANAGER *pDrawManager;
 
 };
 

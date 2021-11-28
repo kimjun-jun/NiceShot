@@ -5,7 +5,10 @@
 */
 #pragma once
 
-#include "../../h/Object/ObjectClass/objectclass.h"
+#include "../../../h/Object/ObjectClass/Interface/interface.h"
+#include "../../../h/Object/ObjectClass/StandardComponent/Model/Model.h"
+#include "../../../h/Object/ObjectClass/StandardComponent/TRANSFORM/TransForm.h"
+#include "../../../h/Object/ObjectClass/StandardComponent/UseCheck/UseCheck.h"
 
 enum eSKY_MODEL_TYPE
 {
@@ -38,24 +41,26 @@ public:
 *　@class SKY
 *　@brief GAMEOBJECT派生クラス
 */
-class SKY : public GAME_OBJECT
+class SKY : private GAME_OBJECT_INTERFACE_SUMMRY
 {
 public:
 	SKY();		//!< データ読み込み　初期化
 	~SKY();		//!< 削除
-	void		Init(void);		//!< 初期化
-	void		Update(void);	//!< 更新
-	void		Draw(void);		//!< 描画
+	void Addressor(GAME_OBJECT_INSTANCE *obj) override {};	//!< アドレッサー
+	void Init(void) override;			//!< 初期化
+	void InitNet(void)override {};		//!< 初期化ネット対戦用に変更が必要なとこで使用
+	void Update(void)override;			//!< 更新
+	void Draw(void)override;			//!< 描画
 
 private:
-	ModelAttribute			Attribute[OBJECT_SKY_MAX];			//!< モデル情報　マテリアルや頂点数など　複数使用するならここを配列化
-	TEXTURE					tex;								//!< テクスチャ情報　複数使用するならここを配列化　ITEMTYPE_MAX
-	VTXBuffer				vtx[OBJECT_SKY_MAX];				//!< 頂点情報　複数使用するならここを配列化
-	TransForm				Transform[OBJECT_SKY_MAX];			//!< トランスフォーム情報
-	SKY_PARAMETER			SkyPara[OBJECT_SKY_MAX];
+	MODELATTRIBUTE Attribute[OBJECT_SKY_MAX];	//!< モデル情報　マテリアルや頂点数など　複数使用するならここを配列化
+	TEXTURE	tex;								//!< テクスチャ情報　複数使用するならここを配列化　ITEMTYPE_MAX
+	VTXBUFFER vtx[OBJECT_SKY_MAX];				//!< 頂点情報　複数使用するならここを配列化
+	TRANSFORM Transform[OBJECT_SKY_MAX];		//!< トランスフォーム情報
+	SKY_PARAMETER SkyPara[OBJECT_SKY_MAX];
 
-	void SetUpMeshSphere(void);			// 球体SKYセットアップ処理
-	void SetUpMeshTop(void);			// 上部SKYセットアップ処理
-	void ResetColor(void);				//カラー初期化　球体モデルと上部モデル
+	void SetUpMeshSphere(void);		// 球体SKYセットアップ処理
+	void SetUpMeshTop(void);		// 上部SKYセットアップ処理
+	void ResetColor(void);			//カラー初期化　球体モデルと上部モデル
 
 };

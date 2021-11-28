@@ -4,11 +4,16 @@
 * @author ƒLƒ€ƒ‰ƒWƒ…ƒ“
 */
 #include "../../../h/main.h"
+#include "../../../h/Object/ObjectClass/StandardComponent/Model/Model.h"
+#include "../../../h/Object/ObjectClass/StandardComponent/TRANSFORM/TransForm.h"
+#include "../../../h/Object/ObjectClass/StandardComponent/UseCheck/UseCheck.h"
 #include "../../../h/Map/field.h"
 #include "../../../h/Other/sound.h"
 #include "../../../h/Object/Player/player.h"
 #include "../../../h/Object/Shadow/shadow.h"
+#include "../../../h/Object/Bullet/bullet.h"
 #include "../../../h/Library/library.h"
+#include "../../../h/Net/sock.h"
 #include "../../../h/Object/Item/item.h"
 
 //*****************************************************************************
@@ -28,9 +33,6 @@ constexpr int DROP_ITEM_CHARGE_ADDTIME{ 1 };				//!< ƒAƒCƒeƒ€‚ğƒŠƒXƒ|[ƒ“‚³‚¹‚é
 //=============================================================================
 ITEM::ITEM(void)
 {
-	//ƒIƒuƒWƒFƒNƒgƒJƒEƒ“ƒgƒAƒbƒv
-	this->CreateInstanceOBJ();
-
 	//ƒJƒEƒ“ƒgƒ‹[ƒv(ƒAƒCƒeƒ€‚Ìí—Ş)@
 	for (int nCntItemType = 0; nCntItemType < ITEM_TYPE_MAX; nCntItemType++)
 	{
@@ -89,17 +91,25 @@ ITEM::~ITEM(void)
 		//ƒeƒNƒXƒ`ƒƒ‰ğ•ú
 		this->tex[nCntItemType].~TEXTURE();
 		//ƒ‚ƒfƒ‹‰ğ•ú
-		this->model.~ModelAttribute();
+		this->model.~MODELATTRIBUTE();
 	}
 
 	//ƒJƒEƒ“ƒgƒ‹[ƒv(ƒAƒCƒeƒ€‚ÌƒCƒ“ƒXƒ^ƒ“ƒX”)@
 	for (int CntItem = 0; CntItem < OBJECT_ITEM_MAX; CntItem++)
 	{
 		//’¸“_‰ğ•ú
-		this->vtx[CntItem].~VTXBuffer();
+		this->vtx[CntItem].~VTXBUFFER();
 	}
-	//ƒIƒuƒWƒFƒNƒgƒJƒEƒ“ƒgƒ_ƒEƒ“
-	this->DeleteInstanceOBJ();
+}
+
+//=============================================================================
+// ‘¼ƒNƒ‰ƒX‚ÌƒAƒhƒŒƒXæ“¾
+//=============================================================================
+void ITEM::Addressor(GAME_OBJECT_INSTANCE *obj)
+{
+	pplayer = obj->GetPlayer();
+	pshadow = obj->GetShadow();
+	pmysocket = obj->GetMySocket();
 }
 
 //=============================================================================
@@ -139,8 +149,8 @@ void ITEM::Init(void)
 //		this[nCntItem].Pos(VEC3_ALL0);
 //		this[nCntItem].SetScl(D3DXVECTOR3(2.0f, 2.0f, 2.0f));
 //		this[nCntItem].SetRot(VEC3_ALL0);
-//		this[nCntItem].SetFieldNorVec(VEC3_ALL0);
-//		this[nCntItem].SetFieldNorUpNorCross(VEC3_ALL0);
+//		this[nCntItem].SetFIELDNORMALVec(VEC3_ALL0);
+//		this[nCntItem].SetFIELDNORMALUpNorCross(VEC3_ALL0);
 //		this[nCntItem].SetQrot(0.0f);
 //		this[nCntItem].NetUse = false;
 //		this[nCntItem].Use(false);
@@ -188,8 +198,8 @@ void ITEM::Init(void)
 //		this[nCntItem].Pos(VEC3_ALL0);
 //		this[nCntItem].SetScl(D3DXVECTOR3(2.0f, 2.0f, 2.0f));
 //		this[nCntItem].SetRot(VEC3_ALL0);
-//		this[nCntItem].SetFieldNorVec(VEC3_ALL0);
-//		this[nCntItem].SetFieldNorUpNorCross(VEC3_ALL0);
+//		this[nCntItem].SetFIELDNORMALVec(VEC3_ALL0);
+//		this[nCntItem].SetFIELDNORMALUpNorCross(VEC3_ALL0);
 //		this[nCntItem].SetQrot(0.0f);
 //		this[nCntItem].Use(false);
 //		this[nCntItem].Droptime = 0.0f;
@@ -208,7 +218,7 @@ void ITEM::Init(void)
 //=============================================================================
 // XVˆ—
 //=============================================================================
-void ITEM::Update(PLAYER *Player, SHADOW *Shadow, bool NetGameStartFlag)
+void ITEM::Update(void)
 {
 	//ƒJƒEƒ“ƒgƒ‹[ƒv(ƒAƒCƒeƒ€‚ÌƒCƒ“ƒXƒ^ƒ“ƒX”)
 	for (int nCntItem = 0; nCntItem < OBJECT_ITEM_MAX; nCntItem++)
@@ -221,8 +231,8 @@ void ITEM::Update(PLAYER *Player, SHADOW *Shadow, bool NetGameStartFlag)
 			D3DXVECTOR3 pos = this->Transform[nCntItem].Pos();
 			D3DXVECTOR3 rot = this->Transform[nCntItem].Rot();
 			D3DXVECTOR3 scl = this->Transform[nCntItem].Scl();
-			D3DXVECTOR3 FieldNorVec = this->PostureVec[nCntItem].FNVecFunc();
-			D3DXVECTOR3 FieldNorUpNorCross = this->PostureVec[nCntItem].FNUNCrossFunc();
+			D3DXVECTOR3 FIELDNORMALVec = this->PostureVec[nCntItem].FNVecFunc();
+			D3DXVECTOR3 FIELDNORMALUpNorCross = this->PostureVec[nCntItem].FNUNCrossFunc();
 			float Qrot = this->PostureVec[nCntItem].QrotFunc();
 
 			//ƒtƒB[ƒ‹ƒh‚É—‚¿‚Ä‚é‚Æ‚«‚Í‚­‚é‚­‚é‰ñ“]‚³‚¹‚é
@@ -236,39 +246,38 @@ void ITEM::Update(PLAYER *Player, SHADOW *Shadow, bool NetGameStartFlag)
 
 			//’nŒ`‚ÌŠp“x‚ÆƒvƒŒƒCƒ„[‚ÌŠp“x‚ğŒvZBdraw‚ÅƒNƒI[ƒ^ƒjƒIƒ“‚Åg‚¤
 			D3DXVECTOR3 Upvec = D3DXVECTOR3(0.0, 1.0f, 0.0f);
-			D3DXVec3Cross(&FieldNorUpNorCross, &FieldNorVec, &Upvec);
-			float kakezan = D3DXVec3Dot(&FieldNorVec, &Upvec);
+			D3DXVec3Cross(&FIELDNORMALUpNorCross, &FIELDNORMALVec, &Upvec);
+			float kakezan = D3DXVec3Dot(&FIELDNORMALVec, &Upvec);
 			if (kakezan != 0.0f)
 			{
 				float cossita = kakezan /
-					sqrtf(FieldNorVec.x*FieldNorVec.x +
-						FieldNorVec.y *FieldNorVec.y +
-						FieldNorVec.z * FieldNorVec.z);
+					sqrtf(FIELDNORMALVec.x*FIELDNORMALVec.x +
+						FIELDNORMALVec.y *FIELDNORMALVec.y +
+						FIELDNORMALVec.z * FIELDNORMALVec.z);
 				Qrot = acosf(cossita);
 			}
 			else Qrot = 0.0f;
 
 			// ‰e‚ÌˆÊ’uİ’è
-			Shadow->UpdateInstance(this->ItemParaAll[nCntItem].nIdxShadow,
+			pshadow->UpdateInstance(this->ItemParaAll[nCntItem].nIdxShadow,
 				this->ItemParaAll[nCntItem].LinkShadowPos,rot, scl);
 
 			//-------------------------------------------ƒIƒuƒWƒFƒNƒg‚Ì’l‘‚«‚İ
 			this->Transform[nCntItem].Pos(pos);
 			this->Transform[nCntItem].Rot(rot);
-			this->PostureVec[nCntItem].FNUNCrossFunc(FieldNorUpNorCross);
+			this->PostureVec[nCntItem].FNUNCrossFunc(FIELDNORMALUpNorCross);
 			this->PostureVec[nCntItem].QrotFunc(Qrot);
 		}
 
 		//‚¾‚ê‚©‚ªƒAƒCƒeƒ€‚ğæ“¾‚µ‚½‚ç‚»‚ÌƒvƒŒƒCƒ„[‚É‹ß‚Ã‚­ˆ—
 		if (this->ItemParaAll[nCntItem].GettingSignal == true)
 		{
-			GettingItem(nCntItem, Player, Shadow);
+			GettingItem(nCntItem);
 		}
 	}
 
-	
 	//ƒ[ƒJƒ‹‘Îí‚È‚ç‚±‚±‚ÅƒŠƒXƒ|[ƒ“ˆ—
-	if (NetGameStartFlag == false)
+	if (pmysocket->GetNetGameStartFlag() == false)
 	{
 		//ƒAƒCƒeƒ€‚ğ•œŠˆ‚³‚¹‚é§ŒäB
 		for (int nCntItem = 0; nCntItem < OBJECT_ITEM_MAX; nCntItem++)
@@ -296,7 +305,7 @@ void ITEM::Update(PLAYER *Player, SHADOW *Shadow, bool NetGameStartFlag)
 					if (ItemNum == ITEM_TYPE_LIFE && ItemNum == ITEM_TYPE_CAMERA && ItemNum == ITEM_TYPE_KIRI) ItemNum = rand() % ITEM_TYPE_MAX;
 					this->ItemParaAll[nCntItem].eType = eITEM_TYPE(ItemNum);
 					//ƒCƒ“ƒXƒ^ƒ“ƒXƒZƒbƒg@g—p‚·‚é
-					this->SetInstance(pos, D3DXVECTOR3(ITEM_BIG_SCL, ITEM_BIG_SCL, ITEM_BIG_SCL), VEC3_ALL0, this->ItemParaAll[nCntItem].eType, Shadow);
+					this->SetInstance(pos, D3DXVECTOR3(ITEM_BIG_SCL, ITEM_BIG_SCL, ITEM_BIG_SCL), VEC3_ALL0, this->ItemParaAll[nCntItem].eType);
 					//this->SetInstance(pos, D3DXVECTOR3(ITEM_BIG_SCL, ITEM_BIG_SCL, ITEM_BIG_SCL), VEC3_ALL0, ITEM_TYPE_TIKEI);
 					//this->SetInstance(pos, D3DXVECTOR3(ITEM_BIG_SCL, ITEM_BIG_SCL, ITEM_BIG_SCL), VEC3_ALL0, ITEM_TYPE_SENSYA);
 					this->ItemParaAll[nCntItem].CollisionFieldEnd = false;
@@ -340,11 +349,11 @@ void ITEM::Draw(void)
 			D3DXVECTOR3 pos = this->Transform[nCntItem].Pos();
 			D3DXVECTOR3 rot = this->Transform[nCntItem].Rot();
 			D3DXVECTOR3 scl = this->Transform[nCntItem].Scl();
-			D3DXVECTOR3 PlayerUpToFieldNorVec = this->PostureVec[nCntItem].FNUNCrossFunc();
+			D3DXVECTOR3 PlayerUpToFIELDNORMALVec = this->PostureVec[nCntItem].FNUNCrossFunc();
 			float Qrot = this->PostureVec[nCntItem].QrotFunc();
 
 			//q=(rotVecAxis–@ü)*(g_Player.rot‰ñ“])  -‚ªƒLƒ‚H
-			D3DXQuaternionRotationAxis(&q, &PlayerUpToFieldNorVec, -Qrot);
+			D3DXQuaternionRotationAxis(&q, &PlayerUpToFIELDNORMALVec, -Qrot);
 			D3DXMatrixRotationQuaternion(&mtxQ, &q);
 
 			// ƒ[ƒ‹ƒhƒ}ƒgƒŠƒbƒNƒX‚Ì‰Šú‰»
@@ -400,7 +409,7 @@ void ITEM::Draw(void)
 //=============================================================================
 // ƒAƒCƒeƒ€‚Ìİ’è
 //=============================================================================
-void ITEM::SetInstance(D3DXVECTOR3 pos, D3DXVECTOR3 scl, D3DXVECTOR3 rot, eITEM_TYPE eType, SHADOW *s)
+void ITEM::SetInstance(D3DXVECTOR3 pos, D3DXVECTOR3 scl, D3DXVECTOR3 rot, eITEM_TYPE eType)
 {
 	//ƒJƒEƒ“ƒgƒ‹[ƒv(ƒAƒCƒeƒ€‚ÌƒCƒ“ƒXƒ^ƒ“ƒX”)
 	for(int nCntItem = 0; nCntItem < OBJECT_ITEM_MAX; nCntItem++)
@@ -419,7 +428,7 @@ void ITEM::SetInstance(D3DXVECTOR3 pos, D3DXVECTOR3 scl, D3DXVECTOR3 rot, eITEM_
 			// ‰e‚Ìİ’è
 			this->ItemParaAll[nCntItem].LinkShadowPos = VEC3_ALL0;
 			this->ItemParaAll[nCntItem].ShadowPosSignal = false;
-			this->ItemParaAll[nCntItem].nIdxShadow = s->SetInstance(pos, VEC3_ALL1);
+			this->ItemParaAll[nCntItem].nIdxShadow = pshadow->SetInstance(pos, VEC3_ALL1);
 
 			break;
 		}
@@ -444,7 +453,7 @@ void ITEM::SetInstance(int Index, D3DXVECTOR3 pos, D3DXVECTOR3 scl, D3DXVECTOR3 
 //=============================================================================
 // ƒAƒCƒeƒ€‚Ìíœ
 //=============================================================================
-void ITEM::ReleaseInstance(int nIdxItem, SHADOW *s)
+void ITEM::ReleaseInstance(int nIdxItem)
 {
 	//w’è”ÍˆÍŠO‚Ì”’l‚È‚çƒXƒ‹[@‘¶İ‚·‚é”’l‚È‚çg—p(•`‰æ)‚µ‚È‚¢
 	if(nIdxItem >= 0 && nIdxItem < OBJECT_ITEM_MAX)
@@ -452,14 +461,14 @@ void ITEM::ReleaseInstance(int nIdxItem, SHADOW *s)
 		//Šî–{ƒpƒ‰ƒ[ƒ^‚Ìİ’è
 		this->iUseType[nIdxItem].Use(NoUse);
 		this->ItemParaAll[nIdxItem].CollisionFieldEnd = false;
-		s->ReleaseInstance(this->ItemParaAll[nIdxItem].nIdxShadow);
+		pshadow->ReleaseInstance(this->ItemParaAll[nIdxItem].nIdxShadow);
 	}
 }
 
 //=============================================================================
 // ƒAƒCƒeƒ€‚ğæ“¾‚µ‚½ƒvƒŒƒCƒ„[‚Ö‹ß‚Ã‚¯‚éŠÖ”
 //=============================================================================
-void ITEM::GettingItem(int nIdxItem, PLAYER *Player, SHADOW *s)
+void ITEM::GettingItem(int nIdxItem)
 {
 	//ƒvƒŒƒCƒ„[‚Ö‹ß‚Ã‚¯‚éˆ—
 	if (this->ItemParaAll[nIdxItem].GettingSignalEnd == false)
@@ -473,7 +482,7 @@ void ITEM::GettingItem(int nIdxItem, PLAYER *Player, SHADOW *s)
 		irot.y += VALUE_ROTATE_ITEM_HI;
 		
 		//ƒvƒŒƒCƒ„[‚ÆƒAƒCƒeƒ€‚Ì‹——£‚ğŒvZ‚µ‹ß‚Ã‚¯‚é
-		D3DXVECTOR3 ppos = Player->modelDraw[this->ItemParaAll[nIdxItem].GetPlayerType].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos();
+		D3DXVECTOR3 ppos = pplayer->modelDraw[this->ItemParaAll[nIdxItem].GetPlayerType].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos();
 
 		D3DXVECTOR3 distance = ppos - ipos;
 		distance *= APPROADHING_RATE;
@@ -496,7 +505,7 @@ void ITEM::GettingItem(int nIdxItem, PLAYER *Player, SHADOW *s)
 	else if(this->ItemParaAll[nIdxItem].GettingSignalEnd == true)
 	{
 		//ƒtƒ‰ƒO‚ğI—¹‚³‚¹g—pƒCƒ“ƒXƒ^ƒ“ƒX”‚ğŒ¸‚ç‚·
-		this->ReleaseInstance(nIdxItem,s);
+		this->ReleaseInstance(nIdxItem);
 		this->ItemParaAll[nIdxItem].GettingSignal = false;
 		this->ItemParaAll[nIdxItem].GettingSignalEnd = false;
 		this->ItemParaOne.GoukeiDrop--;

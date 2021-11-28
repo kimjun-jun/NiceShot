@@ -19,7 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\cpp\Collision\collision.cpp" />
+    <ClCompile Include="..\cpp\Collision\CollisionCal.cpp" />
+    <ClCompile Include="..\cpp\Collision\CollisionCheck.cpp" />
     <ClCompile Include="..\cpp\Debug\debugproc.cpp" />
     <ClCompile Include="..\cpp\Draw\Draw.cpp" />
     <ClCompile Include="..\cpp\Effect\damege.cpp" />
@@ -37,24 +38,27 @@
     <ClCompile Include="..\cpp\Object\Bullet\bulletprediction.cpp" />
     <ClCompile Include="..\cpp\Object\Camera\camera.cpp" />
     <ClCompile Include="..\cpp\Object\CountDown\countdown.cpp" />
-    <ClCompile Include="..\cpp\Object\Fade\fade.cpp" />
     <ClCompile Include="..\cpp\Object\Item\item.cpp" />
-    <ClCompile Include="..\cpp\Object\ObjectClass\objectclass.cpp" />
+    <ClCompile Include="..\cpp\Object\ObjectClass\Instance\instance.cpp" />
+    <ClCompile Include="..\cpp\Object\ObjectClass\Interface\interface.cpp" />
+    <ClCompile Include="..\cpp\Object\ObjectClass\StandardComponent\Model\Model.cpp" />
+    <ClCompile Include="..\cpp\Object\ObjectClass\StandardComponent\TransForm\TransForm.cpp" />
+    <ClCompile Include="..\cpp\Object\ObjectClass\StandardComponent\UseCheak\UseCheck.cpp" />
     <ClCompile Include="..\cpp\Object\Player\player.cpp" />
     <ClCompile Include="..\cpp\Object\Player\Status\status.cpp" />
     <ClCompile Include="..\cpp\Object\Player\VitalGauge\vitalgauge.cpp" />
     <ClCompile Include="..\cpp\Object\Rank\rank.cpp" />
     <ClCompile Include="..\cpp\Object\Result\result.cpp" />
+    <ClCompile Include="..\cpp\Object\Scene\Scene.cpp" />
     <ClCompile Include="..\cpp\Object\Shadow\shadow.cpp" />
     <ClCompile Include="..\cpp\Object\Title\title.cpp" />
     <ClCompile Include="..\cpp\Object\Tutorial\tutorial.cpp" />
     <ClCompile Include="..\cpp\Other\input.cpp" />
     <ClCompile Include="..\cpp\Other\sound.cpp" />
-    <ClCompile Include="..\cpp\Scene\Scene.cpp" />
     <ClCompile Include="..\cpp\Update\Update.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\h\Collision\collision.h" />
+    <ClInclude Include="..\h\Collision\CollisionCal.h" />
     <ClInclude Include="..\h\Debug\debugproc.h" />
     <ClInclude Include="..\h\Draw\Draw.h" />
     <ClInclude Include="..\h\Effect\damege.h" />
@@ -72,19 +76,23 @@
     <ClInclude Include="..\h\Object\Bullet\bulletprediction.h" />
     <ClInclude Include="..\h\Object\Camera\camera.h" />
     <ClInclude Include="..\h\Object\CountDown\countdown.h" />
-    <ClInclude Include="..\h\Object\Fade\fade.h" />
-    <ClInclude Include="..\h\Object\ObjectClass\objectclass.h" />
+    <ClInclude Include="..\h\Object\Item\item.h" />
+    <ClInclude Include="..\h\Object\ObjectClass\Instance\instance.h" />
+    <ClInclude Include="..\h\Object\ObjectClass\Interface\interface.h" />
+    <ClInclude Include="..\h\Object\ObjectClass\StandardComponent\Model\Model.h" />
+    <ClInclude Include="..\h\Object\ObjectClass\StandardComponent\TransForm\TransForm.h" />
+    <ClInclude Include="..\h\Object\ObjectClass\StandardComponent\UseCheck\UseCheck.h" />
     <ClInclude Include="..\h\Object\Player\player.h" />
     <ClInclude Include="..\h\Object\Player\Status\status.h" />
     <ClInclude Include="..\h\Object\Player\VitalGauge\vitalgauge.h" />
     <ClInclude Include="..\h\Object\Rank\rank.h" />
     <ClInclude Include="..\h\Object\Result\result.h" />
+    <ClInclude Include="..\h\Object\Scene\Scene.h" />
     <ClInclude Include="..\h\Object\Shadow\shadow.h" />
     <ClInclude Include="..\h\Object\Title\title.h" />
     <ClInclude Include="..\h\Object\Tutorial\tutorial.h" />
     <ClInclude Include="..\h\Other\input.h" />
     <ClInclude Include="..\h\Other\sound.h" />
-    <ClInclude Include="..\h\Scene\Scene.h" />
     <ClInclude Include="..\h\Update\Update.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>

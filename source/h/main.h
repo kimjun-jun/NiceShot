@@ -143,38 +143,7 @@ enum eOBJECT_COUNT
 	OBJECT_FIELD_MAX = 1,
 	OBJECT_SKY_MAX = 2,
 	OBJECT_WALL_MAX = 4,
-	OBJECT_FADE_MAX = 1,
-};
-
-/**
- * @enum E_STAGE
- * 画面遷移定数
- */
-enum E_STAGE//列挙型。defineの番号を自動で割り当ててくれる。
-{
-	SCENE_TITLE,					//!< 0。1つめだから0。列挙型の列挙定数名。定義した名前をシンボルっていうのが一般らしい。
-	SCENE_TUTORIAL,					//!< 1チュートリアル
-	SCENE_GAMECOUNTDOWN,			//!< 2カウントダウン
-	SCENE_GAME,						//!< 3ゲーム
-	SCENE_NETMATCH,					//!< 4ネットマッチ
-	SCENE_NETGAMECOUNTDOWN,			//!< 5ネットカウントダウン
-	SCENE_NETGAME,					//!< 6ネットゲーム
-	SCENE_RESULT,					//!< 7リザルト
-	SCENE_MAX						
-};
-
-/**
- * @enum UseType
- * 使用タイプの種類
- */
-enum eUse_Type
-{
-	NullUse = -1,
-	NoUse=0,
-	YesUseType1=1,
-	YesUseType2,
-	YesUseType3,
-	YesUseType4,
+	OBJECT_SCENE_MAX = 1,
 };
 
 /**
@@ -234,21 +203,6 @@ enum ePLAYER_MODEL_TYPE
 	PLAYER_MODEL_TYPE_MAX,
 };
 
-
-/**
- * @enum PLAYER_MODEL_NUM
- * モデルタイプ定数
- */
-//num PLAYER_MODEL_NUM
-//
-//	PLAYER_MODEL_NUM_HOUDAI,
-//	PLAYER_MODEL_NUM_HOUTOU,
-//	PLAYER_MODEL_NUM_HOUSIN,
-//	PLAYER_MODEL_NUM_HOUSIN_MORPHING,
-//	PLAYER_MODEL_NUM_MAX,
-//;
-
-
 /**
  * @enum ITEMTYPE
  * アイテム定数
@@ -303,11 +257,6 @@ void DrawTextType(void);
 
 void SetTextSo(char *moji);
 void DrawTextTypeSo(void);
-
-LRESULT CALLBACK IDD_DIALOG(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-
-BOOL CALLBACK IP_DIALOG(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-
 
 //線形合同法関数
 int MyRandFunc(int *X, int M);

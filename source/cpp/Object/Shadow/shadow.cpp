@@ -20,9 +20,6 @@ constexpr float	SHADOW_SIZE_Z{ 25.0f };							// 影の高さ
 //=============================================================================
 SHADOW::SHADOW(void)
 {
-	//オブジェクトカウントアップ
-	this->CreateInstanceOBJ();
-
 	//頂点の作成
 	this->vtx.MakeVertex3DBill(OBJECT_SHADOW_MAX, FVF_VERTEX_3D);
 
@@ -65,9 +62,7 @@ SHADOW::~SHADOW(void)
 	//テクスチャ解放
 	this->tex.~TEXTURE();
 	//頂点解放
-	this->vtx.~VTXBuffer();
-	//オブジェクトカウントダウン
-	this->DeleteInstanceOBJ();
+	this->vtx.~VTXBUFFER();
 }
 
 //=============================================================================

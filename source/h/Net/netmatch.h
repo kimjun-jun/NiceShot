@@ -5,26 +5,30 @@
 */
 #pragma once
 
-#include "../../h/Object/ObjectClass/objectclass.h"
+#include "../../../h/Object/ObjectClass/Interface/interface.h"
+#include "../../../h/Object/ObjectClass/StandardComponent/Model/Model.h"
+#include "../../../h/Object/ObjectClass/StandardComponent/TRANSFORM/TransForm.h"
+#include "../../../h/Object/ObjectClass/StandardComponent/UseCheck/UseCheck.h"
 
 /**
 *　@class TUTO
 *　@brief GAMEOBJECT派生クラス
 */
-class NETMATCH : public GAME_OBJECT
+class NETMATCH : private GAME_OBJECT_INTERFACE_SUMMRY
 {
 public:
 	NETMATCH();		//!< データ読み込み　初期化
 	~NETMATCH();	//!< 削除
 
-	void	Init(void)override;								//!< 初期化
-	void	Update(GAME_OBJECT* obj, FADE *fade);			//!< 更新
-	void	Draw(void)override;								//!< 描画
-
+	void Addressor(GAME_OBJECT_INSTANCE *obj) override {};	//!< アドレッサー
+	void Init(void) override;			//!< 初期化
+	void InitNet(void)override {};		//!< 初期化ネット対戦用に変更が必要なとこで使用
+	void Update(void)override;			//!< 更新
+	void Draw(void)override;			//!< 描画
 private:
 
-	TEXTURE		tex;			//!< テクスチャ情報　複数使用するならここを配列化
-	VTXBuffer	vtx;			//!< 頂点情報　複数使用するならここを配列化
-	TransForm	Transform;		//!< トランスフォーム情報　各プレイヤーの数 * チュートリアル画像分作成
+	TEXTURE	tex;			//!< テクスチャ情報　複数使用するならここを配列化
+	VTXBUFFER vtx;			//!< 頂点情報　複数使用するならここを配列化
+	TRANSFORM Transform;	//!< トランスフォーム情報　各プレイヤーの数 * チュートリアル画像分作成
 };
 

@@ -4,8 +4,9 @@
 * @author ƒLƒ€ƒ‰ƒWƒ…ƒ“
 */
 #include "../../../h/main.h"
-#include "../../../h/Object/Fade/fade.h"
+#include "../../../h/Object/Scene/Scene.h"
 #include "../../../h/Other/sound.h"
+#include "../../../h/Net/sock.h"
 #include "../../../h/Object/CountDown/countdown.h"
 
 //*****************************************************************************
@@ -34,9 +35,6 @@ constexpr float COUNTDOWN_ALPHA{ 0.05f };						//!< ƒJƒEƒ“ƒgƒ_ƒEƒ“‚ª0‚ÌŽžGO‚ð•`‰
 //=============================================================================
 COUNTDOWN::COUNTDOWN(void)
 {
-	//ƒIƒuƒWƒFƒNƒgƒJƒEƒ“ƒgƒAƒbƒv
-	this->CreateInstanceOBJ();
-
 	//’¸“_‚Ìì¬
 	this->vtx.MakeVertex2D(OBJECT_COUNTDOWN_MAX, FVF_VERTEX_2D);
 
@@ -87,11 +85,17 @@ COUNTDOWN::~COUNTDOWN(void)
 	this->tex[COUNTDOWN_TEX_NUMBER].~TEXTURE();
 	this->tex[COUNTDOWN_TEX_LOGO].~TEXTURE();
 	//’¸“_‰ð•ú
-	this->vtx.~VTXBuffer();
-	//ƒIƒuƒWƒFƒNƒgƒJƒEƒ“ƒgƒ_ƒEƒ“
-	this->DeleteInstanceOBJ();
+	this->vtx.~VTXBUFFER();
 }
 
+//=============================================================================
+// ‘¼ƒNƒ‰ƒX‚ÌƒAƒhƒŒƒXŽæ“¾
+//=============================================================================
+void COUNTDOWN::Addressor(GAME_OBJECT_INSTANCE *obj)
+{
+	pmysocket = obj->GetMySocket();
+	pscene = obj->GetScene();
+}
 
 //=============================================================================
 // ‰Šú‰»ˆ—
@@ -114,7 +118,7 @@ void COUNTDOWN::Init(void)
 //=============================================================================
 // XVˆ—
 //=============================================================================
-void COUNTDOWN::Update(GAME_OBJECT*obj, bool Netflag)
+void COUNTDOWN::Update(void)
 {
 	NumberCountUpdate();
 	NumberSizeUpdate();
@@ -123,16 +127,16 @@ void COUNTDOWN::Update(GAME_OBJECT*obj, bool Netflag)
 	{
 		MasterVolumeChange(1);
 		//ƒ[ƒJƒ‹ƒQ[ƒ€ŠJŽn
-		if (Netflag == false)
+		if (pmysocket->GetNetGameStartFlag() == false)
 		{
-			obj->SetScene(SCENE_GAME);
+			pscene->SetScene(SCENE_GAME);
 			PlaySound(SOUND_LABEL_BGM_normal01);
 			SourceVolumeChange(0.5f, SOUND_LABEL_BGM_normal01);
 		}
 		//ƒlƒbƒgƒQ[ƒ€ŠJŽn
 		else
 		{
-			obj->SetScene(SCENE_NETGAME);
+			pscene->SetScene(SCENE_NETGAME);
 			PlaySound(SOUND_LABEL_BGM_boss01);
 			SourceVolumeChange(0.8f, SOUND_LABEL_BGM_boss01);
 		}

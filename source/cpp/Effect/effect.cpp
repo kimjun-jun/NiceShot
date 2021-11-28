@@ -6,6 +6,8 @@
 #include "../../h/main.h"
 #include "../../h/Other/input.h"
 #include "../../h/Object/Camera/camera.h"
+#include "../../h/Draw/Draw.h"
+#include "../../h/Object/ObjectClass/Instance/instance.h"
 #include "../../h/Effect/effect.h"
 
 //*****************************************************************************
@@ -23,9 +25,6 @@ constexpr float	EFFECT_NORMALSET_SIZE_Y{ 16.0f };			//!< エフェクト標準の高さ
 //=============================================================================
 EFFECT::EFFECT(void)
 {
-	//オブジェクトカウントアップ
-	this->CreateInstanceOBJ();
-
 	//頂点の作成
 	this->vtx.MakeVertex3DBill(OBJECT_EFFECT_MAX, FVF_VERTEX_3D);
 
@@ -73,9 +72,15 @@ EFFECT::~EFFECT(void)
 	//テクスチャ解放
 	this->tex.~TEXTURE();
 	//頂点解放
-	this->vtx.~VTXBuffer();
-	//オブジェクトカウントダウン
-	this->DeleteInstanceOBJ();
+	this->vtx.~VTXBUFFER();
+}
+
+//=============================================================================
+// 他クラスのアドレス取得
+//=============================================================================
+void EFFECT::Addressor(GAME_OBJECT_INSTANCE *obj)
+{
+	pDrawManager = obj->GetDrawManager();
 }
 
 //=============================================================================
@@ -146,7 +151,7 @@ void  EFFECT::Update(void)
 //=============================================================================
 // 描画処理
 //=============================================================================
-void  EFFECT::Draw(int CntPlayer)
+void EFFECT::Draw(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 
@@ -178,15 +183,15 @@ void  EFFECT::Draw(int CntPlayer)
 			// ワールドマトリックスの初期化
 			D3DXMatrixIdentity(&mtxWorldEffect);
 
-			mtxWorldEffect._11 = cam[CntPlayer].mtxView._11;
-			mtxWorldEffect._12 = cam[CntPlayer].mtxView._21;
-			mtxWorldEffect._13 = cam[CntPlayer].mtxView._31;
-			mtxWorldEffect._21 = cam[CntPlayer].mtxView._12;
-			mtxWorldEffect._22 = cam[CntPlayer].mtxView._22;
-			mtxWorldEffect._23 = cam[CntPlayer].mtxView._32;
-			mtxWorldEffect._31 = cam[CntPlayer].mtxView._13;
-			mtxWorldEffect._32 = cam[CntPlayer].mtxView._23;
-			mtxWorldEffect._33 = cam[CntPlayer].mtxView._33;
+			mtxWorldEffect._11 = cam[pDrawManager->GetDrawManagerNum()].mtxView._11;
+			mtxWorldEffect._12 = cam[pDrawManager->GetDrawManagerNum()].mtxView._21;
+			mtxWorldEffect._13 = cam[pDrawManager->GetDrawManagerNum()].mtxView._31;
+			mtxWorldEffect._21 = cam[pDrawManager->GetDrawManagerNum()].mtxView._12;
+			mtxWorldEffect._22 = cam[pDrawManager->GetDrawManagerNum()].mtxView._22;
+			mtxWorldEffect._23 = cam[pDrawManager->GetDrawManagerNum()].mtxView._32;
+			mtxWorldEffect._31 = cam[pDrawManager->GetDrawManagerNum()].mtxView._13;
+			mtxWorldEffect._32 = cam[pDrawManager->GetDrawManagerNum()].mtxView._23;
+			mtxWorldEffect._33 = cam[pDrawManager->GetDrawManagerNum()].mtxView._33;
 
 			// スケールを反映
 			D3DXMatrixScaling(&mtxScale, scl.x, scl.y, scl.z);

@@ -4,8 +4,12 @@
 * @author キムラジュン
 */
 #pragma once
-#include "../../../h/Object/ObjectClass/objectclass.h"
 
+#include "../../../h/Object/ObjectClass/Interface/interface.h"
+#include "../../../h/Object/ObjectClass/Instance/instance.h"
+#include "../../../h/Object/ObjectClass/StandardComponent/Model/Model.h"
+#include "../../../h/Object/ObjectClass/StandardComponent/TRANSFORM/TransForm.h"
+#include "../../../h/Object/ObjectClass/StandardComponent/UseCheck/UseCheck.h"
 
 //*****************************************************************************
 // class定義
@@ -32,27 +36,32 @@ public:
 *　@class BULLET
 *　@brief GAMEOBJECT派生クラス
 */
-class BULLET : public GAME_OBJECT
+class BULLET : private GAME_OBJECT_INTERFACE_SUMMRY
 {
 public:
 	BULLET();		//!< データ読み込み　初期化
 	~BULLET();		//!< 削除
 
-	void	Init(void);						//!< 初期化
-	void	Update(SHADOW *s, EFFECT *e);	//!< 更新
-	void	Draw(void);						//!< 描画
+	void Addressor(GAME_OBJECT_INSTANCE *obj) override;	//!< アドレッサー
+	void Init(void) override;			//!< 初期化
+	void InitNet(void)override {};		//!< 初期化ネット対戦用に変更が必要なとこで使用
+	void Update(void)override;			//!< 更新
+	void Draw(void)override;			//!< 描画
 
-	TransForm	Transform[OBJECT_BULLET_MAX];		//!< トランスフォーム情報
-	iUseCheak	iUseType[OBJECT_BULLET_MAX];		//!< 使用情報
-	BULLET_PARAMETER	BulletPara[OBJECT_BULLET_MAX];	//!< インスタンスに必要なデータ群
+	TRANSFORM Transform[OBJECT_BULLET_MAX];		//!< トランスフォーム情報
+	iUseCheck iUseType[OBJECT_BULLET_MAX];		//!< 使用情報
+	BULLET_PARAMETER BulletPara[OBJECT_BULLET_MAX];	//!< インスタンスに必要なデータ群
 
-	int		SetInstance(D3DXVECTOR3 pos, D3DXVECTOR3 move, float fSizeX, float fSizeY, int nTimer, ePLAYER_TYPE type, SHADOW *s);	//!< インスタンスセット
-	void	ReleaseInstance(int nIdxBullet, SHADOW *s);	//!< インスタンス解放
+	int SetInstance(D3DXVECTOR3 pos, D3DXVECTOR3 move, float fSizeX, float fSizeY, int nTimer, ePLAYER_TYPE type);	//!< インスタンスセット
+	void ReleaseInstance(int nIdxBullet);	//!< インスタンス解放
 
 private:
 
-	Movement	move[OBJECT_BULLET_MAX];			//!< 移動量
+	MOVEMENT	move[OBJECT_BULLET_MAX];			//!< 移動量
 
+	//------他クラスのアドレス
+	SHADOW *pshadow;
+	EFFECT *peffect;
 } ;
 
 

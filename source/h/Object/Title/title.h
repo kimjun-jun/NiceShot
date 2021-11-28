@@ -5,7 +5,10 @@
 */
 #pragma once
 
-#include "../../../h/Object/ObjectClass/objectclass.h"
+#include "../../../h/Object/ObjectClass/Interface/interface.h"
+#include "../../../h/Object/ObjectClass/StandardComponent/Model/Model.h"
+#include "../../../h/Object/ObjectClass/StandardComponent/TRANSFORM/TransForm.h"
+#include "../../../h/Object/ObjectClass/StandardComponent/UseCheck/UseCheck.h"
 
 enum eTITLE_HIERARCHY_NUM
 {
@@ -34,26 +37,31 @@ public:
 *　@class TITLE
 *　@brief GAMEOBJECT派生クラス
 */
-class TITLE :public GAME_OBJECT
+class TITLE :private GAME_OBJECT_INTERFACE_SUMMRY
 {
 public:
 	TITLE();	//!< データ読み込み　初期化
 	~TITLE();	//!< 削除
 
-	void	Init(void);								//!< 初期化
-	void	Update(GAME_OBJECT* obj, FADE *fade);	//!< 更新
-	void	Draw(void);								//!< 描画
+	void Addressor(GAME_OBJECT_INSTANCE *obj) override;	//!< アドレッサー
+	void Init(void) override;			//!< 初期化
+	void InitNet(void)override {};		//!< 初期化ネット対戦用に変更が必要なとこで使用
+	void Update(void)override;			//!< 更新
+	void Draw(void)override;			//!< 描画
 
 private:
-	void	ChangeHierarchy(int NextHierarchyType);	//!< 階層切り替え
-	void	CheckScene(FADE *fade);						//!< シーンチェック
+	TEXTURE	tex[OBJECT_TITLE_MAX];				//!< テクスチャ情報　複数使用するならここを配列化
+	VTXBUFFER vtx;								//!< 頂点情報　複数使用するならここを配列化
+	TRANSFORM Transform[OBJECT_TITLE_MAX];		//!< トランスフォーム情報
+	iUseCheck iUseType[OBJECT_TITLE_MAX];		//!< 使用情報
 
-	TEXTURE		tex[OBJECT_TITLE_MAX];				//!< テクスチャ情報　複数使用するならここを配列化
-	VTXBuffer	vtx;								//!< 頂点情報　複数使用するならここを配列化
-	TransForm	Transform[OBJECT_TITLE_MAX];		//!< トランスフォーム情報
-	iUseCheak	iUseType[OBJECT_TITLE_MAX];			//!< 使用情報
+	TITLE_PARAMETER TitlePara;					//!< インスタンスに必要なデータ群
 
-	TITLE_PARAMETER TitlePara;						//!< インスタンスに必要なデータ群
+	//------他クラスのアドレス
+	SCENE *pscene;
+
+	void ChangeHierarchy(int NextHierarchyType);	//!< 階層切り替え
+	void CheckScene(void);							//!< シーンチェック
 
 	enum TITLE_NAME
 	{

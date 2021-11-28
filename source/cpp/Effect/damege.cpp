@@ -4,6 +4,8 @@
 * @author ƒLƒ€ƒ‰ƒWƒ…ƒ“
 */
 #include "../../h/main.h"
+#include "../../h/Net/sock.h"
+#include "../../h/Draw/Draw.h"
 #include "../../h/Effect/damege.h"
 
 //*****************************************************************************
@@ -24,9 +26,6 @@ constexpr float SCREENDAMEGE_TIME{ 20.0f };			//!< ”íƒ_ƒ[ƒW‚Ì‰æ–ÊƒtƒF[ƒhŠ
 //=============================================================================
 DAMEGE::DAMEGE(void)
 {
-	//ƒIƒuƒWƒFƒNƒgƒJƒEƒ“ƒgƒAƒbƒv
-	this->CreateInstanceOBJ();
-
 	//’¸“_‚Ìì¬
 	this->vtx.MakeVertex2D(OBJECT_DAMEGE_MAX, FVF_VERTEX_2D);
 
@@ -69,9 +68,16 @@ DAMEGE::~DAMEGE(void)
 	//ƒeƒNƒXƒ`ƒƒ‰ğ•ú
 	this->tex.~TEXTURE();
 	//’¸“_‰ğ•ú
-	this->vtx.~VTXBuffer();
-	//ƒIƒuƒWƒFƒNƒgƒJƒEƒ“ƒgƒ_ƒEƒ“
-	this->DeleteInstanceOBJ();
+	this->vtx.~VTXBUFFER();
+}
+
+//=============================================================================
+// ‘¼ƒNƒ‰ƒX‚ÌƒAƒhƒŒƒXæ“¾
+//=============================================================================
+void DAMEGE::Addressor(GAME_OBJECT_INSTANCE *obj)
+{
+	pmysocket = obj->GetMySocket();
+	pDrawManager = obj->GetDrawManager();
 }
 
 //=============================================================================
@@ -114,13 +120,13 @@ void DAMEGE::Init(void)
 //=============================================================================
 // Ä‰Šú‰»ˆ—
 //=============================================================================
-void DAMEGE::InitNet(int MyNumber)
+void DAMEGE::InitNet(void)
 {
 	//•`‰æˆÊ’uİ’è
-	this->Transform[MyNumber].Pos(D3DXVECTOR3(DAMEGE_POS_X, DAMEGE_POS_Y, 0.0f));
+	this->Transform[pmysocket->GetNetMyNumber()].Pos(D3DXVECTOR3(DAMEGE_POS_X, DAMEGE_POS_Y, 0.0f));
 
 	//•`‰æˆÊ’u”½‰f
-	D3DXVECTOR3 pos = this->Transform[MyNumber].Pos();
+	D3DXVECTOR3 pos = this->Transform[pmysocket->GetNetMyNumber()].Pos();
 
 	D3DXVECTOR3 vtx[POLYGON_2D_VERTEX];
 	vtx[0] = D3DXVECTOR3(pos.x - DAMEGE_POS_X, pos.y - DAMEGE_POS_Y, 0.0f);
@@ -128,7 +134,7 @@ void DAMEGE::InitNet(int MyNumber)
 	vtx[2] = D3DXVECTOR3(pos.x - DAMEGE_POS_X, pos.y + DAMEGE_POS_Y, 0.0f);
 	vtx[3] = D3DXVECTOR3(pos.x + DAMEGE_POS_X, pos.y + DAMEGE_POS_Y, 0.0f);
 
-	this->vtx.Vertex2D(MyNumber, DAMEGE_SIZE_X_NET, DAMEGE_SIZE_Y_NET, pos);
+	this->vtx.Vertex2D(pmysocket->GetNetMyNumber(), DAMEGE_SIZE_X_NET, DAMEGE_SIZE_Y_NET, pos);
 }
 
 //=============================================================================
@@ -163,7 +169,7 @@ void DAMEGE::Update(void)
 //=============================================================================
 // •`‰æˆ—
 //=============================================================================
-void DAMEGE::Draw(bool Netflag, int NetMyNumber, int CntPlayer)
+void DAMEGE::Draw(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 
@@ -172,10 +178,10 @@ void DAMEGE::Draw(bool Netflag, int NetMyNumber, int CntPlayer)
 	pDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
 	pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS);			// Z”äŠr‚È‚µ
 
-	if (Netflag==false)
+	if (pmysocket->GetNetGameStartFlag() ==false)
 	{
 		//•`‰æ”»’è@
-		if (this->iUseType[CntPlayer].Use() == YesUseType1)
+		if (this->iUseType[pDrawManager->GetDrawManagerNum()].Use() == YesUseType1)
 		{
 			// ’¸“_ƒoƒbƒtƒ@‚ğƒfƒoƒCƒX‚Ìƒf[ƒ^ƒXƒgƒŠ[ƒ€‚ÉƒoƒCƒ“ƒh
 			pDevice->SetStreamSource(0, this->vtx.VtxBuff(), 0, sizeof(VERTEX_2D));
@@ -184,14 +190,14 @@ void DAMEGE::Draw(bool Netflag, int NetMyNumber, int CntPlayer)
 			// ƒeƒNƒXƒ`ƒƒ‚Ìİ’è@ƒeƒNƒXƒ`ƒƒ‚ª•¡”‚È‚çtex‚ğ”z—ñ‰»‚µ‚Ä‘I‘ğ‚³‚¹‚é‚æ‚¤‚É
 			pDevice->SetTexture(0, this->tex.Texture());
 			// ƒ|ƒŠƒSƒ“‚Ì•`‰æ@ˆø”“ñŒÂ–Ú‚Ì•`‰æŠJn’¸“_‚ğİ’è‚·‚é‚±‚Æ‚ª‘å–
-			pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, (CntPlayer * 4), POLYGON_2D_NUM);
+			pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, (pDrawManager->GetDrawManagerNum() * 4), POLYGON_2D_NUM);
 		}
 	}
 
 	else
 	{
 		//•`‰æ”»’è@
-		if (this->iUseType[NetMyNumber].Use() == YesUseType1)
+		if (this->iUseType[pmysocket->GetNetMyNumber()].Use() == YesUseType1)
 		{
 			// ’¸“_ƒoƒbƒtƒ@‚ğƒfƒoƒCƒX‚Ìƒf[ƒ^ƒXƒgƒŠ[ƒ€‚ÉƒoƒCƒ“ƒh
 			pDevice->SetStreamSource(0, this->vtx.VtxBuff(), 0, sizeof(VERTEX_2D));
@@ -200,7 +206,7 @@ void DAMEGE::Draw(bool Netflag, int NetMyNumber, int CntPlayer)
 			// ƒeƒNƒXƒ`ƒƒ‚Ìİ’è@ƒeƒNƒXƒ`ƒƒ‚ª•¡”‚È‚çtex‚ğ”z—ñ‰»‚µ‚Ä‘I‘ğ‚³‚¹‚é‚æ‚¤‚É
 			pDevice->SetTexture(0, this->tex.Texture());
 			// ƒ|ƒŠƒSƒ“‚Ì•`‰æ@ˆø”“ñŒÂ–Ú‚Ì•`‰æŠJn’¸“_‚ğİ’è‚·‚é‚±‚Æ‚ª‘å–
-			pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, (NetMyNumber * 4), POLYGON_2D_NUM);
+			pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, (pmysocket->GetNetMyNumber() * 4), POLYGON_2D_NUM);
 		}
 	}
 	pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);		// ƒ¿ƒ\[ƒXƒJƒ‰[‚Ìw’è

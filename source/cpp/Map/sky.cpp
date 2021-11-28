@@ -26,9 +26,6 @@ constexpr int	TEX_COUNT_LOOP{ 1 };					// テクスチャの繰り返し回数
 //=============================================================================
 SKY::SKY(void)
 {
-	//オブジェクトカウントアップ
-	this->CreateInstanceOBJ();
-
 	// テクスチャの読み込み
 	this->tex.LoadTexture(SKY_TEXTURE_FILENAME);
 
@@ -83,16 +80,14 @@ SKY::~SKY(void)
 	for (int CntSky = 0; CntSky < OBJECT_SKY_MAX; CntSky++)
 	{
 		//頂点解放
-		this->vtx[CntSky].~VTXBuffer();
+		this->vtx[CntSky].~VTXBUFFER();
 	}
-	//オブジェクトカウントダウン
-	this->DeleteInstanceOBJ();
 }
 
 //=============================================================================
 // 初期化処理
 //=============================================================================
-void SKY::Init()
+void SKY::Init(void)
 {
 	//色の初期化
 	this->ResetColor();
@@ -127,11 +122,11 @@ void SKY::Update(void)
 void SKY::Draw(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
-	//DWORD dwSettingLighting, dwSettingCullmode;
-	//pDevice->GetRenderState(D3DRS_LIGHTING, &dwSettingLighting);
-	//pDevice->GetRenderState(D3DRS_CULLMODE, &dwSettingCullmode);
-	//// ライティングを無効に
-	//pDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
+	DWORD dwSettingLighting, dwSettingCullmode;
+	pDevice->GetRenderState(D3DRS_LIGHTING, &dwSettingLighting);
+	pDevice->GetRenderState(D3DRS_CULLMODE, &dwSettingCullmode);
+	// ライティングを無効に
+	pDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
 
 	D3DXMATRIX mtxRot, mtxTranslate, mtxWorld;
 	D3DXVECTOR3 pos = this->Transform[SKY_MODEL_TYPE_SPHERE].Pos();
@@ -169,12 +164,12 @@ void SKY::Draw(void)
 	// ポリゴンの描画
 	pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLEFAN, 0, 0, (this->SkyPara[SKY_MODEL_TYPE_TOP].nNumBlockH + 2), 0, this->SkyPara[SKY_MODEL_TYPE_TOP].nNumBlockH);
 
-	//pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);	// 裏面をカリング
-	//pDevice->SetRenderState(D3DRS_CULLMODE, dwSettingCullmode);
-	//// ライティングを有効に
-	//pDevice->SetRenderState(D3DRS_LIGHTING, TRUE);
-	//pDevice->SetRenderState(D3DRS_LIGHTING, dwSettingLighting);
-	//pDevice->SetRenderState(D3DRS_CULLMODE, dwSettingCullmode);
+	pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);	// 裏面をカリング
+	pDevice->SetRenderState(D3DRS_CULLMODE, dwSettingCullmode);
+	// ライティングを有効に
+	pDevice->SetRenderState(D3DRS_LIGHTING, TRUE);
+	pDevice->SetRenderState(D3DRS_LIGHTING, dwSettingLighting);
+	pDevice->SetRenderState(D3DRS_CULLMODE, dwSettingCullmode);
 }
 
 //=============================================================================

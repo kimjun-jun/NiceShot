@@ -5,8 +5,11 @@
 */
 #pragma once
 
-#include "../../../h/Object/ObjectClass/objectclass.h"
-class PLAYER_HONTAI;
+#include "../../../h/Object/ObjectClass/Interface/interface.h"
+#include "../../../h/Object/ObjectClass/Instance/instance.h"
+#include "../../../h/Object/ObjectClass/StandardComponent/Model/Model.h"
+#include "../../../h/Object/ObjectClass/StandardComponent/TRANSFORM/TransForm.h"
+#include "../../../h/Object/ObjectClass/StandardComponent/UseCheck/UseCheck.h"
 
 //*****************************************************************************
 // マクロ定義
@@ -69,34 +72,38 @@ public:
 *　@class ITEM
 *　@brief GAMEOBJECT派生クラス
 */
-class ITEM : public GAME_OBJECT
+class ITEM : private GAME_OBJECT_INTERFACE_SUMMRY
 {
 public:
 	ITEM();		//!< データ読み込み　初期化
 	~ITEM();	//!< 削除
 
-	void	Init(void);										//!< 初期化
-	void	Update(PLAYER *Player, SHADOW *Shadow, bool NetGameStartFlag);		//!< 更新
-	void	Draw(void);										//!< 描画
+	void Addressor(GAME_OBJECT_INSTANCE *obj) override;	//!< アドレッサー
+	void Init(void) override;			//!< 初期化
+	void InitNet(void)override {};		//!< 初期化ネット対戦用に変更が必要なとこで使用
+	void Update(void)override;			//!< 更新
+	void Draw(void)override;			//!< 描画
 
-	ITEM_PARAMETER_ALL		ItemParaAll[OBJECT_ITEM_MAX];	//!< 各インスタンスに必要なデータ群
-	iUseCheak				iUseType[OBJECT_ITEM_MAX];		//!< 使用情報
-	TransForm				Transform[OBJECT_ITEM_MAX];		//!< トランスフォーム情報
-	FieldNor				PostureVec[OBJECT_ITEM_MAX];	//!< 姿勢ベクトル
-	void					SetInstance(D3DXVECTOR3 pos, D3DXVECTOR3 scl, D3DXVECTOR3 rot, eITEM_TYPE eType, SHADOW *s);
-	void					SetInstance(int Index, D3DXVECTOR3 pos, D3DXVECTOR3 scl, D3DXVECTOR3 rot, eITEM_TYPE eType);
-	void					ReleaseInstance(int nIdxItem, SHADOW *s);
+	ITEM_PARAMETER_ALL ItemParaAll[OBJECT_ITEM_MAX];	//!< 各インスタンスに必要なデータ群
+	iUseCheck iUseType[OBJECT_ITEM_MAX];		//!< 使用情報
+	TRANSFORM Transform[OBJECT_ITEM_MAX];		//!< トランスフォーム情報
+	FIELDNORMAL	PostureVec[OBJECT_ITEM_MAX];	//!< 姿勢ベクトル
+	void SetInstance(D3DXVECTOR3 pos, D3DXVECTOR3 scl, D3DXVECTOR3 rot, eITEM_TYPE eType);
+	void SetInstance(int Index, D3DXVECTOR3 pos, D3DXVECTOR3 scl, D3DXVECTOR3 rot, eITEM_TYPE eType);
+	void ReleaseInstance(int nIdxItem);
 
 private:
+	MODELATTRIBUTE model;				//!< モデル情報　マテリアルや頂点数など　複数使用するならここを配列化
+	TEXTURE tex[ITEM_TYPE_MAX];			//!< テクスチャ情報　複数使用するならここを配列化　ITEMTYPE_MAX
+	VTXBUFFER vtx[OBJECT_ITEM_MAX];		//!< 頂点情報　複数使用するならここを配列化
+	ITEM_PARAMETER_ONE ItemParaOne;		//!< マネージャーに必要なデータ群
 
-	//void	ReinitNet(void);								//!< 初期化　同期
+	//------他クラスのアドレス
+	PLAYER *pplayer;
+	SHADOW *pshadow;
+	MySOCKET *pmysocket;
 
-	void	GettingItem(int nIdxItem, PLAYER *p, SHADOW *s);
-
-	ModelAttribute			model;								//!< モデル情報　マテリアルや頂点数など　複数使用するならここを配列化
-	TEXTURE					tex[ITEM_TYPE_MAX];					//!< テクスチャ情報　複数使用するならここを配列化　ITEMTYPE_MAX
-	VTXBuffer				vtx[OBJECT_ITEM_MAX];				//!< 頂点情報　複数使用するならここを配列化
-	ITEM_PARAMETER_ONE		ItemParaOne;						//!< マネージャーに必要なデータ群
+	void	GettingItem(int nIdxItem);
 
 	const char *c_aFileNameModel[ITEM_TYPE_MAX] =
 	{

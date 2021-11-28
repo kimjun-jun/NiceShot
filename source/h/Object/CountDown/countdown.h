@@ -5,8 +5,10 @@
 */
 #pragma once
 
-
-#include "../../../h/Object/ObjectClass/objectclass.h"
+#include "../../../h/Object/ObjectClass/Interface/interface.h"
+#include "../../../h/Object/ObjectClass/StandardComponent/Model/Model.h"
+#include "../../../h/Object/ObjectClass/StandardComponent/TRANSFORM/TransForm.h"
+#include "../../../h/Object/ObjectClass/StandardComponent/UseCheck/UseCheck.h"
 
 enum COUNTDOWN_TEX_TYPE
 {
@@ -40,28 +42,34 @@ public:
 *　@class COUNTDOWN
 *　@brief GAMEOBJECT派生クラス
 */
-class COUNTDOWN : public GAME_OBJECT
+class COUNTDOWN : private GAME_OBJECT_INTERFACE_SUMMRY
 {
 public:
 	COUNTDOWN();	//!< データ読み込み　初期化
 	~COUNTDOWN();	//!< 削除
 
-	void		Init(void);				//!< 初期化
-	void		Update(GAME_OBJECT*obj, bool Netflag);	//!< 更新
-	void		Draw(void);				//!< 描画
+	void Addressor(GAME_OBJECT_INSTANCE *obj) override;	//!< アドレッサー
+	void Init(void) override;			//!< 初期化
+	void InitNet(void)override {};		//!< 初期化ネット対戦用に変更が必要なとこで使用
+	void Update(void)override;			//!< 更新
+	void Draw(void)override;			//!< 描画
 
-	void		AddCountdown(int val);		//!< タイマーカウントを反映させる
+	void AddCountdown(int val);		//!< タイマーカウントを反映させる
 
 private:
-
-	void		NumberCountUpdate();	//!< カウントダウン数値の更新
-	void		NumberSizeUpdate();		//!< カウントダウンのスケール更新
-
-	TEXTURE		tex[OBJECT_COUNTDOWN_MAX];		//!< テクスチャ情報　複数使用するならここを配列化
-	VTXBuffer	vtx;							//!< 頂点情報　複数使用するならここを配列化
-	TransForm	Transform[OBJECT_COUNTDOWN_MAX];//!< トランスフォーム情報
-	iUseCheak	iUseType[OBJECT_COUNTDOWN_MAX];	//!< 使用情報
+	TEXTURE	tex[OBJECT_COUNTDOWN_MAX];			//!< テクスチャ情報　複数使用するならここを配列化
+	VTXBUFFER vtx;								//!< 頂点情報　複数使用するならここを配列化
+	TRANSFORM Transform[OBJECT_COUNTDOWN_MAX];	//!< トランスフォーム情報
+	iUseCheck iUseType[OBJECT_COUNTDOWN_MAX];	//!< 使用情報
 
 	COUNTDOWN_PARAMETER CountdownPara;			//!< インスタンスに必要なデータ群
+
+	//------他クラスのアドレス
+	MySOCKET *pmysocket;
+	SCENE *pscene;
+
+	void NumberCountUpdate();	//!< カウントダウン数値の更新
+	void NumberSizeUpdate();	//!< カウントダウンのスケール更新
+
 } ;
 

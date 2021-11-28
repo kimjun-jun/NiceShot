@@ -5,7 +5,11 @@
 */
 #pragma once
 
-#include "../../../h/Object/ObjectClass/objectclass.h"
+#include "../../../h/Object/ObjectClass/Interface/interface.h"
+#include "../../../h/Object/ObjectClass/Instance/instance.h"
+#include "../../../h/Object/ObjectClass/StandardComponent/Model/Model.h"
+#include "../../../h/Object/ObjectClass/StandardComponent/TRANSFORM/TransForm.h"
+#include "../../../h/Object/ObjectClass/StandardComponent/UseCheck/UseCheck.h"
 
 /**
  * @enum ePLAYER_PARTS_TYPE
@@ -157,9 +161,9 @@ public:
 	PLAYER_MODEL_DRAW() {}
 	~PLAYER_MODEL_DRAW() {}
 
-	ModelAttribute		ModelAttribute[PLAYER_PARTS_TYPE_MAX];		//!< モデルデータ　0ノーマル、1攻撃　モデルデータの種類　「プレイヤーの数」=4、「モデルパーツ数(砲台、砲塔、砲身、砲身変形後)」=2
-	VTXBuffer			Vtx[PLAYER_PARTS_TYPE_MAX];					//!< 頂点情報　描画用
-	TransForm			Transform[PLAYER_PARTS_TYPE_MAX];			//!< トランスフォーム情報
+	MODELATTRIBUTE		Attribute[PLAYER_PARTS_TYPE_MAX];		//!< モデルデータ　0ノーマル、1攻撃　モデルデータの種類　「プレイヤーの数」=4、「モデルパーツ数(砲台、砲塔、砲身、砲身変形後)」=2
+	VTXBUFFER			Vtx[PLAYER_PARTS_TYPE_MAX];					//!< 頂点情報　描画用
+	TRANSFORM			Transform[PLAYER_PARTS_TYPE_MAX];			//!< トランスフォーム情報
 
 };
 
@@ -173,59 +177,67 @@ public:
 	PLAYER_MODEL_ORIGINAL() {}
 	~PLAYER_MODEL_ORIGINAL() {}
 
-	ModelAttribute		ModelAttribute[PLAYER_MODEL_ORIGINAL_TYPE_MAX];		//!< モデルデータ　0ノーマル、1攻撃　モデルデータの種類　「砲身、砲身変形後」=2
-	VTXBuffer			Vtx[PLAYER_MODEL_ORIGINAL_TYPE_MAX];				//!< 頂点情報　モーフィング基準用
+	MODELATTRIBUTE		Attribute[PLAYER_MODEL_ORIGINAL_TYPE_MAX];		//!< モデルデータ　0ノーマル、1攻撃　モデルデータの種類　「砲身、砲身変形後」=2
+	VTXBUFFER			Vtx[PLAYER_MODEL_ORIGINAL_TYPE_MAX];				//!< 頂点情報　モーフィング基準用
 };
 
 /**
 *　@class PLAYER
 *　@brief GAMEOBJECT派生クラス
 */
-class PLAYER : public GAME_OBJECT
+class PLAYER : private GAME_OBJECT_INTERFACE_SUMMRY
 {
 public:
 	PLAYER();	//!< データ読み込み　初期化
 	~PLAYER();	//!< 削除
 
-	void				Init(FIELD *field);			//!< 初期化
-	void				Update(EFFECT*effect, BULLET*bullet, SHADOW*shadow, FADE *fade, bool Netflag, int MyNumber); //!< 更新
-	void				Draw(void)override;						//!< 描画
+	void Addressor(GAME_OBJECT_INSTANCE *obj) override;		//!< アドレッサー
+	void Init(void) override;			//!< 初期化
+	void InitNet(void)override {};		//!< 初期化ネット対戦用に変更が必要なとこで使用
+	void Update(void)override;			//!< 更新
+	void Draw(void)override;			//!< 描画
 
-	PLAYER_PARAMETER_SUMMARY	PlayerPara[OBJECT_PLAYER_MAX];		//!< インスタンスに必要なデータ群	数が多いので複数包含している							
-	PLAYER_MODEL_DRAW			modelDraw[OBJECT_PLAYER_MAX];		//!< 描画用モデルデータ
-	iUseCheak					iUseType[OBJECT_PLAYER_MAX];		//!< 使用情報
-	FieldNor					PostureVec[OBJECT_PLAYER_MAX];		//!< 姿勢ベクトル
+	PLAYER_PARAMETER_SUMMARY PlayerPara[OBJECT_PLAYER_MAX];	//!< インスタンスに必要なデータ群	数が多いので複数包含している							
+	PLAYER_MODEL_DRAW modelDraw[OBJECT_PLAYER_MAX];			//!< 描画用モデルデータ
+	iUseCheck iUseType[OBJECT_PLAYER_MAX];					//!< 使用情報
+	FIELDNORMAL	PostureVec[OBJECT_PLAYER_MAX];				//!< 姿勢ベクトル
 
 private:
+	TEXTURE	tex;						//!< テクスチャ情報　複数使用するならここを配列化　ITEMTYPE_MAX
+	PLAYER_MODEL_ORIGINAL modelOri;		//!< オリジナルモデルデータ　モーフィング時の基準用
+	MOVEMENT Move[OBJECT_PLAYER_MAX];	//!< 移動量
 
-	TEXTURE						tex;								//!< テクスチャ情報　複数使用するならここを配列化　ITEMTYPE_MAX
-	PLAYER_MODEL_ORIGINAL		modelOri;							//!< オリジナルモデルデータ　モーフィング時の基準用
-	Movement					Move[OBJECT_PLAYER_MAX];			//!< 移動量
+	//------他クラスのアドレス
+	FIELD *pfield;
+	MySOCKET *pmysocket;
+	SCENE *pscene;
+	EFFECT *peffect;
+	BULLET *pbullet;
 
 	//------カラー
-	void	PlayerMeshColor(LPDIRECT3DVERTEXBUFFER9 *pD3DVtxBuff, LPDIRECT3DINDEXBUFFER9 *pD3DIdxBuff, DWORD nNumPolygon, int CntPlayer);
+	void PlayerMeshColor(LPDIRECT3DVERTEXBUFFER9 *pD3DVtxBuff, LPDIRECT3DINDEXBUFFER9 *pD3DIdxBuff, DWORD nNumPolygon, int CntPlayer);
 
 	//------移動制御
-	void	MoveABL(int CntPlayer, EFFECT *effect, bool Netflag);		//!< 移動制御(ABボタンLスティックで移動制御)
-	void	MoveL(int CntPlayer, EFFECT *effect, bool Netflag);			//!< 移動制御(LRスティックで移動制御)
-	void	MoveLtype0(int CntPlayer, EFFECT *effect, bool Netflag);	//!< 移動制御(LRスティックで移動制御)
-	void	MoveL2R2(int CntPlayer, EFFECT *effect, bool Netflag);		//!< 移動制御(L2R2で移動制御)
-	void	MoveKeybord(int CntPlayer, EFFECT *effect);	//!< 移動制御(ki-bo-doで移動制御)
+	void MoveABL(int CntPlayer, EFFECT *effect, bool Netflag);		//!< 移動制御(ABボタンLスティックで移動制御)
+	void MoveL(int CntPlayer, EFFECT *effect, bool Netflag);		//!< 移動制御(LRスティックで移動制御)
+	void MoveLtype0(int CntPlayer, EFFECT *effect, bool Netflag);	//!< 移動制御(LRスティックで移動制御)
+	void MoveL2R2(int CntPlayer, EFFECT *effect, bool Netflag);		//!< 移動制御(L2R2で移動制御)
+	void MoveKeybord(int CntPlayer, EFFECT *effect);				//!< 移動制御(ki-bo-doで移動制御)
 
 	//------カメラ制御
-	void	CameraRevers(int CntPlayer, bool Netflag);		//!< カメラ制御
-	void	CameraRotControl(int CntPlayer, bool Netflag);	//!< カメラ制御(LRスティックで移動制御)
+	void CameraRevers(int CntPlayer, bool Netflag);		//!< カメラ制御
+	void CameraRotControl(int CntPlayer, bool Netflag);	//!< カメラ制御(LRスティックで移動制御)
 
 	//------姿勢制御
-	void	Quaternion(int CntPlayer);					//!< クォータニオン制御　地形法線とUPベクトルと外積
+	void Quaternion(int CntPlayer);		//!< クォータニオン制御　地形法線とUPベクトルと外積
 
 	//------バレット制御
-	void	BulletALL(int CntPlayer, BULLET *bullet, SHADOW *shadow, bool Netflag);			//!< バレット関連制御
-	void	BulletALLMoveL2R2Ver(int CntPlayer, BULLET *bullet, SHADOW *shadow);			//!< バレット関連制御 発射ボタンを十字カーソル
+	void BulletALL(int CntPlayer, bool Netflag);	//!< バレット関連制御
+	void BulletALLMoveL2R2Ver(int CntPlayer);		//!< バレット関連制御 発射ボタンを十字カーソル
 
 	//------アイテム制御
-	void	ItemTimeKiri(int CntPlayer);				//!< フォグ制御
-	void	ItemTimeMorphing(int CntPlayer);			//!< モーフィング制御
+	void ItemTimeKiri(int CntPlayer);				//!< フォグ制御
+	void ItemTimeMorphing(int CntPlayer);			//!< モーフィング制御
 
 	//読み込むモデル　描画用
 	const char *c_aFileNameModelDraw[PLAYER_MODEL_DRAW_ALL_MAX] =

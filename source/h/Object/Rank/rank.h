@@ -5,8 +5,10 @@
 */
 #pragma once
 
-
-#include "../../../h/Object/ObjectClass/objectclass.h"
+#include "../../../h/Object/ObjectClass/Interface/interface.h"
+#include "../../../h/Object/ObjectClass/StandardComponent/Model/Model.h"
+#include "../../../h/Object/ObjectClass/StandardComponent/TRANSFORM/TransForm.h"
+#include "../../../h/Object/ObjectClass/StandardComponent/UseCheck/UseCheck.h"
 
 constexpr int	RANK_COUNTDOWN_NUM{ 2 };					//!< 順位の数　4人なので2,1,0,を使う テクスチャ配列が0-2なので最大値が2
 
@@ -41,28 +43,32 @@ public:
 *　@class RANK
 *　@brief GAMEOBJECT派生クラス
 */
-class RANK : public GAME_OBJECT
+class RANK : public GAME_OBJECT_INTERFACE_SUMMRY
 {
 public:
 	RANK();		//!< データ読み込み　初期化
 	~RANK();	//!< 削除
 
-	void		Init(void);								//!< 初期化
-	void		InitNet(int NetMyNumber);				//!< 初期化
-	void		Update(void);							//!< 更新
-	void		Draw(bool Netflag, int NetMyNumber);	//!< 描画
+	void Addressor(GAME_OBJECT_INSTANCE *obj) override;	//!< アドレッサー
+	void Init(void) override;			//!< 初期化
+	void InitNet(void)override;		//!< 初期化ネット対戦用に変更が必要なとこで使用
+	void Update(void)override;			//!< 更新
+	void Draw(void)override;			//!< 描画
 
-	void		SetRank(int PlayerNum);
-	void		SetRankNet(int PlayerNum, int NetMyNumber);
+	void SetRank(int PlayerNum);
+	void SetRankNet(int PlayerNum, int NetMyNumber);
 
 private:
-	TEXTURE		tex[OBJECT_RANK_MAX-1];			//!< テクスチャ情報　複数使用するならここを配列化　ちょっとケチって-1　一位の分はない
-	VTXBuffer	vtx;							//!< 頂点情報　複数使用するならここを配列化
-	TransForm	Transform[OBJECT_RANK_MAX];		//!< トランスフォーム情報
-	iUseCheak	iUseType[OBJECT_RANK_MAX];		//!< 使用情報
+	TEXTURE	tex[OBJECT_RANK_MAX-1];			//!< テクスチャ情報　複数使用するならここを配列化　ちょっとケチって-1　一位の分はない
+	VTXBUFFER vtx;							//!< 頂点情報　複数使用するならここを配列化
+	TRANSFORM Transform[OBJECT_RANK_MAX];	//!< トランスフォーム情報
+	iUseCheck iUseType[OBJECT_RANK_MAX];	//!< 使用情報
 
-	RANK_PARAMETER_ALL	RankParaAll[OBJECT_RANK_MAX];	//!< インスタンスに必要なデータ群
-	RANK_PARAMETER_ONE	RankParaOne;					//!< マネージャーに必要なデータ群
+	RANK_PARAMETER_ALL RankParaAll[OBJECT_RANK_MAX];	//!< インスタンスに必要なデータ群
+	RANK_PARAMETER_ONE RankParaOne;						//!< マネージャーに必要なデータ群
+
+	//------他クラスのアドレス
+	MySOCKET *pmysocket;
 
 	//ちょっとケチって-1　一位の分はない
 	const char *c_aFileNameTex[OBJECT_RANK_MAX - 1] =

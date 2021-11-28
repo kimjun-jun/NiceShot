@@ -4,8 +4,9 @@
 * @author キムラジュン
 */
 #include "../../../h/main.h"
-#include "../../../../h/Object/ObjectClass/objectclass.h"
 #include "../../../../h/Object/Player/player.h"
+#include "../../../../h/Net/sock.h"
+#include "../../../../h/Draw/Draw.h"
 #include "../../../../h/Object/Player/Status/status.h"
 
 //*****************************************************************************
@@ -30,9 +31,6 @@ constexpr float STATUS_NET_POS_Y_OFFSET{ 150.0f };			// ステータスの表示位置オフ
 //=============================================================================
 STATUS::STATUS(void)
 {
-	//オブジェクトカウントアップ
-	this->CreateInstanceOBJ();
-
 	//頂点の作成
 	this->vtx[PLAYER01].MakeVertex2D(OBJECT_STATUS_MAX, FVF_VERTEX_2D);
 	this->vtx[PLAYER02].MakeVertex2D(OBJECT_STATUS_MAX, FVF_VERTEX_2D);
@@ -93,10 +91,18 @@ STATUS::~STATUS(void)
 	for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
 	{
 		//頂点解放
-		this->vtx[CntPlayer].~VTXBuffer();
+		this->vtx[CntPlayer].~VTXBUFFER();
 	}
-	//オブジェクトカウントダウン
-	this->DeleteInstanceOBJ();
+}
+
+//=============================================================================
+// 他クラスのアドレス取得
+//=============================================================================
+void STATUS::Addressor(GAME_OBJECT_INSTANCE *obj)
+{
+	pplayer = obj->GetPlayer();
+	pmysocket = obj->GetMySocket();
+	pDrawManager = obj->GetDrawManager();
 }
 
 //=============================================================================
@@ -139,18 +145,18 @@ void STATUS::Init(void)
 //=============================================================================
 // 再初期化処理
 //=============================================================================
-void STATUS::InitNet(int MyNumber)
+void STATUS::InitNet(void)
 {
 	//サイズ調整用
 	float buffsize = 48.0f;
 	//描画位置設定
-	this->Transform[MyNumber].Pos(D3DXVECTOR3(STATUS_POS_X * 2 - STATUS_NET_POS_X_OFFSET * 2 + buffsize, STATUS_POS_Y * 2 - STATUS_NET_POS_Y_OFFSET, 0.0f));
+	this->Transform[pmysocket->GetNetMyNumber()].Pos(D3DXVECTOR3(STATUS_POS_X * 2 - STATUS_NET_POS_X_OFFSET * 2 + buffsize, STATUS_POS_Y * 2 - STATUS_NET_POS_Y_OFFSET, 0.0f));
 
 	//カウントループ　ステータス数
 	for (int CntStatus = 0; CntStatus < OBJECT_STATUS_MAX; CntStatus++)
 	{
 		//描画位置反映
-		D3DXVECTOR3 pos = this->Transform[MyNumber].Pos();
+		D3DXVECTOR3 pos = this->Transform[pmysocket->GetNetMyNumber()].Pos();
 		D3DXVECTOR3 vtx[POLYGON_2D_VERTEX];
 		vtx[0] = D3DXVECTOR3(pos.x + (CntStatus*STATUS_SIZE_X_NET + STATUS_SIZE_X_OFFSET), pos.y, 0.0f);
 		vtx[1] = D3DXVECTOR3(pos.x + (CntStatus*STATUS_SIZE_X_NET + STATUS_SIZE_X_OFFSET) + STATUS_SIZE_X_NET, pos.y, 0.0f);
@@ -158,20 +164,20 @@ void STATUS::InitNet(int MyNumber)
 		vtx[3] = D3DXVECTOR3(pos.x + (CntStatus*STATUS_SIZE_X_NET + STATUS_SIZE_X_OFFSET) + STATUS_SIZE_X_NET, pos.y + STATUS_SIZE_Y_NET, 0.0f);
 
 		//描画位置反映
-		this->vtx[MyNumber].Vertex2D(CntStatus, vtx);
+		this->vtx[pmysocket->GetNetMyNumber()].Vertex2D(CntStatus, vtx);
 	}
 }
 
 //=============================================================================
 // 更新処理
 //=============================================================================
-void STATUS::Update(PLAYER *p)
+void STATUS::Update(void)
 {
 	//カウントループ　プレイヤー数の二重ループ
 	for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
 	{
 		//speed
-		if (p->PlayerPara[CntPlayer].ItemPara.SpeedBuffSignal == true)
+		if (pplayer->PlayerPara[CntPlayer].ItemPara.SpeedBuffSignal == true)
 		{
 			this->iUseType[CntPlayer][STATUS_TYPE_SPEED].Use(YesUseType1);
 			this->vtx[CntPlayer].Color2D(STATUS_TYPE_SPEED, D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
@@ -182,7 +188,7 @@ void STATUS::Update(PLAYER *p)
 			this->vtx[CntPlayer].Color2D(STATUS_TYPE_SPEED, D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.3f));
 		}
 		//戦車
-		if (p->PlayerPara[CntPlayer].StandardPara.eModelType == PLAYER_MODEL_TYPE_ATTACK)
+		if (pplayer->PlayerPara[CntPlayer].StandardPara.eModelType == PLAYER_MODEL_TYPE_ATTACK)
 		{
 			this->iUseType[CntPlayer][STATUS_TYPE_SENSYA].Use(YesUseType1);
 			this->vtx[CntPlayer].Color2D(STATUS_TYPE_SENSYA, D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
@@ -193,7 +199,7 @@ void STATUS::Update(PLAYER *p)
 			this->vtx[CntPlayer].Color2D(STATUS_TYPE_SENSYA, D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.3f));
 		}
 		//カメラ
-		if (p->PlayerPara[CntPlayer].ItemPara.BackCameraItemSignal == true)
+		if (pplayer->PlayerPara[CntPlayer].ItemPara.BackCameraItemSignal == true)
 		{
 			this->iUseType[CntPlayer][STATUS_TYPE_CAMERA].Use(YesUseType1);
 			this->vtx[CntPlayer].Color2D(STATUS_TYPE_CAMERA, D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
@@ -204,7 +210,7 @@ void STATUS::Update(PLAYER *p)
 			this->vtx[CntPlayer].Color2D(STATUS_TYPE_CAMERA, D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.3f));
 		}
 		//霧
-		if (p->PlayerPara[CntPlayer].ItemPara.KiriSignal == true)
+		if (pplayer->PlayerPara[CntPlayer].ItemPara.KiriSignal == true)
 		{
 			this->iUseType[CntPlayer][STATUS_TYPE_KIRI].Use(YesUseType1);
 			this->vtx[CntPlayer].Color2D(STATUS_TYPE_KIRI, D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
@@ -220,12 +226,12 @@ void STATUS::Update(PLAYER *p)
 //=============================================================================
 // 描画処理
 //=============================================================================
-void STATUS::Draw(bool Netflag, int NetMyNumber,int CntPlayer)
+void STATUS::Draw(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 
 	//ローカル対戦
-	if (Netflag == false)
+	if (pmysocket->GetNetGameStartFlag() == false)
 	{
 		//カウントループ
 		for (int CntStatus = 0; CntStatus < STATUS_TYPE_MAX; CntStatus++)
@@ -233,7 +239,7 @@ void STATUS::Draw(bool Netflag, int NetMyNumber,int CntPlayer)
 			//if (this->iUseType[CntPlayer][CntStatus].Use() == YesUseType1)
 			{
 				// 頂点バッファをデバイスのデータストリームにバインド
-				pDevice->SetStreamSource(0, this->vtx[CntPlayer].VtxBuff(), 0, sizeof(VERTEX_2D));
+				pDevice->SetStreamSource(0, this->vtx[pDrawManager->GetDrawManagerNum()].VtxBuff(), 0, sizeof(VERTEX_2D));
 				// 頂点フォーマットの設定
 				pDevice->SetFVF(FVF_VERTEX_2D);
 				// テクスチャの設定　テクスチャが複数ならtexを配列化して選択させるように
@@ -251,7 +257,7 @@ void STATUS::Draw(bool Netflag, int NetMyNumber,int CntPlayer)
 		for (int CntStatus = 0; CntStatus < STATUS_TYPE_MAX; CntStatus++)
 		{
 			// 頂点バッファをデバイスのデータストリームにバインド
-			pDevice->SetStreamSource(0, this->vtx[NetMyNumber].VtxBuff(), 0, sizeof(VERTEX_2D));
+			pDevice->SetStreamSource(0, this->vtx[pmysocket->GetNetMyNumber()].VtxBuff(), 0, sizeof(VERTEX_2D));
 			// 頂点フォーマットの設定
 			pDevice->SetFVF(FVF_VERTEX_2D);
 			// テクスチャの設定　テクスチャが複数ならtexを配列化して選択させるように

@@ -1,27 +1,25 @@
 /**
-* @file fade.cpp
+* @file Scene.h
 * @brief NiceShot(3D)戦車ゲーム
 * @author キムラジュン
 */
+
 #include "../../../h/main.h"
 #include "../../../h/Other/sound.h"
-#include "../../../h/Object/Fade/fade.h"
+#include "../../../h/Object/Scene/Scene.h"
 
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-constexpr float	FADE_RATE{ 0.02f };									//!< フェード係数
+constexpr float	SCENE_RATE{ 0.02f };									//!< フェード係数
 
 //=============================================================================
 // コンストラクタ　「読み込み」「初期化」
 //=============================================================================
-FADE::FADE(void)
+SCENE::SCENE(void)
 {
-	//オブジェクトカウントアップ
-	this->CreateInstanceOBJ();
-
 	//頂点の作成
-	this->vtx.MakeVertex2D(OBJECT_FADE_MAX, FVF_VERTEX_2D);
+	this->vtx.MakeVertex2D(OBJECT_SCENE_MAX, FVF_VERTEX_2D);
 
 	//描画位置反映　スクリーンサイズで作成
 	D3DXVECTOR3 VTX[POLYGON_2D_VERTEX] = {
@@ -40,77 +38,77 @@ FADE::FADE(void)
 
 }
 
-
 //=============================================================================
 // デストラクタ　削除
 //=============================================================================
-FADE::~FADE(void)
+SCENE::~SCENE(void)
 {
 	//頂点解放
-	this->vtx.~VTXBuffer();
+	this->vtx.~VTXBUFFER();
 }
 
 //=============================================================================
 // 初期化処理
 //=============================================================================
-void FADE::Init(void)
+void SCENE::Init(void)
 {
 	//初期値設定
-	this->FadePara.color = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
-	this->FadePara.eFade = FADE_IN; 
-	this->FadePara.eScene = SCENE_TITLE;
-	this->FadePara.sno = -1;
+	this->ScenePara.color = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+	this->ScenePara.eFade = FADE_IN;
+	this->ScenePara.eNowScene = SCENE_TITLE;
+	this->ScenePara.eNextScene = SCENE_TITLE;
+	this->ScenePara.sno = -1;
 }
 
 //=============================================================================
 // 更新処理
 //=============================================================================
-void FADE::Update(GAME_OBJECT*obj)
+void SCENE::Update(void)
 {
-	if (this->FadePara.eFade != FADE_NONE)
+	if (this->ScenePara.eFade != FADE_NONE)
 	{// フェード処理中
-		if (this->FadePara.eFade == FADE_OUT)
+		if (this->ScenePara.eFade == FADE_OUT)
 		{// フェードアウト処理
-			this->FadePara.color.a += FADE_RATE;		// α値を加算して画面を消していく
-			if (this->FadePara.color.a >= 1.0f)
+			this->ScenePara.color.a += SCENE_RATE;		// α値を加算して画面を消していく
+			if (this->ScenePara.color.a >= 1.0f)
 			{
 				// 状態を切り替え
-				obj->SetScene(this->FadePara.eScene);
-				
+				SetScene(this->ScenePara.eNextScene);
+
 				// フェードイン処理に切り替え
-				this->FadePara.color.a = 1.0f;
-				this->FadePara.eFade = FADE_MUSIC_STOP;
+				this->ScenePara.color.a = 1.0f;
+				this->ScenePara.eFade = FADE_MUSIC_STOP;
 
 				// BGM停止
 				StopSound();
 			}
 
 			// 色を設定
-			this->vtx.Color2D(0,this->FadePara.color);
+			this->vtx.Color2D(0, this->ScenePara.color);
 		}
-		else if (this->FadePara.eFade == FADE_MUSIC_STOP)
+		else if (this->ScenePara.eFade == FADE_MUSIC_STOP)
 		{
 			// BGM再生
-			if (this->FadePara.sno > -1)
+			if (this->ScenePara.sno > -1)
 			{
-				PlaySound(this->FadePara.sno);
+				PlaySound(this->ScenePara.sno);
 			}
 
-			this->FadePara.eFade = FADE_IN;
+			this->ScenePara.eFade = FADE_IN;
 		}
-		else if (this->FadePara.eFade == FADE_IN)
+		else if (this->ScenePara.eFade == FADE_IN)
 		{// フェードイン処理
-			this->FadePara.color.a -= FADE_RATE;		// α値を減算して画面を浮き上がらせる
-			if (this->FadePara.color.a <= 0.0f)
+			this->ScenePara.color.a -= SCENE_RATE;		// α値を減算して画面を浮き上がらせる
+			if (this->ScenePara.color.a <= 0.0f)
 			{
 				// フェード処理終了
-				this->FadePara.color.a = 0.0f;
-				this->FadePara.eFade = FADE_NONE;
+				this->ScenePara.color.a = 0.0f;
+				this->ScenePara.eFade = FADE_NONE;
 
 			}
 
 			// 色を設定
-			this->vtx.Color2D(0,this->FadePara.color);
+			this->vtx.Color2D(0, this->ScenePara.color);
 		}
 	}
 }
@@ -118,7 +116,7 @@ void FADE::Update(GAME_OBJECT*obj)
 //=============================================================================
 // フェード画面
 //=============================================================================
-void FADE::Draw()
+void SCENE::Draw(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 
@@ -133,13 +131,22 @@ void FADE::Draw()
 }
 
 //=============================================================================
-// フェードの状態設定
+// シーンを切り替える
 //=============================================================================
-void FADE::SetFade(FADE_TYPE fade, E_STAGE next, int sno)
+void SCENE::SetScene(e_SCENE next)
 {
-	this->FadePara.eFade = fade;
-	this->FadePara.eScene = next;
-	this->FadePara.sno = sno;
+	this->ScenePara.eNowScene = next;
+
+}
+
+//=============================================================================
+// シーン切り替え受け取る
+//=============================================================================
+void SCENE::NextScene(eFADE_TYPE eFade, e_SCENE next, int sno)
+{
+	this->ScenePara.eFade = eFade;
+	this->ScenePara.eNextScene = next;
+	this->ScenePara.sno = sno;
 
 }
 

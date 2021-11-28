@@ -28,9 +28,6 @@ constexpr float FIELD_Y_LOW{ 20.0f };				//!< フィールドの高さで色を変える。低い
 //=============================================================================
 FIELD::FIELD(void)
 {
-	//オブジェクトカウントアップ
-	this->CreateInstanceOBJ();
-
 	// テクスチャの読み込み
 	this->tex.LoadTexture(TEXTURE_FILENAME);
 
@@ -87,10 +84,19 @@ FIELD::~FIELD(void)
 	for (int CntField = 0; CntField < FIELD_VTX_MAX; CntField++)
 	{
 		//頂点解放
-		this->vtx[CntField].~VTXBuffer();
+		this->vtx[CntField].~VTXBUFFER();
 	}
-	//オブジェクトカウントダウン
-	this->DeleteInstanceOBJ();
+}
+
+//=============================================================================
+// 他クラスのアドレス取得
+//=============================================================================
+void FIELD::Addressor(GAME_OBJECT_INSTANCE *obj)
+{
+	pplayer = obj->GetPlayer();
+	pitem = obj->GetItem();
+	pbullet = obj->GetBullet();
+	pexplosion = obj->GetExplosion();
 }
 
 //=============================================================================
@@ -298,7 +304,7 @@ void FIELD::Init(void)
 //=============================================================================
 // 更新処理
 //=============================================================================
-void FIELD::Update(PLAYER *player,ITEM *item, BULLET *bullet, EXPLOSION *explosion, SHADOW *shadow)
+void FIELD::Update(void)
 {
 	this->FieldPara.OldTikeiSeed = this->FieldPara.TikeiSeed;
 
@@ -325,7 +331,7 @@ void FIELD::Update(PLAYER *player,ITEM *item, BULLET *bullet, EXPLOSION *explosi
 	case FIELD_TYPE_PLAYERADVANTAGE:
 		//地形変形するときはまず地形クリア
 		this->vtx[FIELD_VTX_END].VtxBuff(this->ClearField(*this->vtx[FIELD_VTX_END].pVtxBuff()));
-		this->vtx[FIELD_VTX_END].VtxBuff(this->SetFieldType03(&player[0], *this->vtx[FIELD_VTX_END].pVtxBuff(), *this->vtx[FIELD_VTX_DRAW].pIdxBuff()));
+		this->vtx[FIELD_VTX_END].VtxBuff(this->SetFieldType03(*this->vtx[FIELD_VTX_END].pVtxBuff(), *this->vtx[FIELD_VTX_DRAW].pIdxBuff()));
 		//処理後にフラグセット
 		this->FieldPara.InterPolationFieldType = -1;
 		this->FieldPara.InterPolationFieldSignal = false;
@@ -338,7 +344,7 @@ void FIELD::Update(PLAYER *player,ITEM *item, BULLET *bullet, EXPLOSION *explosi
 		this->FieldPara.InterPolationFieldSignal = this->InterPolationField();
 	}
 
-	this->FieldHitCheck(player,item,bullet,explosion,shadow);
+	this->FieldHitCheck();
 }
 
 //=============================================================================
@@ -347,6 +353,12 @@ void FIELD::Update(PLAYER *player,ITEM *item, BULLET *bullet, EXPLOSION *explosi
 void FIELD::Draw(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
+
+	DWORD dwSettingLighting, dwSettingCullmode;
+	pDevice->GetRenderState(D3DRS_LIGHTING, &dwSettingLighting);
+	pDevice->GetRenderState(D3DRS_CULLMODE, &dwSettingCullmode);
+	// ライティングを無効に
+	pDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
 
 	D3DXMATRIX mtxRot, mtxTranslate,mtxWorld;
 	D3DXVECTOR3 pos = this->Transform.Pos();
@@ -380,30 +392,37 @@ void FIELD::Draw(void)
 
 	// ポリゴンの描画
 	pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLESTRIP, 0, 0, this->Attribute.NumVertex(), 0, this->Attribute.NumPolygon());
+
+	pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);	// 裏面をカリング
+	pDevice->SetRenderState(D3DRS_CULLMODE, dwSettingCullmode);
+	// ライティングを有効に
+	pDevice->SetRenderState(D3DRS_LIGHTING, TRUE);
+	pDevice->SetRenderState(D3DRS_LIGHTING, dwSettingLighting);
+	pDevice->SetRenderState(D3DRS_CULLMODE, dwSettingCullmode);
 }
 
 //=============================================================================
 // 地形との当たり判定
 //=============================================================================
-void FIELD::FieldHitCheck(PLAYER *player, ITEM *item, BULLET *bullet, EXPLOSION *explosion, SHADOW *shadow)
+void FIELD::FieldHitCheck(void)
 {
 	//プレイヤーと地面の当たり判定
 	for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
 	{
 		//-------------------オブジェクト値読み込み
-		D3DXVECTOR3 rayS = player->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos();
+		D3DXVECTOR3 rayS = pplayer->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos();
 		D3DXVECTOR3 rayG = rayS;
 		D3DXVECTOR3 ReturnPos = rayS;
-		D3DXVECTOR3 FieldNor = player->PostureVec[CntPlayer].FNVecFunc();
+		D3DXVECTOR3 FIELDNORMAL = pplayer->PostureVec[CntPlayer].FNVecFunc();
 		rayS.y += 1000.0f;
 		rayG.y -= 1000.0f;
 
 		//判定
-		this->FieldHitGetSphereVec(rayS, rayG, &FieldNor, &ReturnPos.y);
+		this->FieldHitGetSphereVec(rayS, rayG, &FIELDNORMAL, &ReturnPos.y);
 
 		//-------------------オブジェクト値書き込み
-		player->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos(ReturnPos);
-		player->PostureVec[CntPlayer].FNVecFunc(FieldNor);
+		pplayer->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos(ReturnPos);
+		pplayer->PostureVec[CntPlayer].FNVecFunc(FIELDNORMAL);
 	}
 
 	
@@ -411,14 +430,14 @@ void FIELD::FieldHitCheck(PLAYER *player, ITEM *item, BULLET *bullet, EXPLOSION 
 	//-----------------------------------オブジェクト先頭アドレスを読み込み
 	for (int CntItem = 0; CntItem < OBJECT_ITEM_MAX; CntItem++)
 	{
-		if (item->iUseType[CntItem].Use() == YesUseType1)
+		if (pitem->iUseType[CntItem].Use() == YesUseType1)
 		{
 			//-------------------オブジェクト値読み込み
-			D3DXVECTOR3 rayS = item->Transform[CntItem].Pos();
+			D3DXVECTOR3 rayS = pitem->Transform[CntItem].Pos();
 			D3DXVECTOR3 rayG = rayS;
 			D3DXVECTOR3 ReturnPos = rayS;
-			D3DXVECTOR3 FieldNor = item->PostureVec[CntItem].FNVecFunc();
-			if (item->ItemParaAll[CntItem].ShadowPosSignal==false)
+			D3DXVECTOR3 FIELDNORMAL = pitem->PostureVec[CntItem].FNVecFunc();
+			if (pitem->ItemParaAll[CntItem].ShadowPosSignal==false)
 			{
 				D3DXVECTOR3 ShadowPos = rayS;
 				//レイ調整
@@ -426,60 +445,60 @@ void FIELD::FieldHitCheck(PLAYER *player, ITEM *item, BULLET *bullet, EXPLOSION 
 				rayG.y -= 1000.0f;
 
 				//判定
-				this->FieldHit(rayS, rayG, &FieldNor, &ShadowPos.y);
+				this->FieldHit(rayS, rayG, &FIELDNORMAL, &ShadowPos.y);
 
 				//結果反映してフラグ変更
-				item->ItemParaAll[CntItem].LinkShadowPos = ShadowPos;
-				item->ItemParaAll[CntItem].ShadowPosSignal = true;
+				pitem->ItemParaAll[CntItem].LinkShadowPos = ShadowPos;
+				pitem->ItemParaAll[CntItem].ShadowPosSignal = true;
 			}
-			if (item->ItemParaAll[CntItem].CollisionFieldEnd != true || this->FieldPara.InterPolationFieldSignal == false)
+			if (pitem->ItemParaAll[CntItem].CollisionFieldEnd != true || this->FieldPara.InterPolationFieldSignal == false)
 			{
 				//レイ調整
 				rayS.y += 5.0f;
 				rayG.y -= 5.0f;
 
 				//判定
-				item->ItemParaAll[CntItem].CollisionFieldEnd = this->FieldHitItem(rayS, rayG, &FieldNor, &ReturnPos.y);
+				pitem->ItemParaAll[CntItem].CollisionFieldEnd = this->FieldHitItem(rayS, rayG, &FIELDNORMAL, &ReturnPos.y);
 			}
-			else if (this->FieldPara.InterPolationFieldSignal == true && item->ItemParaAll[CntItem].CollisionFieldEnd == true)
+			else if (this->FieldPara.InterPolationFieldSignal == true && pitem->ItemParaAll[CntItem].CollisionFieldEnd == true)
 			{
 				//レイ調整
 				rayS.y -= 1000.0f;
 				rayG.y += 1000.0f;
 
 				//判定
-				this->FieldHit(rayS, rayG, &FieldNor, &ReturnPos.y);
+				this->FieldHit(rayS, rayG, &FIELDNORMAL, &ReturnPos.y);
 			}
 			//-------------------オブジェクト値書き込み
-			item->Transform[CntItem].Pos(ReturnPos);
-			item->PostureVec[CntItem].FNVecFunc(FieldNor);
+			pitem->Transform[CntItem].Pos(ReturnPos);
+			pitem->PostureVec[CntItem].FNVecFunc(FIELDNORMAL);
 		}
 	}
 	
 	//バレットと地面の当たり判定
 	for (int Cntbullet = 0; Cntbullet < OBJECT_BULLET_MAX; Cntbullet++)
 	{
-		if (bullet->iUseType[Cntbullet].Use() == YesUseType1)
+		if (pbullet->iUseType[Cntbullet].Use() == YesUseType1)
 		{
 			D3DXVECTOR3 kari = VEC3_ALL0;
 			//-------------------オブジェクト値読み込み
-			D3DXVECTOR3 rayS = bullet->Transform[Cntbullet].Pos();
+			D3DXVECTOR3 rayS = pbullet->Transform[Cntbullet].Pos();
 			D3DXVECTOR3 rayG = rayS;
 			rayS.y += 1000.0f;
 			rayG.y -= 1000.0f;
 
 			//判定
-			this->FieldHit(rayS, rayG, &kari, &bullet->BulletPara[Cntbullet].FieldPosY);
+			this->FieldHit(rayS, rayG, &kari, &pbullet->BulletPara[Cntbullet].FieldPosY);
 
 			//地形との当たり判定を緩く(調整)するためのbullet[Cntbullet].FieldPosY-3.0f
-			D3DXVECTOR3 bpos = bullet->Transform[Cntbullet].Pos();
-			if (bullet->BulletPara[Cntbullet].FieldPosY - 3.0f > bpos.y)
+			D3DXVECTOR3 bpos = pbullet->Transform[Cntbullet].Pos();
+			if (pbullet->BulletPara[Cntbullet].FieldPosY - 3.0f > bpos.y)
 			{
 				// 爆発の生成
-				D3DXVECTOR3 ExploPos = D3DXVECTOR3(bpos.x, bullet->BulletPara[Cntbullet].FieldPosY, bpos.z);
-				explosion->SetInstance(ExploPos, 40.0f, 40.0f, eEXPLOSION_TYPE(bullet->BulletPara[Cntbullet].UsePlayerType), PLAYER_COLOR[bullet->BulletPara[Cntbullet].UsePlayerType]);
+				D3DXVECTOR3 ExploPos = D3DXVECTOR3(bpos.x, pbullet->BulletPara[Cntbullet].FieldPosY, bpos.z);
+				pexplosion->SetInstance(ExploPos, 40.0f, 40.0f, eEXPLOSION_TYPE(pbullet->BulletPara[Cntbullet].UsePlayerType), PLAYER_COLOR[pbullet->BulletPara[Cntbullet].UsePlayerType]);
 				// バレット破棄
-				bullet->ReleaseInstance(Cntbullet, shadow);
+				pbullet->ReleaseInstance(Cntbullet);
 				// SE再生
 				PlaySound(SOUND_LABEL_SE_damage);
 			}
@@ -491,7 +510,7 @@ void FIELD::FieldHitCheck(PLAYER *player, ITEM *item, BULLET *bullet, EXPLOSION 
 //=============================================================================
 // 地形変形タイプ
 //=============================================================================
-void FIELD::SetFieldInterPolationFieldType(int type,int CntPlayer,ITEM *item)
+void FIELD::SetFieldInterPolationFieldType(int type,int CntPlayer)
 {
 	//フラグセット
 	this->FieldPara.InterPolationFieldType = type;
@@ -499,7 +518,7 @@ void FIELD::SetFieldInterPolationFieldType(int type,int CntPlayer,ITEM *item)
 	//-----------------------------------オブジェクト先頭アドレスを読み込み
 	for (int CntItem = 0; CntItem < OBJECT_ITEM_MAX; CntItem++)
 	{
-		item->ItemParaAll[CntItem].CollisionFieldEnd = false;
+		pitem->ItemParaAll[CntItem].CollisionFieldEnd = false;
 	}
 }
 
@@ -651,7 +670,7 @@ LPDIRECT3DVERTEXBUFFER9 FIELD::SetFieldType02(LPDIRECT3DVERTEXBUFFER9 VtxBuffEnd
 //=============================================================================
 // 地形の自動生成03　取得プレイヤーが有利になる地形(相手プレイヤー付近を盆地)　　ブロック数32*32　ブロックサイズ250*250
 //=============================================================================
-LPDIRECT3DVERTEXBUFFER9 FIELD::SetFieldType03(PLAYER *player, LPDIRECT3DVERTEXBUFFER9 VtxBuffEnd, LPDIRECT3DINDEXBUFFER9 IdxBuff)
+LPDIRECT3DVERTEXBUFFER9 FIELD::SetFieldType03(LPDIRECT3DVERTEXBUFFER9 VtxBuffEnd, LPDIRECT3DINDEXBUFFER9 IdxBuff)
 {
 	//高さを決める
 	VERTEX_3D *pVtx;
@@ -728,7 +747,7 @@ LPDIRECT3DVERTEXBUFFER9 FIELD::SetFieldType03(PLAYER *player, LPDIRECT3DVERTEXBU
 
 			//プレイヤーの乗っているエリアを特定。4分木で範囲を絞る。
 			//-------------------オブジェクト値読み込み
-			D3DXVECTOR3 pos = player->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos();
+			D3DXVECTOR3 pos = pplayer->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos();
 			//高速化当たり判定
 			SpeedUpFieldHitPoly(pos, &HitPosUp, &HitPosDown, &HitPosLeft, &HitPosRight,
 				this->FieldPara.fSideSizeXEighth, this->FieldPara.fSideSizeZEighth,

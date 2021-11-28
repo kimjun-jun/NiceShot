@@ -6,6 +6,7 @@
 #include "../../h/main.h"
 #include "../../h/Other/input.h"
 #include "../../h/Object/Camera/camera.h"
+#include "../../h/Draw/Draw.h"
 #include "../../h/Effect/explosion.h"
 
 //*****************************************************************************
@@ -27,9 +28,6 @@ constexpr float	EXPLOSION_VERTEX_ADD_SIZE{ 0.5f };				//!< EXPLOSION頂点サイズ
 //=============================================================================
 EXPLOSION::EXPLOSION(void)
 {
-	//オブジェクトカウントアップ
-	this->CreateInstanceOBJ();
-
 	//頂点の作成
 	this->vtx.MakeVertex3DBill(OBJECT_EXPLOSION_MAX, FVF_VERTEX_3D);
 
@@ -74,9 +72,15 @@ EXPLOSION::~EXPLOSION(void)
 	//テクスチャ解放
 	this->tex.~TEXTURE();
 	//頂点解放
-	this->vtx.~VTXBuffer();
-	//オブジェクトカウントダウン
-	this->DeleteInstanceOBJ();
+	this->vtx.~VTXBUFFER();
+}
+
+//=============================================================================
+// 他クラスのアドレス取得
+//=============================================================================
+void EXPLOSION::Addressor(GAME_OBJECT_INSTANCE *obj)
+{
+	pDrawManager = obj->GetDrawManager();
 }
 
 //=============================================================================
@@ -157,7 +161,7 @@ void EXPLOSION::Update(void)
 //=============================================================================
 // 描画処理
 //=============================================================================
-void EXPLOSION::Draw(int CntPlayer)
+void EXPLOSION::Draw(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 
@@ -184,15 +188,15 @@ void EXPLOSION::Draw(int CntPlayer)
 			// ビューマトリックスを取得
 			CAMERA *cam = GetCamera();
 
-			mtxWorldExplosion._11 = cam[CntPlayer].mtxView._11;
-			mtxWorldExplosion._12 = cam[CntPlayer].mtxView._21;
-			mtxWorldExplosion._13 = cam[CntPlayer].mtxView._31;
-			mtxWorldExplosion._21 = cam[CntPlayer].mtxView._12;
-			mtxWorldExplosion._22 = cam[CntPlayer].mtxView._22;
-			mtxWorldExplosion._23 = cam[CntPlayer].mtxView._32;
-			mtxWorldExplosion._31 = cam[CntPlayer].mtxView._13;
-			mtxWorldExplosion._32 = cam[CntPlayer].mtxView._23;
-			mtxWorldExplosion._33 = cam[CntPlayer].mtxView._33;
+			mtxWorldExplosion._11 = cam[pDrawManager->GetDrawManagerNum()].mtxView._11;
+			mtxWorldExplosion._12 = cam[pDrawManager->GetDrawManagerNum()].mtxView._21;
+			mtxWorldExplosion._13 = cam[pDrawManager->GetDrawManagerNum()].mtxView._31;
+			mtxWorldExplosion._21 = cam[pDrawManager->GetDrawManagerNum()].mtxView._12;
+			mtxWorldExplosion._22 = cam[pDrawManager->GetDrawManagerNum()].mtxView._22;
+			mtxWorldExplosion._23 = cam[pDrawManager->GetDrawManagerNum()].mtxView._32;
+			mtxWorldExplosion._31 = cam[pDrawManager->GetDrawManagerNum()].mtxView._13;
+			mtxWorldExplosion._32 = cam[pDrawManager->GetDrawManagerNum()].mtxView._23;
+			mtxWorldExplosion._33 = cam[pDrawManager->GetDrawManagerNum()].mtxView._33;
 
 			// スケールを反映
 			D3DXMatrixScaling(&mtxScale, scl.x, scl.y, scl.z);

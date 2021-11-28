@@ -4,6 +4,7 @@
 * @author キムラジュン
 */
 #include "../../h/main.h"
+#include "../../h/Object/ObjectClass/StandardComponent/Model/Model.h"
 #include "../../h/Library/library.h"
 
 
@@ -863,7 +864,7 @@ void HormingType01(D3DXVECTOR3 *StartPos, D3DXVECTOR3 EndPos, float MoveValue)
 //=============================================================================
 // ゲーム中モーフィング実行関数
 //=============================================================================
-void DoMorphing(LPDIRECT3DVERTEXBUFFER9 FromModelVB, LPDIRECT3DVERTEXBUFFER9 ToModelVB, LPDIRECT3DINDEXBUFFER9 ModelIdx, ModelAttribute *Attribute, float dt, float *time, eMORPHING_TYPE *SignalType)
+void DoMorphing(LPDIRECT3DVERTEXBUFFER9 FromModelVB, LPDIRECT3DVERTEXBUFFER9 ToModelVB, LPDIRECT3DINDEXBUFFER9 ModelIdx, MODELATTRIBUTE *Attribute, float dt, float *time, eMORPHING_TYPE *SignalType)
 {
 	//線形補間でモーフィング
 	{
@@ -904,7 +905,7 @@ void DoMorphing(LPDIRECT3DVERTEXBUFFER9 FromModelVB, LPDIRECT3DVERTEXBUFFER9 ToM
 //=============================================================================
 // リセット時のモーフィング実行関数
 //=============================================================================
-void ResetModel(LPDIRECT3DVERTEXBUFFER9 FromModelVB, LPDIRECT3DVERTEXBUFFER9 ToModelVB, LPDIRECT3DINDEXBUFFER9 ModelIdx, ModelAttribute *Attribute)
+void ResetModel(LPDIRECT3DVERTEXBUFFER9 FromModelVB, LPDIRECT3DVERTEXBUFFER9 ToModelVB, LPDIRECT3DINDEXBUFFER9 ModelIdx, MODELATTRIBUTE *Attribute)
 {
 	// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
 	VERTEX_3D *pVtx;

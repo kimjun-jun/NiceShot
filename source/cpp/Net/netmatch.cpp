@@ -5,7 +5,7 @@
 */
 #include "../../h/main.h"
 #include "../../h/Other/input.h"
-#include "../../h/Object/Fade/fade.h"
+#include "../../h/Object/Scene/Scene.h"
 #include "../../h/Other/sound.h"
 #include "../../h/Net/netmatch.h"
 
@@ -23,9 +23,6 @@ constexpr int	NETMATCHRIAL_POS_Y			{ SCREEN_CENTER_Y };									//!< É`ÉÖÅ[ÉgÉäÉ
 //=============================================================================
 NETMATCH::NETMATCH(void)
 {
-	//ÉIÉuÉWÉFÉNÉgÉJÉEÉìÉgÉAÉbÉv
-	this->CreateInstanceOBJ();
-
 	//í∏ì_ÇÃçÏê¨
 	this->vtx.MakeVertex2D(1, FVF_VERTEX_2D);
 
@@ -57,9 +54,7 @@ NETMATCH::~NETMATCH(void)
 	//ÉeÉNÉXÉ`ÉÉâï˙
 	this->tex.~TEXTURE();
 	//í∏ì_âï˙
-	this->vtx.~VTXBuffer();
-	//ÉIÉuÉWÉFÉNÉgÉJÉEÉìÉgÉ_ÉEÉì
-	this->DeleteInstanceOBJ();
+	this->vtx.~VTXBUFFER();
 }
 
 //=============================================================================
@@ -73,7 +68,7 @@ void NETMATCH::Init(void)
 //=============================================================================
 // çXêV
 //=============================================================================
-void NETMATCH::Update(GAME_OBJECT* obj, FADE *fade)
+void NETMATCH::Update(void)
 {
 
 }

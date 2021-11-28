@@ -31,9 +31,6 @@
     <Filter Include="cpp\Other">
       <UniqueIdentifier>{0343b9d1-da55-4dbb-a4dc-e06cedf668c0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="cpp\Scene">
-      <UniqueIdentifier>{17a0f19d-5da0-4a38-9e55-28b002b7801a}</UniqueIdentifier>
-    </Filter>
     <Filter Include="cpp\Draw">
       <UniqueIdentifier>{2cd506c2-a81e-4590-af37-834f1b307769}</UniqueIdentifier>
     </Filter>
@@ -70,9 +67,6 @@
     <Filter Include="cpp\Object\Rank">
       <UniqueIdentifier>{b234f084-dedb-4467-b2bc-7834a58113ba}</UniqueIdentifier>
     </Filter>
-    <Filter Include="cpp\Object\Fade">
-      <UniqueIdentifier>{b4bb9eaf-93f7-4321-b075-a64356a56c74}</UniqueIdentifier>
-    </Filter>
     <Filter Include="cpp\Object\Title">
       <UniqueIdentifier>{27d4e1a1-2447-47a2-81ed-125fce544e92}</UniqueIdentifier>
     </Filter>
@@ -103,32 +97,17 @@
     <Filter Include="h\Other">
       <UniqueIdentifier>{1b8cd7ca-d130-4ee8-a3fd-17daefc43ff1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="h\Scene">
-      <UniqueIdentifier>{9b26a6b2-db78-4162-9f44-7b5492e5f5e8}</UniqueIdentifier>
-    </Filter>
     <Filter Include="h\Collision">
       <UniqueIdentifier>{2788db82-f309-4d72-9319-dd19c7cf5441}</UniqueIdentifier>
     </Filter>
     <Filter Include="h\Debug">
       <UniqueIdentifier>{dfe4a528-d2d6-4b48-8f9b-e706d642c17e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="h\Draw">
-      <UniqueIdentifier>{16bdc054-1c6e-4d26-a7cb-8bde4c5b7772}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="h\Library">
-      <UniqueIdentifier>{5d67271b-9195-4532-9509-bb25add760fa}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="h\Update">
-      <UniqueIdentifier>{22fa8dac-14c4-4158-9dd7-2a754436fc92}</UniqueIdentifier>
-    </Filter>
     <Filter Include="h\Object\Camera">
       <UniqueIdentifier>{4cd5b28a-684e-4469-9d7b-57bba893479c}</UniqueIdentifier>
     </Filter>
     <Filter Include="h\Object\CountDown">
       <UniqueIdentifier>{f628b8cc-44cb-45dc-ae6f-fd490db74e96}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="h\Object\Fade">
-      <UniqueIdentifier>{9dbc73c3-f5d7-45e4-a8e3-be8fd727834c}</UniqueIdentifier>
     </Filter>
     <Filter Include="h\Object\ObjectClass">
       <UniqueIdentifier>{131372c9-e110-409e-930c-fdfb3f724df3}</UniqueIdentifier>
@@ -178,6 +157,48 @@
     <Filter Include="h\Object\Bullet">
       <UniqueIdentifier>{a40de41a-b3ea-4448-bb8f-7cb0e1bbda3b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="h\Object\ObjectClass\StandardComponent">
+      <UniqueIdentifier>{7c8f833c-e5c0-40c3-bf2e-f0c1acd29ffc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp\Object\ObjectClass\StandardComponent">
+      <UniqueIdentifier>{4a5bc6e3-81de-4862-9576-3e4cc4f1ca99}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp\Object\ObjectClass\StandardComponent\Model">
+      <UniqueIdentifier>{c0fdb842-8772-440f-a939-f86322a6eac1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp\Object\ObjectClass\StandardComponent\TransForm">
+      <UniqueIdentifier>{1226c03e-4cb9-4991-bbde-3c54578e04ee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp\Object\ObjectClass\StandardComponent\UseCheck">
+      <UniqueIdentifier>{acb03943-1320-4530-914a-4b5987039aa1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="h\Object\ObjectClass\StandardComponent\Model">
+      <UniqueIdentifier>{098ef6f5-6898-49bc-ad3a-7b344647bd93}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="h\Object\ObjectClass\StandardComponent\TransForm">
+      <UniqueIdentifier>{5e99bc3a-8b5b-4a8f-b0d6-da6a0e7d1eca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="h\Object\ObjectClass\StandardComponent\UseCheck">
+      <UniqueIdentifier>{337538e2-4fbd-4647-8fff-59e7ea2fce1a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="h\Library">
+      <UniqueIdentifier>{5d67271b-9195-4532-9509-bb25add760fa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="h\Object\Scene">
+      <UniqueIdentifier>{d9993a67-04de-4bd2-bf75-2cc768879f2c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp\Object\Scene">
+      <UniqueIdentifier>{e61ab870-6707-4b4a-b2af-97e948043e65}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="h\Object\Item">
+      <UniqueIdentifier>{04d56bcf-8bbf-4816-aaf2-262b7a6c36bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="h\Draw">
+      <UniqueIdentifier>{5de63b92-a177-4ca6-9fca-0c7a75a87596}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="h\Update">
+      <UniqueIdentifier>{ccc6331d-308d-42c6-9eea-58409fcd6cad}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\cpp\main.cpp">
@@ -188,9 +209,6 @@
     </ClCompile>
     <ClCompile Include="..\cpp\Library\library.cpp">
       <Filter>cpp\Library</Filter>
-    </ClCompile>
-    <ClCompile Include="..\cpp\Object\Fade\fade.cpp">
-      <Filter>cpp\Object\Fade</Filter>
     </ClCompile>
     <ClCompile Include="..\cpp\Object\Tutorial\tutorial.cpp">
       <Filter>cpp\Object\Tutorial</Filter>
@@ -222,12 +240,6 @@
     <ClCompile Include="..\cpp\Object\Rank\rank.cpp">
       <Filter>cpp\Object\Rank</Filter>
     </ClCompile>
-    <ClCompile Include="..\cpp\Object\ObjectClass\objectclass.cpp">
-      <Filter>cpp\Object\ObjectClass</Filter>
-    </ClCompile>
-    <ClCompile Include="..\cpp\Collision\collision.cpp">
-      <Filter>cpp\Collision</Filter>
-    </ClCompile>
     <ClCompile Include="..\cpp\Object\Result\result.cpp">
       <Filter>cpp\Object\Result</Filter>
     </ClCompile>
@@ -236,9 +248,6 @@
     </ClCompile>
     <ClCompile Include="..\cpp\Update\Update.cpp">
       <Filter>cpp\Update</Filter>
-    </ClCompile>
-    <ClCompile Include="..\cpp\Scene\Scene.cpp">
-      <Filter>cpp\Scene</Filter>
     </ClCompile>
     <ClCompile Include="..\cpp\Effect\damege.cpp">
       <Filter>cpp\Effect</Filter>
@@ -279,6 +288,30 @@
     <ClCompile Include="..\cpp\Other\sound.cpp">
       <Filter>cpp\Other</Filter>
     </ClCompile>
+    <ClCompile Include="..\cpp\Object\ObjectClass\Interface\interface.cpp">
+      <Filter>cpp\Object\ObjectClass\Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\Object\ObjectClass\StandardComponent\Model\Model.cpp">
+      <Filter>cpp\Object\ObjectClass\StandardComponent\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\Object\ObjectClass\StandardComponent\UseCheak\UseCheck.cpp">
+      <Filter>cpp\Object\ObjectClass\StandardComponent\UseCheck</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\Object\ObjectClass\StandardComponent\TransForm\TransForm.cpp">
+      <Filter>cpp\Object\ObjectClass\StandardComponent\TransForm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\Object\ObjectClass\Instance\instance.cpp">
+      <Filter>cpp\Object\ObjectClass\Instance</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\Collision\CollisionCal.cpp">
+      <Filter>cpp\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\Collision\CollisionCheck.cpp">
+      <Filter>cpp\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\Object\Scene\Scene.cpp">
+      <Filter>cpp\Object\Scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\h\main.h">
@@ -293,17 +326,11 @@
     <ClInclude Include="..\h\Library\library.h">
       <Filter>h\Library</Filter>
     </ClInclude>
-    <ClInclude Include="..\h\Object\ObjectClass\objectclass.h">
-      <Filter>h\Object\ObjectClass</Filter>
-    </ClInclude>
     <ClInclude Include="..\h\Object\Camera\camera.h">
       <Filter>h\Object\Camera</Filter>
     </ClInclude>
     <ClInclude Include="..\h\Object\CountDown\countdown.h">
       <Filter>h\Object\CountDown</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\Object\Fade\fade.h">
-      <Filter>h\Object\Fade</Filter>
     </ClInclude>
     <ClInclude Include="..\h\Object\Tutorial\tutorial.h">
       <Filter>h\Object\Tutorial</Filter>
@@ -328,18 +355,6 @@
     </ClInclude>
     <ClInclude Include="..\h\Object\Player\player.h">
       <Filter>h\Object\Player</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\Collision\collision.h">
-      <Filter>h\Collision</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\Draw\Draw.h">
-      <Filter>h\Draw</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\Update\Update.h">
-      <Filter>h\Update</Filter>
-    </ClInclude>
-    <ClInclude Include="..\h\Scene\Scene.h">
-      <Filter>h\Scene</Filter>
     </ClInclude>
     <ClInclude Include="..\h\Effect\damege.h">
       <Filter>h\Effect</Filter>
@@ -379,6 +394,36 @@
     </ClInclude>
     <ClInclude Include="..\h\Other\sound.h">
       <Filter>h\Other</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\Object\ObjectClass\Interface\interface.h">
+      <Filter>h\Object\ObjectClass\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\Object\ObjectClass\StandardComponent\Model\Model.h">
+      <Filter>h\Object\ObjectClass\StandardComponent\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\Object\ObjectClass\StandardComponent\UseCheck\UseCheck.h">
+      <Filter>h\Object\ObjectClass\StandardComponent\UseCheck</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\Object\ObjectClass\StandardComponent\TransForm\TransForm.h">
+      <Filter>h\Object\ObjectClass\StandardComponent\TransForm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\Object\ObjectClass\Instance\instance.h">
+      <Filter>h\Object\ObjectClass\Instance</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\Collision\CollisionCal.h">
+      <Filter>h\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\Object\Scene\Scene.h">
+      <Filter>h\Object\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\Object\Item\item.h">
+      <Filter>h\Object\Item</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\Update\Update.h">
+      <Filter>h\Update</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\Draw\Draw.h">
+      <Filter>h\Draw</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

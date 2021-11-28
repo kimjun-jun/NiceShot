@@ -5,9 +5,7 @@
 */
 #pragma once
 
-#include "../../h/Object/ObjectClass/objectclass.h"
-
-
+#include "../../h/Object/ObjectClass/StandardComponent/Model/Model.h"
 
 /**
 * ＊重要＊{読み込むXファイルは必ず三角面化してください]
@@ -39,7 +37,7 @@ HRESULT LoadMesh(const char *FileName, LPD3DXBUFFER *pD3DXBuffMat, DWORD *nNumMa
 * @details モーフィング用 現在は頂点情報を線形補間で変化させている
 * @author : 木村純(キムラジュン)
 */
-void DoMorphing(LPDIRECT3DVERTEXBUFFER9 FromModelVB, LPDIRECT3DVERTEXBUFFER9 ToModelVB, LPDIRECT3DINDEXBUFFER9 ModelIdx, ModelAttribute *Attribute,float dt, float *time, eMORPHING_TYPE *SignalType);
+void DoMorphing(LPDIRECT3DVERTEXBUFFER9 FromModelVB, LPDIRECT3DVERTEXBUFFER9 ToModelVB, LPDIRECT3DINDEXBUFFER9 ModelIdx, MODELATTRIBUTE *Attribute,float dt, float *time, eMORPHING_TYPE *SignalType);
 
 /**
 * @brief モデルリセット関数 ResetModel
@@ -48,7 +46,7 @@ void DoMorphing(LPDIRECT3DVERTEXBUFFER9 FromModelVB, LPDIRECT3DVERTEXBUFFER9 ToM
 * @details モデルが変化した後のリセット用
 * @author : 木村純(キムラジュン)
 */
-void ResetModel(LPDIRECT3DVERTEXBUFFER9 FromModelVB, LPDIRECT3DVERTEXBUFFER9 ToModelVB, LPDIRECT3DINDEXBUFFER9 ModelIdx, ModelAttribute *Attribute);
+void ResetModel(LPDIRECT3DVERTEXBUFFER9 FromModelVB, LPDIRECT3DVERTEXBUFFER9 ToModelVB, LPDIRECT3DINDEXBUFFER9 ModelIdx, MODELATTRIBUTE *Attribute);
 
 /**
 * @brief レイキャスト関数 RayCast
@@ -88,11 +86,11 @@ bool IsCollisionFanAndPoint(D3DXVECTOR3 CenterPos, D3DXVECTOR3 TargetPos, float 
 	(プレイヤーpos, エネミーpos, プレイヤーrot.y, プレイヤーrot.y-1.57f, プレイヤーrot.y+1.57f, 30.0f);
 	 if(collisionFan == true)
 	 {
-		//範囲内だぜ
+		//範囲内
 	 }
 	 else
 	 {
-		//範囲外だぜ
+		//範囲外
 	 }
 */
 

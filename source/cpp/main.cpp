@@ -14,7 +14,7 @@
 #include "../h/Object/Shadow/shadow.h"
 #include "../h/Object/Title/title.h"
 #include "../h/Object/Result/result.h"
-#include "../h/Object/Fade/fade.h"
+#include "../h/Object/Scene/Scene.h"
 #include "../h/Object/Tutorial/tutorial.h"
 #include "../h/Effect/effect.h"
 #include "../h/Object/Bullet/bullet.h"
@@ -28,7 +28,7 @@
 #include "../h/Object/Bullet/bulletprediction.h"
 #include "../h/Object/Bullet/bulletgauge.h"
 #include "../h/Object/Player/VitalGauge/vitalgauge.h"
-#include "../h/Object/ObjectClass/objectclass.h"
+#include "../h/Object/ObjectClass/Instance/instance.h"
 #include "../h/net/sock.h"
 
 //*****************************************************************************
@@ -109,8 +109,6 @@ bool GetGameLoop(void)
 //=============================================================================
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
-	//DialogBox(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), HWND_DESKTOP, IDD_DIALOG);
-
 	srand((unsigned)time(NULL));
 	
 	//UNREFERENCED_PARAMETER(hPrevInstance);	// 無くても良いけど、警告が出る（未使用宣言）
@@ -190,20 +188,21 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	}
 
 	//-----------------------------------------------------オブジェクト生成
-	GAME_OBJECT ObjectAll;
-	ObjectAll.Generate();
+	GAME_OBJECT_INSTANCE ObjectInstance;
+	ObjectInstance.Generate();
+
+	//-----------------------------------------------------オブジェクトアドレス取得
+	ObjectInstance.Addressor(&ObjectInstance);
 
 	//-----------------------------------------------------オブジェクト初期化
-	ObjectAll.Init();
+	ObjectInstance.Init();
 
 	// 入力処理の初期化
 	InitInput(hInstance, hWnd);
 
-	//マルチスレッドで受信プログラム(受信関数)起動　細かく通信する　1/60じゃない　関数一つで出来る
 	//マルチスレッド開始
-	//std::thread SubThread(&GAME_OBJECT::ObjectAll->PackectAll(),);
-	std::thread SubThread([&ObjectAll]() {ObjectAll.PackectAll(); });
-
+	std::thread SubThread([&ObjectInstance]() {ObjectInstance.MySubThreadFunc(); });
+	
 	//フレームカウント初期化
 	timeBeginPeriod(1);				// 分解能を設定
 	dwExecLastTime =
@@ -263,10 +262,10 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 				dwExecLastTime = dwCurrentTime;
 
 				// 更新処理
-				ObjectAll.Update();
+				ObjectInstance.Update();
 
 				// 描画処理
-				ObjectAll.Draw();
+				ObjectInstance.Draw();
 
 				dwFrameCount++;
 			}
@@ -276,14 +275,15 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	//-----------------------------------------------------オブジェクト終了
 	//シーケンス終了フラグ
 	EndGame = true;
-	ObjectAll.MultThreadFlagFunc(false);
-	ObjectAll.GameSceneFlagFunc(false);
+
+	ObjectInstance.GetMySocket()->MultThreadFlagFunc(false);
+	ObjectInstance.GetMySocket()->GameSceneFlagFunc(false);
 
 	//スレッド破棄
 	SubThread.join();
 
 	//delete
-	ObjectAll.Delete();
+	ObjectInstance.Delete();
 
 	// ウィンドウクラスの登録を解除
 	UnregisterClass(CLASS_NAME, wcex.hInstance);
@@ -322,75 +322,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	}
 
 	return DefWindowProc(hWnd, uMsg, wParam, lParam);
-}
-
-LRESULT CALLBACK IDD_DIALOG(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-	LPTSTR IpInputStr = { NULL };
-	switch (uMsg)
-	{
-	case WM_INITDIALOG:
-		PostQuitMessage(0);
-		break;
-	case WM_CREATE:
-		// ウィンドウの作成
-		edit = CreateWindowEx(0,
-			"AppClassサーバーIP入力画面",
-			"サーバーIP入力画面",
-			WS_OVERLAPPEDWINDOW,
-			CW_USEDEFAULT,
-			CW_USEDEFAULT,
-			SCREEN_W + GetSystemMetrics(SM_CXDLGFRAME) * 2,
-			SCREEN_H + GetSystemMetrics(SM_CXDLGFRAME) * 2 + GetSystemMetrics(SM_CYCAPTION),
-			NULL,
-			NULL,
-			((LPCREATESTRUCT)(lParam))->hInstance,
-			NULL);
-		break;
-	case WM_COMMAND:
-		switch (LOWORD(wParam))
-		{
-		case IDOK:
-			//GetDlgItemText(hWnd, IDC_IPADDRESS2, IpInputStr, 256);
-			break;
-		case IDCANCEL:
-			break;
-		}
-		break;
-
-	default:
-		break;
-	}
-
-	return DefWindowProc(hWnd, uMsg, wParam, lParam);
-
-}
-
-BOOL CALLBACK IP_DIALOG(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-	//LPTSTR IpInputStr = { NULL };
-	//switch (uMsg)
-	//{
-	////case WM_INITDIALOG:
-	////	PostQuitMessage(0);
-	////	break;
-	//case WM_COMMAND:		
-	//	switch (LOWORD(wParam))
-	//	{
-	//	case IDOK:
-	//		//GetDlgItemText(hWnd, IDC_IPADDRESS2, IpInputStr, 256);
-	//		break;
-	//	case IDCANCEL:
-	//		break;
-	//	}
-	//	break;
-
-	//default:
-	//	break;
-	//}
-
-	return 1;
-
 }
 
 //=============================================================================
