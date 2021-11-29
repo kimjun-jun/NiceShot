@@ -41,7 +41,11 @@
     <ClCompile Include="..\cpp\Object\Item\item.cpp" />
     <ClCompile Include="..\cpp\Object\ObjectClass\Instance\instance.cpp" />
     <ClCompile Include="..\cpp\Object\ObjectClass\Interface\interface.cpp" />
+    <ClCompile Include="..\cpp\Object\ObjectClass\StandardComponent\Attack\Attack.cpp" />
     <ClCompile Include="..\cpp\Object\ObjectClass\StandardComponent\Model\Model.cpp" />
+    <ClCompile Include="..\cpp\Object\ObjectClass\StandardComponent\Move\Move.cpp" />
+    <ClCompile Include="..\cpp\Object\ObjectClass\StandardComponent\Posture\Posture.cpp" />
+    <ClCompile Include="..\cpp\Object\ObjectClass\StandardComponent\Rotation\Rotation.cpp" />
     <ClCompile Include="..\cpp\Object\ObjectClass\StandardComponent\TransForm\TransForm.cpp" />
     <ClCompile Include="..\cpp\Object\ObjectClass\StandardComponent\UseCheak\UseCheck.cpp" />
     <ClCompile Include="..\cpp\Object\Player\player.cpp" />
@@ -79,7 +83,11 @@
     <ClInclude Include="..\h\Object\Item\item.h" />
     <ClInclude Include="..\h\Object\ObjectClass\Instance\instance.h" />
     <ClInclude Include="..\h\Object\ObjectClass\Interface\interface.h" />
+    <ClInclude Include="..\h\Object\ObjectClass\StandardComponent\Attack\Attack.h" />
     <ClInclude Include="..\h\Object\ObjectClass\StandardComponent\Model\Model.h" />
+    <ClInclude Include="..\h\Object\ObjectClass\StandardComponent\Move\Move.h" />
+    <ClInclude Include="..\h\Object\ObjectClass\StandardComponent\Posture\Posture.h" />
+    <ClInclude Include="..\h\Object\ObjectClass\StandardComponent\Rotation\Rotation.h" />
     <ClInclude Include="..\h\Object\ObjectClass\StandardComponent\TransForm\TransForm.h" />
     <ClInclude Include="..\h\Object\ObjectClass\StandardComponent\UseCheck\UseCheck.h" />
     <ClInclude Include="..\h\Object\Player\player.h" />

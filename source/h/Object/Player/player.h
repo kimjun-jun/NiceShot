@@ -10,6 +10,7 @@
 #include "../../../h/Object/ObjectClass/StandardComponent/Model/Model.h"
 #include "../../../h/Object/ObjectClass/StandardComponent/TRANSFORM/TransForm.h"
 #include "../../../h/Object/ObjectClass/StandardComponent/UseCheck/UseCheck.h"
+#include "../../../h/Object/ObjectClass/StandardComponent/Move/Move.h"
 
 /**
  * @enum ePLAYER_PARTS_TYPE
@@ -201,28 +202,24 @@ public:
 	PLAYER_MODEL_DRAW modelDraw[OBJECT_PLAYER_MAX];			//!< 描画用モデルデータ
 	iUseCheck iUseType[OBJECT_PLAYER_MAX];					//!< 使用情報
 	FIELDNORMAL	PostureVec[OBJECT_PLAYER_MAX];				//!< 姿勢ベクトル
+	MOVE Move[OBJECT_PLAYER_MAX];							//!< 移動量
+
+
+	//------他クラスのアドレス 特別にパブリック
+	EFFECT *peffect;
 
 private:
 	TEXTURE	tex;						//!< テクスチャ情報　複数使用するならここを配列化　ITEMTYPE_MAX
 	PLAYER_MODEL_ORIGINAL modelOri;		//!< オリジナルモデルデータ　モーフィング時の基準用
-	MOVEMENT Move[OBJECT_PLAYER_MAX];	//!< 移動量
 
 	//------他クラスのアドレス
 	FIELD *pfield;
 	MySOCKET *pmysocket;
 	SCENE *pscene;
-	EFFECT *peffect;
 	BULLET *pbullet;
 
 	//------カラー
 	void PlayerMeshColor(LPDIRECT3DVERTEXBUFFER9 *pD3DVtxBuff, LPDIRECT3DINDEXBUFFER9 *pD3DIdxBuff, DWORD nNumPolygon, int CntPlayer);
-
-	//------移動制御
-	void MoveABL(int CntPlayer, EFFECT *effect, bool Netflag);		//!< 移動制御(ABボタンLスティックで移動制御)
-	void MoveL(int CntPlayer, EFFECT *effect, bool Netflag);		//!< 移動制御(LRスティックで移動制御)
-	void MoveLtype0(int CntPlayer, EFFECT *effect, bool Netflag);	//!< 移動制御(LRスティックで移動制御)
-	void MoveL2R2(int CntPlayer, EFFECT *effect, bool Netflag);		//!< 移動制御(L2R2で移動制御)
-	void MoveKeybord(int CntPlayer, EFFECT *effect);				//!< 移動制御(ki-bo-doで移動制御)
 
 	//------カメラ制御
 	void CameraRevers(int CntPlayer, bool Netflag);		//!< カメラ制御
@@ -236,6 +233,7 @@ private:
 	void BulletALLMoveL2R2Ver(int CntPlayer);		//!< バレット関連制御 発射ボタンを十字カーソル
 
 	//------アイテム制御
+	void ItemTimeSpeed(int CntPlayer, EFFECT *effect);	//!< スピードアップ制御 未使用
 	void ItemTimeKiri(int CntPlayer);				//!< フォグ制御
 	void ItemTimeMorphing(int CntPlayer);			//!< モーフィング制御
 

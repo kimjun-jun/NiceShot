@@ -10,6 +10,7 @@
 #include "../../../h/Object/ObjectClass/StandardComponent/Model/Model.h"
 #include "../../../h/Object/ObjectClass/StandardComponent/TRANSFORM/TransForm.h"
 #include "../../../h/Object/ObjectClass/StandardComponent/UseCheck/UseCheck.h"
+#include "../../../h/Object/ObjectClass/StandardComponent/Move/Move.h"
 
 //*****************************************************************************
 // class定義
@@ -57,7 +58,7 @@ public:
 
 private:
 
-	MOVEMENT	move[OBJECT_BULLET_MAX];			//!< 移動量
+	MOVE	move[OBJECT_BULLET_MAX];			//!< 移動量
 
 	//------他クラスのアドレス
 	SHADOW *pshadow;

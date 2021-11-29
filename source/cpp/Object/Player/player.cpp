@@ -16,7 +16,7 @@
 #include "../../../h/Object/Player/player.h"
 
 //画像の参照名																											
-#define	TEXTURE_MEISAI				"../data/MODEL/28513607_p4_master1200.jpg"		//!< 読み込むテクスチャファイル名
+#define	TEXTURE_MEISAI	"../data/MODEL/28513607_p4_master1200.jpg"		//!< 読み込むテクスチャファイル名
 
 constexpr float	PLAYER_INIT_POSX{ 700.0f };				//!< 初期座標プレイヤー
 constexpr float	PLAYER_INIT_POSY{ 300.0f };				//!< 初期座標プレイヤー
@@ -35,8 +35,6 @@ constexpr float	VALUE_ROTATE_PLAYER_HOUTOU{ 0.03f };	//!< プレイヤー砲塔回転量
 constexpr float	VALUE_ROTATE_PLAYER_HOUTOU_MAX{ 1.57f };//!< プレイヤー砲塔回転量最大値
 constexpr float	VALUE_ROTATE_PLAYER_HOUSIN{ 0.01f };	//!< プレイヤー砲身回転量
 constexpr float	VALUE_ROTATE_PLAYER_HOUSIN_MAX{ 0.2f };	//!< プレイヤー砲塔回転量最大値
-constexpr int	FRONT_VEC{ 1 };							//!< 前ベクトル
-constexpr int	BACK_VEC{ -1 };							//!< 後ろベクトル
 constexpr float	MOVE_INERTIA_MOMENT{ 0.8f };			//!< 移動量の慣性モーメント、減速係数として使用
 constexpr float	VALUE_SPEEDBUFF_SUB{ 1.0f };			//!< スピートアップ時間のデクリメントする値
 constexpr float BACKCAMERA_TIME{ 150.0f };				//!< バックカメラアイテム有効時間
@@ -213,7 +211,6 @@ void PLAYER::Init(void)
 		this->PostureVec[CntPlayer].FNVecFunc(VEC3_ALL0);
 		this->PostureVec[CntPlayer].FNUNCrossFunc(VEC3_ALL0);
 		this->PostureVec[CntPlayer].QrotFunc(0.0f);
-		this->Move[CntPlayer].Move(VEC3_ALL0);
 
 		//砲塔
 		this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUTOU].Rot(VEC3_ALL0);
@@ -285,9 +282,8 @@ void PLAYER::Init(void)
 //=============================================================================
 void PLAYER::Update(void)
 {
-	//何人死んだか計算。三人死んだらゲーム終了。次のシーンへ
+	//-----------------何人死んだか計算。三人死んだらゲーム終了。次のシーンへ
 	int deadcnt = 0;
-	//プレイヤー人数分ループ
 	for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
 	{
 		if (this->iUseType[CntPlayer].Use() == NoUse) deadcnt++;
@@ -309,19 +305,19 @@ void PLAYER::Update(void)
 		}
 	}
 
-	//プレイヤー制御
-	//プレイヤー人数分ループ ローカル対戦
+	//-----------------ローカル対戦制御
 	if (pmysocket->GetNetGameStartFlag() == false)
 	{
-		this->MoveKeybord(0, peffect);//デバッグ用
+		this->Move->MoveKeybord(0, this);//デバッグ用
 		for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
 		{
 			bool use = this->iUseType[CntPlayer].Use();
 			//生きていれば制御可能
 			if (use)
 			{
-				//this->SetMoveL2R2(CntPlayer, pmysocket->GetNetGameStartFlag());
-				//this->MoveL(CntPlayer, peffect, pmysocket->GetNetGameStartFlag());
+				//---------------制御関数
+				//this->Move->MoveL(CntPlayer, this, pmysocket->GetNetGameStartFlag());
+				this->CameraRotControl(CntPlayer, pmysocket->GetNetGameStartFlag());
 				this->Quaternion(CntPlayer);
 				this->CameraRevers(CntPlayer, pmysocket->GetNetGameStartFlag());
 				this->BulletALL(CntPlayer, pmysocket->GetNetGameStartFlag());
@@ -333,17 +329,14 @@ void PLAYER::Update(void)
 			else
 			{
 				this[CntPlayer].Quaternion(CntPlayer);
-
 				D3DXVECTOR3 Pos = this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos();
 				D3DXVECTOR3 HoudaiRot = this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Rot();
 				D3DXVECTOR3 HoutouRot = this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUTOU].Rot();
 				D3DXVECTOR3 HousinRot = this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUSIN].Rot();
-
 				CAMERA *cam = GetCamera();
 				cam[CntPlayer].at.x = Pos.x - (AT_W_CAM * sinf(HoudaiRot.y + HoutouRot.y));
 				cam[CntPlayer].at.y = Pos.y + (HousinRot.x*100.0f);
 				cam[CntPlayer].at.z = Pos.z - (AT_W_CAM * cosf(HoudaiRot.y + HoutouRot.y));
-
 				cam[CntPlayer].pos.x = Pos.x + sinf(HoudaiRot.y + HoutouRot.y) * cam[CntPlayer].len;
 				cam[CntPlayer].pos.y = Pos.y + POS_H_CAM;
 				cam[CntPlayer].pos.z = Pos.z + cosf(HoudaiRot.y + HoutouRot.y) * cam[CntPlayer].len;
@@ -351,7 +344,7 @@ void PLAYER::Update(void)
 		}
 	}
 
-	//ネット対戦
+	//-----------------ネット対戦制御
 	else
 	{
 		bool use = this->iUseType[pmysocket->GetNetMyNumber()].Use();
@@ -360,6 +353,7 @@ void PLAYER::Update(void)
 		if (use)
 		{
 			//ネット用フラグ初期化　1フレーム中の変更を保存して変更があればサーバーにデータを送る
+			//---------------初期化
 			this->PlayerPara[pmysocket->GetNetMyNumber()].MorphingPara.NetGetMorphingOneFrame = false;
 			this->PlayerPara[pmysocket->GetNetMyNumber()].BulletPara.BulletStartPos = VEC3_ALL0;
 			for (int i = 0; i < 3; i++) this->PlayerPara[pmysocket->GetNetMyNumber()].BulletPara.BulletMove[i] = VEC3_ALL0;
@@ -368,36 +362,30 @@ void PLAYER::Update(void)
 				this->PlayerPara[CntPlayer].BulletPara.NetBulletShotFlagOneFrame = 0;
 				this->PlayerPara[CntPlayer].StandardPara.OldVital = this->PlayerPara[CntPlayer].StandardPara.Vital;
 			}
-			this->MoveKeybord(pmysocket->GetNetMyNumber(), peffect);
-			//this->MoveLtype0(pmysocket->GetNetMyNumber(), peffect, Netflag);
-			for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
-			{
-				this->Quaternion(CntPlayer);
-			}
+
+			//---------------制御関数
+			this->Move->MoveKeybord(0, this);//デバッグ用
+			//this->Move->MoveL(pmysocket->GetNetMyNumber(), this, pmysocket->GetNetGameStartFlag());
+			this->CameraRotControl(pmysocket->GetNetMyNumber(), pmysocket->GetNetGameStartFlag());
+			for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++) this->Quaternion(CntPlayer);
 			this->CameraRevers(pmysocket->GetNetMyNumber(), pmysocket->GetNetGameStartFlag());
 			this->BulletALL(pmysocket->GetNetMyNumber(), pmysocket->GetNetGameStartFlag());
 			this->ItemTimeKiri(pmysocket->GetNetMyNumber());
-			for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
-			{
-				this->ItemTimeMorphing(CntPlayer);
-			}
+			for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++) this->ItemTimeMorphing(CntPlayer);
 		}
 
 		//それ以外はカメラだけ制御
 		else
 		{
 			this[pmysocket->GetNetMyNumber()].Quaternion(pmysocket->GetNetMyNumber());
-
 			D3DXVECTOR3 Pos = this->modelDraw[pmysocket->GetNetMyNumber()].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos();
 			D3DXVECTOR3 HoudaiRot = this->modelDraw[pmysocket->GetNetMyNumber()].Transform[PLAYER_PARTS_TYPE_HOUDAI].Rot();
 			D3DXVECTOR3 HoutouRot = this->modelDraw[pmysocket->GetNetMyNumber()].Transform[PLAYER_PARTS_TYPE_HOUTOU].Rot();
 			D3DXVECTOR3 HousinRot = this->modelDraw[pmysocket->GetNetMyNumber()].Transform[PLAYER_PARTS_TYPE_HOUSIN].Rot();
-
 			CAMERA *cam = GetCamera();
 			cam[pmysocket->GetNetMyNumber()].at.x = Pos.x - (AT_W_CAM * sinf(HoudaiRot.y + HoutouRot.y));
 			cam[pmysocket->GetNetMyNumber()].at.y = Pos.y + (HousinRot.x*100.0f);
 			cam[pmysocket->GetNetMyNumber()].at.z = Pos.z - (AT_W_CAM * cosf(HoudaiRot.y + HoutouRot.y));
-
 			cam[pmysocket->GetNetMyNumber()].pos.x = Pos.x + sinf(HoudaiRot.y + HoutouRot.y) * cam[pmysocket->GetNetMyNumber()].len;
 			cam[pmysocket->GetNetMyNumber()].pos.y = Pos.y + POS_H_CAM;
 			cam[pmysocket->GetNetMyNumber()].pos.z = Pos.z + cosf(HoudaiRot.y + HoutouRot.y) * cam[pmysocket->GetNetMyNumber()].len;
@@ -720,509 +708,6 @@ void PLAYER::PlayerMeshColor(LPDIRECT3DVERTEXBUFFER9 *pD3DVtxBuff, LPDIRECT3DIND
 }
 
 //=============================================================================
-// 移動制御(ABボタンLスティックで移動制御)
-//=============================================================================
-void PLAYER::MoveABL(int CntPlayer, EFFECT *effect, bool Netflag)
-{
-	//---------------------------------------------------------オブジェクト値呼び出し
-	D3DXVECTOR3 pos = this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos();
-	D3DXVECTOR3 HoudaiRot = this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Rot();
-	D3DXVECTOR3 HoutouRot = this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUTOU].Rot();
-	D3DXVECTOR3 HousinRot = this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUSIN].Rot();
-
-	//Old保存
-	this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos(pos);
-
-	int dir = FRONT_VEC;
-	//移動処理
-	if (IsButtonPressed(CntPlayer, BUTTON_A))
-	{
-		dir = FRONT_VEC;
-		this->PlayerPara[CntPlayer].StandardPara.Speed += PLAYER_VALUE_MOVE;
-	}
-	else if (IsButtonPressed(CntPlayer, BUTTON_B))
-	{
-		dir = BACK_VEC;
-		this->PlayerPara[CntPlayer].StandardPara.Speed -= PLAYER_VALUE_MOVE;
-	}
-
-	// 無移動時は移動量に慣性をかける
-	else
-	{
-		this->PlayerPara[CntPlayer].StandardPara.Speed *= MOVE_INERTIA_MOMENT;
-	}
-
-	//視点変化のアナログ値を旋回に代入してアナログ操作で旋回
-	DIJOYSTATE2 *Button = GetIsButton(CntPlayer);
-	float LAnalogX = float(Button->lX / 30000.0f);
-
-	//旋回
-	if (!IsButtonPressed(CntPlayer, BUTTON_ANALOG_L_RIGHT) && !IsButtonPressed(CntPlayer, BUTTON_ANALOG_L_LEFT))
-	{
-		dir = FRONT_VEC;
-	}
-	else if (IsButtonPressed(CntPlayer, BUTTON_ANALOG_L_RIGHT))
-	{
-		HoudaiRot.y += LAnalogX * dir*this->PlayerPara[CntPlayer].ItemPara.SpeedBuff;
-	}
-	else if (IsButtonPressed(CntPlayer, BUTTON_ANALOG_L_LEFT))
-	{
-		HoudaiRot.y += LAnalogX * dir*this->PlayerPara[CntPlayer].ItemPara.SpeedBuff;
-	}
-
-	//角度の制限値
-	if (HoudaiRot.y >= D3DX_PI * 2) HoudaiRot.y = 0.0f;
-	else if (HoudaiRot.y <= -D3DX_PI * 2) HoudaiRot.y = 0.0f;
-
-	// 移動速度の制限
-	if (this->PlayerPara[CntPlayer].StandardPara.Speed >= PLAYER_VALUE_MOVE_MAX) this->PlayerPara[CntPlayer].StandardPara.Speed = PLAYER_VALUE_MOVE_MAX;
-	else if (this->PlayerPara[CntPlayer].StandardPara.Speed <= -PLAYER_VALUE_MOVE_MAX) this->PlayerPara[CntPlayer].StandardPara.Speed = -PLAYER_VALUE_MOVE_MAX;
-
-	// プレイヤーの座標を更新
-	pos.x -= sinf(HoudaiRot.y) * (this->PlayerPara[CntPlayer].StandardPara.Speed * this->PlayerPara[CntPlayer].ItemPara.SpeedBuff);
-	pos.z -= cosf(HoudaiRot.y) * (this->PlayerPara[CntPlayer].StandardPara.Speed * this->PlayerPara[CntPlayer].ItemPara.SpeedBuff);
-
-	//スピードバフ時間減少
-	if (this->PlayerPara[CntPlayer].ItemPara.SpeedBuffSignal == true)
-	{
-		this->PlayerPara[CntPlayer].ItemPara.SpeedBuffTime -= VALUE_SPEEDBUFF_SUB;
-
-		// エフェクトスピードアップの生成
-		D3DXVECTOR3 EffctSpeedupPos = D3DXVECTOR3(pos.x, pos.y, pos.z);
-		effect->SetInstance(EffctSpeedupPos, VEC3_ALL0, PLAYER_COLOR[CntPlayer], EFFECT_SPEEDUP_SIZE_X, EFFECT_SPEEDUP_SIZE_Y, EFFECT_SPEEDUP_TIME);
-
-		if (this->PlayerPara[CntPlayer].ItemPara.SpeedBuffTime <= 0.0f)
-		{
-			this->PlayerPara[CntPlayer].ItemPara.SpeedBuffSignal = false;
-			this->PlayerPara[CntPlayer].ItemPara.SpeedBuff = VALUE_SPEEDBUFF_SUB;
-		}
-	}
-
-	//砲塔操作　バレット着弾点(左右エイム)
-	if (IsButtonPressed(CntPlayer, BUTTON_R1))
-	{
-		HoutouRot.y += VALUE_ROTATE_PLAYER_HOUTOU;
-		if (HoutouRot.y >= VALUE_ROTATE_PLAYER_HOUTOU_MAX) HoutouRot.y = VALUE_ROTATE_PLAYER_HOUTOU_MAX;
-	}
-	else if (IsButtonPressed(CntPlayer, BUTTON_L1))
-	{
-		HoutouRot.y -= VALUE_ROTATE_PLAYER_HOUTOU;
-		if (HoutouRot.y <= -VALUE_ROTATE_PLAYER_HOUTOU_MAX) HoutouRot.y = -VALUE_ROTATE_PLAYER_HOUTOU_MAX;
-	}
-
-	//砲身操作　バレット着弾点(前後エイム)
-	if (IsButtonPressed(CntPlayer, BUTTON_R2))
-	{
-		HousinRot.x += VALUE_ROTATE_PLAYER_HOUSIN;
-		if (HousinRot.x >= VALUE_ROTATE_PLAYER_HOUSIN_MAX) HousinRot.x = VALUE_ROTATE_PLAYER_HOUSIN_MAX;
-	}
-	else if (GetKeyboardPress(DIK_S) || IsButtonPressed(CntPlayer, BUTTON_L2))
-	{
-		HousinRot.x -= VALUE_ROTATE_PLAYER_HOUSIN;
-		if (HousinRot.x <= -VALUE_ROTATE_PLAYER_HOUSIN_MAX) HousinRot.x = -VALUE_ROTATE_PLAYER_HOUSIN_MAX;
-	}
-
-	//---------------------------------------------------------オブジェクト値セット
-	this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos(pos);
-	this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Rot(HoudaiRot);
-	this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUTOU].Rot(HoutouRot);
-	this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUSIN].Rot(HousinRot);
-
-}
-
-//=============================================================================
-// 移動制御(ki-bo-doで移動制御)
-//=============================================================================
-void PLAYER::MoveKeybord(int CntPlayer, EFFECT *effect)
-{
-	//---------------------------------------------------------オブジェクト値呼び出し
-	D3DXVECTOR3 pos = this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos();
-	D3DXVECTOR3 HoudaiRot = this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Rot();
-	D3DXVECTOR3 HoutouRot = this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUTOU].Rot();
-	D3DXVECTOR3 HousinRot = this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUSIN].Rot();
-
-	//Old保存
-	this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos(pos);
-
-	int dir = FRONT_VEC;
-	//移動処理
-	if (GetKeyboardPress(DIK_W))
-	{
-		dir = FRONT_VEC;
-		this->PlayerPara[CntPlayer].StandardPara.Speed += PLAYER_VALUE_MOVE * 10*4;
-	}
-	else if (GetKeyboardPress(DIK_S))
-	{
-		dir = BACK_VEC;
-		this->PlayerPara[CntPlayer].StandardPara.Speed -= PLAYER_VALUE_MOVE * 10*4;
-	}
-
-	// 無移動時は移動量に慣性をかける
-	else
-	{
-		this->PlayerPara[CntPlayer].StandardPara.Speed *= MOVE_INERTIA_MOMENT;
-	}
-
-	//旋回
-	if (GetKeyboardPress(DIK_D))
-	{
-		HoudaiRot.y += 0.02f * dir*this->PlayerPara[CntPlayer].ItemPara.SpeedBuff*2;
-	}
-	else if (GetKeyboardPress(DIK_A))
-	{
-		HoudaiRot.y -= 0.02f * dir*this->PlayerPara[CntPlayer].ItemPara.SpeedBuff*2;
-	}
-
-
-	//角度の制限値
-	if (HoudaiRot.y >= D3DX_PI * 2) HoudaiRot.y = 0.0f;
-	else if (HoudaiRot.y <= -D3DX_PI * 2) HoudaiRot.y = 0.0f;
-
-	// 移動速度の制限
-	if (this->PlayerPara[CntPlayer].StandardPara.Speed >= PLAYER_VALUE_MOVE_MAX) this->PlayerPara[CntPlayer].StandardPara.Speed = PLAYER_VALUE_MOVE_MAX;
-	else if (this->PlayerPara[CntPlayer].StandardPara.Speed <= -PLAYER_VALUE_MOVE_MAX) this->PlayerPara[CntPlayer].StandardPara.Speed = -PLAYER_VALUE_MOVE_MAX;
-
-	// プレイヤーの座標を更新
-	pos.x -= sinf(HoudaiRot.y) * (this->PlayerPara[CntPlayer].StandardPara.Speed * this->PlayerPara[CntPlayer].ItemPara.SpeedBuff);
-	pos.z -= cosf(HoudaiRot.y) * (this->PlayerPara[CntPlayer].StandardPara.Speed * this->PlayerPara[CntPlayer].ItemPara.SpeedBuff);
-
-	//スピードバフ時間減少
-	if (this->PlayerPara[CntPlayer].ItemPara.SpeedBuffSignal == true)
-	{
-		this->PlayerPara[CntPlayer].ItemPara.SpeedBuffTime -= VALUE_SPEEDBUFF_SUB;
-
-		// エフェクトスピードアップの生成
-		D3DXVECTOR3 EffctSpeedupPos = D3DXVECTOR3(pos.x, pos.y, pos.z);
-		effect->SetInstance(EffctSpeedupPos, VEC3_ALL0, PLAYER_COLOR[CntPlayer], EFFECT_SPEEDUP_SIZE_X, EFFECT_SPEEDUP_SIZE_Y, EFFECT_SPEEDUP_TIME);
-
-		if (this->PlayerPara[CntPlayer].ItemPara.SpeedBuffTime <= 0.0f)
-		{
-			this->PlayerPara[CntPlayer].ItemPara.SpeedBuffSignal = false;
-			this->PlayerPara[CntPlayer].ItemPara.SpeedBuff = VALUE_SPEEDBUFF_SUB;
-		}
-	}
-
-	//砲塔操作　バレット着弾点(左右エイム)
-	if (GetKeyboardPress(DIK_RIGHT))
-	{
-		HoutouRot.y += VALUE_ROTATE_PLAYER_HOUTOU;
-		if (HoutouRot.y >= VALUE_ROTATE_PLAYER_HOUTOU_MAX) HoutouRot.y = VALUE_ROTATE_PLAYER_HOUTOU_MAX;
-	}
-	else if (GetKeyboardPress(DIK_LEFT))
-	{
-		HoutouRot.y -= VALUE_ROTATE_PLAYER_HOUTOU;
-		if (HoutouRot.y <= -VALUE_ROTATE_PLAYER_HOUTOU_MAX) HoutouRot.y = -VALUE_ROTATE_PLAYER_HOUTOU_MAX;
-	}
-
-	//砲身操作　バレット着弾点(前後エイム)
-	if (GetKeyboardPress(DIK_UP))
-	{
-		HousinRot.x += VALUE_ROTATE_PLAYER_HOUSIN;
-		if (HousinRot.x >= VALUE_ROTATE_PLAYER_HOUSIN_MAX) HousinRot.x = VALUE_ROTATE_PLAYER_HOUSIN_MAX;
-	}
-	else if (GetKeyboardPress(DIK_DOWN))
-	{
-		HousinRot.x -= VALUE_ROTATE_PLAYER_HOUSIN;
-		if (HousinRot.x <= -VALUE_ROTATE_PLAYER_HOUSIN_MAX) HousinRot.x = -VALUE_ROTATE_PLAYER_HOUSIN_MAX;
-	}
-
-	//---------------------------------------------------------オブジェクト値セット
-	this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos(pos);
-	this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Rot(HoudaiRot);
-	this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUTOU].Rot(HoutouRot);
-	this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUSIN].Rot(HousinRot);
-
-}
-
-//=============================================================================
-// 移動制御(Lスティックで移動制御)
-//=============================================================================
-void PLAYER::MoveL(int CntPlayer, EFFECT *effect, bool Netflag)
-{
-	//---------------------------------------------------------オブジェクト値呼び出し
-	D3DXVECTOR3 pos = this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos();
-	D3DXVECTOR3 move = this->Move[CntPlayer].Move();
-	D3DXVECTOR3 HoudaiRot = this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Rot();
-
-	//Old保存
-	this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos(pos);
-	this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Rot(HoudaiRot);
-
-	int dir = FRONT_VEC;
-
-	//移動変化はLスティックアナログ値を使用
-	float LAnalogX = 0.0f;		//縦入力
-	float LAnalogY = 0.0f;		//横入力
-	float DashRate = 1.0f;		//スピードアップレート
-
-	//ダッシュ判定
-	if (this->PlayerPara[CntPlayer].ItemPara.SpeedBuffSignal == true)
-	{
-		//スピードバフ時間減少
-		this->PlayerPara[CntPlayer].ItemPara.SpeedBuffTime -= VALUE_SPEEDBUFF_SUB;
-		this->PlayerPara[CntPlayer].ItemPara.DashSignal = true;
-
-		// エフェクトスピードアップの生成
-		D3DXVECTOR3 EffctSpeedupPos = pos;
-		effect->SetInstance(EffctSpeedupPos, VEC3_ALL0, PLAYER_COLOR[CntPlayer], EFFECT_SPEEDUP_SIZE_X, EFFECT_SPEEDUP_SIZE_Y, EFFECT_SPEEDUP_TIME);
-
-		if (this->PlayerPara[CntPlayer].ItemPara.SpeedBuffTime <= 0.0f)
-		{
-			this->PlayerPara[CntPlayer].ItemPara.DashSignal = false;
-			this->PlayerPara[CntPlayer].ItemPara.SpeedBuffSignal = false;
-		}
-	}
-
-	if (this->PlayerPara[CntPlayer].ItemPara.DashSignal == true)
-	{
-		DashRate = PLAYER_VALUE_DASHRATE;
-	}
-
-	//ネット対戦時はゲームパッドナンバーは0　それ以外はプレイヤー番号で対応させる
-	int PadNum = CntPlayer;
-	if (Netflag == true)
-	{
-		PadNum = 0;
-	}
-
-	//移動処理
-	if (IsButtonPressed(PadNum, BUTTON_ANALOG_L_UP) || IsButtonPressed(PadNum, BUTTON_ANALOG_L_DOWN) ||
-		IsButtonPressed(PadNum, BUTTON_ANALOG_L_LEFT) || IsButtonPressed(PadNum, BUTTON_ANALOG_L_RIGHT))
-	{
-		DIJOYSTATE2 *Button = GetIsButton(PadNum);
-
-		LAnalogX = float(Button->lX * PLAYER_MOVE_RATE_X);
-		LAnalogY = float(Button->lY * PLAYER_MOVE_RATE_Y * DashRate);
-		dir = FRONT_VEC;
-	}
-	//旋回入力は後退中に限りリバースする
-	if (IsButtonPressed(PadNum, BUTTON_ANALOG_L_DOWN))
-	{
-		dir = BACK_VEC;
-	}
-	// 無移動時は移動量に慣性をかける
-	else
-	{
-		this->PlayerPara[CntPlayer].ItemPara.DashSignal = false;
-	}
-	if (LAnalogY > 0.0f) LAnalogX *= -1;
-
-	//移動量を反映
-	HoudaiRot.y += LAnalogX * dir;
-	move.x = LAnalogY * sinf(HoudaiRot.y);
-	move.z = LAnalogY * cosf(HoudaiRot.y);
-
-	//プレイヤー座標を更新
-	pos += move;
-
-	//---------------------------------------------------------オブジェクト値セット
-	this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos(pos);
-	this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Rot(HoudaiRot);
-
-	CameraRotControl(CntPlayer, Netflag);
-}
-
-//=============================================================================
-// 移動制御(Lスティックで移動制御)
-//=============================================================================
-void PLAYER::MoveLtype0(int CntPlayer, EFFECT *effect, bool Netflag)
-{
-	//---------------------------------------------------------オブジェクト値呼び出し
-	D3DXVECTOR3 pos = this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos();
-	D3DXVECTOR3 move = this->Move[CntPlayer].Move();
-	D3DXVECTOR3 HoudaiRot = this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Rot();
-
-	//Old保存
-	this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos(pos);
-	this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Rot(HoudaiRot);
-
-	int dir = FRONT_VEC;
-
-	//移動変化はLスティックアナログ値を使用
-	float LAnalogX = 0.0f;		//縦入力
-	float LAnalogY = 0.0f;		//横入力
-	float DashRate = 1.0f;		//スピードアップレート
-
-	//ダッシュ判定
-	if (this->PlayerPara[CntPlayer].ItemPara.SpeedBuffSignal == true)
-	{
-		//スピードバフ時間減少
-		this->PlayerPara[CntPlayer].ItemPara.SpeedBuffTime -= VALUE_SPEEDBUFF_SUB;
-		this->PlayerPara[CntPlayer].ItemPara.DashSignal = true;
-
-		// エフェクトスピードアップの生成
-		D3DXVECTOR3 EffctSpeedupPos = pos;
-		effect->SetInstance(EffctSpeedupPos, VEC3_ALL0, PLAYER_COLOR[CntPlayer], EFFECT_SPEEDUP_SIZE_X, EFFECT_SPEEDUP_SIZE_Y, EFFECT_SPEEDUP_TIME);
-
-		if (this->PlayerPara[CntPlayer].ItemPara.SpeedBuffTime <= 0.0f)
-		{
-			this->PlayerPara[CntPlayer].ItemPara.DashSignal = false;
-			this->PlayerPara[CntPlayer].ItemPara.SpeedBuffSignal = false;
-		}
-	}
-
-	if (this->PlayerPara[CntPlayer].ItemPara.DashSignal == true)
-	{
-		DashRate = PLAYER_VALUE_DASHRATE;
-	}
-
-	//ネット対戦時はゲームパッドナンバーは0　それ以外はプレイヤー番号で対応させる
-	int PadNum = CntPlayer;
-	if (Netflag == true)
-	{
-		PadNum = 0;
-	}
-
-	//移動処理
-	if (IsButtonPressed(PadNum, BUTTON_ANALOG_L_UP) || IsButtonPressed(PadNum, BUTTON_ANALOG_L_DOWN) ||
-		IsButtonPressed(PadNum, BUTTON_ANALOG_L_LEFT) || IsButtonPressed(PadNum, BUTTON_ANALOG_L_RIGHT))
-	{
-		DIJOYSTATE2 *Button = GetIsButton(PadNum);
-
-		LAnalogX = float(Button->lX * PLAYER_MOVE_RATE_X);
-		LAnalogY = float(Button->lY * PLAYER_MOVE_RATE_Y * DashRate);
-		dir = FRONT_VEC;
-	}
-	//旋回入力は後退中に限りリバースする
-	if (IsButtonPressed(PadNum, BUTTON_ANALOG_L_DOWN))
-	{
-		dir = BACK_VEC;
-	}
-	// 無移動時は移動量に慣性をかける
-	else
-	{
-		this->PlayerPara[CntPlayer].ItemPara.DashSignal = false;
-	}
-	if (LAnalogY > 0.0f) LAnalogX *= -1;
-
-	//移動量を反映
-	HoudaiRot.y += LAnalogX * dir;
-	move.x = LAnalogY * sinf(HoudaiRot.y);
-	move.z = LAnalogY * cosf(HoudaiRot.y);
-
-	//プレイヤー座標を更新
-	pos += move;
-
-	//---------------------------------------------------------オブジェクト値セット
-	this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos(pos);
-	this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Rot(HoudaiRot);
-
-	CameraRotControl(CntPlayer, Netflag);
-}
-
-//=============================================================================
-// 移動制御(LRスティックでキャタピラ移動制御)
-//=============================================================================
-void PLAYER::MoveL2R2(int CntPlayer, EFFECT *effect, bool Netflag)
-{
-	//---------------------------------------------------------オブジェクト値呼び出し
-	D3DXVECTOR3 pos = this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos();
-	D3DXVECTOR3 move = this->Move[CntPlayer].Move();
-	D3DXVECTOR3 HoudaiRot = this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Rot();
-
-	//Old保存
-	this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos(pos);
-	this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Rot(HoudaiRot);
-
-	//移動変化はLスティックアナログ値を使用
-	float L2 = 0.0f;		//縦入力
-	float R2 = 0.0f;		//横入力
-	float DashRate = 1.0f;		//スピードアップレート
-
-	//ダッシュ判定
-	if (this->PlayerPara[CntPlayer].ItemPara.SpeedBuffSignal == true)
-	{
-		//スピードバフ時間減少
-		this->PlayerPara[CntPlayer].ItemPara.SpeedBuffTime -= VALUE_SPEEDBUFF_SUB;
-		this->PlayerPara[CntPlayer].ItemPara.DashSignal = true;
-
-		// エフェクトスピードアップの生成
-		D3DXVECTOR3 EffctSpeedupPos = pos;
-		effect->SetInstance(EffctSpeedupPos, VEC3_ALL0, PLAYER_COLOR[CntPlayer], EFFECT_SPEEDUP_SIZE_X, EFFECT_SPEEDUP_SIZE_Y, EFFECT_SPEEDUP_TIME);
-
-		if (this->PlayerPara[CntPlayer].ItemPara.SpeedBuffTime <= 0.0f)
-		{
-			this->PlayerPara[CntPlayer].ItemPara.DashSignal = false;
-			this->PlayerPara[CntPlayer].ItemPara.SpeedBuffSignal = false;
-		}
-	}
-
-	if (this->PlayerPara[CntPlayer].ItemPara.DashSignal == true)
-	{
-		DashRate = PLAYER_VALUE_DASHRATE;
-	}
-
-	//ネット対戦時はゲームパッドナンバーは0　それ以外はプレイヤー番号で対応させる
-	int PadNum = CntPlayer;
-	if (Netflag == true)
-	{
-		PadNum = 0;
-	}
-
-	//左右のキャタピラを前進交代どちらかのフラグ
-	//両キャタピラ前進方向=0、左キャタピラのみ前進=3.925f、右キャタピラのみ前進=-3.925f、左キャタピラのみ後退=-0.785f、右キャタピラのみ後退=0.785f、
-	float Lrot = 3.925f;
-	float Rrot = -3.925f;
-	int Ldir = 1;
-	int Rdir = 1;
-	//移動処理
-	if (IsButtonPressed(PadNum, BUTTON_L1))
-	{
-		Lrot = -0.785f;
-		Ldir *= -1;
-	}
-	if (IsButtonPressed(PadNum, BUTTON_R1))
-	{
-		Rrot = 0.785f;
-		Rdir *= -1;
-	}
-
-	//両キャタピラ使用
-	if (IsButtonPressed(PadNum, BUTTON_L2) && IsButtonPressed(PadNum, BUTTON_R2))
-	{
-		DIJOYSTATE2 *Button = GetIsButton(PadNum);
-		//入力中央値32767　R2最小0　L2最大64000
-		L2 = float(Button->lZ * PLAYER_MOVE_RATE_LR2);
-		R2 = L2;
-
-	}
-	//左キャタピラのみ使用
-	else if (IsButtonPressed(PadNum, BUTTON_L2))
-	{
-		DIJOYSTATE2 *Button = GetIsButton(PadNum);
-		L2 = float(Button->lZ * PLAYER_MOVE_RATE_LR2);
-		HoudaiRot.y += 0.1f*Ldir;
-	}
-	//右キャタピラのみ使用
-	else if (IsButtonPressed(PadNum, BUTTON_R2))
-	{
-		DIJOYSTATE2 *Button = GetIsButton(PadNum);
-		float IZbuf = Button->lZ * PLAYER_MOVE_RATE_LR2;
-		R2 = IZbuf;
-		R2 = 32767 * PLAYER_MOVE_RATE_LR2 + (-R2) + 32767 * PLAYER_MOVE_RATE_LR2;
-		HoudaiRot.y -= 0.1f*Rdir;
-	}
-	// 無移動時は移動量に慣性をかける
-	else
-	{
-		this->PlayerPara[CntPlayer].ItemPara.DashSignal = false;
-	}
-
-	//移動量を反映
-	move.x = R2 * sinf(HoudaiRot.y + Rrot) + L2 * sinf(HoudaiRot.y + Lrot);
-	move.z = R2 * cosf(HoudaiRot.y + Rrot) + L2 * cosf(HoudaiRot.y + Lrot);
-
-	//プレイヤー座標を更新
-	pos += move;
-
-	//---------------------------------------------------------オブジェクト値セット
-	this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos(pos);
-	this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Rot(HoudaiRot);
-
-	CameraRotControl(CntPlayer, Netflag);
-}
-
-//=============================================================================
 // カメラ反転制御(手動とアイテムの両方で制御)
 //=============================================================================
 void PLAYER::CameraRevers(int CntPlayer, bool Netflag)
@@ -1355,18 +840,6 @@ void PLAYER::CameraRotControl(int CntPlayer, bool Netflag)
 	//---------------------------------------------------------オブジェクト値セット
 	this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUTOU].Rot(HoutouRot);
 	this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUSIN].Rot(HousinRot);
-
-
-	////カメラの視点更新
-	//cam[CntPlayer].pos.x = this[CntPlayer].pos.x - (POS_W_CAM * cosf(-this[CntPlayer].rot.y));
-	//cam[CntPlayer].pos.y = this[CntPlayer].pos.y + (POS_H_CAM);
-	//cam[CntPlayer].pos.z = this[CntPlayer].pos.z - (POS_W_CAM * sinf(-this[CntPlayer].rot.y));
-	////カメラの注視点を更新
-	////テクニック　カメラ注視点制御で回転軸atrotXを上げまくっても、それだけでは真上を向かない。
-	////atrotXの増減に比例してatXZ値も減少させていかないと真下真上を見るような注視点を制御できない
-	//cam[CntPlayer].at.x = cam[CntPlayer].pos.x + (POS_W_CAM * sinf(this[CntPlayer].rot.y));
-	//cam[CntPlayer].at.y = cam[CntPlayer].pos.y - (POS_H_CAM * sinf(this[CntPlayer].atrot.x));
-	//cam[CntPlayer].at.z = cam[CntPlayer].pos.z + (POS_W_CAM * cosf(this[CntPlayer].rot.y));
 }
 
 //=============================================================================
@@ -1602,6 +1075,28 @@ void PLAYER::BulletALLMoveL2R2Ver(int CntPlayer)
 	{
 		this->PlayerPara[CntPlayer].BulletPara.BulletStock++;
 		this->PlayerPara[CntPlayer].BulletPara.BulletBornTime = 0.0f;
+	}
+}
+
+//=============================================================================
+// スピードアップ制御　未使用
+//=============================================================================
+void PLAYER::ItemTimeSpeed(int CntPlayer, EFFECT *effect)
+{
+	//スピードバフ時間減少
+	if (this->PlayerPara[CntPlayer].ItemPara.SpeedBuffSignal == true)
+	{
+		this->PlayerPara[CntPlayer].ItemPara.SpeedBuffTime -= VALUE_SPEEDBUFF_SUB;
+		
+		// エフェクトスピードアップの生成
+		D3DXVECTOR3 EffctSpeedupPos = this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos();
+		effect->SetInstance(EffctSpeedupPos, VEC3_ALL0, PLAYER_COLOR[CntPlayer], EFFECT_SPEEDUP_SIZE_X, EFFECT_SPEEDUP_SIZE_Y, EFFECT_SPEEDUP_TIME);
+
+		if (this->PlayerPara[CntPlayer].ItemPara.SpeedBuffTime <= 0.0f)
+		{
+			this->PlayerPara[CntPlayer].ItemPara.SpeedBuffSignal = false;
+			this->PlayerPara[CntPlayer].ItemPara.SpeedBuff = VALUE_SPEEDBUFF_SUB;
+		}
 	}
 }
 

@@ -199,6 +199,30 @@
     <Filter Include="h\Update">
       <UniqueIdentifier>{ccc6331d-308d-42c6-9eea-58409fcd6cad}</UniqueIdentifier>
     </Filter>
+    <Filter Include="h\Object\ObjectClass\StandardComponent\Move">
+      <UniqueIdentifier>{2dd2c481-2dcb-4442-bf11-957e89303e06}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="h\Object\ObjectClass\StandardComponent\Attack">
+      <UniqueIdentifier>{3c27db6a-6383-4189-9664-2ab9fefadaa8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="h\Object\ObjectClass\StandardComponent\Rotation">
+      <UniqueIdentifier>{ca7a831c-4824-43cf-b0e2-3db7a3a50ae0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="h\Object\ObjectClass\StandardComponent\Posture">
+      <UniqueIdentifier>{6c77008e-1602-44de-bc61-ee4be84228ee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp\Object\ObjectClass\StandardComponent\Move">
+      <UniqueIdentifier>{2daf65f7-2ccc-438e-bae0-634670ead33e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp\Object\ObjectClass\StandardComponent\Posture">
+      <UniqueIdentifier>{a4f57244-ad3d-4c1f-bb52-5e5653088ded}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp\Object\ObjectClass\StandardComponent\Attack">
+      <UniqueIdentifier>{22424875-cd9e-49e1-b05a-5f5f1f0cbf2f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp\Object\ObjectClass\StandardComponent\Rotation">
+      <UniqueIdentifier>{1bb94012-9731-4a61-989f-3544d89068e4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\cpp\main.cpp">
@@ -312,6 +336,18 @@
     <ClCompile Include="..\cpp\Object\Scene\Scene.cpp">
       <Filter>cpp\Object\Scene</Filter>
     </ClCompile>
+    <ClCompile Include="..\cpp\Object\ObjectClass\StandardComponent\Move\Move.cpp">
+      <Filter>cpp\Object\ObjectClass\StandardComponent\Move</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\Object\ObjectClass\StandardComponent\Attack\Attack.cpp">
+      <Filter>cpp\Object\ObjectClass\StandardComponent\Attack</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\Object\ObjectClass\StandardComponent\Rotation\Rotation.cpp">
+      <Filter>cpp\Object\ObjectClass\StandardComponent\Rotation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\Object\ObjectClass\StandardComponent\Posture\Posture.cpp">
+      <Filter>cpp\Object\ObjectClass\StandardComponent\Posture</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\h\main.h">
@@ -424,6 +460,18 @@
     </ClInclude>
     <ClInclude Include="..\h\Draw\Draw.h">
       <Filter>h\Draw</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\Object\ObjectClass\StandardComponent\Move\Move.h">
+      <Filter>h\Object\ObjectClass\StandardComponent\Move</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\Object\ObjectClass\StandardComponent\Attack\Attack.h">
+      <Filter>h\Object\ObjectClass\StandardComponent\Attack</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\Object\ObjectClass\StandardComponent\Posture\Posture.h">
+      <Filter>h\Object\ObjectClass\StandardComponent\Posture</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\Object\ObjectClass\StandardComponent\Rotation\Rotation.h">
+      <Filter>h\Object\ObjectClass\StandardComponent\Rotation</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

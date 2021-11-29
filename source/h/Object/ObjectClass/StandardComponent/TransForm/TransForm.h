@@ -6,26 +6,6 @@
 #pragma once
 
 /**
- * @class MOVEMENT
- * @brief 移動クラス
- */
-class MOVEMENT
-{
-public:
-	MOVEMENT() { move = VEC3_ALL0; }
-	~MOVEMENT() {}
-	//------------------------get関数
-	inline D3DXVECTOR3 Move() const { return this->move; };
-
-	//------------------------set関数
-	inline void Move(const D3DXVECTOR3 move) { this->move = move; };
-
-private:
-	D3DXVECTOR3					move;				//!< 移動量
-
-};
-
-/**
  * @class FIELDNORMAL
  * @brief クォータニオンで使う地形法線や球面回転クラス
  */

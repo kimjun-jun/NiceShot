@@ -10,6 +10,7 @@
 #include "../../h/Object/ObjectClass/StandardComponent/Model/Model.h"
 #include "../../h/Object/ObjectClass/StandardComponent/TRANSFORM/TransForm.h"
 #include "../../h/Object/ObjectClass/StandardComponent/UseCheck/UseCheck.h"
+#include "../../h/Object/ObjectClass/StandardComponent/Move/Move.h"
 
 //*****************************************************************************
 // クラス定義
@@ -52,7 +53,7 @@ private:
 
 	TRANSFORM	Transform[OBJECT_EFFECT_MAX];		//!< トランスフォーム情報
 	iUseCheck	iUseType[OBJECT_EFFECT_MAX];		//!< 使用情報
-	MOVEMENT	move[OBJECT_EFFECT_MAX];			//!< 移動量
+	MOVE	move[OBJECT_EFFECT_MAX];			//!< 移動量
 
 	EFFECT_PARAMETER EffectPara[OBJECT_EFFECT_MAX];	//!< インスタンスに必要なデータ群
 
