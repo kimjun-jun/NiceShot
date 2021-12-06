@@ -33,6 +33,9 @@
     <ClCompile Include="..\cpp\Map\wall.cpp" />
     <ClCompile Include="..\cpp\Net\netmatch.cpp" />
     <ClCompile Include="..\cpp\Net\sock.cpp" />
+    <ClCompile Include="..\cpp\Net\SockSubThreadReceive.cpp" />
+    <ClCompile Include="..\cpp\Net\SockSubThreadSend.cpp" />
+    <ClCompile Include="..\cpp\Net\SockUpdate.cpp" />
     <ClCompile Include="..\cpp\Object\Bullet\bullet.cpp" />
     <ClCompile Include="..\cpp\Object\Bullet\bulletgauge.cpp" />
     <ClCompile Include="..\cpp\Object\Bullet\bulletprediction.cpp" />
@@ -75,6 +78,9 @@
     <ClInclude Include="..\h\Map\wall.h" />
     <ClInclude Include="..\h\Net\netmatch.h" />
     <ClInclude Include="..\h\Net\sock.h" />
+    <ClInclude Include="..\h\Net\SockSubThreadReceive.h" />
+    <ClInclude Include="..\h\Net\SockSubThreadSend.h" />
+    <ClInclude Include="..\h\Net\SockUpdate.h" />
     <ClInclude Include="..\h\Object\Bullet\bullet.h" />
     <ClInclude Include="..\h\Object\Bullet\bulletgauge.h" />
     <ClInclude Include="..\h\Object\Bullet\bulletprediction.h" />

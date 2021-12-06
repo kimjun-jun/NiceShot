@@ -308,7 +308,9 @@ void PLAYER::Update(void)
 	//-----------------ローカル対戦制御
 	if (pmysocket->GetNetGameStartFlag() == false)
 	{
+#ifdef _DEBUG
 		this->Move->MoveKeybord(0, this);//デバッグ用
+#endif
 		for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
 		{
 			bool use = this->iUseType[CntPlayer].Use();
@@ -316,7 +318,7 @@ void PLAYER::Update(void)
 			if (use)
 			{
 				//---------------制御関数
-				//this->Move->MoveL(CntPlayer, this, pmysocket->GetNetGameStartFlag());
+				this->Move->MoveL(CntPlayer, this, pmysocket->GetNetGameStartFlag());
 				this->CameraRotControl(CntPlayer, pmysocket->GetNetGameStartFlag());
 				this->Quaternion(CntPlayer);
 				this->CameraRevers(CntPlayer, pmysocket->GetNetGameStartFlag());
@@ -364,8 +366,8 @@ void PLAYER::Update(void)
 			}
 
 			//---------------制御関数
-			this->Move->MoveKeybord(0, this);//デバッグ用
-			//this->Move->MoveL(pmysocket->GetNetMyNumber(), this, pmysocket->GetNetGameStartFlag());
+			this->Move->MoveKeybord(pmysocket->GetNetMyNumber(), this);//デバッグ用
+			this->Move->MoveL(pmysocket->GetNetMyNumber(), this, pmysocket->GetNetGameStartFlag());
 			this->CameraRotControl(pmysocket->GetNetMyNumber(), pmysocket->GetNetGameStartFlag());
 			for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++) this->Quaternion(CntPlayer);
 			this->CameraRevers(pmysocket->GetNetMyNumber(), pmysocket->GetNetGameStartFlag());
@@ -450,7 +452,7 @@ void PLAYER::Draw(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 	// ライティングを有効に
-	pDevice->SetRenderState(D3DRS_LIGHTING, TRUE);
+	pDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
 
 	//一分割で4プレイヤーループ描画させる　DRAW元が4画面分ループさせてるから、実質16体分ループで描画している
 	for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)

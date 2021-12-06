@@ -348,6 +348,15 @@
     <ClCompile Include="..\cpp\Object\ObjectClass\StandardComponent\Posture\Posture.cpp">
       <Filter>cpp\Object\ObjectClass\StandardComponent\Posture</Filter>
     </ClCompile>
+    <ClCompile Include="..\cpp\Net\SockUpdate.cpp">
+      <Filter>cpp\Net</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\Net\SockSubThreadSend.cpp">
+      <Filter>cpp\Net</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cpp\Net\SockSubThreadReceive.cpp">
+      <Filter>cpp\Net</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\h\main.h">
@@ -472,6 +481,15 @@
     </ClInclude>
     <ClInclude Include="..\h\Object\ObjectClass\StandardComponent\Rotation\Rotation.h">
       <Filter>h\Object\ObjectClass\StandardComponent\Rotation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\Net\SockUpdate.h">
+      <Filter>h\Net</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\Net\SockSubThreadSend.h">
+      <Filter>h\Net</Filter>
+    </ClInclude>
+    <ClInclude Include="..\h\Net\SockSubThreadReceive.h">
+      <Filter>h\Net</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

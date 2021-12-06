@@ -29,8 +29,8 @@
 #include "../../h/Object/Bullet/bulletprediction.h"
 #include "../../h/Object/Bullet/bulletgauge.h"
 #include "../../h/Object/Player/VitalGauge/vitalgauge.h"
-#include "../../h/net/netmatch.h"
-#include "../../h/net/sock.h"
+#include "../../h/Net/netmatch.h"
+#include "../../h/Net/sock.h"
 #include "../../h/Object/ObjectClass/Instance/instance.h"
 #include "../../h/Update/Update.h"
 
@@ -142,8 +142,8 @@ void UPDATE_MANAGER::UpdateSceneResult(GAME_OBJECT_INSTANCE *obj)
 
 void UPDATE_MANAGER::UpdateSceneNetMatch(GAME_OBJECT_INSTANCE *obj)
 {
-	//マッチング画面更新
-	obj->GetNetMatch()->Update();
+	//マッチング更新
+	obj->GetMySocket()->Update();
 }
 
 void UPDATE_MANAGER::UpdateSceneNetCountDown(GAME_OBJECT_INSTANCE *obj)

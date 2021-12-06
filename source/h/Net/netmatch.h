@@ -11,8 +11,8 @@
 #include "../../../h/Object/ObjectClass/StandardComponent/UseCheck/UseCheck.h"
 
 /**
-*　@class TUTO
-*　@brief GAMEOBJECT派生クラス
+*　@class NETMATCH
+*　@brief GAME_OBJECT_INTERFACE_SUMMRY派生クラス
 */
 class NETMATCH : private GAME_OBJECT_INTERFACE_SUMMRY
 {

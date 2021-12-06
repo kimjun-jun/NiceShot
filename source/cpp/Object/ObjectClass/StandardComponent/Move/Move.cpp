@@ -212,11 +212,6 @@ void MOVE::MoveL(int CntPlayer, PLAYER *Player, bool Netflag)
 	//---------------------------------------------------------オブジェクト値セット
 	Player->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos(pos);
 	Player->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Rot(HoudaiRot);
-
-	//---------------------------------------------------------オブジェクト値セット
-	Player->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos(pos);
-	Player->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Rot(HoudaiRot);
-
 }
 
 
