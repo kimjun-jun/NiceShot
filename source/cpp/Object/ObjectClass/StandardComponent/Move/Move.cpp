@@ -31,7 +31,7 @@ constexpr int	BACK_VEC{ -1 };							//!< 後ろベクトル
 //=============================================================================
 // 移動制御(ki-bo-doで移動制御)
 //=============================================================================
-void MOVE::MoveKeybord(int CntPlayer, PLAYER *Player)
+void PLAYER_PARAMETER_MOVE::MoveKeybord(PLAYER *Player, int CntPlayer)
 {
 	//---------------------------------------------------------オブジェクト値呼び出し
 	D3DXVECTOR3 pos = Player->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos();
@@ -80,23 +80,6 @@ void MOVE::MoveKeybord(int CntPlayer, PLAYER *Player)
 	pos.x -= sinf(HoudaiRot.y) * (Player->PlayerPara[CntPlayer].StandardPara.Speed * Player->PlayerPara[CntPlayer].ItemPara.SpeedBuff);
 	pos.z -= cosf(HoudaiRot.y) * (Player->PlayerPara[CntPlayer].StandardPara.Speed * Player->PlayerPara[CntPlayer].ItemPara.SpeedBuff);
 
-	//スピードバフ時間減少
-	if (Player->PlayerPara[CntPlayer].ItemPara.SpeedBuffSignal == true)
-	{
-		Player->PlayerPara[CntPlayer].ItemPara.SpeedBuffTime -= VALUE_SPEEDBUFF_SUB;
-
-		// エフェクトスピードアップの生成
-		D3DXVECTOR3 EffctSpeedupPos = D3DXVECTOR3(pos.x, pos.y, pos.z);
-		Player->peffect->SetInstance(EffctSpeedupPos, VEC3_ALL0, PLAYER_COLOR[CntPlayer], EFFECT_SPEEDUP_SIZE_X, EFFECT_SPEEDUP_SIZE_Y, EFFECT_SPEEDUP_TIME);
-
-		if (Player->PlayerPara[CntPlayer].ItemPara.SpeedBuffTime <= 0.0f)
-		{
-			Player->PlayerPara[CntPlayer].ItemPara.SpeedBuffSignal = false;
-			Player->PlayerPara[CntPlayer].ItemPara.SpeedBuff = VALUE_SPEEDBUFF_SUB;
-		}
-	}
-
-
 	//砲塔操作　バレット着弾点(左右エイム)
 	if (GetKeyboardPress(DIK_RIGHT))
 	{
@@ -131,11 +114,11 @@ void MOVE::MoveKeybord(int CntPlayer, PLAYER *Player)
 //=============================================================================
 // 移動制御(Lスティックで移動制御)
 //=============================================================================
-void MOVE::MoveL(int CntPlayer, PLAYER *Player, bool Netflag)
+void PLAYER_PARAMETER_MOVE::MoveL(PLAYER *Player, int CntPlayer, bool Netflag)
 {
 	//---------------------------------------------------------オブジェクト値呼び出し
 	D3DXVECTOR3 pos = Player->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos();
-	D3DXVECTOR3 move = Player->Move[CntPlayer].Move();
+	D3DXVECTOR3 move = Player->PlayerPara[CntPlayer].MovePara.Move();
 	D3DXVECTOR3 HoudaiRot = Player->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Rot();
 
 	//Old保存

@@ -149,8 +149,8 @@ void ITEM::Init(void)
 //		this[nCntItem].Pos(VEC3_ALL0);
 //		this[nCntItem].SetScl(D3DXVECTOR3(2.0f, 2.0f, 2.0f));
 //		this[nCntItem].SetRot(VEC3_ALL0);
-//		this[nCntItem].SetFIELDNORMALVec(VEC3_ALL0);
-//		this[nCntItem].SetFIELDNORMALUpNorCross(VEC3_ALL0);
+//		this[nCntItem].SetPOSTUREVec(VEC3_ALL0);
+//		this[nCntItem].SetPOSTUREUpNorCross(VEC3_ALL0);
 //		this[nCntItem].SetQrot(0.0f);
 //		this[nCntItem].NetUse = false;
 //		this[nCntItem].Use(false);
@@ -198,8 +198,8 @@ void ITEM::Init(void)
 //		this[nCntItem].Pos(VEC3_ALL0);
 //		this[nCntItem].SetScl(D3DXVECTOR3(2.0f, 2.0f, 2.0f));
 //		this[nCntItem].SetRot(VEC3_ALL0);
-//		this[nCntItem].SetFIELDNORMALVec(VEC3_ALL0);
-//		this[nCntItem].SetFIELDNORMALUpNorCross(VEC3_ALL0);
+//		this[nCntItem].SetPOSTUREVec(VEC3_ALL0);
+//		this[nCntItem].SetPOSTUREUpNorCross(VEC3_ALL0);
 //		this[nCntItem].SetQrot(0.0f);
 //		this[nCntItem].Use(false);
 //		this[nCntItem].Droptime = 0.0f;
@@ -231,8 +231,8 @@ void ITEM::Update(void)
 			D3DXVECTOR3 pos = this->Transform[nCntItem].Pos();
 			D3DXVECTOR3 rot = this->Transform[nCntItem].Rot();
 			D3DXVECTOR3 scl = this->Transform[nCntItem].Scl();
-			D3DXVECTOR3 FIELDNORMALVec = this->PostureVec[nCntItem].FNVecFunc();
-			D3DXVECTOR3 FIELDNORMALUpNorCross = this->PostureVec[nCntItem].FNUNCrossFunc();
+			D3DXVECTOR3 POSTUREVec = this->PostureVec[nCntItem].FNVecFunc();
+			D3DXVECTOR3 POSTUREUpNorCross = this->PostureVec[nCntItem].FNUNCrossFunc();
 			float Qrot = this->PostureVec[nCntItem].QrotFunc();
 
 			//フィールドに落ちてるときはくるくる回転させる
@@ -246,14 +246,14 @@ void ITEM::Update(void)
 
 			//地形の角度とプレイヤーの角度を計算。drawでクオータニオンで使う
 			D3DXVECTOR3 Upvec = D3DXVECTOR3(0.0, 1.0f, 0.0f);
-			D3DXVec3Cross(&FIELDNORMALUpNorCross, &FIELDNORMALVec, &Upvec);
-			float kakezan = D3DXVec3Dot(&FIELDNORMALVec, &Upvec);
+			D3DXVec3Cross(&POSTUREUpNorCross, &POSTUREVec, &Upvec);
+			float kakezan = D3DXVec3Dot(&POSTUREVec, &Upvec);
 			if (kakezan != 0.0f)
 			{
 				float cossita = kakezan /
-					sqrtf(FIELDNORMALVec.x*FIELDNORMALVec.x +
-						FIELDNORMALVec.y *FIELDNORMALVec.y +
-						FIELDNORMALVec.z * FIELDNORMALVec.z);
+					sqrtf(POSTUREVec.x*POSTUREVec.x +
+						POSTUREVec.y *POSTUREVec.y +
+						POSTUREVec.z * POSTUREVec.z);
 				Qrot = acosf(cossita);
 			}
 			else Qrot = 0.0f;
@@ -265,7 +265,7 @@ void ITEM::Update(void)
 			//-------------------------------------------オブジェクトの値書き込み
 			this->Transform[nCntItem].Pos(pos);
 			this->Transform[nCntItem].Rot(rot);
-			this->PostureVec[nCntItem].FNUNCrossFunc(FIELDNORMALUpNorCross);
+			this->PostureVec[nCntItem].FNUNCrossFunc(POSTUREUpNorCross);
 			this->PostureVec[nCntItem].QrotFunc(Qrot);
 		}
 
@@ -349,11 +349,11 @@ void ITEM::Draw(void)
 			D3DXVECTOR3 pos = this->Transform[nCntItem].Pos();
 			D3DXVECTOR3 rot = this->Transform[nCntItem].Rot();
 			D3DXVECTOR3 scl = this->Transform[nCntItem].Scl();
-			D3DXVECTOR3 PlayerUpToFIELDNORMALVec = this->PostureVec[nCntItem].FNUNCrossFunc();
+			D3DXVECTOR3 PlayerUpToPOSTUREVec = this->PostureVec[nCntItem].FNUNCrossFunc();
 			float Qrot = this->PostureVec[nCntItem].QrotFunc();
 
 			//q=(rotVecAxis法線)*(g_Player.rot回転)  -がキモ？
-			D3DXQuaternionRotationAxis(&q, &PlayerUpToFIELDNORMALVec, -Qrot);
+			D3DXQuaternionRotationAxis(&q, &PlayerUpToPOSTUREVec, -Qrot);
 			D3DXMatrixRotationQuaternion(&mtxQ, &q);
 
 			// ワールドマトリックスの初期化

@@ -306,12 +306,12 @@ void MySOCKET::NetSetBulletType1(D3DXVECTOR3 buffpos, D3DXVECTOR3 buffmove, int 
 	if (GetNetShareDateFlag() == false)
 	{
 		//フラグが0なら発射してあげる。1フレームで1回発射できる。ここでフラグを1にして更新処理で0にするしている
-		if (pplayer->PlayerPara[PlayerNum].BulletPara.NetBulletShotFlagOneFrame == 0)
+		if (pplayer->PlayerPara[PlayerNum].BulletPara.GetNetBulletShotFlagOneFrame() == 0)
 		{
 			pbullet->SetInstance(buffpos, buffmove,
 				BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME,
 				static_cast<ePLAYER_TYPE>(PlayerNum));
-			pplayer->PlayerPara[PlayerNum].BulletPara.NetBulletShotFlagOneFrame = 1;
+			pplayer->PlayerPara[PlayerNum].BulletPara.SetNetBulletShotFlagOneFrame(1);
 		}
 	}
 }
@@ -322,16 +322,15 @@ void MySOCKET::NetSetBulletType3(D3DXVECTOR3 buffpos, D3DXVECTOR3 *buffmove, int
 	if (GetNetShareDateFlag() == false)
 	{
 		//フラグが0なら発射してあげる。1フレームで1回発射できる。ここでフラグを1にして更新処理で0にするしている
-		if (pplayer->PlayerPara[PlayerNum].BulletPara.NetBulletShotFlagOneFrame == 0)
+		if (pplayer->PlayerPara[PlayerNum].BulletPara.GetNetBulletShotFlagOneFrame() == 0)
 		{
-
 			for (int i = 0; i < 3; i++)
 			{
 				pbullet->SetInstance(buffpos, buffmove[i],
 					BULLET_EFFECT_SIZE, BULLET_EFFECT_SIZE, BULLET_EFFECT_TIME,
 					static_cast<ePLAYER_TYPE>(PlayerNum));
 			}
-			pplayer->PlayerPara[PlayerNum].BulletPara.NetBulletShotFlagOneFrame = 1;
+			pplayer->PlayerPara[PlayerNum].BulletPara.SetNetBulletShotFlagOneFrame(1);
 		}
 	}
 }

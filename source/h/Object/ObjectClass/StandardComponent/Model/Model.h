@@ -103,6 +103,7 @@ public:
 	void RHW2D(const int Indx);
 
 	//í∏ì_ÉJÉâÅ[ÇÃê›íË
+	void MeshColor(DWORD nNumPolygon, int CntPlayer);
 	void Color3D(const int Indx);
 	void Color3D(const int Indx, const D3DXCOLOR col);
 	void Color2D(const int Indx);

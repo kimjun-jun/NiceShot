@@ -10,6 +10,7 @@
 #include "../../../h/Object/ObjectClass/StandardComponent/Model/Model.h"
 #include "../../../h/Object/ObjectClass/StandardComponent/TRANSFORM/TransForm.h"
 #include "../../../h/Object/ObjectClass/StandardComponent/UseCheck/UseCheck.h"
+#include "../../../h/Object/ObjectClass/StandardComponent/Posture/Posture.h"
 
 //*****************************************************************************
 // マクロ定義
@@ -87,7 +88,7 @@ public:
 	ITEM_PARAMETER_ALL ItemParaAll[OBJECT_ITEM_MAX];	//!< 各インスタンスに必要なデータ群
 	iUseCheck iUseType[OBJECT_ITEM_MAX];		//!< 使用情報
 	TRANSFORM Transform[OBJECT_ITEM_MAX];		//!< トランスフォーム情報
-	FIELDNORMAL	PostureVec[OBJECT_ITEM_MAX];	//!< 姿勢ベクトル
+	POSTURE	PostureVec[OBJECT_ITEM_MAX];	//!< 姿勢ベクトル
 	void SetInstance(D3DXVECTOR3 pos, D3DXVECTOR3 scl, D3DXVECTOR3 rot, eITEM_TYPE eType);
 	void SetInstance(int Index, D3DXVECTOR3 pos, D3DXVECTOR3 scl, D3DXVECTOR3 rot, eITEM_TYPE eType);
 	void ReleaseInstance(int nIdxItem);

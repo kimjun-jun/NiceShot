@@ -12,12 +12,13 @@
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-constexpr float	VIEW_ANGLE{ D3DXToRadian(45.0f) };							// ビュー平面の視野角
-constexpr float	VIEW_NEAR_Z{ 10.0f };										// ビュー平面のNearZ値
-constexpr float	VIEW_FAR_Z{ 10000.0f };										// ビュー平面のFarZ値
-constexpr float	VALUE_MOVE_CAMERA{ 2.0f };									// カメラの移動量
-constexpr float	VALUE_ROTATE_CAMERA{ D3DX_PI * 0.005f };					// カメラの回転量
-constexpr float	VIEW_ASPECT{ (float)SCREEN_W / (float)SCREEN_H };			// ビュー平面のアスペクト比	
+constexpr float	VIEW_ANGLE{ D3DXToRadian(45.0f) };							//!< ビュー平面の視野角
+constexpr float	VIEW_NEAR_Z{ 10.0f };										//!< ビュー平面のNearZ値
+constexpr float	VIEW_FAR_Z{ 10000.0f };										//!< ビュー平面のFarZ値
+constexpr float	VALUE_MOVE_CAMERA{ 2.0f };									//!< カメラの移動量
+constexpr float	VALUE_ROTATE_CAMERA{ D3DX_PI * 0.005f };					//!< カメラの回転量
+constexpr float	VIEW_ASPECT{ (float)SCREEN_W / (float)SCREEN_H };			//!< ビュー平面のアスペクト比	
+constexpr float BACKCAMERA_TIME{ 150.0f };									//!< バックカメラアイテム有効時間
 
 //*****************************************************************************
 // グローバル変数
@@ -44,7 +45,6 @@ void InitCamera(void)
 	}
 }
 
-
 //=============================================================================
 // カメラの終了処理
 //=============================================================================
@@ -53,7 +53,6 @@ void UninitCamera(void)
 
 }
 
-
 //=============================================================================
 // カメラの更新処理
 //=============================================================================
@@ -61,7 +60,6 @@ void UpdateCamera(void)
 {
 
 }
-
 
 //=============================================================================
 // カメラの更新
@@ -96,7 +94,6 @@ void SetCamera(int CamNum)
 		pDevice->SetTransform(D3DTS_PROJECTION, &g_Camera[CamNum].mtxProjection);
 }
 
-
 //=============================================================================
 // カメラの取得
 //=============================================================================
@@ -104,3 +101,137 @@ CAMERA *GetCamera(void)
 {
 	return &g_Camera[0];
 }
+
+//=============================================================================
+// カメラ反転制御(手動とアイテムの両方で制御)
+//=============================================================================
+void CameraRevers(PLAYER *Player, int CntPlayer, bool Netflag)
+{
+	//---------------------------------------------------------オブジェクト値呼び出し
+	D3DXVECTOR3 pos = Player->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos();
+	D3DXVECTOR3 HoudaiRot = Player->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Rot();
+	D3DXVECTOR3 HoutouRot = Player->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUTOU].Rot();
+	D3DXVECTOR3 HousinRot = Player->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUSIN].Rot();
+
+	CAMERA *cam = GetCamera();
+
+	//ネット対戦時はゲームパッドナンバーは0　それ以外はプレイヤー番号で対応させる
+	int PadNum = CntPlayer;
+	if (Netflag == true)
+	{
+		PadNum = 0;
+	}
+
+	//バックカメラ処理　バックカメラオン　カメラ視点、注視点、Yボタンを押しているもしくは、バックカメラアイテムがONになっているときはカメラ反転
+	if (GetKeyboardPress(DIK_B) || IsButtonPressed(PadNum, BUTTON_Y) || Player->PlayerPara[CntPlayer].ItemPara.BackCameraItemSignal == true)
+	{
+		cam[CntPlayer].at.x = pos.x + (AT_W_CAM * sinf(HoudaiRot.y + HoutouRot.y));
+		cam[CntPlayer].at.y = pos.y + (HousinRot.x*100.0f);
+		cam[CntPlayer].at.z = pos.z + (AT_W_CAM * cosf(HoudaiRot.y + HoutouRot.y));
+
+		cam[CntPlayer].pos.x = pos.x - sinf(HoudaiRot.y + HoutouRot.y) * cam[CntPlayer].len;
+		cam[CntPlayer].pos.y = pos.y + POS_H_CAM;
+		cam[CntPlayer].pos.z = pos.z - cosf(HoudaiRot.y + HoutouRot.y) * cam[CntPlayer].len;
+	}
+
+	//バックカメラオフ　カメラ視点、注視点
+	//それ以外は通常カメラ
+	else
+	{
+		cam[CntPlayer].at.x = pos.x - (AT_W_CAM * sinf(HoudaiRot.y + HoutouRot.y));
+		cam[CntPlayer].at.y = pos.y + (HousinRot.x*100.0f);
+		cam[CntPlayer].at.z = pos.z - (AT_W_CAM * cosf(HoudaiRot.y + HoutouRot.y));
+
+		cam[CntPlayer].pos.x = pos.x + sinf(HoudaiRot.y + HoutouRot.y) * cam[CntPlayer].len;
+		cam[CntPlayer].pos.y = pos.y + POS_H_CAM;
+		cam[CntPlayer].pos.z = pos.z + cosf(HoudaiRot.y + HoutouRot.y) * cam[CntPlayer].len;
+	}
+	//もし、バックカメラアイテムがONの時にYを押すと通常カメラになる
+	if (Player->PlayerPara[CntPlayer].ItemPara.BackCameraItemSignal == true && IsButtonPressed(PadNum, BUTTON_Y))
+	{
+		cam[CntPlayer].at.x = pos.x - (AT_W_CAM * sinf(HoudaiRot.y + HoutouRot.y));
+		cam[CntPlayer].at.y = pos.y + (HousinRot.x*100.0f);
+		cam[CntPlayer].at.z = pos.z - (AT_W_CAM * cosf(HoudaiRot.y + HoutouRot.y));
+
+		cam[CntPlayer].pos.x = pos.x + sinf(HoudaiRot.y + HoutouRot.y) * cam[CntPlayer].len;
+		cam[CntPlayer].pos.y = pos.y + POS_H_CAM;
+		cam[CntPlayer].pos.z = pos.z + cosf(HoudaiRot.y + HoutouRot.y) * cam[CntPlayer].len;
+	}
+	//バックカメラの時間処理
+	if (Player->PlayerPara[CntPlayer].ItemPara.BackCameraItemSignal == true)
+	{
+		Player->PlayerPara[CntPlayer].ItemPara.BackCameraTime += 1.0f;
+		if (Player->PlayerPara[CntPlayer].ItemPara.BackCameraTime >= BACKCAMERA_TIME)
+		{
+			Player->PlayerPara[CntPlayer].ItemPara.BackCameraTime = 0.0f;
+			Player->PlayerPara[CntPlayer].ItemPara.BackCameraItemSignal = false;
+		}
+	}
+}
+
+//=============================================================================
+// カメラ制御(RスティックでRot制御)
+//=============================================================================
+void CameraRotControl(PLAYER *Player, int CntPlayer, bool Netflag)
+{
+	//---------------------------------------------------------オブジェクト値呼び出し
+	D3DXVECTOR3 HoutouRot = Player->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUTOU].Rot();
+	D3DXVECTOR3 HousinRot = Player->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUSIN].Rot();
+
+	//Old保存
+	Player->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUTOU].Rot(HoutouRot);
+	Player->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUSIN].Rot(HousinRot);
+
+	//ネット対戦時はゲームパッドナンバーは0　それ以外はプレイヤー番号で対応させる
+	int PadNum = CntPlayer;
+	if (Netflag == true)
+	{
+		PadNum = 0;
+	}
+
+	//視野角変化はRスティックアナログ値を使用
+	float RAnalogX = 0.0f;		//縦入力
+	float RAnalogY = 0.0f;		//横入力
+
+	//視野角処理
+	if (IsButtonPressed(PadNum, BUTTON_ANALOG_R_UP) || IsButtonPressed(PadNum, BUTTON_ANALOG_R_DOWN) ||
+		IsButtonPressed(PadNum, BUTTON_ANALOG_R_LEFT) || IsButtonPressed(PadNum, BUTTON_ANALOG_R_RIGHT))
+	{
+		DIJOYSTATE2 *Button = GetIsButton(PadNum);
+		//入力中央値32000　最小0　最大64000
+		//なので-32000することで　中央値0　最小-32000　最大32000にしている
+		//rotに32000とかバカ高い数値を入れるとぶっ飛ぶので、さらに入力値を小さくする
+		//最大0.03くらいになるよう調整　/1000000する(操作しやすい値でいい)
+		RAnalogX = float(Button->lRx) - 32000.0f;
+		RAnalogY = float(Button->lRy) - 32800.0f;
+
+		RAnalogX = RAnalogX / 1000000.0f;
+		RAnalogY = RAnalogY / 1000000.0f;
+
+	}
+
+	//回転量を反映
+	D3DXVECTOR3 moverot = VEC3_ALL0;
+	moverot.y = RAnalogX;
+	moverot.x = -RAnalogY;
+
+	HoutouRot.y += moverot.y;
+	HousinRot.x += moverot.x;
+
+	//角度の制限値
+	{
+		if (HousinRot.x >= 0.3f)
+		{
+			HousinRot.x = 0.3f;
+		}
+		else if (HousinRot.x <= -0.3f)
+		{
+			HousinRot.x = -0.3f;
+		}
+	}
+
+	//---------------------------------------------------------オブジェクト値セット
+	Player->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUTOU].Rot(HoutouRot);
+	Player->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUSIN].Rot(HousinRot);
+}
+

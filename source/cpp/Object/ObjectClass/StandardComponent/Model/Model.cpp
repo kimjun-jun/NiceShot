@@ -610,6 +610,29 @@ void VTXBUFFER::RHW2D(const int Indx)
 	}
 }
 
+//=============================================================================
+// メッシュカラーをセット
+//=============================================================================
+void VTXBUFFER::MeshColor(DWORD nNumPolygon, int CntPlayer)
+{
+	VERTEX_3D *pVtx;
+	WORD *pIdx;
+
+	// 頂点データの範囲をロックし、頂点バッファへのポインタを取得
+	this->pD3DVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+	this->pD3DIdxBuff->Lock(0, 0, (void**)&pIdx, 0);
+	for (int nCntPoly = 0; nCntPoly < int(nNumPolygon); nCntPoly++, pIdx += 3)
+	{
+		// 反射光の設定
+		pVtx[pIdx[0]].diffuse =
+			pVtx[pIdx[1]].diffuse =
+			pVtx[pIdx[2]].diffuse = PLAYER_COLOR[CntPlayer];
+	}
+	// 頂点データをアンロックする
+	this->pD3DVtxBuff->Unlock();
+	this->pD3DIdxBuff->Unlock();
+}
+
 //頂点カラーの設定
 //カラー自動 (3D)
 void VTXBUFFER::Color3D(const int Indx)

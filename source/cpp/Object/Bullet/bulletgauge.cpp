@@ -234,7 +234,7 @@ void BULLETGAUGE::Update(void)
 	for (int CntBulletGauge = 0; CntBulletGauge < OBJECT_BULLETGAUGE_MAX; CntBulletGauge++)
 	{
 		//ƒvƒŒƒCƒ„[‚Ì’e”‚ð‹L˜^
-		this->BulletGaugePara[CntBulletGauge].AmmoStock = pplayer->PlayerPara[CntBulletGauge].BulletPara.BulletStock;
+		this->BulletGaugePara[CntBulletGauge].AmmoStock = pplayer->PlayerPara[CntBulletGauge].BulletPara.GetBulletStock();
 	}
 }
 

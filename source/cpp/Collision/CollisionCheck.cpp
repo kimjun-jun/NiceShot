@@ -245,8 +245,8 @@ void UPDATE_MANAGER::CollisionCheck(GAME_OBJECT_INSTANCE *obj)
 						PlaySound(SOUND_LABEL_SE_rap1);
 						break;
 					case ITEM_TYPE_BULLET:
-						obj->GetPlayer()->PlayerPara[CntPlayer].BulletPara.BulletStock = BULLET_MAX_STOCK;
-						obj->GetPlayer()->PlayerPara[CntPlayer].BulletPara.BulletBornTime = 0.0f;
+						obj->GetPlayer()->PlayerPara[CntPlayer].BulletPara.SetBulletStock(BULLET_MAX_STOCK);
+						obj->GetPlayer()->PlayerPara[CntPlayer].BulletPara.SetBulletBornTime(0.0f);
 						PlaySound(SOUND_LABEL_SE_enter03);
 						break;
 					case ITEM_TYPE_SPEEDUP:

@@ -11,6 +11,8 @@
 #include "../../../h/Object/ObjectClass/StandardComponent/TRANSFORM/TransForm.h"
 #include "../../../h/Object/ObjectClass/StandardComponent/UseCheck/UseCheck.h"
 #include "../../../h/Object/ObjectClass/StandardComponent/Move/Move.h"
+#include "../../../h/Object/ObjectClass/StandardComponent/Attack/Attack.h"
+#include "../../../h/Object/ObjectClass/StandardComponent/Posture/Posture.h"
 
 /**
  * @enum ePLAYER_PARTS_TYPE
@@ -49,24 +51,33 @@ enum ePLAYER_MODEL_ALL_TYPE
 };
 
 /**
-*　@class PLAYER_PARAMETER_BULLET
-*　@brief プレイヤーバレット用パラメータ
+*　@class PLAYER_MODEL_DRAW
+*　@brief プレイヤーモデル　描画用
 */
-class PLAYER_PARAMETER_BULLET
+class PLAYER_MODEL_DRAW
 {
 public:
-	PLAYER_PARAMETER_BULLET() {
-		BulletStartPos = VEC3_ALL0;	for (int i = 0; i < 3; i++) BulletMove[i] = VEC3_ALL0;
-		BulletRotY = 0.0f; BulletBornTime = 0.0f; BulletStock = 0; NetBulletShotFlagOneFrame = 0;
-	};
-	~PLAYER_PARAMETER_BULLET() {}
+	PLAYER_MODEL_DRAW() {}
+	~PLAYER_MODEL_DRAW() {}
 
-	D3DXVECTOR3		BulletStartPos;				//!< バレットの発射地点
-	D3DXVECTOR3		BulletMove[3];				//!< バレットの移動量　パワーアップ中は三方向に発射
-	float			BulletRotY;					//!< バレットのFrontベクトルから地形法線への回転角度
-	float			BulletBornTime;				//!< 残弾回復カウント。時間で回復 BULLET_BORN_MAXTIME
-	int				BulletStock;				//!< 残弾数
-	int				NetBulletShotFlagOneFrame;	//!< ネット対戦用　バレットを発射していなと0,通常モデルは発射1,アタックモデルは発射3　毎フレーム確認して、バレット発射するとフラグを立てる
+	MODELATTRIBUTE		Attribute[PLAYER_PARTS_TYPE_MAX];		//!< モデルデータ　0ノーマル、1攻撃　モデルデータの種類　「プレイヤーの数」=4、「モデルパーツ数(砲台、砲塔、砲身、砲身変形後)」=2
+	VTXBUFFER			Vtx[PLAYER_PARTS_TYPE_MAX];					//!< 頂点情報　描画用
+	TRANSFORM			Transform[PLAYER_PARTS_TYPE_MAX];			//!< トランスフォーム情報
+
+};
+
+/**
+*　@class PLAYER_MODEL_ORIGINAL
+*　@brief プレイヤーモデル　オリジナル用
+*/
+class PLAYER_MODEL_ORIGINAL
+{
+public:
+	PLAYER_MODEL_ORIGINAL() {}
+	~PLAYER_MODEL_ORIGINAL() {}
+
+	MODELATTRIBUTE		Attribute[PLAYER_MODEL_ORIGINAL_TYPE_MAX];		//!< モデルデータ　0ノーマル、1攻撃　モデルデータの種類　「砲身、砲身変形後」=2
+	VTXBUFFER			Vtx[PLAYER_MODEL_ORIGINAL_TYPE_MAX];				//!< 頂点情報　モーフィング基準用
 };
 
 /**
@@ -146,40 +157,12 @@ public:
 	PLAYER_PARAMETER_SUMMARY() {}
 	~PLAYER_PARAMETER_SUMMARY() {}
 
+	PLAYER_PARAMETER_MOVE		MovePara;
 	PLAYER_PARAMETER_BULLET		BulletPara;
-	PLAYER_PARAMETER_STANDARD	StandardPara;
 	PLAYER_PARAMETER_ITEM		ItemPara;
 	PLAYER_PARAMETER_MORPHING	MorphingPara;
-};
-
-/**
-*　@class PLAYER_MODEL_DRAW
-*　@brief プレイヤーモデル　描画用
-*/
-class PLAYER_MODEL_DRAW
-{
-public:
-	PLAYER_MODEL_DRAW() {}
-	~PLAYER_MODEL_DRAW() {}
-
-	MODELATTRIBUTE		Attribute[PLAYER_PARTS_TYPE_MAX];		//!< モデルデータ　0ノーマル、1攻撃　モデルデータの種類　「プレイヤーの数」=4、「モデルパーツ数(砲台、砲塔、砲身、砲身変形後)」=2
-	VTXBUFFER			Vtx[PLAYER_PARTS_TYPE_MAX];					//!< 頂点情報　描画用
-	TRANSFORM			Transform[PLAYER_PARTS_TYPE_MAX];			//!< トランスフォーム情報
-
-};
-
-/**
-*　@class PLAYER_MODEL_ORIGINAL
-*　@brief プレイヤーモデル　オリジナル用
-*/
-class PLAYER_MODEL_ORIGINAL
-{
-public:
-	PLAYER_MODEL_ORIGINAL() {}
-	~PLAYER_MODEL_ORIGINAL() {}
-
-	MODELATTRIBUTE		Attribute[PLAYER_MODEL_ORIGINAL_TYPE_MAX];		//!< モデルデータ　0ノーマル、1攻撃　モデルデータの種類　「砲身、砲身変形後」=2
-	VTXBUFFER			Vtx[PLAYER_MODEL_ORIGINAL_TYPE_MAX];				//!< 頂点情報　モーフィング基準用
+	PLAYER_PARAMETER_STANDARD	StandardPara;
+	POSTURE	PostureVec;					//!< 姿勢ベクトル
 };
 
 /**
@@ -201,12 +184,10 @@ public:
 	PLAYER_PARAMETER_SUMMARY PlayerPara[OBJECT_PLAYER_MAX];	//!< インスタンスに必要なデータ群	数が多いので複数包含している							
 	PLAYER_MODEL_DRAW modelDraw[OBJECT_PLAYER_MAX];			//!< 描画用モデルデータ
 	iUseCheck iUseType[OBJECT_PLAYER_MAX];					//!< 使用情報
-	FIELDNORMAL	PostureVec[OBJECT_PLAYER_MAX];				//!< 姿勢ベクトル
-	MOVE Move[OBJECT_PLAYER_MAX];							//!< 移動量
-
 
 	//------他クラスのアドレス 特別にパブリック
 	EFFECT *peffect;
+	BULLET *pbullet;
 
 private:
 	TEXTURE	tex;						//!< テクスチャ情報　複数使用するならここを配列化　ITEMTYPE_MAX
@@ -216,24 +197,9 @@ private:
 	FIELD *pfield;
 	MySOCKET *pmysocket;
 	SCENE *pscene;
-	BULLET *pbullet;
-
-	//------カラー
-	void PlayerMeshColor(LPDIRECT3DVERTEXBUFFER9 *pD3DVtxBuff, LPDIRECT3DINDEXBUFFER9 *pD3DIdxBuff, DWORD nNumPolygon, int CntPlayer);
-
-	//------カメラ制御
-	void CameraRevers(int CntPlayer, bool Netflag);		//!< カメラ制御
-	void CameraRotControl(int CntPlayer, bool Netflag);	//!< カメラ制御(LRスティックで移動制御)
-
-	//------姿勢制御
-	void Quaternion(int CntPlayer);		//!< クォータニオン制御　地形法線とUPベクトルと外積
-
-	//------バレット制御
-	void BulletALL(int CntPlayer, bool Netflag);	//!< バレット関連制御
-	void BulletALLMoveL2R2Ver(int CntPlayer);		//!< バレット関連制御 発射ボタンを十字カーソル
 
 	//------アイテム制御
-	void ItemTimeSpeed(int CntPlayer, EFFECT *effect);	//!< スピードアップ制御 未使用
+	void ItemTimeSpeed(int CntPlayer, EFFECT *effect);	//!< スピードアップ制御
 	void ItemTimeKiri(int CntPlayer);				//!< フォグ制御
 	void ItemTimeMorphing(int CntPlayer);			//!< モーフィング制御
 
@@ -251,7 +217,6 @@ private:
 		"../data/MODEL/PlayerSensyaHousin.x",
 		"../data/MODEL/PlayerSensyaHousinMo.x"
 	};
-
 
 };
 

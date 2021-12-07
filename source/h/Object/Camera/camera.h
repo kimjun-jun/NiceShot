@@ -5,11 +5,7 @@
 */
 #pragma once
 
-
-//*****************************************************************************
-// インクルードファイル
-//*****************************************************************************
-//#include <d3dx9.h>
+class PLAYER;
 
 //*****************************************************************************
 // マクロ定義
@@ -39,3 +35,7 @@ void UninitCamera(void);
 void UpdateCamera(void);
 void SetCamera(int CamNum);
 CAMERA *GetCamera();
+
+//------カメラ制御
+void CameraRevers(PLAYER *Player, int CntPlayer, bool Netflag);		//!< カメラ制御
+void CameraRotControl(PLAYER *Player, int CntPlayer, bool Netflag);	//!< カメラ制御(LRスティックで移動制御)

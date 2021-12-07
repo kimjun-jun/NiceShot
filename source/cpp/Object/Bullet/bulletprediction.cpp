@@ -120,7 +120,7 @@ void BULLETPREDICTION::Update(void)
 		//”­ŽËŠp“xA”­ŽËÀ—pŒvŽZ
 		D3DXVECTOR3 BmoveRot;
 		BmoveRot.x = -sinf(HoutouRot.y + HoudaiRot.y);
-		BmoveRot.y = sinf(pplayer->PlayerPara[CntPlayer].BulletPara.BulletRotY - HousinRot.x);
+		BmoveRot.y = sinf(pplayer->PlayerPara[CntPlayer].BulletPara.GetBulletRotY() - HousinRot.x);
 		BmoveRot.z = -cosf(HoutouRot.y + HoudaiRot.y);
 		D3DXVECTOR3 bulletmove;
 		bulletmove.x = (BmoveRot.x) *VALUE_MOVE_BULLET;

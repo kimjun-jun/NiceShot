@@ -413,16 +413,16 @@ void FIELD::FieldHitCheck(void)
 		D3DXVECTOR3 rayS = pplayer->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos();
 		D3DXVECTOR3 rayG = rayS;
 		D3DXVECTOR3 ReturnPos = rayS;
-		D3DXVECTOR3 FIELDNORMAL = pplayer->PostureVec[CntPlayer].FNVecFunc();
+		D3DXVECTOR3 POSTURE = pplayer->PlayerPara[CntPlayer].PostureVec.FNVecFunc();
 		rayS.y += 1000.0f;
 		rayG.y -= 1000.0f;
 
 		//判定
-		this->FieldHitGetSphereVec(rayS, rayG, &FIELDNORMAL, &ReturnPos.y);
+		this->FieldHitGetSphereVec(rayS, rayG, &POSTURE, &ReturnPos.y);
 
 		//-------------------オブジェクト値書き込み
 		pplayer->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos(ReturnPos);
-		pplayer->PostureVec[CntPlayer].FNVecFunc(FIELDNORMAL);
+		pplayer->PlayerPara[CntPlayer].PostureVec.FNVecFunc(POSTURE);
 	}
 
 	
@@ -436,7 +436,7 @@ void FIELD::FieldHitCheck(void)
 			D3DXVECTOR3 rayS = pitem->Transform[CntItem].Pos();
 			D3DXVECTOR3 rayG = rayS;
 			D3DXVECTOR3 ReturnPos = rayS;
-			D3DXVECTOR3 FIELDNORMAL = pitem->PostureVec[CntItem].FNVecFunc();
+			D3DXVECTOR3 POSTURE = pitem->PostureVec[CntItem].FNVecFunc();
 			if (pitem->ItemParaAll[CntItem].ShadowPosSignal==false)
 			{
 				D3DXVECTOR3 ShadowPos = rayS;
@@ -445,7 +445,7 @@ void FIELD::FieldHitCheck(void)
 				rayG.y -= 1000.0f;
 
 				//判定
-				this->FieldHit(rayS, rayG, &FIELDNORMAL, &ShadowPos.y);
+				this->FieldHit(rayS, rayG, &POSTURE, &ShadowPos.y);
 
 				//結果反映してフラグ変更
 				pitem->ItemParaAll[CntItem].LinkShadowPos = ShadowPos;
@@ -458,7 +458,7 @@ void FIELD::FieldHitCheck(void)
 				rayG.y -= 5.0f;
 
 				//判定
-				pitem->ItemParaAll[CntItem].CollisionFieldEnd = this->FieldHitItem(rayS, rayG, &FIELDNORMAL, &ReturnPos.y);
+				pitem->ItemParaAll[CntItem].CollisionFieldEnd = this->FieldHitItem(rayS, rayG, &POSTURE, &ReturnPos.y);
 			}
 			else if (this->FieldPara.InterPolationFieldSignal == true && pitem->ItemParaAll[CntItem].CollisionFieldEnd == true)
 			{
@@ -467,11 +467,11 @@ void FIELD::FieldHitCheck(void)
 				rayG.y += 1000.0f;
 
 				//判定
-				this->FieldHit(rayS, rayG, &FIELDNORMAL, &ReturnPos.y);
+				this->FieldHit(rayS, rayG, &POSTURE, &ReturnPos.y);
 			}
 			//-------------------オブジェクト値書き込み
 			pitem->Transform[CntItem].Pos(ReturnPos);
-			pitem->PostureVec[CntItem].FNVecFunc(FIELDNORMAL);
+			pitem->PostureVec[CntItem].FNVecFunc(POSTURE);
 		}
 	}
 	

@@ -78,14 +78,14 @@ void SOCK_SUBTHREAD_SEND::SendPacket(MySOCKET *MySockObj)
 
 	//----------------バレット
 	//バレットを発射していなと0,通常モデルの発射1,アタックモデルの発射3
-	switch (MySockObj->pplayer->PlayerPara[MyNum].BulletPara.NetBulletShotFlagOneFrame)
+	switch (MySockObj->pplayer->PlayerPara[MyNum].BulletPara.GetNetBulletShotFlagOneFrame())
 	{
 	case 0:
 		break;
 	case 1:
 	{
-		D3DXVECTOR3 BPos = MySockObj->pplayer->PlayerPara[MyNum].BulletPara.BulletStartPos;
-		D3DXVECTOR3 BMove = MySockObj->pplayer->PlayerPara[MyNum].BulletPara.BulletMove[0];
+		D3DXVECTOR3 BPos = MySockObj->pplayer->PlayerPara[MyNum].BulletPara.GetBulletStartPos();
+		D3DXVECTOR3 BMove = *MySockObj->pplayer->PlayerPara[MyNum].BulletPara.GetBulletMove();
 		//変更があるので送信用メッセージに書き込む
 		char NewSMsg[BUFFER_SIZE] = { NULL }; //送るデータ内容
 		sprintf_s(NewSMsg, "@P%d,BulletA,PX%4.3f,PY%4.3f,PZ%4.3f,MX%4.3f,MY%4.3f,MZ%4.3f&"
@@ -95,11 +95,9 @@ void SOCK_SUBTHREAD_SEND::SendPacket(MySOCKET *MySockObj)
 	}
 	case 3:
 	{
-		D3DXVECTOR3 BPos = MySockObj->pplayer->PlayerPara[MyNum].BulletPara.BulletStartPos;
+		D3DXVECTOR3 BPos = MySockObj->pplayer->PlayerPara[MyNum].BulletPara.GetBulletStartPos();
 		D3DXVECTOR3 BMove[3];
-		BMove[0] = MySockObj->pplayer->PlayerPara[MyNum].BulletPara.BulletMove[0];
-		BMove[1] = MySockObj->pplayer->PlayerPara[MyNum].BulletPara.BulletMove[1];
-		BMove[2] = MySockObj->pplayer->PlayerPara[MyNum].BulletPara.BulletMove[2];
+		BMove[0] = *MySockObj->pplayer->PlayerPara[MyNum].BulletPara.GetBulletMove();
 		//変更があるので送信用メッセージに書き込む
 		char NewSMsg[BUFFER_SIZE] = { NULL }; //送るデータ内容
 		sprintf_s(NewSMsg,
