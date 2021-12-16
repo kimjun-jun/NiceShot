@@ -18,6 +18,7 @@
 #include <string.h>
 #include <thread>
 #include <mutex>
+#include <vector>
 
 using namespace std;
 
@@ -38,15 +39,19 @@ using namespace std;
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define	FVF_VERTEX_2D				(D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1)										//!< ２Ｄポリゴン頂点フォーマット( 頂点座標[2D] / 反射光 / テクスチャ座標 )
-#define	FVF_VERTEX_3D				(D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_DIFFUSE | D3DFVF_TEX1)							//!< ３Ｄポリゴン頂点フォーマット( 頂点座標[3D] / 法線 / 反射光 / テクスチャ座標 )
+#define	FVF_VERTEX_2D				(D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1)							//!< ２Ｄポリゴン頂点フォーマット( 頂点座標[2D] / 反射光 / テクスチャ座標 )
+#define	FVF_VERTEX_3D				(D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_DIFFUSE | D3DFVF_TEX1)				//!< ３Ｄポリゴン頂点フォーマット( 頂点座標[3D] / 法線 / 反射光 / テクスチャ座標 )
 constexpr int SCREEN_W{ 1280 };																				//!< ウインドウの幅
 constexpr int SCREEN_H{ 960 };																				//!< ウインドウの高さ
-constexpr int SCREEN_CENTER_X{ SCREEN_W / 2 };																		//!< ウインドウの中心Ｘ座標
-constexpr int SCREEN_CENTER_Y{ SCREEN_H / 2 };																		//!< ウインドウの中心Ｙ座標
-constexpr float SCREEN_SEPARATE_BUFF{ 2.5f };																				//!< 画面分割時の描画範囲と描画範囲の隙間
+constexpr int SCREEN_CENTER_X{ SCREEN_W / 2 };																//!< ウインドウの中心Ｘ座標
+constexpr int SCREEN_CENTER_Y{ SCREEN_H / 2 };																//!< ウインドウの中心Ｙ座標
+constexpr float SCREEN_SEPARATE_BUFF{ 2.5f };																//!< 画面分割時の描画範囲と描画範囲の隙間
 
 //開放マクロ
+/**
+ * @def SafeDelete
+ * @brief テンプレート型デリートマクロ
+ */
 template <typename T>
 inline void SafeDelete(T*& p) {
 	if (p != NULL) {
@@ -55,6 +60,10 @@ inline void SafeDelete(T*& p) {
 	}
 }
 
+/**
+ * @def SafeDeleteArray
+ * @brief SafeDeleteArray　テンプレート型デリートマクロ　配列
+ */
 template <typename T>
 inline void SafeDeleteArray(T*& p) {
 	if (p != NULL) {
@@ -63,6 +72,10 @@ inline void SafeDeleteArray(T*& p) {
 	}
 }
 
+/**
+ * @def SafeRelease
+ * @brief SafeRelease　テンプレート型デリートマクロ　ポインター
+ */
 template <typename T>
 inline void SafeRelease(T*& p) {
 	if (p != NULL) {
@@ -111,14 +124,21 @@ constexpr float PLAYER_SPEED_STRONG{ 1.5f };										//!< プレイヤースピード強
 constexpr float PLAYER_SPEED_NORMAL{ 1.0f };										//!< プレイヤースピード中
 constexpr float PLAYER_SPEED_WEAK{ 0.7f };											//!< プレイヤースピード弱
 
+/**
+ * @brief 静的定数 PLAYER_COLOR　プレイヤーカラーの規定値　不変定数
+ */
 const static D3DXCOLOR PLAYER_COLOR[] = {
-	D3DXCOLOR(1.0f, 1.0f, 0.1f, 1.0f),//p1カラー
-	D3DXCOLOR(0.2f, 0.2f, 1.0f, 1.0f),//p2カラー
-	D3DXCOLOR(1.0f, 0.2f, 0.2f, 1.0f),//p3カラー
-	D3DXCOLOR(0.2f, 1.0f, 1.0f, 1.0f),//p4カラー
+	D3DXCOLOR(1.0f, 1.0f, 0.1f, 1.0f),		//!< p1カラー
+	D3DXCOLOR(0.2f, 0.2f, 1.0f, 1.0f),		//!< p2カラー
+	D3DXCOLOR(1.0f, 0.2f, 0.2f, 1.0f),		//!< p3カラー
+	D3DXCOLOR(0.2f, 1.0f, 1.0f, 1.0f),		//!< p4カラー
 };
 
-//オブジェクトの合計(インスタンス総数)
+//
+/**
+ * @enum eOBJECT_COUNT
+ * @brief オブジェクトの合計(インスタンス総数)
+ */
 enum eOBJECT_COUNT
 {
 	OBJECT_PLAYER_MAX = 4,
@@ -147,29 +167,29 @@ enum eOBJECT_COUNT
 };
 
 /**
- * @enum MASTER_VOLUMEOL_CHENGE
- * サウンドボリュームのアップダウン種類
+ * @enum eMASTER_VOLUMEOL_CHENGE
+ * @brief サウンドボリュームのアップダウン種類
  */
 enum eMASTER_VOLUMEOL_CHENGE
 {
-	VOL_UP,
-	VOL_DOWN,
+	VOL_UP,		//!< ボリュームアップ
+	VOL_DOWN,	//!< ボリュームダウン
 };
 
 /**
- * @enum RAND
- * ランダムの種類
+ * @enum eRAND
+ * @brief ランダムの種類
  */
 enum eRAND
 {
-	X,
-	Y,
-	Z,
+	X,		//!< X
+	Y,		//!< Y
+	Z,		//!< Z
 };
 
 /**
- * @enum MORPHINGTYPE
- * モーフィング種類定数
+ * @enum eMORPHING_TYPE
+ * @brief モーフィング種類定数
  */
 enum eMORPHING_TYPE
 {
@@ -179,38 +199,38 @@ enum eMORPHING_TYPE
 };
 
 /**
- * @enum PLAYER_TYPE
- * プレイヤーNo定数
+ * @enum ePLAYER_TYPE
+ * @brief プレイヤーNo
  */
 enum ePLAYER_TYPE
 {
-	PLAYER_NONE = -1,
-	PLAYER01,
-	PLAYER02,
-	PLAYER03,
-	PLAYER04,
-	PLAYER_MAX,
+	PLAYER_NONE = -1,		//!< プレイヤー無し
+	PLAYER01,				//!< プレイヤー1
+	PLAYER02,				//!< プレイヤー2
+	PLAYER03,				//!< プレイヤー3
+	PLAYER04,				//!< プレイヤー4
+	PLAYER_MAX,				//!< プレイヤーマックス
 };
 
 /**
- * @enum PLAYER_MODEL_TYPE
- * モデルタイプ定数
+ * @enum ePLAYER_MODEL_TYPE
+ * @brief モデルタイプの種類
  */
 enum ePLAYER_MODEL_TYPE
 {
-	PLAYER_MODEL_TYPE_NORMAL,
-	PLAYER_MODEL_TYPE_ATTACK,
-	PLAYER_MODEL_TYPE_MAX,
+	PLAYER_MODEL_TYPE_NORMAL,	//!< ノーマルタイプ　通常
+	PLAYER_MODEL_TYPE_ATTACK,	//!< attackタイプ　砲塔3つ
+	PLAYER_MODEL_TYPE_MAX,		//!< タイプマックス
 };
 
 /**
- * @enum ITEMTYPE
- * アイテム定数
+ * @enum eITEM_TYPE
+ * @brief アイテムの種類
  */
 enum eITEM_TYPE
 {
-	ITEM_TYPE_NONE = -1,		//!< 未設定
-	ITEM_TYPE_TIKEI,			//!< 地形
+	ITEM_TYPE_NONE = -1,	//!< 未設定
+	ITEM_TYPE_TIKEI,		//!< 地形
 	ITEM_TYPE_LIFE,			//!< ライフ
 	ITEM_TYPE_SENSYA,		//!< 戦車
 	ITEM_TYPE_BULLET,		//!< バレット
@@ -221,15 +241,15 @@ enum eITEM_TYPE
 };
 
 /**
- * @enum STATUSTYPE
- * ステータス定数
+ * @enum eSTATUS_TYPE
+ * @brief ステータスの種類
  */
 enum eSTATUS_TYPE
 {
-	STATUS_TYPE_SENSYA = 0,			//!< 戦車強化状態
+	STATUS_TYPE_SENSYA = 0,	//!< 戦車強化状態
 	STATUS_TYPE_SPEED,		//!< スピードアップ状態
-	STATUS_TYPE_CAMERA,			//!< バックカメラ状態
-	STATUS_TYPE_KIRI,			//!< もやもや状態
+	STATUS_TYPE_CAMERA,		//!< バックカメラ状態
+	STATUS_TYPE_KIRI,		//!< もやもや状態
 	STATUS_TYPE_MAX
 };
 
@@ -255,18 +275,52 @@ void SetText(char *moji);
 */
 void DrawTextType(void);
 
+/**
+* @brief 文字セットする関数 SetTextSo
+* @param[in] moji 表示したい文字を入力
+* @details 未使用 Debugのみで使用可能
+*/
 void SetTextSo(char *moji);
+
+/**
+* @brief 文字を表示する関数 DrawTextTypeSo
+* @details 未使用 Debugのみで使用可能
+*/
 void DrawTextTypeSo(void);
 
-//線形合同法関数
-int MyRandFunc(int *X, int M);
+/**
+* @brief 線形合同法関数 MyRandFunc
+* @param[in] *X シード値のアドレス　任意の値
+* @param[in] Max 出力の最大値
+* @return int
+* @details 自作ランダム関数　線形合同法
+*/
+int MyRandFunc(int *X, int Max);
 
-//ピークメッセージのセット
+/**
+* @brief ピークメッセージセット関数 SetMsg
+* @param[in] msg ピークメッセージUINT
+* @details アプリの右上Xボタンなどの操作メッセージ
+*/
 void SetMsg(UINT msg);
 
-//アプリメッセージ関数群
+/**
+* @brief ピークメッセージゲット関数 GetMsg
+* @return MSG
+* @details アプリの右上Xボタンなどの操作メッセージ
+*/
 MSG GetMsg(void);
+
+/**
+* @brief ゲーム終了フラグセット関数 SetEndGame
+* @details true:終了　false:継続
+*/
 void SetEndGame(bool flag);
+
+/**
+* @brief ゲーム終了フラグゲット関数 GetEndGame
+* @return bool
+* @details true:終了　false:継続
+*/
 bool GetEndGame(void);
-bool GetGameLoop(void);
 

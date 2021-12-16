@@ -122,7 +122,7 @@ void SOCK_SUBTHREAD_SEND::SendPacket(MySOCKET *MySockObj)
 		}
 	}
 	//----------------モーフィング モーフィング信号ON(アタックモデルの時、常時ON)メッセージ送信。receive側は1を受け続ける。
-	if (MySockObj->pplayer->PlayerPara[MyNum].MorphingPara.NetGetMorphingOneFrame == true)//NetGetMorphing
+	if (MySockObj->pplayer->PlayerPara[MyNum].MorphingPara.GetNetMorphingOneFrame() == true)//NetGetMorphing
 	{
 		//変更があるので送信用メッセージに書き込む
 		char NewSMsg[BUFFER_SIZE] = { NULL }; //送るデータ内容

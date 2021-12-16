@@ -177,7 +177,7 @@ void STATUS::Update(void)
 	for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
 	{
 		//speed
-		if (pplayer->PlayerPara[CntPlayer].ItemPara.SpeedBuffSignal == true)
+		if (pplayer->PlayerPara[CntPlayer].ItemPara.GetSpeedBuffSignal() == true)
 		{
 			this->iUseType[CntPlayer][STATUS_TYPE_SPEED].Use(YesUseType1);
 			this->vtx[CntPlayer].Color2D(STATUS_TYPE_SPEED, D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
@@ -199,7 +199,7 @@ void STATUS::Update(void)
 			this->vtx[CntPlayer].Color2D(STATUS_TYPE_SENSYA, D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.3f));
 		}
 		//ƒJƒƒ‰
-		if (pplayer->PlayerPara[CntPlayer].ItemPara.BackCameraItemSignal == true)
+		if (pplayer->PlayerPara[CntPlayer].ItemPara.GetBackCameraItemSignal() == true)
 		{
 			this->iUseType[CntPlayer][STATUS_TYPE_CAMERA].Use(YesUseType1);
 			this->vtx[CntPlayer].Color2D(STATUS_TYPE_CAMERA, D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
@@ -210,7 +210,7 @@ void STATUS::Update(void)
 			this->vtx[CntPlayer].Color2D(STATUS_TYPE_CAMERA, D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.3f));
 		}
 		//–¶
-		if (pplayer->PlayerPara[CntPlayer].ItemPara.KiriSignal == true)
+		if (pplayer->PlayerPara[CntPlayer].ItemPara.GetKiriSignal() == true)
 		{
 			this->iUseType[CntPlayer][STATUS_TYPE_KIRI].Use(YesUseType1);
 			this->vtx[CntPlayer].Color2D(STATUS_TYPE_KIRI, D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));

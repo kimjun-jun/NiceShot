@@ -108,7 +108,7 @@ void DRAW_MANAGER::DrawSceneTutorial(GAME_OBJECT_INSTANCE *obj)
 		pD3DDevice->SetViewport(&vp[this->DrawManagerNum]);
 		pD3DDevice->Clear(0, NULL, (D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER), D3DCOLOR_RGBA(1, 1, 1, 1), 1.0f, 0);
 
-		if (obj->GetPlayer()->PlayerPara[this->DrawManagerNum].ItemPara.KiriSignal == true) pD3DDevice->SetRenderState(D3DRS_FOGENABLE, TRUE); //フォグ：ON
+		if (obj->GetPlayer()->PlayerPara[this->DrawManagerNum].ItemPara.GetKiriSignal() == true) pD3DDevice->SetRenderState(D3DRS_FOGENABLE, TRUE); //フォグ：ON
 		else pD3DDevice->SetRenderState(D3DRS_FOGENABLE, FALSE); //フォグ：OFF
 
 		// カメラの設定
@@ -154,7 +154,7 @@ void DRAW_MANAGER::DrawSceneGame(GAME_OBJECT_INSTANCE *obj)
 		bool puse = obj->GetPlayer()->iUseType[this->DrawManagerNum].Use();
 		if (puse == true)
 		{
-			if (obj->GetPlayer()->PlayerPara[this->DrawManagerNum].ItemPara.KiriSignal == true) pD3DDevice->SetRenderState(D3DRS_FOGENABLE, TRUE); //フォグ：ON
+			if (obj->GetPlayer()->PlayerPara[this->DrawManagerNum].ItemPara.GetKiriSignal() == true) pD3DDevice->SetRenderState(D3DRS_FOGENABLE, TRUE); //フォグ：ON
 			else pD3DDevice->SetRenderState(D3DRS_FOGENABLE, FALSE); //フォグ：OFF
 			// カメラの設定
 			SetCamera(this->DrawManagerNum);
@@ -214,7 +214,7 @@ void DRAW_MANAGER::DrawSceneNetGame(GAME_OBJECT_INSTANCE *obj)
 	bool puseNet = obj->GetPlayer()->iUseType[obj->GetMySocket()->GetNetMyNumber()].Use();
 	if (puseNet == true)
 	{
-		if (obj->GetPlayer()->PlayerPara[obj->GetMySocket()->GetNetMyNumber()].ItemPara.KiriSignal == true) pD3DDevice->SetRenderState(D3DRS_FOGENABLE, TRUE); //フォグ：ON
+		if (obj->GetPlayer()->PlayerPara[obj->GetMySocket()->GetNetMyNumber()].ItemPara.GetKiriSignal() == true) pD3DDevice->SetRenderState(D3DRS_FOGENABLE, TRUE); //フォグ：ON
 		else pD3DDevice->SetRenderState(D3DRS_FOGENABLE, FALSE); //フォグ：OFF
 		// カメラの設定
 		SetCamera(obj->GetMySocket()->GetNetMyNumber());

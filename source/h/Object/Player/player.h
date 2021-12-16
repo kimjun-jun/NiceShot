@@ -116,6 +116,30 @@ public:
 	};
 	~PLAYER_PARAMETER_ITEM() {}
 
+	//------アイテム制御
+	void ItemTimeSpeed(PLAYER *Player, int CntPlayer);	//!< スピードアップ制御
+	void ItemTimeKiri(int CntPlayer);				//!< フォグ制御
+
+	//------------------------get関数
+	inline float GetSpeedBuff(void) { return SpeedBuff; };
+	inline float GetSpeedBuffTime(void) { return SpeedBuffTime; };
+	inline float GetBackCameraTime(void) { return BackCameraTime; };
+	inline float GetKiriTime(void) { return KiriTime; };
+	inline bool GetSpeedBuffSignal(void) { return SpeedBuffSignal; };
+	inline bool GetBackCameraItemSignal(void) { return BackCameraItemSignal; };
+	inline bool GetKiriSignal(void) { return KiriSignal; };
+	inline bool GetDashSignal(void) { return DashSignal; };
+	//------------------------set関数
+	inline void SetSpeedBuff(const float InBuff) { SpeedBuff = InBuff; };
+	inline void SetSpeedBuffTime(const float InBuffTime) { SpeedBuffTime = InBuffTime; };
+	inline void SetBackCameraTime(const float InTime) { BackCameraTime = InTime; };
+	inline void SetKiriTime(const float InTime) { KiriTime = InTime; };
+	inline void SetSpeedBuffSignal(const bool InFlag) { SpeedBuffSignal = InFlag; };
+	inline void SetBackCameraItemSignal(const bool InFlag) { BackCameraItemSignal = InFlag; };
+	inline void SetKiriSignal(const bool InFlag) { KiriSignal = InFlag; };
+	inline void SetDashSignal(const bool InFlag) { DashSignal = InFlag; };
+
+private:
 	float	SpeedBuff;					//!< 移動スピードアイテムバフ MAX_SPEEDBUFF
 	float	SpeedBuffTime;				//!< 移動スピードアイテム効果時間
 	float	BackCameraTime;				//!< バックカメラアイテムの効果時間
@@ -135,16 +159,35 @@ class PLAYER_PARAMETER_MORPHING
 public:
 	PLAYER_PARAMETER_MORPHING() {
 		MorphingTime = 0.0f; MorphingDTtime = 0.0f; MorphingSignal = NoMorphing;
-		MorphingStart = false; MorphingEnd = false; NetGetMorphingOneFrame = false;
+		MorphingStart = false; MorphingEnd = false; NetMorphingOneFrame = false;
 	}
 	~PLAYER_PARAMETER_MORPHING() {}
 
+	//------アイテム制御
+	void ItemTimeMorphing(PLAYER *Player, int CntPlayer);		//!< モーフィング制御
+
+	//------------------------get関数
+	inline float GetMorphingTime(void) { return MorphingTime; };
+	inline float GetMorphingDTtime(void) { return MorphingDTtime; };
+	inline bool GetMorphingStart(void) { return MorphingStart; };
+	inline bool GetMorphingEnd(void) { return MorphingEnd; };
+	inline bool GetNetMorphingOneFrame(void) { return NetMorphingOneFrame; };
+	inline eMORPHING_TYPE GetMorphingSignal(void) { return MorphingSignal; };
+	//------------------------set関数
+	inline void SetMorphingTime(const float InTime) { MorphingTime = InTime; };
+	inline void SetMorphingDTtime(const float InDtTime) { MorphingDTtime = InDtTime; };
+	inline void SetMorphingStart(const bool InFlag) { MorphingStart = InFlag; };
+	inline void SetMorphingEnd(const bool InFlag) { MorphingEnd = InFlag; };
+	inline void SetNetMorphingOneFrame(const bool InFlag) { NetMorphingOneFrame = InFlag; };
+	inline void SetMorphingSignal(const eMORPHING_TYPE InType) { MorphingSignal = InType; };
+
+private:
 	float			MorphingTime;				//!< モーフィングできる時間
 	float			MorphingDTtime;				//!< モーフィング時に補間タイムとして使用
-	eMORPHING_TYPE	MorphingSignal;				//!< 1,なにもしない　2,モーフィング中　3,モーフィング完了
 	bool			MorphingStart;				//!< 変形判定　trueアタックモデル(アイテム取得時true)　false通常モデル(tureになって時間経過後false)
 	bool			MorphingEnd;				//!< 変形終了判定　
-	bool			NetGetMorphingOneFrame;		//!< ネット対戦用　trueでモーフィング中　モーフィングの同期で使用
+	bool			NetMorphingOneFrame;		//!< ネット対戦用　trueでモーフィング中　モーフィングの同期で使用
+	eMORPHING_TYPE	MorphingSignal;				//!< 1,なにもしない　2,モーフィング中　3,モーフィング完了
 };
 
 /**
@@ -169,7 +212,7 @@ public:
 *　@class PLAYER
 *　@brief GAMEOBJECT派生クラス
 */
-class PLAYER : private GAME_OBJECT_INTERFACE_SUMMRY
+class PLAYER : public GAME_OBJECT_INTERFACE_SUMMRY
 {
 public:
 	PLAYER();	//!< データ読み込み　初期化
@@ -183,6 +226,7 @@ public:
 
 	PLAYER_PARAMETER_SUMMARY PlayerPara[OBJECT_PLAYER_MAX];	//!< インスタンスに必要なデータ群	数が多いので複数包含している							
 	PLAYER_MODEL_DRAW modelDraw[OBJECT_PLAYER_MAX];			//!< 描画用モデルデータ
+	PLAYER_MODEL_ORIGINAL modelOri;							//!< オリジナルモデルデータ　モーフィング時の基準用
 	iUseCheck iUseType[OBJECT_PLAYER_MAX];					//!< 使用情報
 
 	//------他クラスのアドレス 特別にパブリック
@@ -191,17 +235,11 @@ public:
 
 private:
 	TEXTURE	tex;						//!< テクスチャ情報　複数使用するならここを配列化　ITEMTYPE_MAX
-	PLAYER_MODEL_ORIGINAL modelOri;		//!< オリジナルモデルデータ　モーフィング時の基準用
 
 	//------他クラスのアドレス
 	FIELD *pfield;
 	MySOCKET *pmysocket;
 	SCENE *pscene;
-
-	//------アイテム制御
-	void ItemTimeSpeed(int CntPlayer, EFFECT *effect);	//!< スピードアップ制御
-	void ItemTimeKiri(int CntPlayer);				//!< フォグ制御
-	void ItemTimeMorphing(int CntPlayer);			//!< モーフィング制御
 
 	//読み込むモデル　描画用
 	const char *c_aFileNameModelDraw[PLAYER_MODEL_DRAW_ALL_MAX] =

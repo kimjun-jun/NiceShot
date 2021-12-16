@@ -123,7 +123,7 @@ void CameraRevers(PLAYER *Player, int CntPlayer, bool Netflag)
 	}
 
 	//バックカメラ処理　バックカメラオン　カメラ視点、注視点、Yボタンを押しているもしくは、バックカメラアイテムがONになっているときはカメラ反転
-	if (GetKeyboardPress(DIK_B) || IsButtonPressed(PadNum, BUTTON_Y) || Player->PlayerPara[CntPlayer].ItemPara.BackCameraItemSignal == true)
+	if (GetKeyboardPress(DIK_B) || IsButtonPressed(PadNum, BUTTON_Y) || Player->PlayerPara[CntPlayer].ItemPara.GetBackCameraItemSignal() == true)
 	{
 		cam[CntPlayer].at.x = pos.x + (AT_W_CAM * sinf(HoudaiRot.y + HoutouRot.y));
 		cam[CntPlayer].at.y = pos.y + (HousinRot.x*100.0f);
@@ -147,7 +147,7 @@ void CameraRevers(PLAYER *Player, int CntPlayer, bool Netflag)
 		cam[CntPlayer].pos.z = pos.z + cosf(HoudaiRot.y + HoutouRot.y) * cam[CntPlayer].len;
 	}
 	//もし、バックカメラアイテムがONの時にYを押すと通常カメラになる
-	if (Player->PlayerPara[CntPlayer].ItemPara.BackCameraItemSignal == true && IsButtonPressed(PadNum, BUTTON_Y))
+	if (Player->PlayerPara[CntPlayer].ItemPara.GetBackCameraItemSignal() == true && IsButtonPressed(PadNum, BUTTON_Y))
 	{
 		cam[CntPlayer].at.x = pos.x - (AT_W_CAM * sinf(HoudaiRot.y + HoutouRot.y));
 		cam[CntPlayer].at.y = pos.y + (HousinRot.x*100.0f);
@@ -158,13 +158,13 @@ void CameraRevers(PLAYER *Player, int CntPlayer, bool Netflag)
 		cam[CntPlayer].pos.z = pos.z + cosf(HoudaiRot.y + HoutouRot.y) * cam[CntPlayer].len;
 	}
 	//バックカメラの時間処理
-	if (Player->PlayerPara[CntPlayer].ItemPara.BackCameraItemSignal == true)
+	if (Player->PlayerPara[CntPlayer].ItemPara.GetBackCameraItemSignal() == true)
 	{
-		Player->PlayerPara[CntPlayer].ItemPara.BackCameraTime += 1.0f;
-		if (Player->PlayerPara[CntPlayer].ItemPara.BackCameraTime >= BACKCAMERA_TIME)
+		Player->PlayerPara[CntPlayer].ItemPara.SetBackCameraTime(Player->PlayerPara[CntPlayer].ItemPara.GetBackCameraTime() + 1.0f);
+		if (Player->PlayerPara[CntPlayer].ItemPara.GetBackCameraTime() >= BACKCAMERA_TIME)
 		{
-			Player->PlayerPara[CntPlayer].ItemPara.BackCameraTime = 0.0f;
-			Player->PlayerPara[CntPlayer].ItemPara.BackCameraItemSignal = false;
+			Player->PlayerPara[CntPlayer].ItemPara.SetBackCameraTime(0.0f);
+			Player->PlayerPara[CntPlayer].ItemPara.SetBackCameraItemSignal(false);
 		}
 	}
 }

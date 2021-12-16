@@ -43,7 +43,6 @@ void SetOjama(int type, int UsePlayer, PLAYER *p);
 #define PLAYER_MODEL_SIZE					(15.0f)																		//!< モデルサイズ
 #define ITEM_MODEL_SIZE						(15.0f)																		//!< モデルサイズ
 
-
 void UPDATE_MANAGER::CollisionCheck(GAME_OBJECT_INSTANCE *obj)
 {
 	//プレイヤーに対する当たり判定
@@ -223,25 +222,25 @@ void UPDATE_MANAGER::CollisionCheck(GAME_OBJECT_INSTANCE *obj)
 						if (obj->GetPlayer()->PlayerPara[CntPlayer].StandardPara.eModelType == PLAYER_MODEL_TYPE_NORMAL)
 						{
 							//モーフィング開始信号、モデルタイプ、モーフィング中信号、モーフィング時間、モーフィング終了カウントのセット
-							obj->GetPlayer()->PlayerPara[CntPlayer].MorphingPara.MorphingStart = true;
+							obj->GetPlayer()->PlayerPara[CntPlayer].MorphingPara.SetMorphingStart(true);
 							obj->GetPlayer()->PlayerPara[CntPlayer].StandardPara.eModelType = PLAYER_MODEL_TYPE_ATTACK;
-							obj->GetPlayer()->PlayerPara[CntPlayer].MorphingPara.MorphingSignal = NowMorphing;
-							obj->GetPlayer()->PlayerPara[CntPlayer].MorphingPara.MorphingTime = MORPHING_TIME;
+							obj->GetPlayer()->PlayerPara[CntPlayer].MorphingPara.SetMorphingSignal(NowMorphing);
+							obj->GetPlayer()->PlayerPara[CntPlayer].MorphingPara.SetMorphingTime(MORPHING_TIME);
 						}
 						//モーフィング終了変化中にアイテムを拾った時はもう一度モーフィングさせる
-						else if (obj->GetPlayer()->PlayerPara[CntPlayer].MorphingPara.MorphingStart == false && obj->GetPlayer()->PlayerPara[CntPlayer].MorphingPara.MorphingTime <= 0.0f)
+						else if (obj->GetPlayer()->PlayerPara[CntPlayer].MorphingPara.GetMorphingStart() == false && obj->GetPlayer()->PlayerPara[CntPlayer].MorphingPara.GetMorphingTime() <= 0.0f)
 						{
-							obj->GetPlayer()->PlayerPara[CntPlayer].MorphingPara.MorphingStart = true;
+							obj->GetPlayer()->PlayerPara[CntPlayer].MorphingPara.SetMorphingStart(true);
 							obj->GetPlayer()->PlayerPara[CntPlayer].StandardPara.eModelType = PLAYER_MODEL_TYPE_ATTACK;
-							obj->GetPlayer()->PlayerPara[CntPlayer].MorphingPara.MorphingSignal = NowMorphing;
-							obj->GetPlayer()->PlayerPara[CntPlayer].MorphingPara.MorphingTime = MORPHING_TIME;
+							obj->GetPlayer()->PlayerPara[CntPlayer].MorphingPara.SetMorphingSignal(NowMorphing);
+							obj->GetPlayer()->PlayerPara[CntPlayer].MorphingPara.SetMorphingTime(MORPHING_TIME);
 						}
 						//アタックモデル中にアイテム拾ったら時間延長
 						else
 						{
-							obj->GetPlayer()->PlayerPara[CntPlayer].MorphingPara.MorphingTime = MORPHING_TIME;
+							obj->GetPlayer()->PlayerPara[CntPlayer].MorphingPara.SetMorphingTime(MORPHING_TIME);
 						}
-						obj->GetPlayer()->PlayerPara[CntPlayer].MorphingPara.NetGetMorphingOneFrame = true;
+						obj->GetPlayer()->PlayerPara[CntPlayer].MorphingPara.SetNetMorphingOneFrame(true);
 						PlaySound(SOUND_LABEL_SE_rap1);
 						break;
 					case ITEM_TYPE_BULLET:
@@ -250,9 +249,9 @@ void UPDATE_MANAGER::CollisionCheck(GAME_OBJECT_INSTANCE *obj)
 						PlaySound(SOUND_LABEL_SE_enter03);
 						break;
 					case ITEM_TYPE_SPEEDUP:
-						obj->GetPlayer()->PlayerPara[CntPlayer].ItemPara.SpeedBuff = MAX_SPEEDBUFF;
-						obj->GetPlayer()->PlayerPara[CntPlayer].ItemPara.SpeedBuffTime = MAX_SPEEDBUFFTIME;
-						obj->GetPlayer()->PlayerPara[CntPlayer].ItemPara.SpeedBuffSignal = true;
+						obj->GetPlayer()->PlayerPara[CntPlayer].ItemPara.SetSpeedBuff(MAX_SPEEDBUFF);
+						obj->GetPlayer()->PlayerPara[CntPlayer].ItemPara.SetSpeedBuffTime(MAX_SPEEDBUFFTIME);
+						obj->GetPlayer()->PlayerPara[CntPlayer].ItemPara.SetSpeedBuffSignal(true);
 						PlaySound(SOUND_LABEL_SE_speed);
 						break;
 					case ITEM_TYPE_CAMERA:
@@ -286,8 +285,8 @@ void SetOjama(int type, int UsePlayer, PLAYER *p)
 		for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
 		{
 			if (UsePlayer == CntPlayer) continue;
-			p->PlayerPara[CntPlayer].ItemPara.BackCameraItemSignal = true;
-			p->PlayerPara[CntPlayer].ItemPara.BackCameraTime = 0.0f;
+			p->PlayerPara[CntPlayer].ItemPara.SetBackCameraItemSignal(true);
+			p->PlayerPara[CntPlayer].ItemPara.SetBackCameraTime(0.0f);
 		}
 	}
 	//フォグ
@@ -297,8 +296,8 @@ void SetOjama(int type, int UsePlayer, PLAYER *p)
 		for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
 		{
 			if (UsePlayer == CntPlayer) continue;
-			p->PlayerPara[CntPlayer].ItemPara.KiriSignal = true;
-			p->PlayerPara[CntPlayer].ItemPara.KiriTime = 0.0f;
+			p->PlayerPara[CntPlayer].ItemPara.SetKiriSignal(true);
+			p->PlayerPara[CntPlayer].ItemPara.SetKiriTime(0.0f);
 		}
 	}
 }

@@ -279,23 +279,23 @@ void MySOCKET::NetSetMorphing(int PlayerNum)
 		if (pplayer->PlayerPara[PlayerNum].StandardPara.eModelType == PLAYER_MODEL_TYPE_NORMAL)
 		{
 			//モーフィング開始信号、モデルタイプ、モーフィング中信号、モーフィング時間、モーフィング終了カウントのセット
-			pplayer->PlayerPara[PlayerNum].MorphingPara.MorphingStart = true;
+			pplayer->PlayerPara[PlayerNum].MorphingPara.SetMorphingStart(true);
 			pplayer->PlayerPara[PlayerNum].StandardPara.eModelType = PLAYER_MODEL_TYPE_ATTACK;
-			pplayer->PlayerPara[PlayerNum].MorphingPara.MorphingSignal = NowMorphing;
-			pplayer->PlayerPara[PlayerNum].MorphingPara.MorphingTime = MORPHING_TIME;
+			pplayer->PlayerPara[PlayerNum].MorphingPara.SetMorphingSignal(NowMorphing);
+			pplayer->PlayerPara[PlayerNum].MorphingPara.SetMorphingTime(MORPHING_TIME);
 			PlaySound(SOUND_LABEL_SE_rap1);
 		}
-		else if (pplayer->PlayerPara[PlayerNum].MorphingPara.MorphingStart == false && pplayer->PlayerPara[PlayerNum].MorphingPara.MorphingTime <= 0.0f)
+		else if (pplayer->PlayerPara[PlayerNum].MorphingPara.GetMorphingStart() == false && pplayer->PlayerPara[PlayerNum].MorphingPara.GetMorphingTime() <= 0.0f)
 		{
-			pplayer->PlayerPara[PlayerNum].MorphingPara.MorphingStart = true;
+			pplayer->PlayerPara[PlayerNum].MorphingPara.SetMorphingStart(true);
 			pplayer->PlayerPara[PlayerNum].StandardPara.eModelType = PLAYER_MODEL_TYPE_ATTACK;
-			pplayer->PlayerPara[PlayerNum].MorphingPara.MorphingSignal = NowMorphing;
-			pplayer->PlayerPara[PlayerNum].MorphingPara.MorphingTime = MORPHING_TIME;
+			pplayer->PlayerPara[PlayerNum].MorphingPara.SetMorphingSignal(NowMorphing);
+			pplayer->PlayerPara[PlayerNum].MorphingPara.SetMorphingTime(MORPHING_TIME);
 			PlaySound(SOUND_LABEL_SE_rap1);
 		}
 		else
 		{
-			pplayer->PlayerPara[PlayerNum].MorphingPara.MorphingTime = MORPHING_TIME;
+			pplayer->PlayerPara[PlayerNum].MorphingPara.SetMorphingTime(MORPHING_TIME);
 		}
 	}
 }

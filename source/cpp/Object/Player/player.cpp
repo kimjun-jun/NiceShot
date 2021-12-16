@@ -184,21 +184,21 @@ void PLAYER::Init(void)
 		for (int i = 0; i < 3; i++) this->PlayerPara[CntPlayer].BulletPara.SetBulletMove(VEC3_ALL0, i);
 
 		//アイテムパラメータ
-		this->PlayerPara[CntPlayer].ItemPara.BackCameraItemSignal = false;
-		this->PlayerPara[CntPlayer].ItemPara.SpeedBuffSignal = false;
-		this->PlayerPara[CntPlayer].ItemPara.KiriSignal = false;
-		this->PlayerPara[CntPlayer].ItemPara.DashSignal = false;
-		this->PlayerPara[CntPlayer].ItemPara.SpeedBuff = 1.0f;
-		this->PlayerPara[CntPlayer].ItemPara.SpeedBuffTime = 0.0f;
-		this->PlayerPara[CntPlayer].ItemPara.KiriTime = 0.0f;
-		this->PlayerPara[CntPlayer].ItemPara.BackCameraTime = 0.0f;
+		this->PlayerPara[CntPlayer].ItemPara.SetBackCameraItemSignal(false);
+		this->PlayerPara[CntPlayer].ItemPara.SetSpeedBuffSignal(false);
+		this->PlayerPara[CntPlayer].ItemPara.SetKiriSignal(false);
+		this->PlayerPara[CntPlayer].ItemPara.SetDashSignal(false);
+		this->PlayerPara[CntPlayer].ItemPara.SetSpeedBuff(1.0f);
+		this->PlayerPara[CntPlayer].ItemPara.SetSpeedBuffTime(0.0f);
+		this->PlayerPara[CntPlayer].ItemPara.SetKiriTime(0.0f);
+		this->PlayerPara[CntPlayer].ItemPara.SetBackCameraTime(0.0f);
 
 		//モーフィングパラメータ
-		this->PlayerPara[CntPlayer].MorphingPara.MorphingDTtime = 0.0f;
-		this->PlayerPara[CntPlayer].MorphingPara.MorphingSignal = NoMorphing;
-		this->PlayerPara[CntPlayer].MorphingPara.MorphingStart = false;
-		this->PlayerPara[CntPlayer].MorphingPara.MorphingTime = MORPHING_TIME;
-		this->PlayerPara[CntPlayer].MorphingPara.NetGetMorphingOneFrame = false;
+		this->PlayerPara[CntPlayer].MorphingPara.SetMorphingDTtime(0.0f);
+		this->PlayerPara[CntPlayer].MorphingPara.SetMorphingSignal(NoMorphing);
+		this->PlayerPara[CntPlayer].MorphingPara.SetMorphingStart(false);
+		this->PlayerPara[CntPlayer].MorphingPara.SetMorphingTime(MORPHING_TIME);
+		this->PlayerPara[CntPlayer].MorphingPara.SetNetMorphingOneFrame(false);
 
 		//その他パラメータ
 		this->PlayerPara[CntPlayer].PostureVec.FNVecFunc(VEC3_ALL0);
@@ -316,9 +316,9 @@ void PLAYER::Update(void)
 				this->PlayerPara[CntPlayer].PostureVec.Quaternion();
 				CameraRevers(this, CntPlayer, pmysocket->GetNetGameStartFlag());
 				this->PlayerPara[CntPlayer].BulletPara.BulletALL(this, CntPlayer, pmysocket->GetNetGameStartFlag());
-				this->ItemTimeSpeed(CntPlayer, this->peffect);
-				this->ItemTimeKiri(CntPlayer);
-				this->ItemTimeMorphing(CntPlayer);
+				this->PlayerPara[CntPlayer].ItemPara.ItemTimeSpeed(this, CntPlayer);
+				this->PlayerPara[CntPlayer].ItemPara.ItemTimeKiri(CntPlayer);
+				this->PlayerPara[CntPlayer].MorphingPara.ItemTimeMorphing(this, CntPlayer);
 			}
 
 			//それ以外はカメラだけ制御
@@ -350,7 +350,7 @@ void PLAYER::Update(void)
 		{
 			//ネット用フラグ初期化　1フレーム中の変更を保存して変更があればサーバーにデータを送る
 			//---------------初期化
-			this->PlayerPara[pmysocket->GetNetMyNumber()].MorphingPara.NetGetMorphingOneFrame = false;
+			this->PlayerPara[pmysocket->GetNetMyNumber()].MorphingPara.SetNetMorphingOneFrame(false);
 			for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++)
 			{
 				this->PlayerPara[CntPlayer].StandardPara.OldVital = this->PlayerPara[CntPlayer].StandardPara.Vital;
@@ -368,9 +368,9 @@ void PLAYER::Update(void)
 			//バレット
 			this->PlayerPara[pmysocket->GetNetMyNumber()].BulletPara.BulletALL(this, pmysocket->GetNetMyNumber(), pmysocket->GetNetGameStartFlag());
 			//アイテム効果
-			this->ItemTimeSpeed(pmysocket->GetNetMyNumber(),this->peffect);
-			this->ItemTimeKiri(pmysocket->GetNetMyNumber());
-			for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++) this->ItemTimeMorphing(CntPlayer);
+			this->PlayerPara[pmysocket->GetNetMyNumber()].ItemPara.ItemTimeSpeed(this, pmysocket->GetNetMyNumber());
+			this->PlayerPara[pmysocket->GetNetMyNumber()].ItemPara.ItemTimeKiri(pmysocket->GetNetMyNumber());
+			for (int CntPlayer = 0; CntPlayer < OBJECT_PLAYER_MAX; CntPlayer++) this->PlayerPara[pmysocket->GetNetMyNumber()].MorphingPara.ItemTimeMorphing(this, pmysocket->GetNetMyNumber());
 		}
 
 		//それ以外はカメラだけ制御
@@ -635,21 +635,21 @@ void PLAYER::Draw(void)
 //=============================================================================
 // スピードアップ制御
 //=============================================================================
-void PLAYER::ItemTimeSpeed(int CntPlayer, EFFECT *effect)
+void PLAYER_PARAMETER_ITEM::ItemTimeSpeed(PLAYER *Player, int CntPlayer)
 {
 	//スピードバフ時間減少
-	if (this->PlayerPara[CntPlayer].ItemPara.SpeedBuffSignal == true)
+	if (this->SpeedBuffSignal == true)
 	{
-		this->PlayerPara[CntPlayer].ItemPara.SpeedBuffTime -= VALUE_SPEEDBUFF_SUB;
+		this->SpeedBuffTime -= VALUE_SPEEDBUFF_SUB;
 		
 		// エフェクトスピードアップの生成
-		D3DXVECTOR3 EffctSpeedupPos = this->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos();
-		effect->SetInstance(EffctSpeedupPos, VEC3_ALL0, PLAYER_COLOR[CntPlayer], EFFECT_SPEEDUP_SIZE_X, EFFECT_SPEEDUP_SIZE_Y, EFFECT_SPEEDUP_TIME);
+		D3DXVECTOR3 EffctSpeedupPos = Player->modelDraw[CntPlayer].Transform[PLAYER_PARTS_TYPE_HOUDAI].Pos();
+		Player->peffect->SetInstance(EffctSpeedupPos, VEC3_ALL0, PLAYER_COLOR[CntPlayer], EFFECT_SPEEDUP_SIZE_X, EFFECT_SPEEDUP_SIZE_Y, EFFECT_SPEEDUP_TIME);
 
-		if (this->PlayerPara[CntPlayer].ItemPara.SpeedBuffTime <= 0.0f)
+		if (this->SpeedBuffTime <= 0.0f)
 		{
-			this->PlayerPara[CntPlayer].ItemPara.SpeedBuffSignal = false;
-			this->PlayerPara[CntPlayer].ItemPara.SpeedBuff = VALUE_SPEEDBUFF_SUB;
+			this->SpeedBuffSignal = false;
+			this->SpeedBuff = VALUE_SPEEDBUFF_SUB;
 		}
 	}
 }
@@ -657,15 +657,15 @@ void PLAYER::ItemTimeSpeed(int CntPlayer, EFFECT *effect)
 //=============================================================================
 // フォグ制御
 //=============================================================================
-void PLAYER::ItemTimeKiri(int CntPlayer)
+void PLAYER_PARAMETER_ITEM::ItemTimeKiri(int CntPlayer)
 {
-	if (this->PlayerPara[CntPlayer].ItemPara.KiriSignal == true)
+	if (this->KiriSignal == true)
 	{
-		this->PlayerPara[CntPlayer].ItemPara.KiriTime += 1.0f;
-		if (this->PlayerPara[CntPlayer].ItemPara.KiriTime >= KIRI_TIME)
+		this->KiriTime += 1.0f;
+		if (this->KiriTime >= KIRI_TIME)
 		{
-			this->PlayerPara[CntPlayer].ItemPara.KiriTime = 0.0f;
-			this->PlayerPara[CntPlayer].ItemPara.KiriSignal = false;
+			this->KiriTime = 0.0f;
+			this->KiriSignal = false;
 		}
 	}
 }
@@ -673,50 +673,50 @@ void PLAYER::ItemTimeKiri(int CntPlayer)
 //=============================================================================
 // モーフィング制御
 //=============================================================================
-void PLAYER::ItemTimeMorphing(int CntPlayer)
+void PLAYER_PARAMETER_MORPHING::ItemTimeMorphing(PLAYER *Player, int CntPlayer)
 {
 	// モーフィングtrue
-	if (this->PlayerPara[CntPlayer].MorphingPara.MorphingStart == true)
+	if (this->MorphingStart == true)
 	{
-		this->PlayerPara[CntPlayer].MorphingPara.NetGetMorphingOneFrame = true;
+		this->NetMorphingOneFrame = true;
 		///////////////////////////////////////////////////////////////////////バレット3つ時間開始
 		// モーフィング時間減算開始
-		this->PlayerPara[CntPlayer].MorphingPara.MorphingTime -= 1.0f;
+		this->MorphingTime -= 1.0f;
 
 		// モーフィング攻撃タイプに変更開始
-		if (this->PlayerPara[CntPlayer].MorphingPara.MorphingSignal == NowMorphing)
+		if (this->MorphingSignal == NowMorphing)
 		{
-			this->PlayerPara[CntPlayer].StandardPara.eModelType = PLAYER_MODEL_TYPE_ATTACK;
+			Player->PlayerPara[CntPlayer].StandardPara.eModelType = PLAYER_MODEL_TYPE_ATTACK;
 			DoMorphing(
-				this->modelDraw[CntPlayer].Vtx[PLAYER_PARTS_TYPE_HOUSIN].VtxBuff(),
-				this->modelOri.Vtx[PLAYER_MODEL_ORIGINAL_TYPE_HOUSIN_MORPHING].VtxBuff(),
-				this->modelDraw[CntPlayer].Vtx[PLAYER_PARTS_TYPE_HOUSIN].IdxBuff(), 
-				&this->modelDraw[CntPlayer].Attribute[PLAYER_PARTS_TYPE_HOUSIN],
-				0.01f, &this->PlayerPara[CntPlayer].MorphingPara.MorphingDTtime, &this->PlayerPara[CntPlayer].MorphingPara.MorphingSignal);
+				Player->modelDraw[CntPlayer].Vtx[PLAYER_PARTS_TYPE_HOUSIN].VtxBuff(),
+				Player->modelOri.Vtx[PLAYER_MODEL_ORIGINAL_TYPE_HOUSIN_MORPHING].VtxBuff(),
+				Player->modelDraw[CntPlayer].Vtx[PLAYER_PARTS_TYPE_HOUSIN].IdxBuff(),
+				&Player->modelDraw[CntPlayer].Attribute[PLAYER_PARTS_TYPE_HOUSIN],
+				0.01f, &this->MorphingDTtime, &this->MorphingSignal);
 		}
 		///////////////////////////////////////////////////////////////////////バレット3つ時間終了
 
 		// 時間経過でモデルを元に戻す
-		else if (this->PlayerPara[CntPlayer].MorphingPara.MorphingTime <= 0.0f)
+		else if (this->MorphingTime <= 0.0f)
 		{
-			this->PlayerPara[CntPlayer].StandardPara.eModelType = PLAYER_MODEL_TYPE_NORMAL;
-			this->PlayerPara[CntPlayer].MorphingPara.MorphingSignal = NowMorphing;
-			this->PlayerPara[CntPlayer].MorphingPara.MorphingStart = false;
+			Player->PlayerPara[CntPlayer].StandardPara.eModelType = PLAYER_MODEL_TYPE_NORMAL;
+			this->MorphingSignal = NowMorphing;
+			this->MorphingStart = false;
 		}
 	}
 
 	// モーフィングオリジナルタイプに変更開始
-	if (this->PlayerPara[CntPlayer].MorphingPara.MorphingStart == false && this->PlayerPara[CntPlayer].MorphingPara.MorphingTime <= 0.0f)
+	if (this->MorphingStart == false && this->MorphingTime <= 0.0f)
 	{
 		DoMorphing(
-			this->modelDraw[CntPlayer].Vtx[PLAYER_PARTS_TYPE_HOUSIN].VtxBuff(),
-			this->modelOri.Vtx[PLAYER_MODEL_ORIGINAL_TYPE_HOUSIN].VtxBuff(),
-			this->modelDraw[CntPlayer].Vtx[PLAYER_PARTS_TYPE_HOUSIN].IdxBuff(),
-			&this->modelDraw[CntPlayer].Attribute[PLAYER_PARTS_TYPE_HOUSIN],
-			0.01f, &this->PlayerPara[CntPlayer].MorphingPara.MorphingDTtime, &this->PlayerPara[CntPlayer].MorphingPara.MorphingSignal);
-		if (this->PlayerPara[CntPlayer].MorphingPara.MorphingSignal == EndMorphing)
+			Player->modelDraw[CntPlayer].Vtx[PLAYER_PARTS_TYPE_HOUSIN].VtxBuff(),
+			Player->modelOri.Vtx[PLAYER_MODEL_ORIGINAL_TYPE_HOUSIN].VtxBuff(),
+			Player->modelDraw[CntPlayer].Vtx[PLAYER_PARTS_TYPE_HOUSIN].IdxBuff(),
+			&Player->modelDraw[CntPlayer].Attribute[PLAYER_PARTS_TYPE_HOUSIN],
+			0.01f, &this->MorphingDTtime, &this->MorphingSignal);
+		if (this->MorphingSignal == EndMorphing)
 		{
-			this->PlayerPara[CntPlayer].MorphingPara.MorphingTime = MORPHING_TIME;
+			this->MorphingTime = MORPHING_TIME;
 		}
 	}
 }

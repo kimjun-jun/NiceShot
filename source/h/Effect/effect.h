@@ -32,7 +32,7 @@ public:
 *　@class EFFECT
 *　@brief GAMEOBJECT派生クラス
 */
-class EFFECT : private GAME_OBJECT_INTERFACE_SUMMRY
+class EFFECT : public GAME_OBJECT_INTERFACE_SUMMRY
 {
 public:
 	EFFECT();	//!< データ読み込み　初期化

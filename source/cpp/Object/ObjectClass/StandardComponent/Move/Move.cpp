@@ -61,11 +61,11 @@ void PLAYER_PARAMETER_MOVE::MoveKeybord(PLAYER *Player, int CntPlayer)
 	//旋回
 	if (GetKeyboardPress(DIK_D))
 	{
-		HoudaiRot.y += 0.02f * dir*Player->PlayerPara[CntPlayer].ItemPara.SpeedBuff * 2;
+		HoudaiRot.y += 0.02f * dir*Player->PlayerPara[CntPlayer].ItemPara.GetSpeedBuff() * 2;
 	}
 	else if (GetKeyboardPress(DIK_A))
 	{
-		HoudaiRot.y -= 0.02f * dir*Player->PlayerPara[CntPlayer].ItemPara.SpeedBuff * 2;
+		HoudaiRot.y -= 0.02f * dir*Player->PlayerPara[CntPlayer].ItemPara.GetSpeedBuff() * 2;
 	}
 
 	//角度の制限値
@@ -77,8 +77,8 @@ void PLAYER_PARAMETER_MOVE::MoveKeybord(PLAYER *Player, int CntPlayer)
 	else if (Player->PlayerPara[CntPlayer].StandardPara.Speed <= -PLAYER_VALUE_MOVE_MAX) Player->PlayerPara[CntPlayer].StandardPara.Speed = -PLAYER_VALUE_MOVE_MAX;
 
 	// プレイヤーの座標を更新
-	pos.x -= sinf(HoudaiRot.y) * (Player->PlayerPara[CntPlayer].StandardPara.Speed * Player->PlayerPara[CntPlayer].ItemPara.SpeedBuff);
-	pos.z -= cosf(HoudaiRot.y) * (Player->PlayerPara[CntPlayer].StandardPara.Speed * Player->PlayerPara[CntPlayer].ItemPara.SpeedBuff);
+	pos.x -= sinf(HoudaiRot.y) * (Player->PlayerPara[CntPlayer].StandardPara.Speed * Player->PlayerPara[CntPlayer].ItemPara.GetSpeedBuff());
+	pos.z -= cosf(HoudaiRot.y) * (Player->PlayerPara[CntPlayer].StandardPara.Speed * Player->PlayerPara[CntPlayer].ItemPara.GetSpeedBuff());
 
 	//砲塔操作　バレット着弾点(左右エイム)
 	if (GetKeyboardPress(DIK_RIGHT))
@@ -133,24 +133,24 @@ void PLAYER_PARAMETER_MOVE::MoveL(PLAYER *Player, int CntPlayer, bool Netflag)
 	float DashRate = 1.0f;		//スピードアップレート
 
 	//ダッシュ判定
-	if (Player->PlayerPara[CntPlayer].ItemPara.SpeedBuffSignal == true)
+	if (Player->PlayerPara[CntPlayer].ItemPara.GetSpeedBuffSignal() == true)
 	{
 		//スピードバフ時間減少
-		Player->PlayerPara[CntPlayer].ItemPara.SpeedBuffTime -= VALUE_SPEEDBUFF_SUB;
-		Player->PlayerPara[CntPlayer].ItemPara.DashSignal = true;
+		Player->PlayerPara[CntPlayer].ItemPara.SetSpeedBuffTime(Player->PlayerPara[CntPlayer].ItemPara.GetSpeedBuffTime() -VALUE_SPEEDBUFF_SUB);
+		Player->PlayerPara[CntPlayer].ItemPara.SetDashSignal(true);
 
 		// エフェクトスピードアップの生成
 		D3DXVECTOR3 EffctSpeedupPos = pos;
 		Player->peffect->SetInstance(EffctSpeedupPos, VEC3_ALL0, PLAYER_COLOR[CntPlayer], EFFECT_SPEEDUP_SIZE_X, EFFECT_SPEEDUP_SIZE_Y, EFFECT_SPEEDUP_TIME);
 
-		if (Player->PlayerPara[CntPlayer].ItemPara.SpeedBuffTime <= 0.0f)
+		if (Player->PlayerPara[CntPlayer].ItemPara.GetSpeedBuffTime() <= 0.0f)
 		{
-			Player->PlayerPara[CntPlayer].ItemPara.DashSignal = false;
-			Player->PlayerPara[CntPlayer].ItemPara.SpeedBuffSignal = false;
+			Player->PlayerPara[CntPlayer].ItemPara.SetDashSignal(false);
+			Player->PlayerPara[CntPlayer].ItemPara.SetSpeedBuffSignal(false);
 		}
 	}
 
-	if (Player->PlayerPara[CntPlayer].ItemPara.DashSignal == true)
+	if (Player->PlayerPara[CntPlayer].ItemPara.GetDashSignal() == true)
 	{
 		DashRate = PLAYER_VALUE_DASHRATE;
 	}
@@ -180,7 +180,7 @@ void PLAYER_PARAMETER_MOVE::MoveL(PLAYER *Player, int CntPlayer, bool Netflag)
 	// 無移動時は移動量に慣性をかける
 	else
 	{
-		Player->PlayerPara[CntPlayer].ItemPara.DashSignal = false;
+		Player->PlayerPara[CntPlayer].ItemPara.SetDashSignal(false);
 	}
 	if (LAnalogY > 0.0f) LAnalogX *= -1;
 
